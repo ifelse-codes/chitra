@@ -1,0 +1,22 @@
+# Vajra session-guard owner record (one-session-per-chat) — local only, never commit.
+.ai/.session-owner
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+
+# Logs & OS cruft
+*.log
+.DS_Store
+
+# Env
+.env
+.env.*
+!.env.example

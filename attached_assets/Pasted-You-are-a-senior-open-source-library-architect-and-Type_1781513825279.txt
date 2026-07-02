@@ -1,0 +1,296 @@
+You are a senior open-source library architect and TypeScript expert.
+
+I have attached an HTML mockup.
+
+IMPORTANT:
+
+The HTML is NOT the product.
+
+The HTML is only a marketing/vision mockup showing what the project aspires to be.
+
+Your task is to study the attached mockup, infer the vision, and build the actual open-source library behind it.
+
+---
+
+# Project Name
+
+Chitra
+
+Tagline:
+
+"Beautiful visualizations for terminals, agents, and modern developer workflows."
+
+---
+
+# Vision
+
+Chitra should become the standard visualization library for:
+
+* CLI applications
+* Terminal dashboards
+* AI Agents
+* MCP Servers
+* LLM applications
+* DevOps tooling
+* Observability systems
+* Build systems
+* Data pipelines
+* Developer tooling
+
+Think:
+
+* Chart.js for terminals
+* Recharts for AI agents
+* Matplotlib for the command line
+* D3 for text-based environments
+
+---
+
+# Study The Mockup
+
+Analyze the attached HTML and identify:
+
+* Visual language
+* Product positioning
+* Intended audience
+* Features being hinted at
+* Developer experience expectations
+
+Extract the underlying product idea.
+
+Do NOT recreate the HTML.
+
+Build the actual library that the HTML is advertising.
+
+---
+
+# Core Requirements
+
+Create a production-grade TypeScript library.
+
+Project Name:
+
+chitra
+
+NPM Package:
+
+@chitra/core
+
+---
+
+# Supported Charts
+
+Implement:
+
+* Line Chart
+* Area Chart
+* Bar Chart
+* Horizontal Bar Chart
+* Sparkline
+* Histogram
+* Scatter Plot
+* Pie Chart
+* Donut Chart
+* Heatmap
+* Timeline
+* Progress Chart
+* Gauge Chart
+* Radar Chart
+* Box Plot
+* Waterfall Chart
+* Funnel Chart
+* Candlestick Chart
+* Treemap
+* Sankey-style text chart
+
+Architecture should support adding many more chart types.
+
+---
+
+# Rendering Engines
+
+Support multiple rendering modes.
+
+## Unicode Blocks
+
+Use:
+
+▁▂▃▄▅▆▇█
+
+## Braille Renderer
+
+Use Unicode braille characters for high-density plots.
+
+Example:
+
+⢀⣀⣤⣶⣿
+
+## ASCII Fallback
+
+For legacy terminals.
+
+---
+
+# API Design
+
+Simple API:
+
+```ts
+import { line } from "chitra";
+
+console.log(
+  line({
+    data: [10,20,15,30,25]
+  })
+);
+```
+
+Advanced API:
+
+```ts
+import { plot } from "chitra";
+
+plot(data)
+  .line()
+  .title("Revenue")
+  .theme("tokyo-night")
+  .render();
+```
+
+---
+
+# Themes
+
+Provide built-in themes:
+
+* default
+* nord
+* dracula
+* github-dark
+* tokyo-night
+* solarized
+* monochrome
+
+---
+
+# Output Formats
+
+Support:
+
+```ts
+chart.render()
+chart.toString()
+chart.toMarkdown()
+chart.toJSON()
+```
+
+---
+
+# AI Agent Support
+
+This is a first-class requirement.
+
+AI agents should be able to generate charts using Chitra.
+
+Examples:
+
+* MCP servers
+* Claude Code
+* Codex
+* OpenAI Agents
+* Replit Agents
+* Cursor Agents
+
+Create APIs optimized for agent workflows.
+
+---
+
+# Performance Goals
+
+* Very fast rendering
+* Minimal memory usage
+* Tree-shakable
+* Small bundle size
+* Zero runtime dependencies whenever possible
+
+Target:
+
+* <20KB gzipped core
+
+---
+
+# Project Structure
+
+Create a professional monorepo.
+
+packages/
+core/
+charts/
+renderers/
+themes/
+plugins/
+
+apps/
+docs/
+
+examples/
+
+benchmarks/
+
+---
+
+# Documentation
+
+Generate:
+
+* README.md
+* Quick Start Guide
+* API Documentation
+* Architecture Guide
+* Contributing Guide
+* Examples
+
+---
+
+# Testing
+
+Use:
+
+* Vitest
+
+Target:
+
+* > 90% coverage
+
+---
+
+# CI/CD
+
+Create:
+
+* GitHub Actions
+* Release Workflow
+* Semantic Versioning
+* Automated NPM Publishing
+
+---
+
+# Deliverables
+
+Produce:
+
+1. Full source code
+2. Monorepo structure
+3. Working examples
+4. Documentation
+5. Tests
+6. CI/CD setup
+7. NPM-ready package
+
+Think like the creator of Chart.js or Recharts.
+
+Do not build a demo.
+
+Do not build a prototype.
+
+Build the foundation of a serious open-source project that can grow into the standard visualization engine for terminal-native and AI-native software.

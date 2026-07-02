@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Chitra Docs"
+version = "1.0.0"
+id = "artifacts/chitra-docs"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18349
+
+[services.development]
+run = "pnpm --filter @workspace/chitra-docs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/chitra-docs", "run", "build" ]
+publicDir = "artifacts/chitra-docs/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18349"
+BASE_PATH = "/"

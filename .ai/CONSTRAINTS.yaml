@@ -1,0 +1,87 @@
+version: 3
+
+maturity: L3
+
+session:
+  max_assumptions: 2
+  max_retries: 2
+  max_files_per_atomic_change: 3
+  max_stories_per_session: 1
+  cap_hours_per_session: 2
+  ground_truth_every_n_sessions: 5
+  one_session_per_chat: true   # new session = new chat; enforced by .ai/hooks/hook-session-guard.sh
+
+branch:
+  forbid_direct_work_on: [main, master]
+  required_session_branch_pattern: '^session-\d{2,}-[a-z0-9-]+$'
+  ground_truth_commit_exempt_branch_suffixes: [-closeout, -enforcement]
+
+commit:
+  autonomous: false
+  require_user_approval: true
+  approval_tokens: [approved, lgtm, "ship it", "yes commit", "go ahead and commit", "go ahead"]
+
+verify:
+  required_for_done: true
+  script_pattern: 'scripts/verify-session-{NN}.sh'
+  template: 'scripts/verify-session-template.sh'
+  exit_zero_required: true
+
+demo:
+  script_pattern: 'scripts/demo-session-{NN}.sh'
+  template: 'scripts/demo-session-template.sh'
+  cumulative: true
+  required_elements: [header, cases, summary_table]
+
+state:
+  state_md_mode: snapshot
+  knowledge_md_mode: append-permanent-only
+
+communication:
+  max_words_per_response: 200
+  required_formats: [bullets, tables, code-blocks]
+  forbid: [greetings, apologies, filler, trailing-summaries]
+
+ground_truth:
+  # Every 5th session is NO-CODE. It must catch BOTH direction drift (vision+roadmap)
+  # and discipline drift (rules+constitution+state). Rules exist to serve the vision —
+  # auditing rule-following without auditing the vision is the trap.
+  forbid_code_changes: true
+  forbid_commits: true
+  forbid_prs: true
+  required_outputs: [sessions/session-{NN}-ground-truth.md]
+  drift_axes: [vision, roadmap, rules, constitution, state, cost]
+  required_audits: [vision_alignment, roadmap_alignment, state_drift, knowledge_staleness, constraint_violation_review, constitution_review, cost_review]
+  vision_questions:
+    - Is the north-star still the right destination?
+    - Is current work the shortest path to it, or intellectually-fun scope creep?
+    - What new evidence would make us pivot or abandon this direction?
+  roadmap_questions:
+    - Does each phase still map to the north-star?
+    - Is the next item the highest-leverage one, or just the easiest?
+    - Any item now obsolete, or any the vision now demands but the roadmap lacks?
+  constitution_questions:
+    - Is any rule now blocking the vision instead of protecting it?
+    - Did this audit's own mechanism have a blind spot? (meta-check)
+
+load_order:
+  - .ai/AGENTS.md
+  - .ai/SESSION
+  - .ai/SESSION-BOOT.md
+  - .ai/TASK.md
+  - .ai/STATE.md
+  - .ai/CONSTRAINTS.yaml
+  - .ai/KNOWLEDGE.md
+  - .ai/ROADMAP.md
+
+copilot:
+  # The co-pilot loader (fired by .ai/hooks/hook-copilot-loader.sh): surface the right
+  # context the moment matching work is touched, not all up front.
+  # Rule form:  "PATTERN => file, file | why this context, for this work"
+  #   PATTERN = a path glob (matched against the touched file, repo-relative)
+  #          or cmd:<substring> (matched against a Bash command).
+  # Maturity-gated: L1 advises (non-blocking); L2/L3 enforce (exit 2 — block until surfaced).
+  # Per-session debounce: each rule fires once per session. Edit these for your project.
+  on:
+    - "cmd:git commit => .ai/STATE.md | STATE.md is a snapshot of reality — confirm it matches before you commit"
+    - "prompts/* => .ai/TASK.md, .ai/ROADMAP.md | the prompt is the session contract — re-read the task + roadmap before editing it"
