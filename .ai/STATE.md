@@ -1,9 +1,10 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S01 in progress, 2026-07-02.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S01 closed, 2026-07-02.)
 
 ## Active Branch
-`session-01-docs-examples` (off `main`). git initialized 2026-07-02.
+`main` — S01 merged via PR #1 (squash `d4242d8`). Remote:
+`github.com/ifelse-codes/chitra`. Next session branches from here.
 
 ## What Currently Works (observed, not claimed)
 - `pnpm install` — clean (~25s). One benign peer-dep warning (esbuild-plugin-pino vs
@@ -31,8 +32,8 @@
 - Candlestick doc referenced phantom theme `"neon"` → corrected to `"dracula"`.
 
 ## What Is In Progress
-- **S01:** Docs-from-lib generator — code complete, verify green; pending commit + PR +
-  closeout. See [[roadmap]]. Next in milestone: S02 expand examples.
+- Nothing active. **S02 (expand examples)** is next — see [[roadmap]] and
+  `prompts/02-task-expand-examples.md`. Start it in a new chat.
 
 ## Cost Tracking
 - Cumulative: $0.00

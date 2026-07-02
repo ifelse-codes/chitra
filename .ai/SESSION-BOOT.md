@@ -1,20 +1,19 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 01
+- **Number:** 02
 - **Type:** CODE
-- **Branch:** pending (`git init` required — repo is not yet a git repo)
+- **Branch:** `session-02-expand-examples` (from `main`)
 - **Date last updated:** 2026-07-02
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 01.
-- S00 brownfield onboarding complete: `.ai/KNOWLEDGE.md`, `.ai/STATE.md`, `.ai/ROADMAP.md`
-  seeded from verified reality (116/116 core tests pass; full-workspace typecheck exit 0).
-- Product = `@chitra/core` (zero-dep TS terminal charting lib); `artifacts/*` + `lib/*` are
-  the in-scope Replit-scaffolded full-stack (docs site, api-server, openapi→zod/react-query,
-  drizzle db).
-- Milestone: **Docs & examples**.
+- `.ai/SESSION` = 02.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00 baseline + S01 (PR #1).
+- S01 shipped the docs-from-lib generator: `artifacts/chitra-docs/scripts/chart-specs.ts`
+  is the single source of truth for chart previews; `pnpm gen:charts` regenerates
+  `src/data/{charts.ts,ansi-charts.json}`; `gen:charts:check` guards drift.
+- Milestone **Docs & examples**: S01 done → S02 examples → S03 docs polish → S04 README.
 
 ## Next Session
-- **Read prompt:** `prompts/01-task-kickoff.md`
+- **Read prompt:** `prompts/02-task-expand-examples.md`
 - Open in a **new chat** (one session per chat).
