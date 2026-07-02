@@ -8,13 +8,13 @@ Founder wants "all of the above." Vajra caps one story/session, so the four asks
 **sequenced** — generator first because the other three should render *generated-correct*
 output, not hand-pasted strings.
 
-- **S01 — Docs-from-lib generator** ← current
-  Single spec source → render every chart via `@chitra/core` → regenerate
-  `artifacts/chitra-docs/src/data/charts.ts` + `data/ansi-charts.json`. Verify script fails on
-  drift. Kills the hand-pasted-preview risk. (`ansi-charts.json` = colored `.toString()`;
-  `charts.ts.preview` = `.toPlain()`.)
-- **S02 — Expand examples** — deepen `examples/basic.ts`: multi-series, all themes, agent
-  `toJSON()`/`noColor` usage. Reuse the S01 spec source where possible.
+- **S01 — Docs-from-lib generator** ✅ DONE (PR #1, squash `d4242d8`)
+  Single spec source (`chart-specs.ts`) renders every chart via `@chitra/core` →
+  regenerates `charts.ts` + `ansi-charts.json`; `gen:charts:check` fails on drift. Fixed
+  a title drift + phantom `"neon"` theme. verify-session-01 ALL GREEN.
+- **S02 — Expand examples** ← next
+  Deepen `examples/basic.ts`: multi-series, all 7 themes, agent `toJSON()`/`noColor` usage.
+  Reuse the S01 spec source where possible.
 - **S03 — Polish docs site** — copy, IA, navigation on `artifacts/chitra-docs` (App.tsx),
   now backed by generated previews.
 - **S04 — README / getting-started** — sharpen `packages/core/README.md` + top-level adopter
