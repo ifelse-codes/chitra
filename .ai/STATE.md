@@ -1,9 +1,9 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S00 onboarding, 2026-07-02.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S01 in progress, 2026-07-02.)
 
 ## Active Branch
-`main` — git repo initialized 2026-07-02 (baseline import commit). S01 work branches from here.
+`session-01-docs-examples` (off `main`). git initialized 2026-07-02.
 
 ## What Currently Works (observed, not claimed)
 - `pnpm install` — clean (~25s). One benign peer-dep warning (esbuild-plugin-pino vs
@@ -14,18 +14,25 @@
   mockup-sandbox + scripts) — **exit 0**.
 - `@chitra/core` library: 20 charts, 3 renderers, 7 themes, `ChartResult` output surface —
   present and typechecked.
+- **S01 docs generator** (`artifacts/chitra-docs/scripts/`): `chart-specs.ts` (single source)
+  + `generate-charts.ts` render all 20 charts through `@chitra/core` → regenerate
+  `src/data/charts.ts` + `ansi-charts.json`. `pnpm gen:charts` writes; `gen:charts:check`
+  fails on drift. `scripts/verify-session-01.sh` — **ALL GREEN (4/4)**; `demo-session-01.sh`
+  exits 0.
 
 ## What Is Broken / Incomplete
 - **No publishable build**: core `build` script is `tsc --noEmit`; the `dist/` bundle its
   `package.json` `exports` points at is not produced. Not npm-shippable as-is.
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
-- No `scripts/verify-session-00.sh` / `demo-session-00.sh` (onboarding is docs-only, exempt).
+
+## Fixed this session
+- Docs previews were hand-pasted and had drifted (line title `Revenue Growth` in
+  ansi-charts.json vs `Revenue Trend` in charts.ts) — now generated, so they can't diverge.
+- Candlestick doc referenced phantom theme `"neon"` → corrected to `"dracula"`.
 
 ## What Is In Progress
-- **S00 (this session):** brownfield onboarding — seeding `.ai/` files from verified reality.
-  Complete pending founder sign-off.
-- **S01 (next):** Docs & examples milestone (founder-chosen). See [[roadmap]] and
-  `prompts/01-task-kickoff.md`.
+- **S01:** Docs-from-lib generator — code complete, verify green; pending commit + PR +
+  closeout. See [[roadmap]]. Next in milestone: S02 expand examples.
 
 ## Cost Tracking
 - Cumulative: $0.00
