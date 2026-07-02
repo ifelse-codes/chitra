@@ -1,6 +1,9 @@
 # Vajra session-guard owner record (one-session-per-chat) — local only, never commit.
 .ai/.session-owner
 
+# Vajra verify run artifacts (timestamped logs)
+.ai/verify/
+
 # Dependencies
 node_modules/
 
