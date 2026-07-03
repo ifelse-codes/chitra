@@ -61,6 +61,20 @@ bar({
   height: 10,
 }).render();
 
+divider("MULTI-SERIES BAR CHART");
+bar({
+  data: [
+    [42, 67, 38, 55, 72, 61],
+    [28, 45, 52, 48, 60, 55],
+  ],
+  title: "Sales vs Returns",
+  theme: "nord",
+  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+  seriesLabels: ["Sales", "Returns"],
+  legend: true,
+  height: 10,
+}).render();
+
 divider("HORIZONTAL BAR CHART");
 horizontalBar({
   data: [892, 645, 534, 421, 387, 312, 289],
@@ -86,6 +100,27 @@ area({
   width: 60,
   height: 12,
 }).render();
+
+divider("THEME TOUR — one line chart across all 7 themes");
+const themeNames = [
+  "default",
+  "nord",
+  "dracula",
+  "github-dark",
+  "tokyo-night",
+  "solarized",
+  "monochrome",
+] as const;
+for (const theme of themeNames) {
+  line({
+    data: [12, 24, 18, 36, 30, 48, 42, 54],
+    title: `Theme: ${theme}`,
+    theme,
+    width: 50,
+    height: 6,
+    labels: ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"],
+  }).render();
+}
 
 divider("HISTOGRAM");
 const normalData = Array.from({ length: 500 }, () => {
@@ -267,7 +302,7 @@ plot([15, 28, 22, 45, 38, 60, 52, 70])
   .line()
   .render();
 
-divider("AI AGENT OUTPUT (noColor + toJSON)");
+divider("AI AGENT OUTPUT — MCP tool result shape");
 const agentChart = bar({
   data: [42, 67, 38, 55],
   labels: ["Q1", "Q2", "Q3", "Q4"],
@@ -275,7 +310,14 @@ const agentChart = bar({
   noColor: true,
 });
 
-console.log("toPlain() output for LLM consumption:");
-console.log(agentChart.toPlain());
-console.log("\ntoJSON() for structured agent responses:");
-console.log(JSON.stringify(agentChart.toJSON(), null, 2));
+const mcpToolResult = {
+  name: "render_chart",
+  content: [
+    { type: "text", text: agentChart.toPlain() },
+    { type: "text", text: JSON.stringify(agentChart.toJSON(), null, 2) },
+  ],
+  isError: false,
+};
+
+console.log("MCP tool result passed back to the LLM:");
+console.log(JSON.stringify(mcpToolResult, null, 2));
