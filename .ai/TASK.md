@@ -1,9 +1,10 @@
 # Current Task Pointer
 
-## Session 02 — Expand examples (Docs & examples milestone, story 2 of 4)
+## Session 03 — Polish docs site (Docs & examples milestone, story 3 of 4)
 
-- **Branch:** `session-02-expand-examples` (from `main`)
-- **Goal:** Deepen `examples/basic.ts` — multi-series charts, all 7 themes, and AI-agent
-  usage (`toJSON()` / `noColor`). Reuse the S01 spec source where sensible.
+- **Branch:** `session-03-polish-docs` (from `main`)
+- **Goal:** Improve copy, information architecture, and navigation on the docs site
+  `artifacts/chitra-docs` (App.tsx and related components), now backed by generated chart
+  previews.
 
-Read prompt: `prompts/02-task-expand-examples.md`
+Read prompt: `prompts/03-task-polish-docs.md` (to be created at kickoff)

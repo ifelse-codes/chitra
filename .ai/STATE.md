@@ -1,9 +1,9 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S01 closed, 2026-07-02.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S02 closed, 2026-07-03.)
 
 ## Active Branch
-`main` — S01 merged via PR #1 (squash `d4242d8`). Remote:
+`main` — S02 merged via PR #3 (squash `c382802`). Remote:
 `github.com/ifelse-codes/chitra`. Next session branches from here.
 
 ## What Currently Works (observed, not claimed)
@@ -18,8 +18,11 @@
 - **S01 docs generator** (`artifacts/chitra-docs/scripts/`): `chart-specs.ts` (single source)
   + `generate-charts.ts` render all 20 charts through `@chitra/core` → regenerate
   `src/data/charts.ts` + `ansi-charts.json`. `pnpm gen:charts` writes; `gen:charts:check`
-  fails on drift. `scripts/verify-session-01.sh` — **ALL GREEN (4/4)**; `demo-session-01.sh`
+  fails on drift. `scripts/verify-session-01.sh` — ALL GREEN (4/4); `demo-session-01.sh`
   exits 0.
+- **S02 expanded examples** (`examples/basic.ts`): multi-series bar chart, theme tour
+  across all 7 themes, and MCP-tool-shaped AI agent output. `scripts/verify-session-02.sh`
+  — **ALL GREEN (6/6)**; `demo-session-02.sh` exits 0.
 
 ## What Is Broken / Incomplete
 - **No publishable build**: core `build` script is `tsc --noEmit`; the `dist/` bundle its
@@ -27,13 +30,12 @@
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
 
 ## Fixed this session
-- Docs previews were hand-pasted and had drifted (line title `Revenue Growth` in
-  ansi-charts.json vs `Revenue Trend` in charts.ts) — now generated, so they can't diverge.
-- Candlestick doc referenced phantom theme `"neon"` → corrected to `"dracula"`.
+- Examples now demonstrate multi-series charts, every theme, and AI-agent output.
+- Added automated verify + demo scripts for S02.
 
 ## What Is In Progress
-- Nothing active. **S02 (expand examples)** is next — see [[roadmap]] and
-  `prompts/02-task-expand-examples.md`. Start it in a new chat.
+- Nothing active. **S03 (polish docs site)** is next — see [[roadmap]].
+  `prompts/03-task-polish-docs.md` does not exist yet; create it at kickoff.
 
 ## Cost Tracking
 - Cumulative: $0.00
