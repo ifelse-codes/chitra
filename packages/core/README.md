@@ -20,6 +20,8 @@ Chitra is the standard visualization library for:
 
 Think Chart.js for terminals. Recharts for AI agents. Matplotlib for the command line.
 
+**New here?** Follow the path: [Install](#install) → [Render your first chart](#your-first-chart) → [Run the examples](#run-the-examples) → [AI agent output](#ai-agent-output).
+
 ---
 
 ## Install
@@ -30,9 +32,11 @@ npm install @chitra/core
 pnpm add @chitra/core
 ```
 
+Every chart function returns a `ChartResult` — call `.render()` to print it, or `.toString()` / `.toPlain()` / `.toMarkdown()` / `.toJSON()` to capture it.
+
 ---
 
-## Quick Start
+## Your first chart
 
 ### Simple API
 
@@ -62,6 +66,23 @@ plot([10, 20, 15, 30, 25])
   .line()
   .render();
 ```
+
+---
+
+## Run the examples
+
+A single runnable file exercises every chart type, the theme tour, the fluent API, and
+AI-agent output — see [`examples/basic.ts`](../../examples/basic.ts) in the repo.
+
+```bash
+git clone https://github.com/ifelse-codes/chitra.git
+cd chitra
+pnpm install
+npx tsx examples/basic.ts
+```
+
+The AI-agent section at the end of that file (`bar(...).toPlain()` + `.toJSON()`) shows the
+exact shape you would return from an MCP tool.
 
 ---
 
@@ -139,45 +160,50 @@ line({
 
 ## Output Formats
 
+Every chart returns a `ChartResult` with five ways to consume it:
+
 ```ts
 const chart = line({ data: [1, 2, 3] });
 
-chart.render();          // prints to stdout
-chart.toString();        // ANSI colored string
-chart.toPlain();         // plain text, no ANSI
-chart.toMarkdown();      // wrapped in ```code block```
-chart.toJSON();          // structured { type, data, plain, ... }
+chart.render();          // prints the ANSI chart to stdout
+chart.toString();        // ANSI-colored string (terminals)
+chart.toPlain();         // plain text, ANSI stripped (LLM input)
+chart.toMarkdown();      // plain text fenced in a ``` code block (chat/docs)
+chart.toJSON();          // structured object { type, data, labels, title, plain }
 ```
 
 ---
 
-## AI Agent Support
+## AI agent output
 
-Chitra is designed for AI agent workflows. Use `toPlain()` or `toJSON()` to integrate with agents:
+For agents, MCP servers, and LLM tools, pass `noColor: true` and pick the helper that fits
+the channel: **plain** for raw text, **markdown** for chat surfaces, **json** for structured
+tool results.
 
 ```ts
-// For MCP servers and LLM tools
-const chartData = line({
+// Plain text — drop straight into an MCP tool result
+const chartText = line({
   data: metrics,
   title: "Response Times",
-  noColor: true,     // No ANSI for LLM consumption
+  noColor: true,          // no ANSI escapes for LLM consumption
 }).toPlain();
 
-// Return as tool result
-return { content: [{ type: "text", text: chartData }] };
+return { content: [{ type: "text", text: chartText }] };
 ```
 
 ```ts
-// For structured agent responses
+// JSON — structured response the agent can reason over
 const result = bar({
   data: counts,
   labels: categories,
   noColor: true,
 }).toJSON();
 
-// result.plain — text representation
-// result.data  — original data
-// result.type  — chart type
+// result.type   — chart type, e.g. "bar"
+// result.data   — the original data
+// result.labels — category labels
+// result.title  — chart title
+// result.plain  — plain-text rendering
 ```
 
 ---
