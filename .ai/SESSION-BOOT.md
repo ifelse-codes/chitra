@@ -1,23 +1,21 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 04
-- **Type:** CODE
-- **Branch:** `session-04-readme-getting-started` (from `main`)
-- **Date last updated:** 2026-07-03
+- **Number:** 05
+- **Type:** GROUND-TRUTH (NO-CODE, mandatory every-5th)
+- **Branch:** `session-05-ground-truth` (from `main`)
+- **Date last updated:** 2026-07-08
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 04.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00 baseline + S01 + S02;
-  S03 docs polish is ready in PR form.
-- S01 shipped the docs-from-lib generator: `artifacts/chitra-docs/scripts/chart-specs.ts`
-  is the single source of truth for chart previews; `pnpm gen:charts` regenerates
-  `src/data/{charts.ts,ansi-charts.json}`; `gen:charts:check` guards drift.
-- S02 expanded `examples/basic.ts` with multi-series, theme tour, and AI-agent output.
-- S03 polished the docs site IA/copy/navigation, fixed stale theme names, and added
-  `scripts/verify-session-03.sh` + `scripts/demo-session-03.sh`.
-- Milestone **Docs & examples**: S01 done → S02 examples → S03 docs polish → S04 README.
+- `.ai/SESSION` = 05.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S03 + **S04 (README) shipped** (`def0cfa`).
+- **S05 = NO-CODE ground-truth done** → `sessions/session-05-ground-truth.md`. Verdict **🔴 discipline
+  drift**: STATE/SESSION/SESSION-BOOT were a session stale, S04 skipped verify/demo/summary/closeout,
+  KNOWLEDGE falsely claims "NOT a git repo". Direction ✅ sound (zero-dep, 116 tests green, AI-first).
+- Remediations deferred to the next CODE session (do NOT fold in during GT): rewrite STATE, fix
+  KNOWLEDGE git falsehood, mark S02/S04 done in ROADMAP, backfill/waive S04 verify/demo/summary.
 
 ## Next Session
-- **Read prompt:** `prompts/04-task-readme-getting-started.md` (to be created at kickoff)
+- **Number:** 06 — **the real publishable `dist/` build for `@chitra/core`** (build is still
+  `tsc --noEmit`; `dist/` absent though `package.json#exports` point at it → not npm-installable).
 - Open in a **new chat** (one session per chat).
