@@ -1,18 +1,19 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S02 closed, 2026-07-03.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S03 closed, 2026-07-03.)
 
 ## Active Branch
-`main` — S02 merged via PR #3 (squash `c382802`). Remote:
-`github.com/ifelse-codes/chitra`. Next session branches from here.
+`session-03-polish-docs` — S03 implementation complete and ready for PR. Remote:
+`github.com/ifelse-codes/chitra`. Next session branches from `main` after S03 merges.
 
 ## What Currently Works (observed, not claimed)
-- `pnpm install` — clean (~25s). One benign peer-dep warning (esbuild-plugin-pino vs
-  esbuild 0.27.3 in `artifacts/api-server`).
-- `pnpm --filter @chitra/core run test` — **116/116 pass**, 7 files, ~0.7s.
+- `pnpm --filter @chitra/core run test` — **116/116 pass**, 7 files.
 - `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `pnpm run typecheck` (full workspace: libs build + api-server + chitra-docs +
-  mockup-sandbox + scripts) — **exit 0**.
+- `pnpm --filter @workspace/chitra-docs run gen:charts:check` — **exit 0**.
+- `pnpm --filter @workspace/chitra-docs run typecheck` — **exit 0**.
+- `PORT=5000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run build` — **exit 0**.
+- `scripts/verify-session-03.sh` — **ALL GREEN (8/8)**.
+- `scripts/demo-session-03.sh` — **exit 0**.
 - `@chitra/core` library: 20 charts, 3 renderers, 7 themes, `ChartResult` output surface —
   present and typechecked.
 - **S01 docs generator** (`artifacts/chitra-docs/scripts/`): `chart-specs.ts` (single source)
@@ -23,6 +24,9 @@
 - **S02 expanded examples** (`examples/basic.ts`): multi-series bar chart, theme tour
   across all 7 themes, and MCP-tool-shaped AI agent output. `scripts/verify-session-02.sh`
   — **ALL GREEN (6/6)**; `demo-session-02.sh` exits 0.
+- **S03 docs polish** (`artifacts/chitra-docs/src/App.tsx` + `index.css`): improved
+  start-here navigation, homepage route cards, corrected theme copy, and clearer AI-agent
+  output path.
 
 ## What Is Broken / Incomplete
 - **No publishable build**: core `build` script is `tsc --noEmit`; the `dist/` bundle its
@@ -30,12 +34,14 @@
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
 
 ## Fixed this session
-- Examples now demonstrate multi-series charts, every theme, and AI-agent output.
-- Added automated verify + demo scripts for S02.
+- Docs site now routes users through Install → Quickstart → Chart gallery → Agent output.
+- Removed stale `neon` theme references from docs-site copy.
+- Added S03 automated verify + demo scripts.
 
 ## What Is In Progress
-- Nothing active. **S03 (polish docs site)** is next — see [[roadmap]].
-  `prompts/03-task-polish-docs.md` does not exist yet; create it at kickoff.
+- S03 closeout / PR publication.
+- **S04 (README / getting-started)** is next — see [[roadmap]].
+  `prompts/04-task-readme-getting-started.md` does not exist yet; create it at kickoff.
 
 ## Cost Tracking
 - Cumulative: $0.00

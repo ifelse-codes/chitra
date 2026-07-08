@@ -15,9 +15,12 @@ output, not hand-pasted strings.
 - **S02 — Expand examples** ← next
   Deepen `examples/basic.ts`: multi-series, all 7 themes, agent `toJSON()`/`noColor` usage.
   Reuse the S01 spec source where possible.
-- **S03 — Polish docs site** — copy, IA, navigation on `artifacts/chitra-docs` (App.tsx),
-  now backed by generated previews.
-- **S04 — README / getting-started** — sharpen `packages/core/README.md` + top-level adopter
+- **S03 — Polish docs site** ✅ DONE
+  Copy, IA, and navigation on `artifacts/chitra-docs` now point users to install,
+  quickstart, chart gallery, and AI-agent output. Fixed stale theme names and added
+  verify/demo scripts. verify-session-03 ALL GREEN.
+- **S04 — README / getting-started** ← next
+  Sharpen `packages/core/README.md` + top-level adopter
   path; examples provably match lib output.
 
 ## Backlog (not yet scheduled)
