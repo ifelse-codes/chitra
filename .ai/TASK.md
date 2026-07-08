@@ -1,10 +1,9 @@
 # Current Task Pointer
 
-## Session 03 — Polish docs site (Docs & examples milestone, story 3 of 4)
+## Session 04 — README / getting-started (Docs & examples milestone, story 4 of 4)
 
-- **Branch:** `session-03-polish-docs` (from `main`)
-- **Goal:** Improve copy, information architecture, and navigation on the docs site
-  `artifacts/chitra-docs` (App.tsx and related components), now backed by generated chart
-  previews.
+- **Branch:** `session-04-readme-getting-started` (from `main`)
+- **Goal:** Sharpen `packages/core/README.md` and the top-level adopter path so users can
+  install, render a first chart, browse examples, and understand AI-agent output quickly.
 
-Read prompt: `prompts/03-task-polish-docs.md` (to be created at kickoff)
+Read prompt: `prompts/04-task-readme-getting-started.md` (to be created at kickoff)

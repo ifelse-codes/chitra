@@ -18,7 +18,7 @@ const CHART_META: Record<string, ChartMeta> = {
   },
   area: {
     uses: ["Volume/accumulation over time — requests, bytes, events","Makes the magnitude of change more visible than a line","Good for showing filled volume between a baseline and a trend"],
-    options: [{ name:"renderer", desc:'"braille" gives smooth filled area; "blocks" for compatibility' },{ name:"width / height", desc:"Grid dimensions" },{ name:"theme", desc:"Controls fill color — try \"neon\" for vibrant fills" }],
+    options: [{ name:"renderer", desc:'"braille" gives smooth filled area; "blocks" for compatibility' },{ name:"width / height", desc:"Grid dimensions" },{ name:"theme", desc:'Use "nord", "dracula", "github-dark", "tokyo-night", "solarized", or "monochrome"' }],
   },
   sparkline: {
     uses: ["Live dashboard metrics — CPU, memory, network, disk at a glance","Inline status in CLI output, log files, or monitoring scripts","Multiple sparklines stacked = a full system monitor in 6 lines"],
@@ -100,9 +100,9 @@ const CHART_ACCENT: Record<string, string> = {
 };
 
 const NAV_SECTIONS = [
-  { label: "Getting Started", items: ["install", "quickstart", "fluent-api"] },
+  { label: "Start Here", items: ["install", "quickstart", "fluent-api"] },
   { label: "Chart Types", items: CHARTS.map((c) => c.id) },
-  { label: "Reference", items: ["ai-output"] },
+  { label: "Agent Output", items: ["ai-output"] },
 ];
 
 function hl(code: string): string {
@@ -158,6 +158,26 @@ function AccentChip({ accent }: { accent: string }) {
   return <span className={`accent-chip chip-${accent}`}>{accent}</span>;
 }
 
+function RouteCard({
+  title,
+  detail,
+  cta,
+  onClick,
+}: {
+  title: string;
+  detail: string;
+  cta: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className="route-card" onClick={onClick}>
+      <span className="route-title">{title}</span>
+      <span className="route-detail">{detail}</span>
+      <span className="route-cta">{cta}</span>
+    </button>
+  );
+}
+
 /* ── Page: Install ──────────────────────────────────────────── */
 function InstallPage() {
   return (
@@ -165,7 +185,7 @@ function InstallPage() {
       <div className="page-header">
         <div className="page-eyebrow">Getting Started</div>
         <h1>Installation</h1>
-        <p className="lead">Zero runtime dependencies. Pure TypeScript. Works anywhere Node.js runs.</p>
+        <p className="lead">Install the TypeScript terminal chart library with no runtime dependency chain.</p>
       </div>
       <h2>Package managers</h2>
       <CodeBlock lang="bash" code={`npm install @chitra/core\npnpm add @chitra/core\nyarn add @chitra/core`} />
@@ -173,10 +193,10 @@ function InstallPage() {
       <ul>
         <li>Node.js 18 or later</li>
         <li>TypeScript 5+ for full type safety (optional)</li>
-        <li>Any Unicode-capable terminal (iTerm2, Warp, Windows Terminal, …)</li>
+        <li>Any Unicode-capable terminal, with ASCII fallback when needed</li>
       </ul>
       <h2>Module format</h2>
-      <p>Ships both <strong>ESM</strong> and <strong>CommonJS</strong> builds. Full TypeScript types included — no <code>@types/</code> package needed.</p>
+      <p>Typed ESM imports are the primary path. Full TypeScript types are included, with no <code>@types/</code> package needed.</p>
       <CodeBlock code={`import { bar } from "@chitra/core";\n// Full type inference — no @types/chitra needed\nbar({ data: [1, 2, 3] }).render();`} />
     </div>
   );
@@ -189,14 +209,14 @@ function QuickstartPage() {
       <div className="page-header">
         <div className="page-eyebrow">Getting Started</div>
         <h1>Quickstart</h1>
-        <p className="lead">Your first chart in 30 seconds.</p>
+        <p className="lead">Render a chart, choose a renderer, then reuse the same result in terminals, Markdown, logs, and agents.</p>
       </div>
-      <CodeBlock code={`import { bar, line, sparkline } from "@chitra/core";\n\n// Vertical bar chart\nbar({\n  data: [42, 67, 38, 55, 72],\n  labels: ["Jan", "Feb", "Mar", "Apr", "May"],\n  title: "Monthly Deployments",\n  theme: "neon",\n}).render();\n\n// Braille line chart — sub-character precision\nline({\n  data: [10, 20, 15, 35, 28, 45, 38, 52],\n  title: "Revenue",\n  renderer: "braille",\n}).render();\n\n// Inline sparkline — perfect for dashboards\nsparkline({\n  data: [1, 4, 2, 7, 3, 9, 5, 11, 8],\n  label: "CPU",\n  showValue: true,\n}).render();`} />
+      <CodeBlock code={`import { bar, line, sparkline } from "@chitra/core";\n\n// Vertical bar chart\nbar({\n  data: [42, 67, 38, 55, 72],\n  labels: ["Jan", "Feb", "Mar", "Apr", "May"],\n  title: "Monthly Deployments",\n  theme: "tokyo-night",\n}).render();\n\n// Braille line chart — sub-character precision\nline({\n  data: [10, 20, 15, 35, 28, 45, 38, 52],\n  title: "Revenue",\n  renderer: "braille",\n}).render();\n\n// Inline sparkline — perfect for dashboards\nsparkline({\n  data: [1, 4, 2, 7, 3, 9, 5, 11, 8],\n  label: "CPU",\n  showValue: true,\n}).render();`} />
       <h2>ChartResult interface</h2>
       <p>Every chart function returns a <code>ChartResult</code> — five output methods for any context:</p>
       <CodeBlock code={`const chart = bar({ data: [1, 2, 3] });\n\nchart.render();       // → stdout with ANSI colors\nchart.toString();     // → ANSI string\nchart.toPlain();      // → plain text, no escape codes\nchart.toMarkdown();   // → fenced code block\nchart.toJSON();       // → { type, data, plain, ... }`} />
       <h2>Themes</h2>
-      <CodeBlock code={`// 7 built-in themes\n"default" | "dark" | "nord" | "neon" | "solarized" | "minimal" | "light"`} />
+      <CodeBlock code={`// 7 built-in themes\n"default" | "nord" | "dracula" | "github-dark" | "tokyo-night" | "solarized" | "monochrome"`} />
     </div>
   );
 }
@@ -208,11 +228,11 @@ function FluentPage() {
       <div className="page-header">
         <div className="page-eyebrow">Getting Started</div>
         <h1>Fluent API</h1>
-        <p className="lead"><code>plot(data)</code> — a chainable builder that wraps all 20 chart types.</p>
+        <p className="lead"><code>plot(data)</code> keeps shared options together, then renders the final chart type at the end of the chain.</p>
       </div>
-      <CodeBlock code={`import { plot } from "@chitra/core";\n\n// Chain options, call chart type last\nplot([18, 32, 27, 48, 39, 61, 52, 74])\n  .title("Revenue Growth")\n  .theme("neon")\n  .width(60)\n  .height(14)\n  .renderer("braille")\n  .line()\n  .render();\n\nplot([42, 67, 38, 55, 72])\n  .labels(["Jan", "Feb", "Mar", "Apr", "May"])\n  .title("Deploys")\n  .bar()\n  .render();`} />
+      <CodeBlock code={`import { plot } from "@chitra/core";\n\n// Chain options, call chart type last\nplot([18, 32, 27, 48, 39, 61, 52, 74])\n  .title("Revenue Growth")\n  .theme("tokyo-night")\n  .width(60)\n  .height(14)\n  .renderer("braille")\n  .line()\n  .render();\n\nplot([42, 67, 38, 55, 72])\n  .labels(["Jan", "Feb", "Mar", "Apr", "May"])\n  .title("Deploys")\n  .bar()\n  .render();`} />
       <h2>All builder methods</h2>
-      <CodeBlock code={`plot(data)\n  // Metadata\n  .title(string)\n  .labels(string[])\n  .label(string)          // sparkline label\n\n  // Appearance\n  .theme("default" | "dark" | "nord" | "neon" | "solarized" | "minimal" | "light")\n  .renderer("braille" | "blocks" | "ascii")\n  .width(number)\n  .height(number)\n  .noColor()              // strip ANSI — for LLMs / CI logs\n\n  // Chart type (call last)\n  .line()        .bar()         .area()        .sparkline()\n  .histogram()   .scatter()     .pie()         .donut()\n  .heatmap()     .progress()    .gauge()       .horizontalBar()\n  .timeline()    .radar()       .boxplot()     .waterfall()\n  .funnel()      .candlestick() .treemap()     .sankey()`} />
+      <CodeBlock code={`plot(data)\n  // Metadata\n  .title(string)\n  .labels(string[])\n  .label(string)          // sparkline label\n\n  // Appearance\n  .theme("default" | "nord" | "dracula" | "github-dark" | "tokyo-night" | "solarized" | "monochrome")\n  .renderer("braille" | "blocks" | "ascii")\n  .width(number)\n  .height(number)\n  .noColor()              // strip ANSI — for LLMs / CI logs\n\n  // Chart type (call last)\n  .line()        .bar()         .area()        .sparkline()\n  .histogram()   .scatter()     .pie()         .donut()\n  .heatmap()     .progress()    .gauge()       .horizontalBar()\n  .timeline()    .radar()       .boxplot()     .waterfall()\n  .funnel()      .candlestick() .treemap()     .sankey()`} />
     </div>
   );
 }
@@ -224,9 +244,9 @@ function AiPage() {
       <div className="page-header">
         <div className="page-eyebrow">Reference</div>
         <h1>AI Agent Support</h1>
-        <p className="lead">First-class output formats for LLMs, MCP tools, and AI pipelines.</p>
+        <p className="lead">Use the same chart result in a terminal, then hand plain text or JSON to LLMs and MCP tools.</p>
       </div>
-      <p>LLMs see garbled output when ANSI escape codes are present. Chitra's <code>toPlain()</code> and <code>toJSON()</code> methods return clean, readable representations — no stripping required.</p>
+      <p>ANSI escape codes are great for terminals and noisy for language models. Chitra's <code>noColor</code>, <code>toPlain()</code>, and <code>toJSON()</code> paths keep agent output readable without a post-processing step.</p>
       <h2>noColor + toPlain</h2>
       <CodeBlock code={`import { bar } from "@chitra/core";\n\nconst chart = bar({\n  data: [42, 67, 38],\n  labels: ["Q1", "Q2", "Q3"],\n  title: "Quarterly Revenue",\n  noColor: true,          // skip ANSI at generation time\n});\n\n// Pass directly to any LLM or agent:\nconst text = chart.toPlain();\nconst json  = chart.toJSON();\n// { type: "bar", title: "Quarterly Revenue",\n//   data: [42, 67, 38], labels: [...], plain: "..." }`} />
       <h2>MCP tool handler</h2>
@@ -263,7 +283,7 @@ function ChartPage({ id }: { id: string }) {
         </div>
       )}
 
-      <h2>Live preview</h2>
+      <h2>Preview</h2>
       <Terminal id={id} plain={chart.preview} />
 
       <h2>Code</h2>
@@ -294,18 +314,18 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
         <div className="hero-eyebrow">
           <span className="pill"><span className="pill-dot" />v0.1.0 — stable</span>
           <span className="pill">MIT License</span>
-          <span className="pill">Zero dependencies</span>
+          <span className="pill">Zero runtime deps</span>
           <span className="pill">TypeScript-first</span>
         </div>
 
         <h1 className="hero-title">
           Terminal charts<br />
-          <span className="grad">built for builders.</span>
+          <span className="grad">for CLIs and agents.</span>
         </h1>
 
         <p className="hero-desc">
-          Beautiful, accurate visualizations for CLIs, AI agents, and developer
-          tooling — rendered in pure Unicode with zero runtime dependencies.
+          Twenty generated chart previews, three renderers, and clean output methods
+          for terminals, CI logs, Markdown, MCP tools, and LLM workflows.
         </p>
 
         <div className="hero-stats">
@@ -320,13 +340,33 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <button className="btn-primary" onClick={() => onNav("install")}>
             Get started →
           </button>
+          <button className="btn-secondary" onClick={() => onNav("quickstart")}>
+            First chart
+          </button>
           <button className="btn-secondary" onClick={() => onNav("line")}>
             Browse charts
           </button>
-          <a className="btn-secondary" href="https://github.com" target="_blank" rel="noreferrer"
-             style={{ textDecoration: "none" }}>
-            ★ GitHub
-          </a>
+        </div>
+
+        <div className="route-grid">
+          <RouteCard
+            title="Install"
+            detail="Package managers, runtime expectations, and typed imports."
+            cta="Start here"
+            onClick={() => onNav("install")}
+          />
+          <RouteCard
+            title="Quickstart"
+            detail="Render a bar, line, and sparkline with the ChartResult API."
+            cta="Copy code"
+            onClick={() => onNav("quickstart")}
+          />
+          <RouteCard
+            title="AI output"
+            detail="Use noColor, toPlain, and toJSON in MCP-style tool results."
+            cta="View reference"
+            onClick={() => onNav("ai-output")}
+          />
         </div>
 
         <div className="hero-terminal-wrap">
@@ -352,12 +392,12 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="feature-item">
             <div className="feature-icon">⚡</div>
             <div className="feature-title">Fluent API</div>
-            <div className="feature-desc"><code>plot(data).title("…").theme("neon").bar().render()</code> — all 20 charts from one chainable builder.</div>
+            <div className="feature-desc"><code>plot(data).title("...").theme("tokyo-night").bar().render()</code> — all 20 charts from one chainable builder.</div>
           </div>
           <div className="feature-item">
             <div className="feature-icon">🎨</div>
             <div className="feature-title">7 themes</div>
-            <div className="feature-desc">Nord, Neon, Solarized, Dark, Minimal, Light, Default — plus full custom color control.</div>
+            <div className="feature-desc">Default, Nord, Dracula, GitHub Dark, Tokyo Night, Solarized, and Monochrome.</div>
           </div>
           <div className="feature-item">
             <div className="feature-icon">🔡</div>
