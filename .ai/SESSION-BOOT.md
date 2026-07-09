@@ -1,21 +1,24 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 05
-- **Type:** GROUND-TRUTH (NO-CODE, mandatory every-5th)
-- **Branch:** `session-05-ground-truth` (from `main`)
-- **Date last updated:** 2026-07-08
+- **Number:** 06
+- **Type:** CODE — real publishable `dist/` build for `@chitra/core`
+- **Branch:** `session-06-dist-build` (from `main`)
+- **Date last updated:** 2026-07-09
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 05.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S03 + **S04 (README) shipped** (`def0cfa`).
-- **S05 = NO-CODE ground-truth done** → `sessions/session-05-ground-truth.md`. Verdict **🔴 discipline
-  drift**: STATE/SESSION/SESSION-BOOT were a session stale, S04 skipped verify/demo/summary/closeout,
-  KNOWLEDGE falsely claims "NOT a git repo". Direction ✅ sound (zero-dep, 116 tests green, AI-first).
-- Remediations deferred to the next CODE session (do NOT fold in during GT): rewrite STATE, fix
-  KNOWLEDGE git falsehood, mark S02/S04 done in ROADMAP, backfill/waive S04 verify/demo/summary.
+- `.ai/SESSION` = 06.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S05.
+- **S06 = real dist build landed** (`81c0649`): `pnpm build` now emits `dist/index.js` (ESM) +
+  `dist/index.cjs` (CJS) + `dist/index.d.ts` via esbuild + `tsc --emitDeclarationOnly`; zero runtime deps,
+  public API unchanged, 116 tests green, ESM+CJS each expose 44 exports. `@chitra/core` is now npm-buildable.
+  (Landed as Arm A of Vajra's session-52 value-gap A/B; the 1 correction folded in = `incremental:false` so a
+  clean `rm -rf dist && pnpm build` reproduces the `.d.ts`.)
+- **Still-open discipline drift from S05 GT** (`sessions/session-05-ground-truth.md`) — defer to next session:
+  rewrite stale `.ai/STATE.md`, fix `.ai/KNOWLEDGE.md` "NOT a git repo" falsehood, mark S02/S04 done in ROADMAP,
+  backfill/waive S04 verify/demo/summary, add a closeout-integrity gate.
 
 ## Next Session
-- **Number:** 06 — **the real publishable `dist/` build for `@chitra/core`** (build is still
-  `tsc --noEmit`; `dist/` absent though `package.json#exports` point at it → not npm-installable).
+- **Number:** 07 — fold in the S05 ground-truth remediations (STATE/KNOWLEDGE/ROADMAP hygiene) OR the next
+  ROADMAP feature (CI workflows).
 - Open in a **new chat** (one session per chat).
