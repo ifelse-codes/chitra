@@ -1,0 +1,86 @@
+name: CI
+
+# Session 07 — the gates that must stay green (see .ai/ROADMAP.md guardrails):
+#   core:  @chitra/core test (116) + typecheck + dist build (ESM + CJS + .d.ts)
+#   docs:  @workspace/chitra-docs typecheck + build
+#   drift: generated chart previews match the spec source (gen:charts:check)
+# Toolchain is pinned to the versions proven green locally (Node 26, pnpm 9.12.3,
+# lockfile v9.0); bump both here and in scripts/verify-session-07.sh together.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "26"
+  PNPM_VERSION: "9.12.3"
+
+jobs:
+  core:
+    name: core · test + typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      - name: Test
+        run: pnpm --filter @chitra/core run test
+      - name: Typecheck
+        run: pnpm --filter @chitra/core run typecheck
+      - name: Build dist (ESM + CJS + .d.ts)
+        run: pnpm --filter @chitra/core run build
+
+  docs:
+    name: docs · typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      # docs tsconfig references lib/ projects whose declaration output is not
+      # in git; build them first or a fresh clone fails typecheck.
+      - name: Build lib type declarations
+        run: pnpm run typecheck:libs
+      - name: Typecheck
+        run: pnpm --filter @workspace/chitra-docs run typecheck
+      - name: Build
+        run: pnpm --filter @workspace/chitra-docs run build
+        env:
+          PORT: "5000"
+          BASE_PATH: "/"
+
+  chart-drift:
+    name: drift · generated charts match spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      - name: Chart generation drift check
+        run: pnpm --filter @workspace/chitra-docs run gen:charts:check
