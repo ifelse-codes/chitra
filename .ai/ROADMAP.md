@@ -24,9 +24,11 @@ output, not hand-pasted strings.
   path; examples provably match lib output.
 
 ## Backlog (not yet scheduled)
-- Real publishable `dist/` build for `@chitra/core` (current `build` is `tsc --noEmit`).
-- CI workflows (README references `.github/workflows/*` that don't exist).
+- ✅ **S06** — Real publishable `dist/` build for `@chitra/core` (ESM + CJS + `.d.ts`, zero deps).
+- ✅ **S07** — CI workflows (`.github/workflows/ci.yml`: core · docs · chart-drift gates, pinned toolchain).
+- `release.yml` / publish workflow (npm publish on tag).
 - Flesh out `artifacts/api-server` beyond `/healthz` if the hosted API is pursued.
+- S05 ground-truth remediation still open: S04 verify/demo/summary backfill + a closeout-integrity gate.
 
 ## Guardrails carried forward (see [[knowledge]])
 - Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · 116 tests green ·

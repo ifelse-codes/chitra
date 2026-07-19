@@ -1,9 +1,12 @@
 # Current Task Pointer
 
-## Session 04 — README / getting-started (Docs & examples milestone, story 4 of 4)
+## Session 07 — CI workflows — COMPLETE
 
-- **Branch:** `session-04-readme-getting-started` (from `main`)
-- **Goal:** Sharpen `packages/core/README.md` and the top-level adopter path so users can
-  install, render a first chart, browse examples, and understand AI-agent output quickly.
+- **Branch:** `session-07-ci-workflows` (from `main`)
+- **Shipped:** `.github/workflows/ci.yml` (3 jobs: core · docs · chart-drift; pinned Node 26 / pnpm
+  9.12.3; frozen install) + `verify-session-07.sh` (13/13) + `demo-session-07.sh`. Built via a Vajra
+  dogfood ride-along (Vajra S76), independently re-verified. Closes the backlog "CI workflows" item.
+- Summary: `sessions/session-07-summary.md`.
 
-Read prompt: `prompts/04-task-readme-getting-started.md` (to be created at kickoff)
+Between sessions. **Next: S08** — `release.yml` / publish workflow, or `artifacts/api-server`, or the
+remaining S05 ground-truth remediation. Open in a **new chat**.
