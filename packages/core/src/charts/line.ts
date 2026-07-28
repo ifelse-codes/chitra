@@ -240,24 +240,42 @@ function mergeCanvasRows(
   rows: string[],
   _numSeries: number,
   colors: string[],
-  noColor: boolean
+  noColor: boolean,
+  emptyChar: string = "\u2800"
 ): string {
   if (rows.length === 0) return "";
-  const len = rows[0].length;
+  const len = stripAnsi(rows[0]).length; 
+  
+  const visualRows = rows.map(extractVisualChars);
   let result = "";
+  
   for (let i = 0; i < len; i++) {
     let found = false;
-    for (let si = 0; si < rows.length; si++) {
-      const ch = rows[si][i];
-      if (ch && ch !== "\u2800") {
+    for (let si = 0; si < visualRows.length; si++) {
+      const ch = visualRows[si][i];
+      if (ch && ch !== stripAnsi(emptyChar) && ch !== "\u2800" && ch !== " ") {
         result += colorize(ch, colors[si % colors.length], noColor);
         found = true;
         break;
       }
     }
-    if (!found) result += rows[0][i] ?? " ";
+    if (!found) {
+      result += emptyChar;
+    }
   }
   return result;
+}
+
+function extractVisualChars(row: string): string[] {
+  const chars: string[] = [];
+  let inEscape = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === "\x1b") { inEscape = true; continue; }
+    if (inEscape) { if (ch === "m") inEscape = false; continue; }
+    chars.push(ch);
+  }
+  return chars;
 }
 
 function buildXLabels(labels: string[], totalWidth: number): string {

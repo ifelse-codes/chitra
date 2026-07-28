@@ -46,13 +46,10 @@ export function niceTicks(min: number, max: number, maxTicks = 5): { min: number
   else if (norm < 7.5) step = 5 * mag;
   else step = 10 * mag;
 
-  // Prevent snapping to 0 if the data floor is significantly above 0
+  // STRICT bounds: Do not force 0 if min is > 0. Just step down once.
   let niceMin = Math.floor(min / step) * step;
-  if (niceMin === 0 && min > step * 1.5) {
-      niceMin = Math.floor((min - (step * 0.5)) / step) * step;
-  }
+  let niceMax = Math.ceil(max / step) * step;
   
-  const niceMax = Math.ceil(max / step) * step;
   const ticks: number[] = [];
   for (let t = niceMin; t <= niceMax + 1e-9; t += step) {
     ticks.push(t);
