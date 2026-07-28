@@ -311,7 +311,10 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
   return (
     <div className="hero">
       <div className="hero-inner">
+        <div className="hero-main">
+          <div className="hero-copy">
         <div className="hero-eyebrow">
+          <span className="hero-kicker"><span className="hero-kicker-dot" />A clear view of your data</span>
           <span className="pill"><span className="pill-dot" />v0.1.0 — stable</span>
           <span className="pill">MIT License</span>
           <span className="pill">Zero runtime deps</span>
@@ -347,6 +350,12 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
             Browse charts
           </button>
         </div>
+          </div>
+
+          <div className="hero-terminal-wrap">
+            <Terminal id="line" />
+          </div>
+        </div>
 
         <div className="route-grid">
           <RouteCard
@@ -367,10 +376,6 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
             cta="View reference"
             onClick={() => onNav("ai-output")}
           />
-        </div>
-
-        <div className="hero-terminal-wrap">
-          <Terminal id="line" />
         </div>
 
         <div className="features-strip">
@@ -471,8 +476,8 @@ export default function App() {
     <div className="layout">
       <header className="topbar">
         <button className="logo" onClick={() => nav("home")}>
-          <span className="logo-icon">⬡</span>
-          chitra
+          <span className="logo-icon">◈</span>
+          <span>chitra</span>
         </button>
         <nav className="topbar-nav">
           <button className={`topbar-link ${["install","quickstart","fluent-api"].includes(active) ? "active" : ""}`} onClick={() => nav("install")}>Docs</button>
