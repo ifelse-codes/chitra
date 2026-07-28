@@ -39,12 +39,19 @@ export function niceTicks(min: number, max: number, maxTicks = 5): { min: number
   const rawStep = range / (maxTicks - 1);
   const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const norm = rawStep / mag;
+  
   let step: number;
   if (norm < 1.5) step = 1 * mag;
   else if (norm < 3) step = 2 * mag;
   else if (norm < 7.5) step = 5 * mag;
   else step = 10 * mag;
-  const niceMin = Math.floor(min / step) * step;
+
+  // Prevent snapping to 0 if the data floor is significantly above 0
+  let niceMin = Math.floor(min / step) * step;
+  if (niceMin === 0 && min > step * 1.5) {
+      niceMin = Math.floor((min - (step * 0.5)) / step) * step;
+  }
+  
   const niceMax = Math.ceil(max / step) * step;
   const ticks: number[] = [];
   for (let t = niceMin; t <= niceMax + 1e-9; t += step) {

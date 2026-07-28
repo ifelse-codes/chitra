@@ -133,9 +133,18 @@ function drawBrailleLine(
   const sy = y0 < y1 ? 1 : -1;
   let err = dx - dy;
 
+  // Track if we've actually moved to prevent infinite loops in degenerate cases
+  let lastX = -1;
+  let lastY = -1;
+
   while (true) {
+    if (x0 === lastX && y0 === lastY) break; // safeguard
     canvas.set(x0, y0);
+    lastX = x0;
+    lastY = y0;
+    
     if (x0 === x1 && y0 === y1) break;
+    
     const e2 = 2 * err;
     if (e2 > -dy) { err -= dy; x0 += sx; }
     if (e2 < dx) { err += dx; y0 += sy; }
