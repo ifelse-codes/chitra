@@ -23,6 +23,7 @@ export function line(opts: LineChartOptions): ChartResult {
   
   // Apply nice ticks for cleaner Y-axis bounds
   const plotRows = height;
+  // Apply nice ticks for cleaner Y-axis bounds, but don't force a 0 baseline if data starts high
   const yTicks = showAxes ? niceTicks(opts.yMin ?? dataMin, opts.yMax ?? dataMax, Math.max(2, Math.floor(plotRows / 3))) : null;
   const yMin = yTicks ? yTicks.min : (opts.yMin ?? dataMin);
   const yMax = yTicks ? yTicks.max : (opts.yMax ?? dataMax);
@@ -54,7 +55,6 @@ export function line(opts: LineChartOptions): ChartResult {
       let yLabel = " ".repeat(yAxisWidth);
       
       if (showAxes && yTicks) {
-        const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
         // Find if this row is close to a nice tick
         const closestTick = tickLabels.find(t => {
           const rowNorm = 1 - (row / (plotRows - 1));
@@ -82,7 +82,7 @@ export function line(opts: LineChartOptions): ChartResult {
         mergedData = mergeCanvasRows(rowChars, series.length, theme.colors, noColor);
       }
       
-      // Inject faint horizontal gridlines behind the braille
+      // Inject faint horizontal gridlines behind the braille cleanly
       if (showAxes && isTick) {
         mergedData = injectGridline(mergedData, plotCols, theme.axis, noColor);
       }
@@ -197,11 +197,10 @@ export function line(opts: LineChartOptions): ChartResult {
 }
 
 function injectGridline(rowStr: string, len: number, colorLabel: string, noColor: boolean): string {
-  const pure = stripAnsi(rowStr);
   const out: string[] = [];
   let inEscape = false;
   let escapeSeq = "";
-  let visualIdx = 0;
+  let visualCount = 0;
 
   for (let i = 0; i < rowStr.length; i++) {
     const ch = rowStr[i];
@@ -219,14 +218,21 @@ function injectGridline(rowStr: string, len: number, colorLabel: string, noColor
       continue;
     }
     
-    // Replace empty braille spaces with faint dots
+    // Only inject gridline if it's completely empty braille space, and use a dim, solid rule
     if (ch === "\u2800" || ch === " ") {
-      out.push(colorize("·", colorLabel, noColor));
+      out.push(colorize("┈", colorLabel, noColor));
     } else {
       out.push(ch);
     }
-    visualIdx++;
+    visualCount++;
   }
+  
+  // Pad if the braille canvas didn't reach the edge
+  while (visualCount < len) {
+    out.push(colorize("┈", colorLabel, noColor));
+    visualCount++;
+  }
+  
   return out.join("");
 }
 
