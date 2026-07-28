@@ -55,13 +55,17 @@ export class BrailleCanvas {
     for (let r = lo; r <= hi; r++) this.set(dotCol, r);
   }
 
-  toLines(): string[] {
+  toLines(emptyChar: string = "\u2800"): string[] {
     const lines: string[] = [];
     for (let r = 0; r < this.rows; r++) {
       let line = "";
       for (let c = 0; c < this.cols; c++) {
         const bits = this.dots[r * this.cols + c];
-        line += String.fromCodePoint(BRAILLE_BASE + bits);
+        if (bits === 0) {
+          line += emptyChar;
+        } else {
+          line += String.fromCodePoint(BRAILLE_BASE + bits);
+        }
       }
       lines.push(line);
     }
