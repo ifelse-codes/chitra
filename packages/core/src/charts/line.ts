@@ -1,7 +1,7 @@
 import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { colorize, padStart, stripAnsi } from "../ansi.js";
-import { minMax, formatNumber } from "../utils.js";
+import { minMax, formatNumber, niceTicks } from "../utils.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
 
 export function line(opts: LineChartOptions): ChartResult {
@@ -20,12 +20,20 @@ export function line(opts: LineChartOptions): ChartResult {
 
   const allValues = series.flat();
   const { min: dataMin, max: dataMax } = minMax(allValues);
-  const yMin = opts.yMin ?? dataMin;
-  const yMax = opts.yMax ?? dataMax;
-
-  const yAxisWidth = Math.max(formatNumber(yMax).length, formatNumber(yMin).length) + 1;
-  const plotCols = width - yAxisWidth - 2;
+  
+  // Apply nice ticks for cleaner Y-axis bounds
   const plotRows = height;
+  const yTicks = showAxes ? niceTicks(opts.yMin ?? dataMin, opts.yMax ?? dataMax, Math.max(2, Math.floor(plotRows / 3))) : null;
+  const yMin = yTicks ? yTicks.min : (opts.yMin ?? dataMin);
+  const yMax = yTicks ? yTicks.max : (opts.yMax ?? dataMax);
+  const tickLabels = yTicks ? yTicks.ticks : [];
+
+  const yAxisWidth = Math.max(
+    formatNumber(yMax).length,
+    formatNumber(yMin).length,
+    ...tickLabels.map(t => formatNumber(t).length)
+  ) + 1;
+  const plotCols = width - yAxisWidth - 2;
 
   const seriesLabels = opts.seriesLabels ?? series.map((_, i) => `Series ${i + 1}`);
 
@@ -41,37 +49,54 @@ export function line(opts: LineChartOptions): ChartResult {
       plotLineOnBrailleCanvas(canvases[si], s, yMin, yMax);
     });
 
-    const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
-
     for (let row = 0; row < plotRows; row++) {
-      const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
-      const yLabel =
-        row % yLabelStep === 0 || row === plotRows - 1
-          ? padStart(formatNumber(yVal), yAxisWidth)
-          : " ".repeat(yAxisWidth);
+      let isTick = false;
+      let yLabel = " ".repeat(yAxisWidth);
+      
+      if (showAxes && yTicks) {
+        const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
+        // Find if this row is close to a nice tick
+        const closestTick = tickLabels.find(t => {
+          const rowNorm = 1 - (row / (plotRows - 1));
+          const tNorm = (t - yMin) / (yMax - yMin);
+          return Math.abs(rowNorm - tNorm) < 0.5 / (plotRows - 1);
+        });
+        
+        if (closestTick !== undefined) {
+          yLabel = padStart(formatNumber(closestTick), yAxisWidth);
+          isTick = true;
+        }
+      } else if (!showAxes) {
+        yLabel = "";
+      }
 
-      const axisChar = showAxes ? colorize("│", theme.axis, noColor) : " ";
+      const axisChar = showAxes ? colorize(isTick ? "├" : "│", theme.axis, noColor) : " ";
       let rowStr = colorize(yLabel, theme.label, noColor) + axisChar;
 
       const rowChars = canvases.map((c) => c.toLines()[row] ?? "");
-
+      let mergedData = "";
+      
       if (series.length === 1) {
-        rowStr += colorize(rowChars[0], theme.colors[0], noColor);
+        mergedData = colorize(rowChars[0], theme.colors[0], noColor);
       } else {
-        const merged = mergeCanvasRows(rowChars, series.length, theme.colors, noColor);
-        rowStr += merged;
+        mergedData = mergeCanvasRows(rowChars, series.length, theme.colors, noColor);
       }
-
-      lines.push(rowStr);
+      
+      // Inject faint horizontal gridlines behind the braille
+      if (showAxes && isTick) {
+        mergedData = injectGridline(mergedData, plotCols, theme.axis, noColor);
+      }
+      
+      lines.push(rowStr + mergedData);
     }
 
     if (showAxes) {
       lines.push(
-        " ".repeat(yAxisWidth) + colorize("└" + "─".repeat(plotCols * 2), theme.axis, noColor)
+        " ".repeat(yAxisWidth) + colorize("└" + "─".repeat(plotCols), theme.axis, noColor)
       );
 
       if (opts.labels) {
-        const labelStr = buildXLabels(opts.labels, plotCols * 2);
+        const labelStr = buildXLabels(opts.labels, plotCols);
         lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
       }
     }
@@ -95,20 +120,29 @@ export function line(opts: LineChartOptions): ChartResult {
       lines.push(colorize(opts.title, theme.title, noColor));
     }
 
-    const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
-
     for (let row = 0; row < plotRows; row++) {
-      const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
-      const yLabel =
-        row % yLabelStep === 0 || row === plotRows - 1
-          ? padStart(formatNumber(yVal), yAxisWidth)
-          : " ".repeat(yAxisWidth);
+      let isTick = false;
+      let yLabel = " ".repeat(yAxisWidth);
+      
+      if (showAxes && yTicks) {
+        const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
+        const closestTick = tickLabels.find(t => {
+          const rowNorm = 1 - (row / (plotRows - 1));
+          const tNorm = (t - yMin) / (yMax - yMin);
+          return Math.abs(rowNorm - tNorm) < 0.5 / (plotRows - 1);
+        });
+        
+        if (closestTick !== undefined) {
+          yLabel = padStart(formatNumber(closestTick), yAxisWidth);
+          isTick = true;
+        }
+      }
 
-      const axisChar = showAxes ? colorize("│", theme.axis, noColor) : " ";
+      const axisChar = showAxes ? colorize(isTick ? "├" : "│", theme.axis, noColor) : " ";
       let rowStr = colorize(yLabel, theme.label, noColor) + axisChar;
 
       for (let col = 0; col < plotCols; col++) {
-        let ch = " ";
+        let ch = isTick && showAxes ? colorize("·", theme.axis, noColor) : " ";
         for (let si = series.length - 1; si >= 0; si--) {
           const s = series[si];
           const xIdx = Math.round((col / (plotCols - 1)) * (s.length - 1));
@@ -123,6 +157,16 @@ export function line(opts: LineChartOptions): ChartResult {
         rowStr += ch;
       }
       lines.push(rowStr);
+    }
+
+    if (showAxes) {
+      lines.push(
+        " ".repeat(yAxisWidth) + colorize("└" + "─".repeat(plotCols), theme.axis, noColor)
+      );
+      if (opts.labels) {
+        const labelStr = buildXLabels(opts.labels, plotCols);
+        lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
+      }
     }
 
     return lines;
@@ -150,6 +194,40 @@ export function line(opts: LineChartOptions): ChartResult {
       };
     },
   };
+}
+
+function injectGridline(rowStr: string, len: number, colorLabel: string, noColor: boolean): string {
+  const pure = stripAnsi(rowStr);
+  const out: string[] = [];
+  let inEscape = false;
+  let escapeSeq = "";
+  let visualIdx = 0;
+
+  for (let i = 0; i < rowStr.length; i++) {
+    const ch = rowStr[i];
+    if (ch === "\x1b") {
+      inEscape = true;
+      escapeSeq = ch;
+      continue;
+    }
+    if (inEscape) {
+      escapeSeq += ch;
+      if (ch === "m") {
+        inEscape = false;
+        out.push(escapeSeq);
+      }
+      continue;
+    }
+    
+    // Replace empty braille spaces with faint dots
+    if (ch === "\u2800" || ch === " ") {
+      out.push(colorize("·", colorLabel, noColor));
+    } else {
+      out.push(ch);
+    }
+    visualIdx++;
+  }
+  return out.join("");
 }
 
 function mergeCanvasRows(
