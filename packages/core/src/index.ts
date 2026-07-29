@@ -25,6 +25,8 @@ export {
 
 export { themes, resolveTheme } from "./themes/index.js";
 export { BrailleCanvas, plotLineOnBrailleCanvas, plotAreaOnBrailleCanvas } from "./renderers/braille.js";
+export { createLineChartModel, lineModelToSvg } from "./charts/line-model.js";
+export type { LineChartModel, LineSeriesModel } from "./charts/line-model.js";
 export { sparklineBlocks, buildHorizontalBlockBar, blockHeight } from "./renderers/blocks.js";
 export { sparklineAscii, buildAsciiHBar } from "./renderers/ascii.js";
 export { ansi, colorize, stripAnsi, hexToAnsi } from "./ansi.js";
