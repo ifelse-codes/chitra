@@ -192,4 +192,6 @@ export interface ChartResult {
   toMarkdown(): string;
   toJSON(): object;
   toPlain(): string;
+  /** Available for chart types with a browser-native renderer. */
+  toSVG?(): string;
 }

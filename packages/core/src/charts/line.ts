@@ -2,6 +2,7 @@ import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { colorize, padStart, stripAnsi } from "../ansi.js";
 import { minMax, formatNumber, niceTicks } from "../utils.js";
+import { createLineChartModel, lineModelToPlain, lineModelToSvg } from "./line-model.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
 
 export function line(opts: LineChartOptions): ChartResult {
@@ -231,6 +232,7 @@ export function line(opts: LineChartOptions): ChartResult {
   }
 
   const output = buildLines().join("\n");
+  const model = createLineChartModel(opts);
 
   return {
     render() { process.stdout.write(output + "\n"); },
@@ -244,8 +246,10 @@ export function line(opts: LineChartOptions): ChartResult {
         labels: opts.labels,
         title: opts.title,
         plain: stripAnsi(output),
+        model: lineModelToPlain(model),
       };
     },
+    toSVG() { return lineModelToSvg(model); },
   };
 }
 
