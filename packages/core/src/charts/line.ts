@@ -73,18 +73,16 @@ export function line(opts: LineChartOptions): ChartResult {
       const axisChar = showAxes ? colorize(isTick ? "├" : "│", theme.axis, noColor) : " ";
       let rowStr = colorize(yLabel, theme.label, noColor) + axisChar;
 
-      const rowChars = canvases.map((c) => c.toLines()[row] ?? "");
+      // Use a faint dot "·" for gridlines if this is a tick row, otherwise standard braille empty "\u2800"
+      const emptyChar = isTick ? colorize("·", theme.axis, noColor) : "\u2800";
+      
+      const rowChars = canvases.map((c) => c.toLines(emptyChar)[row] ?? "");
       let mergedData = "";
       
       if (series.length === 1) {
-        mergedData = colorize(rowChars[0], theme.colors[0], noColor);
+        mergedData = mergeCanvasRows([rowChars[0]], 1, theme.colors, noColor, emptyChar);
       } else {
-        mergedData = mergeCanvasRows(rowChars, series.length, theme.colors, noColor);
-      }
-      
-      // Inject faint horizontal gridlines behind the braille cleanly
-      if (showAxes && isTick) {
-        mergedData = injectGridline(mergedData, plotCols, theme.axis, noColor);
+        mergedData = mergeCanvasRows(rowChars, series.length, theme.colors, noColor, emptyChar);
       }
       
       lines.push(rowStr + mergedData);
@@ -197,43 +195,7 @@ export function line(opts: LineChartOptions): ChartResult {
 }
 
 function injectGridline(rowStr: string, len: number, colorLabel: string, noColor: boolean): string {
-  const out: string[] = [];
-  let inEscape = false;
-  let escapeSeq = "";
-  let visualCount = 0;
-
-  for (let i = 0; i < rowStr.length; i++) {
-    const ch = rowStr[i];
-    if (ch === "\x1b") {
-      inEscape = true;
-      escapeSeq = ch;
-      continue;
-    }
-    if (inEscape) {
-      escapeSeq += ch;
-      if (ch === "m") {
-        inEscape = false;
-        out.push(escapeSeq);
-      }
-      continue;
-    }
-    
-    // Only inject gridline if it's completely empty braille space, and use a dim, solid rule
-    if (ch === "\u2800" || ch === " ") {
-      out.push(colorize("┈", colorLabel, noColor));
-    } else {
-      out.push(ch);
-    }
-    visualCount++;
-  }
-  
-  // Pad if the braille canvas didn't reach the edge
-  while (visualCount < len) {
-    out.push(colorize("┈", colorLabel, noColor));
-    visualCount++;
-  }
-  
-  return out.join("");
+  return rowStr;
 }
 
 function mergeCanvasRows(
