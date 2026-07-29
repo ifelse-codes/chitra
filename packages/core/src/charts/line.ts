@@ -42,7 +42,7 @@ export function line(opts: LineChartOptions): ChartResult {
     const lines: string[] = [];
 
     if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
+      lines.push(" ".repeat(yAxisWidth + 1) + colorize(opts.title, theme.title, noColor));
     }
 
     const canvases = series.map(() => new BrailleCanvas(plotCols, plotRows));
@@ -126,7 +126,7 @@ export function line(opts: LineChartOptions): ChartResult {
     const lines: string[] = [];
 
     if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
+      lines.push(" ".repeat(yAxisWidth + 1) + colorize(opts.title, theme.title, noColor));
     }
 
     const gridLines = Array.from({ length: plotRows }, () =>
@@ -151,13 +151,18 @@ export function line(opts: LineChartOptions): ChartResult {
         
         let ch = renderer === "ascii" ? "o" : "●";
         
-        // Very basic slope check to choose character
-        if (col > 0 && renderer === "ascii") {
-            const prevExactX = ((col - 1) / (plotCols - 1)) * (s.length - 1);
-            const prevVal = s[Math.floor(prevExactX)];
-            if (val > prevVal) ch = "/";
-            else if (val < prevVal) ch = "\\";
-            else ch = "-";
+        // Enhance slope character logic to make 'o' appear on exact data points, 
+        // and lines only connect them.
+        if (renderer === "ascii") {
+            const isExactPoint = Math.abs(frac) < 0.1 || Math.abs(frac - 1) < 0.1;
+            if (!isExactPoint && col > 0) {
+              const prevExactX = ((col - 1) / (plotCols - 1)) * (s.length - 1);
+              const prevVal = s[Math.floor(prevExactX)];
+              // Only draw slope chars between actual points
+              if (val > prevVal + 1e-9) ch = "/";
+              else if (val < prevVal - 1e-9) ch = "\\";
+              else ch = "-";
+            }
         }
 
         if (yRow >= 0 && yRow < plotRows) {
@@ -189,7 +194,7 @@ export function line(opts: LineChartOptions): ChartResult {
       for (let col = 0; col < plotCols; col++) {
         let ch = gridLines[row][col];
         if (ch === " " && isTick && showAxes) {
-          ch = colorize("·", theme.axis, noColor);
+          ch = colorize("┈", theme.axis, noColor);
         }
         rowStr += ch;
       }
