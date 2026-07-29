@@ -60,31 +60,46 @@ export const SPECS: ChartSpec[] = [
     id: "line",
     name: "Line Chart",
     description:
-      "Continuous data over time, rendered with Unicode Braille for sub-character precision.",
+      "Continuous data over time, rendered with explicit ASCII line characters matching classical terminal monitoring.",
     code: `import { line } from "@chitra/core";
 
 line({
   data: [
-    10, 12, 11, 14, 18, 22, 21, 23, 27, 26,
-    30, 32, 29, 31, 35, 34, 38, 42, 40, 44,
-    46, 43, 47, 50, 49, 53, 56, 52, 55, 60
+    24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310,
+    24480, 24390, 24270, 24140, 24060, 24060, 23990, 23880, 23940, 23900,
+    24060, 24000, 24060, 24120, 24180, 24260, 24280, 24240, 24350, 24340,
+    24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860, 24860,
+    24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600
   ],
-  title: "Revenue Trend",
-  width: 52,
-  height: 10,
-  theme: "nord",
+  labels: ["7D Ago", "6D Ago", "5D Ago", "4D Ago", "3D Ago", "2D Ago", "1D Ago", "Now"],
+  title: "NIFTY 50 INDEX",
+  width: 72,
+  height: 18,
+  theme: "default",
+  renderer: "ascii", // Forces explicit line drawing (- / \\ o)
 }).render();`,
     ...single(() =>
       line({
         data: [
-          10, 12, 11, 14, 18, 22, 21, 23, 27, 26,
-          30, 32, 29, 31, 35, 34, 38, 42, 40, 44,
-          46, 43, 47, 50, 49, 53, 56, 52, 55, 60
+          24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310,
+          24480, 24390, 24270, 24140, 24060, 24060, 23990, 23880, 23940, 23900,
+          24060, 24000, 24060, 24120, 24180, 24260, 24280, 24240, 24350, 24340,
+          24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860, 24860,
+          24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600
         ],
-        title: "Revenue Trend",
-        width: 52,
-        height: 10,
-        theme: "nord",
+        labels: ["7D Ago", "6D Ago", "5D Ago", "4D Ago", "3D Ago", "2D Ago", "1D Ago", "Now"],
+        title: "NIFTY 50 INDEX",
+        width: 72,
+        height: 18,
+        theme: {
+            name: "nifty",
+            colors: ["#34d399"], // Bright explicit green
+            axis: "#475569", // Dim explicit slate
+            label: "#94a3b8",
+            title: "#34d399",
+            grid: "#334155"
+        },
+        renderer: "ascii",
       }),
     ),
   },
