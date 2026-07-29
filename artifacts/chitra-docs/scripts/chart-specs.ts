@@ -40,11 +40,17 @@ export interface ChartSpec {
   ansi: () => string;
   /** Plain, no-ANSI fallback → CHARTS[].preview in src/data/charts.ts. */
   plain: () => string;
+  /** Optional browser-native SVG output from the same core chart result. */
+  svg?: () => string;
 }
 
 /** Single-chart spec helper: both outputs from one ChartResult factory. */
-function single(make: () => ChartResult): Pick<ChartSpec, "ansi" | "plain"> {
-  return { ansi: () => make().toString(), plain: () => make().toPlain() };
+function single(make: () => ChartResult): Pick<ChartSpec, "ansi" | "plain" | "svg"> {
+  return {
+    ansi: () => make().toString(),
+    plain: () => make().toPlain(),
+    svg: () => make().toSVG?.() ?? "",
+  };
 }
 
 /** Composite spec helper: join several charts (e.g. stacked sparklines). */
