@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CHARTS } from "./data/charts";
 import { ansiToHtml } from "./ansi";
 import ansiCharts from "./data/ansi-charts.json";
+import svgCharts from "./data/svg-charts.json";
 
 const ANSI = ansiCharts as Record<string, string>;
 
@@ -154,6 +155,22 @@ function Terminal({ id, plain }: { id?: string; plain?: string }) {
   );
 }
 
+function SvgChart({ id }: { id: string }) {
+  const svg = (svgCharts as Record<string, string | undefined>)[id];
+  if (!svg) return null;
+  return (
+    <div className="svg-chart" aria-label={`${id} chart rendered as SVG`}>
+      <div className="svg-chart-bar">
+        <div className="dots">
+          <span className="dot r" /><span className="dot y" /><span className="dot g" />
+        </div>
+        <span className="terminal-title">chitra — web</span>
+      </div>
+      <div className="svg-chart-body" dangerouslySetInnerHTML={{ __html: svg }} />
+    </div>
+  );
+}
+
 function AccentChip({ accent }: { accent: string }) {
   return <span className={`accent-chip chip-${accent}`}>{accent}</span>;
 }
@@ -284,6 +301,7 @@ function ChartPage({ id }: { id: string }) {
       )}
 
       <h2>Preview</h2>
+      <SvgChart id={id} />
       <Terminal id={id} plain={chart.preview} />
 
       <h2>Code</h2>
