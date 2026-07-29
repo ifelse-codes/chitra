@@ -94,8 +94,19 @@ export function line(opts: LineChartOptions): ChartResult {
       );
 
       if (opts.labels) {
-        const labelStr = buildXLabels(opts.labels, plotCols);
-        lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
+        const n = opts.labels.length;
+        if (n > 0) {
+            const positions = opts.labels.map((_, i) => Math.round((i / (n - 1)) * (plotCols - 1)));
+            let tickRow = " ".repeat(plotCols).split("");
+            positions.forEach(p => { if (p < plotCols) tickRow[p] = "┼"; });
+            if (tickRow[0] === "┼") tickRow[0] = "┬";
+            
+            lines.pop();
+            lines.push(" ".repeat(yAxisWidth) + colorize("└" + tickRow.join("").replace(/ /g, "─"), theme.axis, noColor));
+            
+            const labelStr = buildXLabels(opts.labels, plotCols, positions);
+            lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
+        }
       }
     }
 
@@ -118,12 +129,48 @@ export function line(opts: LineChartOptions): ChartResult {
       lines.push(colorize(opts.title, theme.title, noColor));
     }
 
+    const gridLines = Array.from({ length: plotRows }, () =>
+      Array<string>(plotCols).fill(" ")
+    );
+
+    series.forEach((s, si) => {
+      const color = theme.colors[si % theme.colors.length];
+      for (let col = 0; col < plotCols; col++) {
+        // Find left and right data bounds for this column to interpolate
+        const exactX = (col / (plotCols - 1)) * (s.length - 1);
+        const idxL = Math.floor(exactX);
+        const idxR = Math.ceil(exactX);
+        const frac = exactX - idxL;
+        
+        const valL = s[idxL];
+        const valR = s[idxR] ?? valL;
+        const val = valL + frac * (valR - valL);
+
+        const yNorm = yMax === yMin ? 0.5 : (val - yMin) / (yMax - yMin);
+        const yRow = Math.round((1 - yNorm) * (plotRows - 1));
+        
+        let ch = renderer === "ascii" ? "o" : "●";
+        
+        // Very basic slope check to choose character
+        if (col > 0 && renderer === "ascii") {
+            const prevExactX = ((col - 1) / (plotCols - 1)) * (s.length - 1);
+            const prevVal = s[Math.floor(prevExactX)];
+            if (val > prevVal) ch = "/";
+            else if (val < prevVal) ch = "\\";
+            else ch = "-";
+        }
+
+        if (yRow >= 0 && yRow < plotRows) {
+          gridLines[yRow][col] = colorize(ch, color, noColor);
+        }
+      }
+    });
+
     for (let row = 0; row < plotRows; row++) {
       let isTick = false;
       let yLabel = " ".repeat(yAxisWidth);
       
       if (showAxes && yTicks) {
-        const yVal = yMax - (row / (plotRows - 1)) * (yMax - yMin);
         const closestTick = tickLabels.find(t => {
           const rowNorm = 1 - (row / (plotRows - 1));
           const tNorm = (t - yMin) / (yMax - yMin);
@@ -140,17 +187,9 @@ export function line(opts: LineChartOptions): ChartResult {
       let rowStr = colorize(yLabel, theme.label, noColor) + axisChar;
 
       for (let col = 0; col < plotCols; col++) {
-        let ch = isTick && showAxes ? colorize("·", theme.axis, noColor) : " ";
-        for (let si = series.length - 1; si >= 0; si--) {
-          const s = series[si];
-          const xIdx = Math.round((col / (plotCols - 1)) * (s.length - 1));
-          const yNorm = (yMax === yMin) ? 0.5 : (s[xIdx] - yMin) / (yMax - yMin);
-          const yRow = Math.round((1 - yNorm) * (plotRows - 1));
-          if (row === yRow) {
-            const color = theme.colors[si % theme.colors.length];
-            ch = colorize("●", color, noColor);
-            break;
-          }
+        let ch = gridLines[row][col];
+        if (ch === " " && isTick && showAxes) {
+          ch = colorize("·", theme.axis, noColor);
         }
         rowStr += ch;
       }
@@ -162,8 +201,19 @@ export function line(opts: LineChartOptions): ChartResult {
         " ".repeat(yAxisWidth) + colorize("└" + "─".repeat(plotCols), theme.axis, noColor)
       );
       if (opts.labels) {
-        const labelStr = buildXLabels(opts.labels, plotCols);
-        lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
+        const n = opts.labels.length;
+        if (n > 0) {
+            const positions = opts.labels.map((_, i) => Math.round((i / (n - 1)) * (plotCols - 1)));
+            let tickRow = " ".repeat(plotCols).split("");
+            positions.forEach(p => { if (p < plotCols) tickRow[p] = "┼"; });
+            if (tickRow[0] === "┼") tickRow[0] = "┬";
+            
+            lines.pop();
+            lines.push(" ".repeat(yAxisWidth) + colorize("└" + tickRow.join("").replace(/ /g, "─"), theme.axis, noColor));
+            
+            const labelStr = buildXLabels(opts.labels, plotCols, positions);
+            lines.push(" ".repeat(yAxisWidth + 1) + colorize(labelStr, theme.label, noColor));
+        }
       }
     }
 
