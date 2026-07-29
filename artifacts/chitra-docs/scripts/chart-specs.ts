@@ -93,11 +93,11 @@ line({
         height: 18,
         theme: {
             name: "nifty",
-            colors: ["#34d399"], // Bright explicit green
-            axis: "#475569", // Dim explicit slate
-            label: "#94a3b8",
-            title: "#34d399",
-            grid: "#334155"
+            colors: ["\x1b[38;2;52;211;153m"], // Bright explicit green
+            axis: "\x1b[38;2;71;85;105m", // Dim explicit slate
+            label: "\x1b[38;2;148;163;184m",
+            title: "\x1b[38;2;52;211;153m",
+            grid: "\x1b[38;2;51;65;85m"
         },
         renderer: "ascii",
       }),
