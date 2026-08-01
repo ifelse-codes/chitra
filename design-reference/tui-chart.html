@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stats — TUI line chart</title>
+<style>
+:root{
+  --bg:#07090a;
+  --fg:#d7e0d7;
+  --dimfg:#93a093;
+  --frame:#4ee06a;
+  --grid:#474d47;
+  --axis:#ccd6cc;
+  --cpu:#8ae234;
+  --mem:#e9b83c;
+  --nin:#34e2e2;
+  --nout:#f25fd0;
+  --mono:"SF Mono","Fira Code","Fira Mono",ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);}
+body{
+  font-family:var(--mono);
+  color:var(--fg);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding:18px 20px 34px;
+}
+.glow{text-shadow:0 0 8px rgba(78,224,106,.28)}
+
+/* ---------- prompt line ---------- */
+.prompt{white-space:nowrap;overflow-x:auto;font-size:1.05rem;letter-spacing:.01em;padding-bottom:2px}
+.prompt::-webkit-scrollbar{height:0}
+.p-user{color:#5cf07c;font-weight:600;text-shadow:0 0 8px rgba(92,240,124,.3)}
+.p-path{color:var(--nin)}
+.p-sym{color:#5cf07c}
+.p-cmd{color:#e6ede6}
+.caret{display:inline-block;width:1.1ch;height:2px;background:#5cf07c;vertical-align:bottom;margin:0 0 3px 2px;animation:blink 1.15s steps(1,end) infinite}
+@keyframes blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+.cursorrow{height:10px;margin:2px 0 6px 24px}
+.cursorrow i{display:block;width:38ch;max-width:22%;height:2px;background:#4ee06a;opacity:.85}
+
+/* ---------- panels ---------- */
+.panel{
+  position:relative;
+  border:1px dashed var(--frame);
+  border-radius:9px;
+  padding:14px 16px 12px;
+  margin-top:6px;
+}
+.panel + .panel{margin-top:16px}
+.panel-tag{
+  position:absolute;top:-.78em;left:16px;
+  background:var(--bg);padding:0 8px;
+  color:var(--frame);font-size:1rem;
+}
+
+.head{display:flex;justify-content:space-between;gap:16px;color:var(--frame);font-size:1.03rem}
+.head .stamp{color:var(--frame);opacity:.95;white-space:pre}
+.rule{border-top:1px dashed var(--frame);opacity:.75;margin:10px 0 8px}
+
+/* ---------- legend ---------- */
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 34px;margin:2px 0 4px}
+.lg{display:flex;align-items:center;gap:8px;font-size:1rem;cursor:pointer;user-select:none;white-space:nowrap}
+.lg.off{opacity:.3}
+.lg svg{display:block}
+
+/* ---------- chart ---------- */
+#chartWrap{width:100%;overflow-x:auto}
+#chartWrap::-webkit-scrollbar{height:6px}
+#chartWrap::-webkit-scrollbar-thumb{background:#2a332a;border-radius:3px}
+#chart{display:block;width:100%;min-width:640px;height:auto}
+
+/* ---------- summary ---------- */
+.cols{display:grid;grid-template-columns:repeat(4,1fr);margin-top:4px}
+.col{padding:2px 12px 2px 14px;border-left:1px dashed var(--frame);display:flex;gap:10px;align-items:center;justify-content:space-between}
+.col:first-child{border-left:0;padding-left:2px}
+.col h4{margin:0 0 4px;font-size:1rem;font-weight:600}
+.stats{font-size:.95rem;white-space:pre;color:#e6ede6}
+.stats .k{color:var(--dimfg)}
+.spark{flex:0 0 auto}
+
+/* ---------- status ---------- */
+.status{margin-top:14px;font-size:1.02rem}
+.status .k{color:#c9d3c9}
+.status .v{color:var(--frame)}
+
+/* ---------- toolbar + drawer ---------- */
+.toolbar{position:fixed;top:14px;right:16px;display:flex;gap:8px;z-index:20}
+button.tb{
+  font-family:var(--mono);font-size:.85rem;
+  background:rgba(7,9,10,.85);color:var(--frame);
+  border:1px dashed var(--frame);border-radius:6px;
+  padding:5px 11px;cursor:pointer;
+}
+button.tb:hover{background:#0f1a10}
+button.tb:focus-visible{outline:2px solid var(--nin);outline-offset:2px}
+
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);
+  background:#080b0c;border-left:1px dashed var(--frame);
+  padding:18px 18px 40px;overflow-y:auto;z-index:19;
+  transform:translateX(102%);transition:transform .22s ease;
+}
+.drawer.open{transform:none}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}.caret{animation:none}}
+.drawer h3{margin:0 0 14px;font-size:1rem;color:var(--frame);font-weight:600}
+.drawer h5{margin:18px 0 8px;font-size:.82rem;color:var(--dimfg);font-weight:400;letter-spacing:.08em}
+label.f{display:block;margin-bottom:9px;font-size:.8rem;color:var(--dimfg)}
+label.f input,label.f textarea,.row input{
+  display:block;width:100%;margin-top:3px;
+  font-family:var(--mono);font-size:.85rem;
+  background:#0d1211;color:#e6ede6;
+  border:1px solid #253026;border-radius:5px;padding:6px 8px;
+}
+label.f textarea{min-height:110px;resize:vertical}
+input:focus,textarea:focus{outline:1px solid var(--frame)}
+.grid2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.srow{display:grid;grid-template-columns:26px 1fr 46px 26px;gap:6px;align-items:center;margin-bottom:7px}
+.srow input[type=color]{padding:0;height:26px;border:1px solid #253026;background:#0d1211;border-radius:4px}
+.srow input[type=text]{font-size:.8rem;padding:4px 6px}
+.srow button{background:none;border:1px solid #2c3a2d;color:#8fa08f;border-radius:4px;cursor:pointer;font-family:var(--mono);height:26px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
+.chip{font-size:.78rem;padding:4px 9px;border:1px dashed #2f4030;border-radius:20px;color:var(--dimfg);cursor:pointer;user-select:none}
+.chip.on{color:var(--frame);border-color:var(--frame)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.acts button{font-family:var(--mono);font-size:.8rem;background:#0d1211;color:var(--frame);border:1px dashed var(--frame);border-radius:5px;padding:6px 10px;cursor:pointer}
+.hint{font-size:.74rem;color:#6d7a6d;line-height:1.5;margin-top:6px}
+
+@media (max-width:820px){
+  body{font-size:14px;padding:14px 12px 30px}
+  .cols{grid-template-columns:repeat(2,1fr);row-gap:12px}
+  .col:nth-child(3){border-left:0;padding-left:2px}
+  .head{flex-direction:column;gap:2px}
+}
+@media (max-width:520px){
+  .cols{grid-template-columns:1fr}
+  .col{border-left:0;padding-left:2px}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="tb" id="btnCfg">[ config ]</button>
+  <button class="tb" id="btnSvg">[ svg ]</button>
+  <button class="tb" id="btnPng">[ png ]</button>
+</div>
+
+<div class="prompt">
+  <span class="p-user" id="pUser">suman@sutra</span>
+  <span class="p-path">~</span>
+  <span class="p-sym">$</span>
+  <span class="p-cmd" id="pCmd">stats --last 24h --series cpu,mem,net --format line</span><span class="caret"></span>
+</div>
+<div class="cursorrow"><i></i></div>
+
+<section class="panel">
+  <div class="head">
+    <span class="glow" id="chTitle">SYSTEM METRICS (Last 24 Hours)</span>
+    <span class="stamp glow" id="chStamp">2025-07-29  10:42:17 IST</span>
+  </div>
+  <div class="rule"></div>
+  <div class="legend" id="legend"></div>
+  <div id="chartWrap"><svg id="chart" xmlns="http://www.w3.org/2000/svg"></svg></div>
+</section>
+
+<section class="panel">
+  <span class="panel-tag" id="sumTag">- SUMMARY (Last 24 Hours) -</span>
+  <div class="cols" id="cols"></div>
+</section>
+
+<div class="status">
+  <span class="k">Status:</span>
+  <span class="v glow" id="statusTxt">All systems operational ✓</span>
+</div>
+
+<aside class="drawer" id="drawer" aria-label="Chart settings">
+  <h3>chart config</h3>
+
+  <label class="f">Title<input id="fTitle"></label>
+  <label class="f">Timestamp<input id="fStamp"></label>
+  <label class="f">Summary box label<input id="fSumTag"></label>
+  <label class="f">Status line<input id="fStatus"></label>
+
+  <h5>AXES</h5>
+  <div class="grid2">
+    <label class="f">Y min<input id="fYmin" type="number"></label>
+    <label class="f">Y max<input id="fYmax" type="number"></label>
+    <label class="f">Y step<input id="fYstep" type="number"></label>
+  </div>
+  <label class="f">Y label<input id="fYlab"></label>
+  <label class="f">X label<input id="fXlab"></label>
+  <label class="f">X tick labels (comma separated)<input id="fXticks"></label>
+
+  <h5>SHOW / HIDE</h5>
+  <div class="chips" id="chips"></div>
+
+  <h5>SERIES</h5>
+  <div id="serRows"></div>
+  <div class="acts"><button id="btnAddSeries">+ series</button></div>
+
+  <h5>DATA</h5>
+  <label class="f">CSV — header row = series names, one column per series
+    <textarea id="fCsv" spellcheck="false"></textarea>
+  </label>
+  <div class="acts">
+    <button id="btnApply">apply csv</button>
+    <button id="btnPull">load current</button>
+    <button id="btnDemo">demo data</button>
+    <button id="btnRandom">random walk</button>
+  </div>
+  <p class="hint">First column may be time labels (non-numeric). Blank cells are allowed — the line just skips them.</p>
+</aside>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   1. STATE
+------------------------------------------------------------------ */
+const state = {
+  title:  "SYSTEM METRICS (Last 24 Hours)",
+  stamp:  "2025-07-29  10:42:17 IST",
+  sumTag: "- SUMMARY (Last 24 Hours) -",
+  status: "All systems operational ✓",
+  yLabel: "% / Mbps",
+  xLabel: "Time (IST)  \u2192",
+  yMin: 0, yMax: 100, yStep: 20,
+  xTicks: ["10:00","14:00","18:00","22:00","02:00","06:00","10:00"],
+  show: { grid:true, markers:true, legend:true, summary:true, sparks:true, axisTicks:true },
+  series: [
+    { name:"CPU (%)",       color:"#8ae234", glyph:"*", on:true, data:[] },
+    { name:"MEM (%)",       color:"#e9b83c", glyph:"o", on:true, data:[] },
+    { name:"NET IN (Mbps)", color:"#34e2e2", glyph:"+", on:true, data:[] },
+    { name:"NET OUT (Mbps)",color:"#f25fd0", glyph:"x", on:true, data:[] }
+  ]
+};
+
+/* ------------------------------------------------------------------
+   2. DEMO DATA — keyframes traced from the reference screenshot
+------------------------------------------------------------------ */
+const KEYFRAMES = {
+  cpu: [[0,29],[0.5,35],[1,35],[1.4,39],[1.8,47],[2.2,50],[2.6,55],[3.0,64],[3.3,65],[3.7,75],
+        [4.0,64],[4.4,60],[4.8,62],[5.2,61],[5.6,64],[6.0,62],[6.5,66],[7.0,71],[7.4,68],[7.8,65],
+        [8.2,61],[8.7,64],[9.0,64],[9.3,55],[9.6,46],[10.0,45],[10.4,48],[10.8,44],[11.2,47],[11.6,43],
+        [12.0,39],[12.4,44],[12.8,45],[13.2,43],[13.6,47],[14.0,42],[14.5,46],[15.0,48],[15.4,50],[15.8,52],
+        [16.2,55],[16.6,60],[17.0,64],[17.4,60],[17.8,63],[18.2,62],[18.6,60],[19.0,64],[19.4,68],[19.8,71],
+        [20.0,75],[20.4,70],[20.8,72],[21.2,75],[21.6,68],[22.0,65],[22.3,64],[22.6,60],[23.0,50],[23.2,45],
+        [23.4,44],[23.6,46],[23.8,39],[24,44]],
+  mem: [[0,50],[0.5,49],[1.0,47],[1.5,44],[1.8,42],[2.2,45],[2.6,45],[3.0,46],[3.4,46],[3.8,47],
+        [4.2,48],[4.6,49],[5.0,50],[5.4,51],[5.8,52],[6.2,52],[6.6,52],[7.0,53],[7.4,52],[7.8,54],
+        [8.2,53],[8.6,55],[9.0,58],[9.3,57],[9.7,55],[10.1,55],[10.5,55],[10.9,54],[11.3,53],[11.7,53],
+        [12.1,52],[12.5,51],[12.9,50],[13.3,49],[13.7,49],[14.1,50],[14.5,50],[14.9,51],[15.3,50],[15.7,51],
+        [16.1,52],[16.5,53],[16.9,54],[17.3,55],[17.7,56],[18.1,57],[18.5,56],[18.9,54],[19.3,57],[19.7,59],
+        [20.1,60],[20.5,60],[20.9,58],[21.3,60],[21.7,62],[22.0,63],[22.4,64],[22.8,62],[23.2,60],[23.6,58],
+        [24,55]],
+  nin: [[0,12],[0.4,15],[0.8,17],[1.2,17],[1.6,19],[2.0,24],[2.4,27],[2.8,31],[3.2,27],[3.6,28],
+        [4.0,24],[4.4,23],[4.8,24],[5.2,23],[5.6,22],[6.0,23],[6.4,25],[6.8,29],[7.2,27],[7.6,25],
+        [8.0,28],[8.4,26],[8.8,24],[9.2,30],[9.5,35],[9.9,27],[10.2,22],[10.6,20],[11.0,21],[11.4,19],
+        [11.8,20],[12.2,22],[12.6,20],[13.0,18],[13.4,16],[13.8,14],[14.2,13],[14.6,13],[15.0,15],[15.4,14],
+        [15.8,16],[16.2,17],[16.6,21],[17.0,22],[17.4,22],[17.8,24],[18.2,26],[18.6,30],[19.0,26],[19.4,25],
+        [19.8,28],[20.2,31],[20.6,35],[21.0,31],[21.4,30],[21.8,27],[22.2,24],[22.6,26],[23.0,28],[23.3,31],
+        [23.6,24],[23.8,20],[24,22]],
+  nout:[[0,8],[0.4,9],[0.8,10],[1.2,11],[1.6,13],[2.0,13],[2.4,15],[2.8,17],[3.2,14],[3.6,15],
+        [4.0,13],[4.4,14],[4.8,13],[5.2,13],[5.6,12],[6.0,14],[6.4,13],[6.8,15],[7.2,14],[7.6,13],
+        [8.0,19],[8.4,15],[8.8,12],[9.2,16],[9.5,21],[9.9,16],[10.2,13],[10.6,12],[11.0,13],[11.4,11],
+        [11.8,12],[12.2,13],[12.6,11],[13.0,10],[13.4,8],[13.8,7],[14.2,6],[14.6,7],[15.0,8],[15.4,8],
+        [15.8,9],[16.2,10],[16.6,12],[17.0,13],[17.4,13],[17.8,14],[18.2,15],[18.6,20],[19.0,16],[19.4,15],
+        [19.8,17],[20.2,18],[20.6,20],[21.0,19],[21.4,18],[21.8,16],[22.2,14],[22.6,15],[23.0,17],[23.3,20],
+        [23.6,14],[23.8,11],[24,13]]
+};
+
+function rng(seed){ let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+
+function fromKeyframes(kf, points, span, jitter, seed){
+  const r = rng(seed), out = [];
+  for (let i = 0; i < points; i++){
+    const h = i * span / (points - 1);
+    let k = 0;
+    while (k < kf.length - 2 && kf[k + 1][0] < h) k++;
+    const [h0, v0] = kf[k], [h1, v1] = kf[k + 1];
+    const t = h1 === h0 ? 0 : (h - h0) / (h1 - h0);
+    const v = v0 + (v1 - v0) * t + (r() - 0.5) * jitter;
+    out.push(Math.round(Math.max(0, v) * 10) / 10);
+  }
+  return out;
+}
+
+function loadDemo(){
+  const N = 73, seeds = [7, 23, 41, 59], keys = ["cpu","mem","nin","nout"];
+  state.series.forEach((s, i) => {
+    if (KEYFRAMES[keys[i]]) s.data = fromKeyframes(KEYFRAMES[keys[i]], N, 24, 2.2, seeds[i]);
+  });
+}
+
+function loadRandom(){
+  const N = 73;
+  state.series.forEach((s, i) => {
+    const r = rng(Date.now() + i * 977);
+    let v = state.yMin + (state.yMax - state.yMin) * (0.2 + 0.5 * r());
+    const out = [];
+    for (let k = 0; k < N; k++){
+      v += (r() - 0.5) * (state.yMax - state.yMin) * 0.09;
+      v = Math.min(state.yMax, Math.max(state.yMin, v));
+      out.push(Math.round(v * 10) / 10);
+    }
+    s.data = out;
+  });
+}
+
+/* ------------------------------------------------------------------
+   3. CHART RENDERER  (pure SVG, monospace glyph markers)
+------------------------------------------------------------------ */
+const NS = "http://www.w3.org/2000/svg";
+const FONT = getComputedStyle(document.documentElement).getPropertyValue("--mono").trim();
+
+function el(tag, attrs, text){
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+const VB = { w:1440, h:492, l:96, r:26, t:52, b:92 };
+
+function renderChart(){
+  const svg = document.getElementById("chart");
+  svg.setAttribute("viewBox", `0 0 ${VB.w} ${VB.h}`);
+  svg.setAttribute("font-family", FONT);
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const cs = getComputedStyle(document.documentElement);
+  const C = {
+    grid: cs.getPropertyValue("--grid").trim(),
+    axis: cs.getPropertyValue("--axis").trim(),
+    frame: cs.getPropertyValue("--frame").trim(),
+    fg: cs.getPropertyValue("--fg").trim(),
+    bg: cs.getPropertyValue("--bg").trim()
+  };
+
+  const x0 = VB.l, x1 = VB.w - VB.r, y0 = VB.h - VB.b, y1 = VB.t;
+  const { yMin, yMax, yStep } = state;
+  const N = Math.max(...state.series.map(s => s.data.length), 2);
+
+  const sy = v => y0 - (v - yMin) / (yMax - yMin) * (y0 - y1);
+  const sx = i => x0 + (N <= 1 ? 0 : i / (N - 1) * (x1 - x0));
+
+  // export background
+  svg.appendChild(el("rect", { x:0, y:0, width:VB.w, height:VB.h, fill:C.bg }));
+
+  // y-axis unit label
+  svg.appendChild(el("text", { x:32, y:30, fill:C.fg, "font-size":19 }, state.yLabel));
+
+  // horizontal gridlines + y tick labels
+  for (let v = yMin; v <= yMax + 1e-9; v += yStep){
+    const y = sy(v);
+    const isBase = Math.abs(v - yMin) < 1e-9;
+    if (state.show.grid || isBase){
+      svg.appendChild(el("line", {
+        x1:x0, x2:x1, y1:y, y2:y,
+        stroke: isBase ? C.axis : C.grid,
+        "stroke-width": isBase ? 1.3 : 1,
+        "stroke-dasharray": isBase ? "7 5" : "9 9"
+      }));
+    }
+    svg.appendChild(el("text", {
+      x:x0 - 16, y, fill:C.frame, "font-size":19,
+      "text-anchor":"end", "dominant-baseline":"middle"
+    }, String(Math.round(v * 100) / 100)));
+  }
+
+  // vertical axis
+  svg.appendChild(el("line", { x1:x0, x2:x0, y1:y1, y2:y0, stroke:C.axis, "stroke-width":1.3 }));
+  svg.appendChild(el("text", {
+    x:x0, y:y1, fill:C.axis, "font-size":19, "text-anchor":"middle", "dominant-baseline":"middle"
+  }, "+"));
+
+  // x ticks + labels
+  const ticks = state.xTicks.filter(Boolean);
+  ticks.forEach((lab, i) => {
+    const f = ticks.length <= 1 ? 0 : i / (ticks.length - 1);
+    const x = x0 + f * (x1 - x0);
+    if (state.show.axisTicks){
+      svg.appendChild(el("text", {
+        x, y:y0, fill:C.axis, "font-size":19, "text-anchor":"middle", "dominant-baseline":"middle"
+      }, "+"));
+    }
+    const anchor = i === 0 ? "start" : (i === ticks.length - 1 ? "end" : "middle");
+    svg.appendChild(el("text", { x, y:y0 + 34, fill:C.frame, "font-size":19, "text-anchor":anchor }, lab));
+  });
+
+  // x-axis caption
+  svg.appendChild(el("text", {
+    x:(x0 + x1) / 2, y:y0 + 70, fill:C.frame, "font-size":19, "text-anchor":"middle"
+  }, state.xLabel));
+
+  // series
+  state.series.forEach(s => {
+    if (!s.on || !s.data.length) return;
+
+    // split into runs so blank values break the line instead of faking it
+    let run = [];
+    const runs = [];
+    s.data.forEach((v, i) => {
+      if (v == null || Number.isNaN(v)) { if (run.length) runs.push(run); run = []; }
+      else run.push([sx(i), sy(v)]);
+    });
+    if (run.length) runs.push(run);
+
+    runs.forEach(pts => {
+      if (pts.length > 1){
+        svg.appendChild(el("polyline", {
+          points: pts.map(p => p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" "),
+          fill:"none", stroke:s.color, "stroke-width":1.7,
+          "stroke-linejoin":"round", "stroke-linecap":"round"
+        }));
+      }
+      if (state.show.markers){
+        pts.forEach(p => svg.appendChild(el("text", {
+          x:p[0].toFixed(2), y:p[1].toFixed(2), fill:s.color, "font-size":17,
+          "text-anchor":"middle", "dominant-baseline":"middle"
+        }, s.glyph)));
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------------
+   4. LEGEND / SUMMARY / TEXT
+------------------------------------------------------------------ */
+function legendMark(s){
+  return `<svg width="78" height="18" viewBox="0 0 78 18">
+    <line x1="2" y1="9" x2="30" y2="9" stroke="${s.color}" stroke-width="1.7"/>
+    <line x1="48" y1="9" x2="76" y2="9" stroke="${s.color}" stroke-width="1.7"/>
+    <text x="39" y="9" fill="${s.color}" font-size="15" font-family="${FONT}"
+          text-anchor="middle" dominant-baseline="middle">${esc(s.glyph)}</text>
+  </svg>`;
+}
+
+function renderLegend(){
+  const box = document.getElementById("legend");
+  box.style.display = state.show.legend ? "" : "none";
+  box.innerHTML = state.series.map((s, i) =>
+    `<span class="lg ${s.on ? "" : "off"}" data-i="${i}" title="click to toggle">
+       ${legendMark(s)}<span style="color:${s.color}">${esc(s.name)}</span>
+     </span>`).join("");
+  box.querySelectorAll(".lg").forEach(n => n.onclick = () => {
+    state.series[+n.dataset.i].on = !state.series[+n.dataset.i].on;
+    renderAll();
+  });
+}
+
+function stats(arr){
+  const v = arr.filter(x => x != null && !Number.isNaN(x));
+  if (!v.length) return null;
+  const sum = v.reduce((a, b) => a + b, 0);
+  return { min:Math.min(...v), max:Math.max(...v), avg:sum / v.length, last:v[v.length - 1] };
+}
+const f1 = n => n.toFixed(1);
+const pad = (s, n) => String(s).padStart(n, " ");
+
+function sparkline(arr, color){
+  const v = arr.filter(x => x != null && !Number.isNaN(x));
+  if (!v.length) return "";
+  const W = 156, H = 42, bars = Math.min(46, v.length), step = W / bars;
+  const lo = Math.min(...v), hi = Math.max(...v), rng = hi - lo || 1;
+  let out = "";
+  for (let i = 0; i < bars; i++){
+    const val = v[Math.floor(i * v.length / bars)];
+    const h = 5 + (val - lo) / rng * (H - 7);
+    out += `<rect x="${(i * step).toFixed(2)}" y="${(H - h).toFixed(2)}"
+            width="${Math.max(1.2, step - 1.4).toFixed(2)}" height="${h.toFixed(2)}" fill="${color}"/>`;
+  }
+  return `<svg class="spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${out}</svg>`;
+}
+
+function renderSummary(){
+  const wrap = document.getElementById("cols");
+  const panel = wrap.closest(".panel");
+  panel.style.display = state.show.summary ? "" : "none";
+  const cells = state.series.map(s => {
+    const st = stats(s.data);
+    const rows = st
+      ? [["Min", st.min], ["Max", st.max], ["Avg", st.avg], ["Last", st.last]]
+          .map(([k, v]) => `<span class="k">${pad(k, 4)} :</span> ${pad(f1(v), 6)}`).join("\n")
+      : `<span class="k">no data</span>`;
+    return `<div class="col">
+      <div>
+        <h4 style="color:${s.color}">${esc(s.name)}</h4>
+        <div class="stats">${rows}</div>
+      </div>
+      ${state.show.sparks ? sparkline(s.data, s.color) : ""}
+    </div>`;
+  }).join("");
+  wrap.style.gridTemplateColumns = `repeat(${Math.min(4, Math.max(1, state.series.length))},1fr)`;
+  wrap.innerHTML = cells;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c])); }
+
+function renderText(){
+  document.getElementById("chTitle").textContent = state.title;
+  document.getElementById("chStamp").textContent = state.stamp;
+  document.getElementById("sumTag").textContent = state.sumTag;
+  document.getElementById("statusTxt").textContent = state.status;
+}
+
+function renderAll(){ renderText(); renderLegend(); renderChart(); renderSummary(); }
+
+/* ------------------------------------------------------------------
+   5. CSV IN / OUT
+------------------------------------------------------------------ */
+function toCsv(){
+  const head = state.series.map(s => s.name).join(",");
+  const N = Math.max(...state.series.map(s => s.data.length), 0);
+  const lines = [head];
+  for (let i = 0; i < N; i++){
+    lines.push(state.series.map(s => (s.data[i] == null ? "" : s.data[i])).join(","));
+  }
+  return lines.join("\n");
+}
+
+function fromCsv(text){
+  const rows = text.trim().split(/\r?\n/).map(r => r.split(","));
+  if (rows.length < 2) return "Need a header row plus at least one data row.";
+  let head = rows[0].map(c => c.trim());
+  let body = rows.slice(1);
+
+  // drop a leading label column if it holds text
+  const firstIsLabels = body.some(r => r[0] !== "" && Number.isNaN(Number(r[0])));
+  if (firstIsLabels){ head = head.slice(1); body = body.map(r => r.slice(1)); }
+  if (!head.length) return "No series columns found.";
+
+  const palette = ["#8ae234","#e9b83c","#34e2e2","#f25fd0","#a68bff","#ff8b5e"];
+  const glyphs  = ["*","o","+","x","#","."];
+  state.series = head.map((name, c) => {
+    const old = state.series[c];
+    return {
+      name: name || `series ${c + 1}`,
+      color: old ? old.color : palette[c % palette.length],
+      glyph: old ? old.glyph : glyphs[c % glyphs.length],
+      on: true,
+      data: body.map(r => {
+        const raw = (r[c] ?? "").trim();
+        if (raw === "") return null;
+        const n = Number(raw);
+        return Number.isNaN(n) ? null : n;
+      })
+    };
+  });
+  return null;
+}
+
+/* ------------------------------------------------------------------
+   6. EXPORT
+------------------------------------------------------------------ */
+function svgString(){
+  const svg = document.getElementById("chart").cloneNode(true);
+  svg.setAttribute("xmlns", NS);
+  svg.setAttribute("width", VB.w);
+  svg.setAttribute("height", VB.h);
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
+}
+function download(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href:url, download:name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+document.getElementById("btnSvg").onclick = () =>
+  download(new Blob([svgString()], { type:"image/svg+xml" }), "chart.svg");
+
+document.getElementById("btnPng").onclick = () => {
+  const scale = 2;
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.createElement("canvas");
+    cv.width = VB.w * scale; cv.height = VB.h * scale;
+    const ctx = cv.getContext("2d");
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    cv.toBlob(b => download(b, "chart.png"), "image/png");
+  };
+  img.onerror = () => alert("PNG export failed in this browser — use [ svg ] instead.");
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString());
+};
+
+/* ------------------------------------------------------------------
+   7. CONFIG DRAWER
+------------------------------------------------------------------ */
+const drawer = document.getElementById("drawer");
+document.getElementById("btnCfg").onclick = () => {
+  drawer.classList.toggle("open");
+  if (drawer.classList.contains("open")) syncForm();
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") drawer.classList.remove("open"); });
+
+const F = id => document.getElementById(id);
+const bind = (id, key, num) => {
+  F(id).oninput = () => { state[key] = num ? Number(F(id).value) : F(id).value; renderAll(); };
+};
+bind("fTitle","title"); bind("fStamp","stamp"); bind("fSumTag","sumTag"); bind("fStatus","status");
+bind("fYlab","yLabel"); bind("fXlab","xLabel");
+bind("fYmin","yMin",1); bind("fYmax","yMax",1); bind("fYstep","yStep",1);
+F("fXticks").oninput = () => {
+  state.xTicks = F("fXticks").value.split(",").map(s => s.trim());
+  renderChart();
+};
+
+const CHIPS = [["grid","grid"],["markers","markers"],["legend","legend"],
+               ["summary","summary"],["sparks","sparklines"],["axisTicks","axis +"]];
+function renderChips(){
+  F("chips").innerHTML = CHIPS.map(([k, lab]) =>
+    `<span class="chip ${state.show[k] ? "on" : ""}" data-k="${k}">${lab}</span>`).join("");
+  F("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    state.show[c.dataset.k] = !state.show[c.dataset.k];
+    renderChips(); renderAll();
+  });
+}
+
+function renderSeriesRows(){
+  F("serRows").innerHTML = state.series.map((s, i) => `
+    <div class="srow">
+      <input type="color" value="${s.color}" data-i="${i}" data-f="color">
+      <input type="text" value="${esc(s.name)}" data-i="${i}" data-f="name">
+      <input type="text" value="${esc(s.glyph)}" maxlength="1" data-i="${i}" data-f="glyph">
+      <button data-del="${i}" title="remove">x</button>
+    </div>`).join("");
+  F("serRows").querySelectorAll("input").forEach(inp => inp.oninput = () => {
+    const s = state.series[+inp.dataset.i];
+    s[inp.dataset.f] = inp.dataset.f === "glyph" ? (inp.value || "*") : inp.value;
+    renderAll();
+  });
+  F("serRows").querySelectorAll("button").forEach(b => b.onclick = () => {
+    state.series.splice(+b.dataset.del, 1);
+    renderSeriesRows(); renderAll();
+  });
+}
+
+F("btnAddSeries").onclick = () => {
+  const N = Math.max(...state.series.map(s => s.data.length), 12);
+  state.series.push({ name:"NEW", color:"#a68bff", glyph:".", on:true, data:Array(N).fill(null) });
+  renderSeriesRows(); renderAll();
+};
+F("btnPull").onclick  = () => { F("fCsv").value = toCsv(); };
+F("btnApply").onclick = () => {
+  const err = fromCsv(F("fCsv").value);
+  if (err) return alert(err);
+  renderSeriesRows(); renderAll();
+};
+F("btnDemo").onclick   = () => { loadDemo();   renderSeriesRows(); renderAll(); };
+F("btnRandom").onclick = () => { loadRandom(); renderSeriesRows(); renderAll(); };
+
+function syncForm(){
+  F("fTitle").value = state.title;   F("fStamp").value = state.stamp;
+  F("fSumTag").value = state.sumTag; F("fStatus").value = state.status;
+  F("fYlab").value = state.yLabel;   F("fXlab").value = state.xLabel;
+  F("fYmin").value = state.yMin;     F("fYmax").value = state.yMax;
+  F("fYstep").value = state.yStep;   F("fXticks").value = state.xTicks.join(", ");
+  if (!F("fCsv").value) F("fCsv").value = toCsv();
+  renderChips(); renderSeriesRows();
+}
+
+/* ------------------------------------------------------------------
+   8. GO
+------------------------------------------------------------------ */
+loadDemo();
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mudra — charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   MUDRA DESIGN SYSTEM — token layer, lifted verbatim.
+   The only color in the system is violet. Everything else is grey.
+   If a second hue appears anywhere, it is a bug.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg:        #0A0A0C;
+  --bg-2:      #0D0D11;
+  --surface:   #121217;
+  --surface-2: #16161C;
+
+  --line:        rgba(255,255,255,0.075);
+  --line-strong: rgba(255,255,255,0.14);
+
+  --ink:   #ECECEF;
+  --ink-2: #A4A4AE;
+  --ink-3: #6A6A75;
+
+  --violet:      #8B7CF6;
+  --violet-soft: #B7AEFF;
+  --violet-dim:  rgba(139,124,246,0.12);
+  --violet-line: rgba(139,124,246,0.28);
+
+  --page-bg:        var(--bg);
+  --surface-card:   var(--surface);
+  --surface-muted:  var(--bg-2);
+  --surface-raised: var(--surface-2);
+
+  --text-heading: var(--ink);
+  --text-body:    var(--ink-2);
+  --text-muted:   var(--ink-3);
+  --text-accent:  var(--violet-soft);
+
+  --border-default: var(--line);
+  --border-strong:  var(--line-strong);
+  --border-accent:  var(--violet-line);
+
+  --mark:        var(--violet);
+  --fill-accent: var(--violet-dim);
+  --focus-ring:  var(--violet);
+}
+
+/* TYPOGRAPHY — Geist for prose, Geist Mono for every label, number,
+   tag, status and data point. Never a running paragraph in mono. */
+:root {
+  --sans: 'Geist Variable','Geist',Inter,system-ui,-apple-system,sans-serif;
+  --mono: 'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --font-display: var(--sans);
+  --font-body:    var(--sans);
+  --font-mono:    var(--mono);
+
+  --text-hero:    clamp(30px, 6vw,   62px);
+  --text-h2:      clamp(26px, 4.4vw, 40px);
+  --text-h3:      18px;
+  --text-lead:    clamp(15px, 2.1vw, 18px);
+  --text-body-sz: 14.5px;
+  --text-small:   13px;
+  --text-eyebrow: 11px;
+  --text-mono-sm: 11.5px;
+  --text-metric:  22px;
+
+  --weight-body:     400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  --track-hero:    -0.035em;
+  --track-h2:      -0.025em;
+  --track-h3:      -0.015em;
+  --track-body:    -0.01em;
+  --track-eyebrow:  0.22em;
+  --track-tag:      0.14em;
+
+  --leading-hero: 1.08;
+  --leading-h2:   1.12;
+  --leading-body: 1.6;
+  --leading-tight:1.4;
+
+  --measure-hero: 18ch;
+  --measure-body: 62ch;
+  --measure-lead: 60ch;
+}
+
+/* SPACING, RADIUS, LAYOUT & MOTION */
+:root {
+  --r: 6px; --r-0: 0px; --r-pill: 100px;
+
+  --maxw: 1080px; --pad-x: 28px; --pad-x-sm: 20px;
+
+  --section-y: 104px; --section-y-sm: 76px;
+  --head-gap: 48px; --eyebrow-gap: 14px;
+
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:34px;
+  --space-10:48px; --space-12:64px;
+
+  --gap-grid: 13px; --gap-hairline: 1px;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --dur-reveal: .7s; --dur-hover: .3s;
+  --reveal-rise: 18px;
+  --spin-slow: 240s; --spin-slower: 300s;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CHART EXTENSION — the only addition made to Mudra.
+   A line chart needs four separable series and the system allows
+   exactly one hue. Separation is therefore carried by TONE + DASH
+   + GLYPH, and violet is spent only on the active series.
+   --tone-2 is a new step interpolated between --ink and --ink-2.
+   It stays inside the greyscale ramp. It is not a second hue.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --tone-1: var(--ink);   /* #ECECEF */
+  --tone-2: #C6C6CE;      /* new ramp step */
+  --tone-3: var(--ink-2); /* #A4A4AE */
+  --tone-4: var(--ink-3); /* #6A6A75 */
+
+  --grid-line: rgba(255,255,255,0.055);
+}
+
+/* ═══════════ BASE ═══════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  font-size: var(--text-body-sz);
+  line-height: var(--leading-body);
+  letter-spacing: var(--track-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+.wrap {
+  position: relative; z-index: 1;
+  max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad-x);
+}
+
+.section { padding: var(--section-y) 0; border-top: 1px solid var(--border-default); }
+.section h2 {
+  font-size: var(--text-h2); font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-h2); line-height: var(--leading-h2);
+  margin: var(--eyebrow-gap) 0 0;
+}
+
+.hero { padding: 120px 0 72px; }
+.hero h1 {
+  font-size: var(--text-hero); font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-hero); line-height: var(--leading-hero);
+  margin: 22px 0 0; max-width: var(--measure-hero);
+}
+.hero h1 .em, .accent { color: var(--text-accent); }
+.hero p {
+  color: var(--text-body); max-width: var(--measure-lead);
+  margin: 20px 0 0; font-size: var(--text-lead);
+}
+
+/* Eyebrow — the system's signature type device */
+.eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-eyebrow);
+  font-weight: var(--weight-medium); letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase; color: var(--text-muted);
+}
+.eyebrow .dot { color: var(--mark); }
+
+/* Mandala watermark — the one flourish */
+.ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.ambient svg { position: absolute; color: var(--violet); }
+.mandala-a { width: 920px; height: 920px; top: -200px; right: -260px; opacity: .032; }
+.mandala-b { width: 680px; height: 680px; bottom: -220px; left: -220px; opacity: .022; }
+.spin     { animation: spin var(--spin-slow)   linear infinite; transform-origin: 50% 50%; }
+.spin-rev { animation: spin var(--spin-slower) linear infinite reverse; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Scroll reveal — one pattern, fade + 18px rise */
+.reveal {
+  opacity: 0; transform: translateY(var(--reveal-rise));
+  transition: opacity var(--dur-reveal) var(--ease), transform var(--dur-reveal) var(--ease);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ═══════════ MONO PRIMITIVES ═══════════ */
+.tag {
+  font-family: var(--font-mono); font-size: var(--text-mono-sm);
+  letter-spacing: var(--track-tag); text-transform: uppercase;
+  color: var(--text-muted); border: 1px solid var(--border-default);
+  border-radius: var(--r-pill); padding: 3px 11px; white-space: nowrap;
+}
+.tag .dot { color: var(--mark); }
+
+.cmd {
+  font-family: var(--font-mono); font-size: var(--text-mono-sm);
+  color: var(--text-muted); letter-spacing: 0;
+  display: flex; gap: 9px; align-items: baseline;
+  overflow-x: auto; white-space: nowrap;
+}
+.cmd::-webkit-scrollbar { height: 0; }
+.cmd .sig { color: var(--mark); }
+.cmd .arg { color: var(--ink-2); }
+
+/* ═══════════ CARD ═══════════ */
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r);
+  padding: var(--space-6);
+}
+.card-head {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: var(--space-6); flex-wrap: wrap;
+}
+.card-head h3 {
+  margin: var(--space-2) 0 0; font-size: var(--text-h3);
+  font-weight: var(--weight-semibold); letter-spacing: var(--track-h3);
+  line-height: var(--leading-tight);
+}
+.card-head .meta {
+  font-family: var(--font-mono); font-size: var(--text-mono-sm);
+  color: var(--text-muted); letter-spacing: 0;
+}
+.hairline { height: 1px; background: var(--border-default); margin: var(--space-5) 0; border: 0; }
+
+/* ═══════════ LEGEND ═══════════ */
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); }
+.lg {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-mono); font-size: var(--text-mono-sm);
+  letter-spacing: var(--track-tag); text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer; user-select: none;
+  background: none; border: 0; padding: 4px 2px; border-radius: var(--r);
+  transition: color var(--dur-hover) var(--ease), opacity var(--dur-hover) var(--ease);
+}
+.lg:hover, .lg.active { color: var(--text-accent); }
+.lg.off { opacity: .38; }
+.lg svg { display: block; overflow: visible; }
+
+/* ═══════════ PLOT ═══════════ */
+.plot { width: 100%; overflow-x: auto; }
+.plot::-webkit-scrollbar { height: 6px; }
+.plot::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: var(--r-pill); }
+#chart { display: block; width: 100%; min-width: 620px; height: auto; }
+
+/* ═══════════ METRIC CELLS ═══════════ */
+.cells {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-hairline); background: var(--border-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r); overflow: hidden;
+}
+.cell {
+  background: var(--surface-card); padding: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  transition: background var(--dur-hover) var(--ease);
+}
+.cell.active { background: var(--surface-raised); }
+.cell-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.cell .metric {
+  font-family: var(--font-mono); font-size: var(--text-metric);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  line-height: 1; color: var(--text-heading);
+}
+.cell.active .metric { color: var(--text-accent); }
+.cell .unit { font-size: 11px; color: var(--ink-3); margin-left: 5px; letter-spacing: 0; }
+.cell .rows {
+  font-family: var(--font-mono); font-size: var(--text-eyebrow);
+  letter-spacing: var(--track-tag); color: var(--text-muted);
+  display: flex; gap: var(--space-4); flex-wrap: wrap;
+}
+.cell .rows b { font-weight: var(--weight-medium); color: var(--ink-2); letter-spacing: 0; }
+.cell svg { display: block; }
+
+/* ═══════════ STATUS ═══════════ */
+.statusbar {
+  display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;
+  padding-top: var(--space-6); border-top: 1px solid var(--border-default);
+}
+.statusbar .txt {
+  font-family: var(--font-mono); font-size: var(--text-mono-sm);
+  color: var(--text-muted); letter-spacing: 0;
+}
+
+/* ═══════════ CONTROLS ═══════════ */
+.toolbar { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.btn {
+  font-family: var(--font-mono); font-size: var(--text-eyebrow);
+  letter-spacing: var(--track-tag); text-transform: uppercase;
+  color: var(--text-muted); background: transparent;
+  border: 1px solid var(--border-default); border-radius: var(--r);
+  padding: 7px 13px; cursor: pointer;
+  transition: color var(--dur-hover) var(--ease),
+              border-color var(--dur-hover) var(--ease),
+              background var(--dur-hover) var(--ease);
+}
+.btn:hover { color: var(--text-heading); border-color: var(--border-strong); background: var(--surface-raised); }
+.btn.on { color: var(--text-accent); border-color: var(--border-accent); background: var(--fill-accent); }
+
+/* ═══════════ DRAWER ═══════════ */
+.scrim {
+  position: fixed; inset: 0; background: rgba(10,10,12,.62); z-index: 18;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-hover) var(--ease);
+}
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0; height: 100%; width: min(430px, 94vw);
+  background: var(--surface-raised); border-left: 1px solid var(--border-default);
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  overflow-y: auto; z-index: 19;
+  transform: translateX(102%); transition: transform .34s var(--ease);
+}
+.drawer.open { transform: none; }
+.drawer h4 {
+  margin: 0; font-size: var(--text-h3);
+  font-weight: var(--weight-semibold); letter-spacing: var(--track-h3);
+}
+.grp { margin-top: var(--space-8); }
+.grp > .eyebrow { display: block; margin-bottom: var(--space-4); }
+label.f { display: block; margin-bottom: var(--space-3); }
+label.f > span {
+  font-family: var(--font-mono); font-size: var(--text-eyebrow);
+  letter-spacing: var(--track-tag); text-transform: uppercase; color: var(--text-muted);
+}
+input[type=text], input[type=number], textarea, select {
+  display: block; width: 100%; margin-top: 6px;
+  font-family: var(--font-mono); font-size: var(--text-small);
+  background: var(--bg-2); color: var(--ink);
+  border: 1px solid var(--border-default); border-radius: var(--r);
+  padding: 8px 10px; letter-spacing: 0;
+}
+textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
+input:hover, textarea:hover, select:hover { border-color: var(--border-strong); }
+.trio { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-2); }
+.srow {
+  display: grid; grid-template-columns: 1fr 76px 88px 34px;
+  gap: var(--space-2); align-items: end; margin-bottom: var(--space-3);
+}
+.srow select, .srow input { margin-top: 6px; padding: 7px 8px; font-size: var(--text-mono-sm); }
+.srow .x {
+  height: 34px; background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border-default); border-radius: var(--r);
+  font-family: var(--font-mono); cursor: pointer;
+}
+.srow .x:hover { color: var(--ink); border-color: var(--border-strong); }
+.hint { font-size: var(--text-small); color: var(--text-muted); line-height: 1.55; margin: var(--space-3) 0 0; }
+
+/* ═══════════ RESPONSIVE FLOOR ═══════════ */
+@media (max-width: 880px) { .cells { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) {
+  .wrap { padding: 0 var(--pad-x-sm); }
+  .section { padding: var(--section-y-sm) 0; }
+  .hero { padding: 72px 0 52px; }
+  .card { padding: var(--space-5); }
+  .cells { grid-template-columns: 1fr; }
+}
+
+/* ═══════════ REDUCED-MOTION KILL-SWITCH ═══════════ */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <svg class="mandala-a spin"     id="mandalaA" viewBox="0 0 400 400"></svg>
+  <svg class="mandala-b spin-rev" id="mandalaB" viewBox="0 0 400 400"></svg>
+</div>
+
+<header class="hero wrap">
+  <p class="eyebrow"><span class="dot">●</span> Mudra · charts</p>
+  <h1>Data in <span class="em">mono</span>.</h1>
+  <p>One hue, four tones, four glyphs. The accent is spent only on the series you are looking at.</p>
+</header>
+
+<section class="section">
+  <div class="wrap">
+
+    <div class="card reveal">
+      <div class="card-head">
+        <div>
+          <p class="eyebrow"><span class="dot">●</span> <span id="ebSeries"></span></p>
+          <h3 id="chTitle">System metrics</h3>
+        </div>
+        <div style="text-align:right">
+          <div class="meta" id="chStamp"></div>
+          <div class="toolbar" style="margin-top:10px;justify-content:flex-end">
+            <button class="btn" id="btnCfg">Config</button>
+            <button class="btn" id="btnSvg">SVG</button>
+            <button class="btn" id="btnPng">PNG</button>
+          </div>
+        </div>
+      </div>
+
+      <hr class="hairline">
+      <div class="legend" id="legend"></div>
+      <hr class="hairline">
+      <div class="plot"><svg id="chart" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    </div>
+
+    <div style="height:var(--space-8)"></div>
+
+    <p class="eyebrow reveal" style="margin-bottom:var(--space-4)"><span class="dot">●</span> Last 24 hours</p>
+    <div class="cells reveal" id="cells"></div>
+
+    <div style="height:var(--space-10)"></div>
+
+    <div class="statusbar reveal">
+      <span class="tag"><span class="dot">●</span> <span id="statusTag"></span></span>
+      <span class="txt" id="statusTxt"></span>
+      <span style="flex:1"></span>
+      <span class="cmd">
+        <span class="sig">$</span><span>stats</span>
+        <span class="arg">--last 24h --series cpu,mem,net --format line</span>
+      </span>
+    </div>
+
+  </div>
+</section>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drawer" aria-label="Chart settings">
+  <h4>Config</h4>
+
+  <div class="grp">
+    <span class="eyebrow"><span class="dot">●</span> Labels</span>
+    <label class="f"><span>Title</span><input type="text" id="fTitle"></label>
+    <label class="f"><span>Timestamp</span><input type="text" id="fStamp"></label>
+    <label class="f"><span>Status tag</span><input type="text" id="fStatusTag"></label>
+    <label class="f"><span>Status line</span><input type="text" id="fStatusTxt"></label>
+  </div>
+
+  <div class="grp">
+    <span class="eyebrow"><span class="dot">●</span> Axes</span>
+    <div class="trio">
+      <label class="f"><span>Y min</span><input type="number" id="fYmin"></label>
+      <label class="f"><span>Y max</span><input type="number" id="fYmax"></label>
+      <label class="f"><span>Y step</span><input type="number" id="fYstep"></label>
+    </div>
+    <label class="f"><span>Y unit</span><input type="text" id="fYlab"></label>
+    <label class="f"><span>X label</span><input type="text" id="fXlab"></label>
+    <label class="f"><span>X ticks — comma separated</span><input type="text" id="fXticks"></label>
+  </div>
+
+  <div class="grp">
+    <span class="eyebrow"><span class="dot">●</span> Display</span>
+    <div class="toolbar" id="chips"></div>
+  </div>
+
+  <div class="grp">
+    <span class="eyebrow"><span class="dot">●</span> Series</span>
+    <div class="srow" style="margin-bottom:6px">
+      <span class="eyebrow">Name</span><span class="eyebrow">Tone</span><span class="eyebrow">Line</span><span></span>
+    </div>
+    <div id="serRows"></div>
+    <div class="toolbar" style="margin-top:var(--space-3)">
+      <button class="btn" id="btnAddSeries">Add series</button>
+    </div>
+    <p class="hint">Mudra allows one hue, so tone, dash and glyph carry the difference. Violet is reserved for whichever series you hover.</p>
+  </div>
+
+  <div class="grp">
+    <span class="eyebrow"><span class="dot">●</span> Data</span>
+    <label class="f"><span>CSV — header row is series names</span><textarea id="fCsv" spellcheck="false"></textarea></label>
+    <div class="toolbar">
+      <button class="btn" id="btnApply">Apply CSV</button>
+      <button class="btn" id="btnPull">Load current</button>
+      <button class="btn" id="btnDemo">Demo data</button>
+      <button class="btn" id="btnRandom">Random walk</button>
+    </div>
+    <p class="hint">A first column of text labels becomes the x axis. Blank cells break the line instead of faking a value.</p>
+  </div>
+</aside>
+
+<script>
+"use strict";
+
+/* ═══════════ 1 · TOKENS READ BACK FROM CSS ═══════════ */
+const CSSVAR = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const TOKENS = () => ({
+  bg: CSSVAR("--bg"), surface: CSSVAR("--surface"),
+  line: CSSVAR("--line"), lineStrong: CSSVAR("--line-strong"),
+  grid: CSSVAR("--grid-line"),
+  ink: CSSVAR("--ink"), ink2: CSSVAR("--ink-2"), ink3: CSSVAR("--ink-3"),
+  violet: CSSVAR("--violet"), mono: CSSVAR("--mono")
+});
+const TONES  = ["--tone-1","--tone-2","--tone-3","--tone-4"];
+const DASHES = { solid:"", dashed:"7 5", dotted:"1.5 4", "dash-dot":"9 4 1.5 4" };
+
+/* ═══════════ 2 · STATE ═══════════ */
+const state = {
+  title: "System metrics",
+  stamp: "2026-07-29 10:42:17 IST",
+  statusTag: "Operational",
+  statusTxt: "all checks passing · 0 alerts firing",
+  yLabel: "% / Mbps",
+  xLabel: "Time · IST",
+  yMin: 0, yMax: 100, yStep: 20,
+  xTicks: ["10:00","14:00","18:00","22:00","02:00","06:00","10:00"],
+  show: { grid:true, markers:true, area:false, sparks:true },
+  active: -1,
+  series: [
+    { name:"CPU",     unit:"%",    tone:0, dash:"solid",    glyph:"*", on:true, data:[] },
+    { name:"MEM",     unit:"%",    tone:1, dash:"dashed",   glyph:"o", on:true, data:[] },
+    { name:"NET IN",  unit:"Mbps", tone:2, dash:"dotted",   glyph:"+", on:true, data:[] },
+    { name:"NET OUT", unit:"Mbps", tone:3, dash:"dash-dot", glyph:"x", on:true, data:[] }
+  ]
+};
+const toneOf = s => CSSVAR(TONES[Math.min(s.tone, TONES.length - 1)]);
+
+/* ═══════════ 3 · DEMO DATA ═══════════ */
+const KEYFRAMES = {
+  cpu: [[0,29],[0.5,35],[1,35],[1.4,39],[1.8,47],[2.2,50],[2.6,55],[3.0,64],[3.3,65],[3.7,75],
+        [4.0,64],[4.4,60],[4.8,62],[5.2,61],[5.6,64],[6.0,62],[6.5,66],[7.0,71],[7.4,68],[7.8,65],
+        [8.2,61],[8.7,64],[9.0,64],[9.3,55],[9.6,46],[10.0,45],[10.4,48],[10.8,44],[11.2,47],[11.6,43],
+        [12.0,39],[12.4,44],[12.8,45],[13.2,43],[13.6,47],[14.0,42],[14.5,46],[15.0,48],[15.4,50],[15.8,52],
+        [16.2,55],[16.6,60],[17.0,64],[17.4,60],[17.8,63],[18.2,62],[18.6,60],[19.0,64],[19.4,68],[19.8,71],
+        [20.0,75],[20.4,70],[20.8,72],[21.2,75],[21.6,68],[22.0,65],[22.3,64],[22.6,60],[23.0,50],[23.2,45],
+        [23.4,44],[23.6,46],[23.8,39],[24,44]],
+  mem: [[0,50],[0.5,49],[1.0,47],[1.5,44],[1.8,42],[2.2,45],[2.6,45],[3.0,46],[3.4,46],[3.8,47],
+        [4.2,48],[4.6,49],[5.0,50],[5.4,51],[5.8,52],[6.2,52],[6.6,52],[7.0,53],[7.4,52],[7.8,54],
+        [8.2,53],[8.6,55],[9.0,58],[9.3,57],[9.7,55],[10.1,55],[10.5,55],[10.9,54],[11.3,53],[11.7,53],
+        [12.1,52],[12.5,51],[12.9,50],[13.3,49],[13.7,49],[14.1,50],[14.5,50],[14.9,51],[15.3,50],[15.7,51],
+        [16.1,52],[16.5,53],[16.9,54],[17.3,55],[17.7,56],[18.1,57],[18.5,56],[18.9,54],[19.3,57],[19.7,59],
+        [20.1,60],[20.5,60],[20.9,58],[21.3,60],[21.7,62],[22.0,63],[22.4,64],[22.8,62],[23.2,60],[23.6,58],
+        [24,55]],
+  nin: [[0,12],[0.4,15],[0.8,17],[1.2,17],[1.6,19],[2.0,24],[2.4,27],[2.8,31],[3.2,27],[3.6,28],
+        [4.0,24],[4.4,23],[4.8,24],[5.2,23],[5.6,22],[6.0,23],[6.4,25],[6.8,29],[7.2,27],[7.6,25],
+        [8.0,28],[8.4,26],[8.8,24],[9.2,30],[9.5,35],[9.9,27],[10.2,22],[10.6,20],[11.0,21],[11.4,19],
+        [11.8,20],[12.2,22],[12.6,20],[13.0,18],[13.4,16],[13.8,14],[14.2,13],[14.6,13],[15.0,15],[15.4,14],
+        [15.8,16],[16.2,17],[16.6,21],[17.0,22],[17.4,22],[17.8,24],[18.2,26],[18.6,30],[19.0,26],[19.4,25],
+        [19.8,28],[20.2,31],[20.6,35],[21.0,31],[21.4,30],[21.8,27],[22.2,24],[22.6,26],[23.0,28],[23.3,31],
+        [23.6,24],[23.8,20],[24,22]],
+  nout:[[0,8],[0.4,9],[0.8,10],[1.2,11],[1.6,13],[2.0,13],[2.4,15],[2.8,17],[3.2,14],[3.6,15],
+        [4.0,13],[4.4,14],[4.8,13],[5.2,13],[5.6,12],[6.0,14],[6.4,13],[6.8,15],[7.2,14],[7.6,13],
+        [8.0,19],[8.4,15],[8.8,12],[9.2,16],[9.5,21],[9.9,16],[10.2,13],[10.6,12],[11.0,13],[11.4,11],
+        [11.8,12],[12.2,13],[12.6,11],[13.0,10],[13.4,8],[13.8,7],[14.2,6],[14.6,7],[15.0,8],[15.4,8],
+        [15.8,9],[16.2,10],[16.6,12],[17.0,13],[17.4,13],[17.8,14],[18.2,15],[18.6,20],[19.0,16],[19.4,15],
+        [19.8,17],[20.2,18],[20.6,20],[21.0,19],[21.4,18],[21.8,16],[22.2,14],[22.6,15],[23.0,17],[23.3,20],
+        [23.6,14],[23.8,11],[24,13]]
+};
+const rng = seed => { let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; };
+
+function fromKeyframes(kf, points, span, jitter, seed){
+  const r = rng(seed), out = [];
+  for (let i = 0; i < points; i++){
+    const h = i * span / (points - 1);
+    let k = 0;
+    while (k < kf.length - 2 && kf[k + 1][0] < h) k++;
+    const [h0, v0] = kf[k], [h1, v1] = kf[k + 1];
+    const t = h1 === h0 ? 0 : (h - h0) / (h1 - h0);
+    out.push(Math.round(Math.max(0, v0 + (v1 - v0) * t + (r() - 0.5) * jitter) * 10) / 10);
+  }
+  return out;
+}
+function loadDemo(){
+  const keys = ["cpu","mem","nin","nout"], seeds = [7,23,41,59];
+  state.series.forEach((s, i) => {
+    if (KEYFRAMES[keys[i]]) s.data = fromKeyframes(KEYFRAMES[keys[i]], 73, 24, 2.2, seeds[i]);
+  });
+}
+function loadRandom(){
+  state.series.forEach((s, i) => {
+    const r = rng(Date.now() + i * 977), span = state.yMax - state.yMin;
+    let v = state.yMin + span * (0.2 + 0.5 * r());
+    s.data = Array.from({ length: 73 }, () => {
+      v = Math.min(state.yMax, Math.max(state.yMin, v + (r() - 0.5) * span * 0.09));
+      return Math.round(v * 10) / 10;
+    });
+  });
+}
+
+/* ═══════════ 4 · MANDALA ═══════════ */
+function mandala(id, petals, rings){
+  const svg = document.getElementById(id), NSU = "http://www.w3.org/2000/svg";
+  const cx = 200, cy = 200, R = 190;
+  const add = (tag, at) => {
+    const n = document.createElementNS(NSU, tag);
+    for (const k in at) n.setAttribute(k, at[k]);
+    svg.appendChild(n);
+  };
+  for (let i = 0; i < rings; i++)
+    add("circle", { cx, cy, r: R * (0.16 + i * (0.84 / rings)),
+      fill:"none", stroke:"currentColor", "stroke-width":0.7 });
+  for (let p = 0; p < petals; p++){
+    const a  = p * 2 * Math.PI / petals;
+    const an = a + 2 * Math.PI / petals;
+    const b  = a + Math.PI / petals;
+    add("line", { x1:cx + Math.cos(a) * R * 0.16, y1:cy + Math.sin(a) * R * 0.16,
+      x2:cx + Math.cos(a) * R, y2:cy + Math.sin(a) * R,
+      stroke:"currentColor", "stroke-width":0.6 });
+    add("path", { d:`M ${cx + Math.cos(a) * R} ${cy + Math.sin(a) * R} ` +
+      `Q ${cx + Math.cos(b) * R * 1.16} ${cy + Math.sin(b) * R * 1.16} ` +
+      `${cx + Math.cos(an) * R} ${cy + Math.sin(an) * R}`,
+      fill:"none", stroke:"currentColor", "stroke-width":0.55 });
+  }
+  add("circle", { cx, cy, r: R * 0.05, fill:"none", stroke:"currentColor", "stroke-width":0.9 });
+}
+
+/* ═══════════ 5 · CHART ═══════════ */
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, at, txt) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in at) n.setAttribute(k, at[k]);
+  if (txt != null) n.textContent = txt;
+  return n;
+};
+const VB = { w: 1160, h: 430, l: 58, r: 18, t: 26, b: 62 };
+
+function renderChart(){
+  const svg = document.getElementById("chart"), T = TOKENS();
+  svg.setAttribute("viewBox", `0 0 ${VB.w} ${VB.h}`);
+  svg.setAttribute("font-family", T.mono);
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const x0 = VB.l, x1 = VB.w - VB.r, y0 = VB.h - VB.b, y1 = VB.t;
+  const { yMin, yMax, yStep } = state;
+  const N  = Math.max(...state.series.map(s => s.data.length), 2);
+  const sy = v => y0 - (v - yMin) / (yMax - yMin) * (y0 - y1);
+  const sx = i => x0 + (N <= 1 ? 0 : i / (N - 1) * (x1 - x0));
+
+  svg.appendChild(el("rect", { x:0, y:0, width:VB.w, height:VB.h, fill:T.surface }));
+  svg.appendChild(el("text", { x:x0, y:14, fill:T.ink3, "font-size":11, "letter-spacing":"1.6" },
+    state.yLabel.toUpperCase()));
+
+  const step = yStep > 0 ? yStep : (yMax - yMin) / 5;
+  for (let v = yMin; v <= yMax + 1e-9; v += step){
+    const y = sy(v), base = Math.abs(v - yMin) < 1e-9;
+    if (state.show.grid || base)
+      svg.appendChild(el("line", { x1:x0, x2:x1, y1:y, y2:y,
+        stroke: base ? T.lineStrong : T.grid, "stroke-width":1 }));
+    svg.appendChild(el("text", { x:x0 - 12, y, fill:T.ink3, "font-size":11,
+      "text-anchor":"end", "dominant-baseline":"middle" }, String(Math.round(v * 100) / 100)));
+  }
+
+  const ticks = state.xTicks.filter(Boolean);
+  ticks.forEach((lab, i) => {
+    const f = ticks.length <= 1 ? 0 : i / (ticks.length - 1);
+    const x = x0 + f * (x1 - x0);
+    svg.appendChild(el("line", { x1:x, x2:x, y1:y0, y2:y0 + 5, stroke:T.lineStrong, "stroke-width":1 }));
+    svg.appendChild(el("text", { x, y:y0 + 22, fill:T.ink3, "font-size":11,
+      "text-anchor": i === 0 ? "start" : (i === ticks.length - 1 ? "end" : "middle") }, lab));
+  });
+  svg.appendChild(el("text", { x:(x0 + x1) / 2, y:y0 + 46, fill:T.ink3,
+    "font-size":11, "letter-spacing":"1.6", "text-anchor":"middle" }, state.xLabel.toUpperCase()));
+
+  const anyActive = state.active >= 0;
+  state.series.forEach((s, idx) => {
+    if (!s.on || !s.data.length) return;
+    const isActive = idx === state.active;
+    const stroke   = isActive ? T.violet : toneOf(s);
+    const op       = anyActive && !isActive ? 0.3 : 1;
+    const w        = isActive ? 2.1 : 1.5;
+
+    let run = [], runs = [];
+    s.data.forEach((v, i) => {
+      if (v == null || Number.isNaN(v)) { if (run.length) runs.push(run); run = []; }
+      else run.push([sx(i), sy(v)]);
+    });
+    if (run.length) runs.push(run);
+
+    runs.forEach(pts => {
+      const path = pts.map(p => p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" ");
+      if (state.show.area && pts.length > 1)
+        svg.appendChild(el("polygon", {
+          points: `${pts[0][0].toFixed(2)},${y0} ${path} ${pts[pts.length - 1][0].toFixed(2)},${y0}`,
+          fill: stroke, opacity: (isActive ? 0.1 : 0.045) * op, stroke:"none" }));
+      if (pts.length > 1)
+        svg.appendChild(el("polyline", { points: path, fill:"none", stroke,
+          "stroke-width":w, opacity:op, "stroke-dasharray": DASHES[s.dash] || "",
+          "stroke-linejoin":"round", "stroke-linecap":"round" }));
+      if (state.show.markers)
+        pts.forEach(p => svg.appendChild(el("text", {
+          x:p[0].toFixed(2), y:p[1].toFixed(2), fill:stroke, opacity:op,
+          "font-size":11.5, "text-anchor":"middle", "dominant-baseline":"middle" }, s.glyph)));
+    });
+  });
+}
+
+/* ═══════════ 6 · LEGEND · CELLS · SPARKLINES ═══════════ */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const f1  = n => n.toFixed(1);
+
+function stats(arr){
+  const v = arr.filter(x => x != null && !Number.isNaN(x));
+  if (!v.length) return null;
+  return { min:Math.min(...v), max:Math.max(...v),
+           avg:v.reduce((a,b) => a + b, 0) / v.length, last:v[v.length - 1] };
+}
+
+function sampleSvg(s, active){
+  const T = TOKENS(), c = active ? T.violet : toneOf(s), d = DASHES[s.dash] || "";
+  return `<svg width="46" height="12" viewBox="0 0 46 12">
+    <line x1="1" y1="6" x2="16" y2="6" stroke="${c}" stroke-width="1.5" stroke-dasharray="${d}"/>
+    <line x1="30" y1="6" x2="45" y2="6" stroke="${c}" stroke-width="1.5" stroke-dasharray="${d}"/>
+    <text x="23" y="6" fill="${c}" font-size="11" font-family="${T.mono}"
+          text-anchor="middle" dominant-baseline="middle">${esc(s.glyph)}</text></svg>`;
+}
+
+function sparkline(s, active){
+  const T = TOKENS(), c = active ? T.violet : toneOf(s);
+  const v = s.data.filter(x => x != null && !Number.isNaN(x));
+  if (v.length < 2) return "";
+  const W = 92, H = 26, lo = Math.min(...v), hi = Math.max(...v), sp = hi - lo || 1;
+  const pts = v.map((val, i) =>
+    `${(i / (v.length - 1) * W).toFixed(1)},${(H - 2 - (val - lo) / sp * (H - 4)).toFixed(1)}`).join(" ");
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <polyline points="${pts}" fill="none" stroke="${c}" stroke-width="1.2"
+      stroke-linejoin="round" stroke-linecap="round" opacity="${active ? 1 : 0.75}"/></svg>`;
+}
+
+function setActive(i){ state.active = i; renderChart(); renderLegend(); renderCells(); }
+
+function renderLegend(){
+  const box = document.getElementById("legend");
+  box.innerHTML = state.series.map((s, i) => {
+    const active = i === state.active;
+    return `<button class="lg ${s.on ? "" : "off"} ${active ? "active" : ""}" data-i="${i}"
+      title="click to hide or show">${sampleSvg(s, active)}<span>${esc(s.name)}</span></button>`;
+  }).join("");
+  box.querySelectorAll(".lg").forEach(n => {
+    const i = +n.dataset.i;
+    n.onclick      = () => { state.series[i].on = !state.series[i].on; renderAll(); };
+    n.onmouseenter = () => setActive(i);
+    n.onmouseleave = () => setActive(-1);
+    n.onfocus      = () => setActive(i);
+    n.onblur       = () => setActive(-1);
+  });
+  document.getElementById("ebSeries").textContent =
+    `${state.series.filter(s => s.on).length} series · ${Math.max(...state.series.map(s => s.data.length), 0)} points`;
+}
+
+function renderCells(){
+  const wrap = document.getElementById("cells");
+  wrap.style.gridTemplateColumns = `repeat(${Math.min(4, Math.max(1, state.series.length))},1fr)`;
+  wrap.innerHTML = state.series.map((s, i) => {
+    const st = stats(s.data), active = i === state.active;
+    return `<div class="cell ${active ? "active" : ""}" data-i="${i}">
+      <div class="cell-top">
+        <span class="eyebrow">${active ? '<span class="dot">●</span> ' : ""}${esc(s.name)}</span>
+        ${state.show.sparks ? sparkline(s, active) : ""}
+      </div>
+      <div class="metric">${st ? f1(st.last) : "—"}<span class="unit">${esc(s.unit || "")}</span></div>
+      <div class="rows">${st
+        ? `<span>MIN <b>${f1(st.min)}</b></span><span>MAX <b>${f1(st.max)}</b></span><span>AVG <b>${f1(st.avg)}</b></span>`
+        : "<span>no data</span>"}</div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".cell").forEach(n => {
+    const i = +n.dataset.i;
+    n.onmouseenter = () => setActive(i);
+    n.onmouseleave = () => setActive(-1);
+  });
+}
+
+function renderText(){
+  document.getElementById("chTitle").textContent   = state.title;
+  document.getElementById("chStamp").textContent   = state.stamp;
+  document.getElementById("statusTag").textContent = state.statusTag;
+  document.getElementById("statusTxt").textContent = state.statusTxt;
+}
+function renderAll(){ renderText(); renderLegend(); renderChart(); renderCells(); }
+
+/* ═══════════ 7 · CSV ═══════════ */
+function toCsv(){
+  const N = Math.max(...state.series.map(s => s.data.length), 0);
+  const lines = [state.series.map(s => s.name).join(",")];
+  for (let i = 0; i < N; i++)
+    lines.push(state.series.map(s => s.data[i] == null ? "" : s.data[i]).join(","));
+  return lines.join("\n");
+}
+function fromCsv(text){
+  const rows = text.trim().split(/\r?\n/).map(r => r.split(","));
+  if (rows.length < 2) return "Add a header row and at least one row of numbers.";
+  let head = rows[0].map(c => c.trim()), body = rows.slice(1);
+
+  const labelCol = body.some(r => r[0] !== "" && Number.isNaN(Number(r[0])));
+  if (labelCol){
+    const labels = body.map(r => (r[0] || "").trim());
+    const every = Math.max(1, Math.floor(labels.length / 6));
+    state.xTicks = labels.filter((_, i) => i % every === 0 || i === labels.length - 1);
+    head = head.slice(1); body = body.map(r => r.slice(1));
+  }
+  if (!head.length) return "No series columns found.";
+
+  const glyphs = ["*","o","+","x","#","."], dashes = Object.keys(DASHES);
+  state.series = head.map((name, c) => {
+    const old = state.series[c];
+    return {
+      name:  name || `SERIES ${c + 1}`,
+      unit:  old ? old.unit : "",
+      tone:  old ? old.tone : c % TONES.length,
+      dash:  old ? old.dash : dashes[c % dashes.length],
+      glyph: old ? old.glyph : glyphs[c % glyphs.length],
+      on: true,
+      data: body.map(r => {
+        const raw = (r[c] ?? "").trim();
+        if (raw === "") return null;
+        const n = Number(raw);
+        return Number.isNaN(n) ? null : n;
+      })
+    };
+  });
+  return null;
+}
+
+/* ═══════════ 8 · EXPORT ═══════════ */
+function svgString(){
+  const svg = document.getElementById("chart").cloneNode(true);
+  svg.setAttribute("xmlns", NS);
+  svg.setAttribute("width", VB.w);
+  svg.setAttribute("height", VB.h);
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
+}
+function download(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href:url, download:name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+document.getElementById("btnSvg").onclick = () =>
+  download(new Blob([svgString()], { type:"image/svg+xml" }), "mudra-chart.svg");
+document.getElementById("btnPng").onclick = () => {
+  const img = new Image(), scale = 2;
+  img.onload = () => {
+    const cv = document.createElement("canvas");
+    cv.width = VB.w * scale; cv.height = VB.h * scale;
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    cv.toBlob(b => download(b, "mudra-chart.png"), "image/png");
+  };
+  img.onerror = () => alert("PNG export is blocked in this browser. Use SVG instead.");
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString());
+};
+
+/* ═══════════ 9 · CONFIG DRAWER ═══════════ */
+const F = id => document.getElementById(id);
+const drawer = F("drawer"), scrim = F("scrim");
+const closeDrawer = () => {
+  drawer.classList.remove("open"); scrim.classList.remove("on"); F("btnCfg").classList.remove("on");
+};
+F("btnCfg").onclick = () => {
+  const open = !drawer.classList.contains("open");
+  drawer.classList.toggle("open", open);
+  scrim.classList.toggle("on", open);
+  F("btnCfg").classList.toggle("on", open);
+  if (open) syncForm();
+};
+scrim.onclick = closeDrawer;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+const bind = (id, key, num) => F(id).oninput = () => {
+  state[key] = num ? Number(F(id).value) : F(id).value; renderAll();
+};
+bind("fTitle","title"); bind("fStamp","stamp");
+bind("fStatusTag","statusTag"); bind("fStatusTxt","statusTxt");
+bind("fYlab","yLabel"); bind("fXlab","xLabel");
+bind("fYmin","yMin",1); bind("fYmax","yMax",1); bind("fYstep","yStep",1);
+F("fXticks").oninput = () => {
+  state.xTicks = F("fXticks").value.split(",").map(s => s.trim()); renderChart();
+};
+
+const CHIPS = [["grid","Grid"],["markers","Glyphs"],["area","Area fill"],["sparks","Sparklines"]];
+function renderChips(){
+  F("chips").innerHTML = CHIPS.map(([k, lab]) =>
+    `<button class="btn ${state.show[k] ? "on" : ""}" data-k="${k}">${lab}</button>`).join("");
+  F("chips").querySelectorAll("button").forEach(b => b.onclick = () => {
+    state.show[b.dataset.k] = !state.show[b.dataset.k]; renderChips(); renderAll();
+  });
+}
+
+function renderSeriesRows(){
+  F("serRows").innerHTML = state.series.map((s, i) => `
+    <div class="srow">
+      <input type="text" value="${esc(s.name)}" data-i="${i}" data-f="name">
+      <select data-i="${i}" data-f="tone">${
+        TONES.map((_, k) => `<option value="${k}" ${k === s.tone ? "selected" : ""}>Tone ${k + 1}</option>`).join("")
+      }</select>
+      <select data-i="${i}" data-f="dash">${
+        Object.keys(DASHES).map(d => `<option value="${d}" ${d === s.dash ? "selected" : ""}>${d}</option>`).join("")
+      }</select>
+      <button class="x" data-del="${i}" title="remove series">×</button>
+    </div>`).join("");
+  F("serRows").querySelectorAll("input,select").forEach(inp => {
+    const ev = inp.tagName === "SELECT" ? "onchange" : "oninput";
+    inp[ev] = () => {
+      const s = state.series[+inp.dataset.i], f = inp.dataset.f;
+      s[f] = f === "tone" ? Number(inp.value) : inp.value;
+      renderAll();
+    };
+  });
+  F("serRows").querySelectorAll(".x").forEach(b => b.onclick = () => {
+    state.series.splice(+b.dataset.del, 1); renderSeriesRows(); renderAll();
+  });
+}
+
+F("btnAddSeries").onclick = () => {
+  const N = Math.max(...state.series.map(s => s.data.length), 12);
+  state.series.push({ name:"NEW", unit:"", tone:3, dash:"solid", glyph:".", on:true, data:Array(N).fill(null) });
+  renderSeriesRows(); renderAll();
+};
+F("btnPull").onclick   = () => { F("fCsv").value = toCsv(); };
+F("btnApply").onclick  = () => {
+  const err = fromCsv(F("fCsv").value);
+  if (err) return alert(err);
+  syncForm(); renderAll();
+};
+F("btnDemo").onclick   = () => { loadDemo();   renderSeriesRows(); renderAll(); };
+F("btnRandom").onclick = () => { loadRandom(); renderSeriesRows(); renderAll(); };
+
+function syncForm(){
+  F("fTitle").value = state.title;         F("fStamp").value = state.stamp;
+  F("fStatusTag").value = state.statusTag; F("fStatusTxt").value = state.statusTxt;
+  F("fYlab").value = state.yLabel;         F("fXlab").value = state.xLabel;
+  F("fYmin").value = state.yMin;           F("fYmax").value = state.yMax;
+  F("fYstep").value = state.yStep;         F("fXticks").value = state.xTicks.join(", ");
+  if (!F("fCsv").value) F("fCsv").value = toCsv();
+  renderChips(); renderSeriesRows();
+}
+
+/* ═══════════ 10 · BOOT ═══════════ */
+mandala("mandalaA", 24, 6);
+mandala("mandalaB", 16, 5);
+loadDemo();
+renderAll();
+
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.08 });
+document.querySelectorAll(".reveal").forEach((n, i) => {
+  n.style.transitionDelay = (i * 70) + "ms";
+  io.observe(n);
+});
+</script>
+</body>
+</html>

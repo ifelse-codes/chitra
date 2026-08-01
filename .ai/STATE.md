@@ -26,6 +26,9 @@ Next session branches from `main`.
   (`core.hooksPath .githooks`), `.ai/hooks/*` committed.
 
 ## What Is Broken / Incomplete
+- Chart visuals are **not yet at the design-reference quality** (founder feedback at
+  S08 closeout). `design-reference/` (tui-chart · mudra-chart · mudra-dashboard) is the
+  target design language to learn and build toward.
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
 - **S05 ground-truth remediation debt (still open):** S04 verify/demo/summary backfill
   and a closeout-integrity gate remain; `.ai/KNOWLEDGE.md` "NOT a git repo" falsehood
@@ -40,9 +43,9 @@ Next session branches from `main`.
   upgrades (this session).
 
 ## What Is In Progress
-- None — S08 landed on `main`. **Next: S09** — candidates: flesh out
-  `artifacts/api-server` beyond `/healthz` · the remaining S05 GT remediation ·
-  exercise a real `v0.1.0` release. See [[roadmap]].
+- None — S08 landed on `main` (PR #5 merged). **Next session (founder direction):**
+  analyze `design-reference/` and rebuild the chart look to match it (charts "not
+  looking that great"). See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood
