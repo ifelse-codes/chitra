@@ -1,9 +1,16 @@
 import type { DonutChartOptions, ChartResult } from "../types.js";
-import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
+import { resolveTheme, GREY_TONES } from "../themes/index.js";
+import { colorize, stripAnsi, visibleLength } from "../ansi.js";
 import { formatNumber } from "../utils.js";
+import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
-const DONUT_CHARS = ["█", "▓", "▒", "░", "▪", "▫", "◼", "◻"];
+const SLICE_CHARS = ["█", "▓", "▒", "░"];
+const GLYPHS = ["*", "o", "+", "x"];
+
+function padV(str: string, width: number): string {
+  const len = visibleLength(str);
+  return len >= width ? str : str + " ".repeat(width - len);
+}
 
 export function donut(opts: DonutChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
@@ -11,17 +18,17 @@ export function donut(opts: DonutChartOptions): ChartResult {
   const data = opts.data;
   const labels = opts.labels ?? data.map((_, i) => `Item ${i + 1}`);
   const total = data.reduce((a, b) => a + b, 0);
-  const radius = opts.radius ?? 8;
-  const innerRadius = opts.innerRadius ?? Math.floor(radius * 0.5);
+  const radius = opts.radius ?? 6;
+  const innerRadius = opts.innerRadius ?? Math.max(2, Math.floor(radius * 0.5));
 
-  function buildLines(): string[] {
-    const lines: string[] = [];
+  const accent = theme.accent ?? theme.colors[0] ?? GREY_TONES[0]!;
+  const tones = theme.tones ?? GREY_TONES;
 
-    if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
-      lines.push("");
-    }
+  // slice color: the primary (first) slice gets the accent hue; the rest get
+  // the greyscale tone ramp (mudra "one hue + tone ramp" separation).
+  const colorAt = (i: number) => (i === 0 ? accent : tones[(i - 1) % tones.length]);
 
+  function renderRing(): string[] {
     const cx = radius * 2;
     const cy = radius;
     const rows = radius * 2 + 1;
@@ -36,6 +43,7 @@ export function donut(opts: DonutChartOptions): ChartResult {
 
     const centerText = formatNumber(total);
     const centerRow = Math.floor(rows / 2);
+    const out: string[] = [];
 
     for (let row = 0; row < rows; row++) {
       let rowStr = "";
@@ -46,21 +54,19 @@ export function donut(opts: DonutChartOptions): ChartResult {
 
         if (dist >= innerRadius && dist <= radius) {
           const angle = (Math.atan2(dy, dx) + Math.PI * 2) % (Math.PI * 2);
-          let seriesIdx = data.length - 1;
+          let idx = data.length - 1;
           for (let i = 0; i < cumulative.length; i++) {
             if (angle < cumulative[i]) {
-              seriesIdx = i;
+              idx = i;
               break;
             }
           }
-          const color = theme.colors[seriesIdx % theme.colors.length];
-          const ch = DONUT_CHARS[seriesIdx % DONUT_CHARS.length];
-          rowStr += colorize(ch, color, noColor);
+          rowStr += colorize(SLICE_CHARS[idx % SLICE_CHARS.length], colorAt(idx), noColor);
         } else if (dist < innerRadius) {
           if (row === centerRow) {
             const offset = col - cx + Math.floor(centerText.length / 2);
             if (offset >= 0 && offset < centerText.length) {
-              rowStr += colorize(centerText[offset], theme.label, noColor);
+              rowStr += colorize(centerText[offset]!, theme.label, noColor);
             } else {
               rowStr += " ";
             }
@@ -71,19 +77,67 @@ export function donut(opts: DonutChartOptions): ChartResult {
           rowStr += " ";
         }
       }
-      lines.push(rowStr);
+      out.push(rowStr);
+    }
+    return out;
+  }
+
+  function buildLines(): string[] {
+    const ring = renderRing();
+    const ringCols = radius * 4 + 1;
+    const eyebrow = (opts.eyebrow ?? "DISTRIBUTION").toUpperCase();
+    const width = opts.width ?? Math.max(ringCols + 8, 48);
+    const inner = width - 4;
+
+    const lines: string[] = [];
+    lines.push(frameTop(width, opts.title ?? "DONUT", opts.timestamp, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
+    lines.push(frameRow(width, "", theme.axis, noColor));
+
+    const padLeft = Math.max(0, Math.floor((inner - ringCols) / 2));
+    for (const r of ring) lines.push(frameRow(width, " ".repeat(padLeft) + r, theme.axis, noColor));
+
+    lines.push(frameRow(width, "", theme.axis, noColor));
+    lines.push(frameRow(width, glyphLegend(inner), theme.axis, noColor));
+
+    if (opts.summary !== false) {
+      lines.push(frameRule(width, theme.axis, noColor));
+      for (const row of metricCells(inner)) lines.push(frameRow(width, row, theme.axis, noColor));
     }
 
-    lines.push("");
-    data.forEach((v, i) => {
-      const pct = ((v / total) * 100).toFixed(1);
-      const color = theme.colors[i % theme.colors.length];
-      const label = labels[i];
-      const ch = DONUT_CHARS[i % DONUT_CHARS.length];
-      lines.push(colorize(`${ch} ${label}: ${formatNumber(v)} (${pct}%)`, color, noColor));
-    });
-
+    if (opts.status) {
+      lines.push(frameRule(width, theme.axis, noColor));
+      lines.push(frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor));
+    }
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
+  }
+
+  function glyphLegend(inner: number): string {
+    const items = labels.map((label, i) => {
+      const glyph = colorize(GLYPHS[i % GLYPHS.length]!, colorAt(i), noColor);
+      const name = colorize(label, colorAt(i), noColor);
+      return `${glyph}─${name}`;
+    });
+    return items.join("   ");
+  }
+
+  function metricCells(inner: number): string[] {
+    const colW = Math.max(12, Math.floor(inner / Math.max(1, data.length)));
+    const header = labels
+      .map((label, i) => colorize(`${i === 0 ? "●" : "·"} ${label.toUpperCase()}`, colorAt(i), noColor))
+      .map((s) => padV(s, colW))
+      .join("");
+    const values = data
+      .map((v, i) => {
+        const pct = ((v / total) * 100).toFixed(1);
+        const cell = colorize(formatNumber(v), colorAt(i), noColor) + colorize(` ${pct}%`, theme.label, noColor);
+        return cell;
+      })
+      .map((s) => padV(s, colW))
+      .join("");
+    return [header, values];
   }
 
   const output = buildLines().join("\n");
