@@ -3,9 +3,10 @@
 //   tsx scripts/generate-charts.ts          # write files
 //   tsx scripts/generate-charts.ts --check  # verify on-disk files are current
 //
-// Outputs (both DERIVED from scripts/chart-specs.ts — never edit by hand):
-//   src/data/ansi-charts.json  { [id]: coloredAnsiString }
-//   src/data/charts.ts         export const CHARTS: ChartDef[]
+// Outputs (all DERIVED from scripts/chart-specs.ts — never edit by hand):
+//   src/data/ansi-charts.json       { [id]: coloredAnsiString }
+//   src/data/svg-charts.json        { [id]: svgMarkup }   (only for charts with svg())
+//   src/data/charts.ts              export const CHARTS: ChartDef[]
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -14,6 +15,7 @@ import { SPECS } from "./chart-specs.js";
 const here = dirname(fileURLToPath(import.meta.url));
 const dataDir = resolve(here, "../src/data");
 const ANSI_JSON = resolve(dataDir, "ansi-charts.json");
+const SVG_JSON = resolve(dataDir, "svg-charts.json");
 const CHARTS_TS = resolve(dataDir, "charts.ts");
 
 /** Escape a string for safe embedding inside a TS template literal. */
@@ -24,6 +26,17 @@ function tl(s: string): string {
 function buildAnsiJson(): string {
   const obj: Record<string, string> = {};
   for (const spec of SPECS) obj[spec.id] = spec.ansi();
+  return JSON.stringify(obj, null, 2) + "\n";
+}
+
+function buildSvgJson(): string {
+  const obj: Record<string, string> = {};
+  for (const spec of SPECS) {
+    if (spec.svg) {
+      const svg = spec.svg();
+      if (svg) obj[spec.id] = svg;
+    }
+  }
   return JSON.stringify(obj, null, 2) + "\n";
 }
 
@@ -58,6 +71,7 @@ export const CHARTS: ChartDef[] = [
 
 const outputs = [
   { path: ANSI_JSON, label: "src/data/ansi-charts.json", content: buildAnsiJson() },
+  { path: SVG_JSON, label: "src/data/svg-charts.json", content: buildSvgJson() },
   { path: CHARTS_TS, label: "src/data/charts.ts", content: buildChartsTs() },
 ];
 

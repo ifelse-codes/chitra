@@ -33,6 +33,30 @@ export function minMaxFlat(data: number[][]): { min: number; max: number } {
   return minMax(data.flat());
 }
 
+export function niceTicks(min: number, max: number, maxTicks = 5): { min: number; max: number; step: number; ticks: number[] } {
+  if (min === max) return { min, max, step: 1, ticks: [min] };
+  const range = max - min;
+  const rawStep = range / (maxTicks - 1);
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const norm = rawStep / mag;
+  
+  let step: number;
+  if (norm < 1.5) step = 1 * mag;
+  else if (norm < 3) step = 2 * mag;
+  else if (norm < 7.5) step = 5 * mag;
+  else step = 10 * mag;
+
+  // STRICT bounds: Do not force 0 if min is > 0. Just step down once.
+  let niceMin = Math.floor(min / step) * step;
+  let niceMax = Math.ceil(max / step) * step;
+  
+  const ticks: number[] = [];
+  for (let t = niceMin; t <= niceMax + 1e-9; t += step) {
+    ticks.push(t);
+  }
+  return { min: niceMin, max: niceMax, step, ticks: ticks.reverse() };
+}
+
 export function formatNumber(value: number, precision = 2): string {
   if (Math.abs(value) >= 1_000_000) return (value / 1_000_000).toFixed(1) + "M";
   if (Math.abs(value) >= 1_000) return (value / 1_000).toFixed(1) + "K";

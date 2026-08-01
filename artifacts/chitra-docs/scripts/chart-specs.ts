@@ -40,11 +40,17 @@ export interface ChartSpec {
   ansi: () => string;
   /** Plain, no-ANSI fallback → CHARTS[].preview in src/data/charts.ts. */
   plain: () => string;
+  /** Optional browser-native SVG output from the same core chart result. */
+  svg?: () => string;
 }
 
 /** Single-chart spec helper: both outputs from one ChartResult factory. */
-function single(make: () => ChartResult): Pick<ChartSpec, "ansi" | "plain"> {
-  return { ansi: () => make().toString(), plain: () => make().toPlain() };
+function single(make: () => ChartResult): Pick<ChartSpec, "ansi" | "plain" | "svg"> {
+  return {
+    ansi: () => make().toString(),
+    plain: () => make().toPlain(),
+    svg: () => make().toSVG?.() ?? "",
+  };
 }
 
 /** Composite spec helper: join several charts (e.g. stacked sparklines). */
@@ -60,23 +66,46 @@ export const SPECS: ChartSpec[] = [
     id: "line",
     name: "Line Chart",
     description:
-      "Continuous data over time, rendered with Unicode Braille for sub-character precision.",
+      "Continuous data over time, rendered with explicit ASCII line characters matching classical terminal monitoring.",
     code: `import { line } from "@chitra/core";
 
 line({
-  data: [10, 20, 15, 35, 28, 45, 38, 52, 44, 60],
-  title: "Revenue Trend",
-  width: 52,
-  height: 10,
-  theme: "nord",
+  data: [
+    24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310,
+    24480, 24390, 24270, 24140, 24060, 24060, 23990, 23880, 23940, 23900,
+    24060, 24000, 24060, 24120, 24180, 24260, 24280, 24240, 24350, 24340,
+    24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860, 24860,
+    24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600
+  ],
+  labels: ["7D Ago", "6D Ago", "5D Ago", "4D Ago", "3D Ago", "2D Ago", "1D Ago", "Now"],
+  title: "NIFTY 50 INDEX",
+  width: 72,
+  height: 18,
+  theme: "default",
+  renderer: "ascii", // Forces explicit line drawing (- / \\ o)
 }).render();`,
     ...single(() =>
       line({
-        data: [10, 20, 15, 35, 28, 45, 38, 52, 44, 60],
-        title: "Revenue Trend",
-        width: 52,
-        height: 10,
-        theme: "nord",
+        data: [
+          24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310,
+          24480, 24390, 24270, 24140, 24060, 24060, 23990, 23880, 23940, 23900,
+          24060, 24000, 24060, 24120, 24180, 24260, 24280, 24240, 24350, 24340,
+          24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860, 24860,
+          24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600
+        ],
+        labels: ["7D Ago", "6D Ago", "5D Ago", "4D Ago", "3D Ago", "2D Ago", "1D Ago", "Now"],
+        title: "NIFTY 50 INDEX",
+        width: 72,
+        height: 18,
+        theme: {
+            name: "nifty",
+            colors: ["\x1b[38;2;52;211;153m"], // Bright explicit green
+            axis: "\x1b[38;2;71;85;105m", // Dim explicit slate
+            label: "\x1b[38;2;148;163;184m",
+            title: "\x1b[38;2;52;211;153m",
+            grid: "\x1b[38;2;51;65;85m"
+        },
+        renderer: "ascii",
       }),
     ),
   },

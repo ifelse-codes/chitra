@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Tracked pre-push: blocks pushes to main/master.
+
+set -euo pipefail
+
+blocked=0
+while read -r localref localsha remoteref remotesha; do
+  [ -z "${remoteref:-}" ] && continue
+  case "$remoteref" in
+    refs/heads/main|refs/heads/master)
+      echo "[pre-push BLOCK] Push to '$remoteref' forbidden. Open a PR/MR instead."
+      blocked=1 ;;
+  esac
+done
+
+exit "$blocked"

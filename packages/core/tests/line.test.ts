@@ -61,4 +61,53 @@ describe("line chart", () => {
     const result = line({ data: [10, 20, 30], yMin: 0, yMax: 100 });
     expect(result.toPlain()).toContain("100");
   });
+
+  it("renders the dashboard frame with a top-right timestamp", () => {
+    const result = line({ data: [1, 2, 3], title: "SYS", timestamp: "10:42 IST" });
+    const plain = result.toPlain();
+    expect(plain).toContain("┌─ SYS");
+    expect(plain).toContain("10:42 IST");
+    expect(plain).toContain("─┐");
+  });
+
+  it("renders the status footer line", () => {
+    const result = line({ data: [1, 2, 3], status: "All systems operational" });
+    expect(result.toPlain()).toContain("Status: All systems operational");
+  });
+
+  it("renders min/max/avg/last summary stats when legend is shown", () => {
+    const result = line({
+      data: [
+        [1, 2, 3, 4],
+        [4, 3, 2, 1],
+      ],
+      seriesLabels: ["A", "B"],
+    });
+    const plain = result.toPlain();
+    expect(plain).toContain("min");
+    expect(plain).toContain("max");
+    expect(plain).toContain("avg");
+    expect(plain).toContain("last");
+  });
+
+  it("summary: false suppresses the stats block", () => {
+    const result = line({ data: [1, 2, 3], summary: false });
+    const plain = result.toPlain();
+    expect(plain).not.toContain("min");
+    expect(plain).not.toContain("avg");
+    expect(plain).not.toContain("last");
+  });
+
+  it("noColor keeps the panel frame free of ANSI escapes", () => {
+    const result = line({
+      data: [1, 2, 3],
+      title: "SYS",
+      timestamp: "10:42 IST",
+      status: "ok",
+      noColor: true,
+    });
+    expect(result.toString()).not.toContain("\x1b[");
+    expect(result.toPlain()).toContain("┌─");
+    expect(result.toPlain()).toContain("└─");
+  });
 });
