@@ -40,8 +40,8 @@ terminal-native dashboard look.
 - Max 2 assumptions; <=3 files per atomic commit.
 
 ## Execution
-1. release.yml workflow + verify/demo scripts — done: <sha>
-2. Line-chart SV-grade upgrade + ascii renderer — done: <sha>
-3. Shared LineChartModel + toSVG() web renderer + docs SVG output — done: <sha>
-4. Dashboard panel look (timestamp / status / summary) + tests — done: <sha>
-5. Closeout sync (.ai tracker) + fidelity review — done: <sha>
+1. release.yml workflow + verify/demo scripts — done: 4edbf9e (release.yml), 7551db0 (scripts)
+2. Line-chart SV-grade upgrade + ascii renderer — done: 96ff0d7 (SV-grade), 264d3da (ascii renderer)
+3. Shared LineChartModel + toSVG() web renderer + docs SVG output — done: 33fec84 (model+toSVG), 2a15e24 (docs SVG)
+4. Dashboard panel look (timestamp / status / summary) + tests — done: f37f608 (panel), 07c9a5d (tests)
+5. Closeout sync (.ai tracker) + fidelity review — done: 839b1f8 (contract; tracker/review commits follow)
