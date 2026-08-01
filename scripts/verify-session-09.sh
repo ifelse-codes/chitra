@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Session 09 verify — design-reference language.
-# Proves: the README Design Style section documents the language, the direction
-# is the mudra one-hue contract, the donut demo renders the target look with
-# chitra's own primitives (no lib changes), and the design references exist.
+# Session 09 verify — design-reference language, implemented in the donut chart.
+# Proves: the design references exist, the README documents the design style,
+# the theme layer carries the mudra one-hue tokens (accent + tone ramp), the
+# panel primitives support the dashed frame, and the donut chart renders the
+# target language (dashed panel, eyebrow, tone+glyph legend, metric cells,
+# status) while keeping the core test suite green.
 
 set -euo pipefail
 ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
@@ -24,8 +26,6 @@ run_check() {
   fi
 }
 
-DEMO_OUT() { ./packages/core/node_modules/.bin/tsx scripts/src/demo09-donut.ts 2>/dev/null; }
-
 # 1. Design references exist
 run_check "ref-tui-chart"        test -f design-reference/tui-chart.html
 run_check "ref-mudra-chart"      test -f design-reference/mudra-chart.html
@@ -39,18 +39,29 @@ run_check "readme-tone-dash-glyph"     grep -qi "tone + dash + glyph" packages/c
 run_check "readme-metric-cells"        grep -qi "metric summary cells" packages/core/README.md
 run_check "readme-svg-mirrors"         grep -qi "svg output mirrors" packages/core/README.md
 
-# 3. Demo source renders the target look (mudra one-hue)
-run_check "demo-src-exists"            test -f scripts/src/demo09-donut.ts
-run_check "demo-dashed-frame"          grep -q '┌╌' scripts/src/demo09-donut.ts
-run_check "demo-tone-ramp"             grep -q 'tones:' scripts/src/demo09-donut.ts
-run_check "demo-accent-on-primary"     grep -q 'primary ? h(TOKENS.frame)' scripts/src/demo09-donut.ts
-run_check "demo-glyph-legend"          grep -q 'GLYPHS' scripts/src/demo09-donut.ts
-run_check "demo-metric-cells"          grep -q 'metricCells' scripts/src/demo09-donut.ts
-run_check "demo-runs-mudra"            bash -c 'DEMO_OUT() { ./packages/core/node_modules/.bin/tsx scripts/src/demo09-donut.ts 2>/dev/null; }; DEMO_OUT | grep -q "TARGET A — mudra"'
+# 3. Theme layer carries mudra one-hue tokens
+run_check "theme-accent-field"        grep -q "accent" packages/core/src/types.ts
+run_check "theme-tone-field"          grep -q "tones" packages/core/src/types.ts
+run_check "theme-grey-tones"          grep -q "GREY_TONES" packages/core/src/themes/index.ts
+run_check "theme-accent-default"      grep -q 'accent: h("#8B7CF6")' packages/core/src/themes/index.ts
 
-# 4. No library code changed — design language is demoed, not yet implemented
-run_check "core-unchanged"             git diff --quiet HEAD~1 -- packages/core/src
-run_check "no-implementation-yet"      bash -c '! grep -rl "TOKENS" packages/core/src >/dev/null'
+# 4. Panel primitives support the dashed frame
+run_check "panel-dashed-top"          grep -q 'dashed = false' packages/core/src/renderers/panel.ts
+run_check "panel-dashed-dash"         grep -q 'dashed ? "╌" : "─"' packages/core/src/renderers/panel.ts
+
+# 5. Donut renders the design language
+run_check "donut-dashed-frame"        grep -q ', true)' packages/core/src/charts/donut.ts
+run_check "donut-accent-primary"      grep -q "i === 0 ? accent" packages/core/src/charts/donut.ts
+run_check "donut-tone-ramp"           grep -q "tones\[(i - 1)" packages/core/src/charts/donut.ts
+run_check "donut-eyebrow"             grep -q "eyebrow" packages/core/src/charts/donut.ts
+run_check "donut-glyph-legend"        grep -q "GLYPHS" packages/core/src/charts/donut.ts
+run_check "donut-metric-cells"        grep -q "metricCells" packages/core/src/charts/donut.ts
+run_check "donut-status-footer"       grep -q "opts.status" packages/core/src/charts/donut.ts
+run_check "donut-runs"                bash -c 'echo "import { donut } from \"./packages/core/src/charts/donut.js\"; const o = donut({ data: [30,40,30], labels: [\"X\",\"Y\",\"Z\"], status: \"ok\" }); if (!o.toString().includes(\"Status: ok\")) process.exit(1);" > .donut-smoke.mts; ./packages/core/node_modules/.bin/tsx .donut-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .donut-smoke.mts; exit $rc'
+
+# 6. Suite stays green
+run_check "core-tests-green"          pnpm --filter @chitra/core run test
+run_check "core-typecheck"            pnpm --filter @chitra/core run typecheck
 
 ( cd ".ai/verify/session-${SESSION}" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
