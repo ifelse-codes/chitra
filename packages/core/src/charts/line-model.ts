@@ -3,15 +3,27 @@ import { minMax, niceTicks } from "../utils.js";
 import { resolveTheme } from "../themes/index.js";
 import { stripAnsi } from "../ansi.js";
 
+export interface LineSeriesStats {
+  min: number;
+  max: number;
+  avg: number;
+  last: number;
+}
+
 export interface LineSeriesModel {
   name: string;
   color: string;
   marker: string;
   values: number[];
+  stats: LineSeriesStats;
 }
 
 export interface LineChartModel {
   title: string;
+  timestamp?: string;
+  status?: string;
+  showSummary: boolean;
+  showLegend: boolean;
   xLabel: string;
   yLabel: string;
   labels: string[];
@@ -19,6 +31,11 @@ export interface LineChartModel {
   yMax: number;
   yTicks: number[];
   series: LineSeriesModel[];
+}
+
+function seriesStats(values: number[]): LineSeriesStats {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return { min: Math.min(...values), max: Math.max(...values), avg: total / values.length, last: values[values.length - 1] };
 }
 
 const markers = ["*", "○", "+", "×", "◆", "□"];
@@ -37,6 +54,10 @@ export function createLineChartModel(options: LineChartOptions): LineChartModel 
 
   return {
     title: options.title ?? "Line chart",
+    timestamp: options.timestamp,
+    status: options.status,
+    showSummary: options.summary ?? (options.legend !== false && data.length > 0),
+    showLegend: options.legend !== false,
     xLabel: options.xLabel ?? "Time",
     yLabel: options.yLabel ?? "Value",
     labels,
@@ -48,6 +69,7 @@ export function createLineChartModel(options: LineChartOptions): LineChartModel 
       color: theme.colors[index % theme.colors.length],
       marker: markers[index % markers.length],
       values,
+      stats: seriesStats(values),
     })),
   };
 }
