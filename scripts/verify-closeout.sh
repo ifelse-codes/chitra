@@ -253,7 +253,8 @@ waiver_ok() { [ -n "${VAJRA_CLOSEOUT_WAIVER:-}" ] && [ "${VAJRA_CLOSEOUT_WAIVER}
 check_fidelity_review() {
   local NAME="fidelity-review-accept"; local LOG="$ARTIFACTS/${NAME}.log"
   if [ -z "$N" ]; then echo "BLOCK: N unresolved" > "$LOG"; bad "$NAME"; return; fi
-  local F="sessions/session-${N}-review.md"
+  local PADDED; PADDED="$(printf '%02d' "$N")"
+  local F="sessions/session-${PADDED}-review.md"
   : > "$LOG"
 
   # (1) Require the artifact.
@@ -262,7 +263,7 @@ check_fidelity_review() {
     if waiver_ok; then
       echo "WAIVED: VAJRA_CLOSEOUT_WAIVER=$N — ${VAJRA_CLOSEOUT_WAIVER_REASON:-<no reason recorded>}" >> "$LOG"; ok "$NAME"
     else
-      echo "FAIL: supply sessions/session-${N}-review.md (cold pass) or a founder waiver (VAJRA_CLOSEOUT_WAIVER=$N)." >> "$LOG"; bad "$NAME"
+      echo "FAIL: supply sessions/session-${PADDED}-review.md (cold pass) or a founder waiver (VAJRA_CLOSEOUT_WAIVER=$N)." >> "$LOG"; bad "$NAME"
     fi
     return
   fi
@@ -359,7 +360,8 @@ canonical_inputs_sha() {
 check_review_attestation() {
   local NAME="review-inputs-attested"; local LOG="$ARTIFACTS/${NAME}.log"
   if [ -z "$N" ]; then echo "BLOCK: N unresolved" > "$LOG"; bad "$NAME"; return; fi
-  local F="sessions/session-${N}-review.md"
+  local PADDED; PADDED="$(printf '%02d' "$N")"
+  local F="sessions/session-${PADDED}-review.md"
   : > "$LOG"
 
   if [ ! -f "$F" ] || [ ! -s "$F" ]; then
