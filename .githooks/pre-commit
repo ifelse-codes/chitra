@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Tracked pre-commit hook. Activated by: git config core.hooksPath .githooks
+
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || echo DETACHED)"
+case "$branch" in
+  main|master)
+    echo "[pre-commit BLOCK] Direct commits to '$branch' forbidden. Branch session-NN-<slug> first."
+    exit 1 ;;
+esac
+
+# --- Approval-evidence gate (S93 — no-autonomous-commit: voluntary -> ENFORCED) --------------
+# On a session branch, a commit requires an un-forgeable human approval marker: the env var
+# VAJRA_ALLOW_COMMIT must equal the branch's session number. Same house pattern as
+# VAJRA_CLOSEOUT_WAIVER (S56) and VAJRA_ALLOW_PUBLISH (S37): an env var the founder supplies,
+# NOT a file/flag the agent can Write into the tree (that would be in the diff, and self-granted
+# — the S69 "jurisdiction-self-granted" fakest-green class). Fail-closed: no marker => BLOCK.
+# Session-scoped so a stale VAJRA_ALLOW_COMMIT from another session does not authorize this one.
+#
+# Layer honesty: this L2 belt is git-native and catches every commit path. But an agent that
+# controls the command line can inline `VAJRA_ALLOW_COMMIT=NN git commit`, so L2 alone is
+# auditable, not un-forgeable. The un-forgeable teeth are the L3 PreToolUse hook
+# (scripts/hook-commit-guard.sh): its launch env is beyond an inline prefix's reach, and it
+# fires even on `git commit --no-verify` (which skips THIS hook but not PreToolUse). To commit
+# autonomously the agent must beat BOTH layers. See sessions/session-93-summary.md.
+if [[ "$branch" =~ ^session-([0-9]+)- ]]; then
+  sess="${BASH_REMATCH[1]}"
+  if [ "${VAJRA_ALLOW_COMMIT:-}" != "$sess" ]; then
+    echo "[pre-commit BLOCK] Autonomous commit on '$branch' without approval evidence."
+    echo "  no-autonomous-commit is ENFORCED (S93), not voluntary. A commit needs founder"
+    echo "  approval, supplied as an un-forgeable env marker (mirrors VAJRA_CLOSEOUT_WAIVER):"
+    echo "      VAJRA_ALLOW_COMMIT=$sess git commit ..."
+    echo "  Override this git hook only via git's own --no-verify (still caught by the L3 guard)."
+    exit 1
+  fi
+fi
+
+staged="$(git diff --cached --name-only --diff-filter=ACMR | sed '/^$/d' | wc -l | tr -d ' ')"
+if [ "${staged:-0}" -gt 3 ]; then
+  echo "[pre-commit BLOCK] $staged files staged; max 3 per atomic change."
+  exit 1
+fi
+
+if [ -f .ai/SESSION ] && [ -f .ai/SESSION-BOOT.md ]; then
+  n="$(tr -d ' \t\n\r' < .ai/SESSION)"
+  boot="$(grep -m1 -E '\*\*Number:\*\*' .ai/SESSION-BOOT.md | grep -oE '[0-9]+' | head -1)"
+  if [ -n "$n" ] && [ -n "$boot" ] && [ "$((10#$n))" -ne "$((10#$boot))" ]; then
+    echo "[pre-commit BLOCK] .ai/ drift: .ai/SESSION=$n but SESSION-BOOT Number=$boot."
+    exit 1
+  fi
+fi
+
+if [ -x scripts/hook-drift-guard.sh ]; then
+  scripts/hook-drift-guard.sh --quiet || {
+    echo "[pre-commit BLOCK] drift-guard reported drift."
+    exit 1
+  }
+fi
+
+exit 0

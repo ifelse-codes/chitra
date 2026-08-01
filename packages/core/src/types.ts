@@ -52,6 +52,12 @@ export interface LineChartOptions extends BaseChartOptions {
   showPoints?: boolean;
   yMin?: number;
   yMax?: number;
+  /** Shown top-right of the panel frame, e.g. "2026-07-29 10:42:17 IST". */
+  timestamp?: string;
+  /** Shown in the panel footer, e.g. "All systems operational ✓". */
+  status?: string;
+  /** Show min/max/avg/last summary block below the chart. Default true when legend is shown. */
+  summary?: boolean;
 }
 
 export interface BarChartOptions extends BaseChartOptions {
@@ -192,4 +198,6 @@ export interface ChartResult {
   toMarkdown(): string;
   toJSON(): object;
   toPlain(): string;
+  /** Available for chart types with a browser-native renderer. */
+  toSVG?(): string;
 }

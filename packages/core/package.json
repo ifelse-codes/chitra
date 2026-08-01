@@ -14,10 +14,10 @@
     "sparkline",
     "dashboard"
   ],
-  "homepage": "https://github.com/chitra-dev/chitra",
+  "homepage": "https://github.com/ifelse-codes/chitra",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chitra-dev/chitra.git"
+    "url": "https://github.com/ifelse-codes/chitra.git"
   },
   "license": "MIT",
   "type": "module",

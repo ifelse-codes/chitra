@@ -8,7 +8,7 @@ interface Span {
 function parseAnsi(raw: string): Span[] {
   const spans: Span[] = [];
   // SGR regex: ESC [ ... m
-  const re = /\x1b\[([\d;]*)m/g;
+  const re = /\u001b\[([\d;]*)m/g;
   let pos = 0;
   let fg: string | null = null;
   let bold = false;

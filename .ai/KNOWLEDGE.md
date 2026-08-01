@@ -31,7 +31,7 @@
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @chitra/core run test` | 116 tests |
+| `pnpm --filter @chitra/core run test` | 121 tests |
 | `pnpm --filter @chitra/core run test:coverage` | tests + coverage |
 | `pnpm --filter @chitra/core run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
@@ -46,7 +46,7 @@
 - **Public API stability**: exported fns (`line`/`bar`/`area`/`sparkline`/… + `plot()` fluent
   builder) shouldn't break for consumers. `BaseChartOptions` carries shared fields; specific
   charts only declare unique options. `PlotBuilder` wraps the same chart fns (no duplication).
-- **116 core tests stay green.** Never leave the suite red.
+- **121 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best chart lib ever created."*
 
 ## Environment quirks / gotchas
@@ -57,8 +57,10 @@
   the current `build` script** (`tsc --noEmit`) — real dist bundling is unbuilt.
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
-- **Repo is NOT a git repo** (no `.git`). Vajra's branch/commit/PR rules can't run until
-  `git init`. See [[state]].
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S08.
+  Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
+  `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
+  need `VAJRA_ALLOW_PUBLISH=1`.
 
 ## Where things live
 - `packages/core/src/`: `index.ts` (exports), `types.ts`, `ansi.ts`, `utils.ts`, `plot.ts`,
