@@ -11,6 +11,7 @@
   core tests green. Built via a Vajra dogfood ride-along, independently re-verified.
 - Summary: `sessions/session-08-summary.md`. Review: `sessions/session-08-review.md`.
 
-Between sessions. **Next: S09** — flesh out `artifacts/api-server` beyond `/healthz`,
-or the remaining S05 ground-truth remediation, or exercise a real `v0.1.0` release
-(needs `NODE_AUTH_TOKEN` secret). Open in a **new chat**.
+Between sessions. **Next session (founder direction):** analyze `design-reference/`
+(tui-chart · mudra-chart · mudra-dashboard), learn that design language, and rebuild
+the chitra chart look to match it — current charts are "not looking that great."
+Open in a **new chat**.
