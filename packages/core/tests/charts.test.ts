@@ -77,6 +77,45 @@ describe("donut chart", () => {
     const j = donut({ data: [1, 2] }).toJSON() as Record<string, unknown>;
     expect(j.type).toBe("donut");
   });
+  it("renders the dashed panel frame with title and timestamp", () => {
+    const out = donut({
+      data: [30, 40, 30],
+      title: "SYS",
+      timestamp: "10:42 IST",
+    }).toPlain();
+    expect(out).toContain("┌╌");
+    expect(out).toContain("╌┐");
+    expect(out).toContain("SYS");
+    expect(out).toContain("10:42 IST");
+  });
+  it("renders the eyebrow caption uppercase", () => {
+    const out = donut({ data: [30, 40, 30], eyebrow: "Distribution · Requests" }).toPlain();
+    expect(out).toContain("DISTRIBUTION · REQUESTS");
+  });
+  it("renders the glyph legend", () => {
+    const out = donut({ data: [30, 40, 30], labels: ["CPU", "MEM", "NET"] }).toPlain();
+    expect(out).toContain("*─CPU");
+    expect(out).toContain("o─MEM");
+    expect(out).toContain("+─NET");
+  });
+  it("renders metric cells with value and pct", () => {
+    const out = donut({ data: [50, 50], labels: ["A", "B"] }).toPlain();
+    expect(out).toContain("50.0%");
+    expect(out).toContain("A");
+    expect(out).toContain("B");
+  });
+  it("summary: false suppresses metric cells", () => {
+    const out = donut({ data: [50, 50], labels: ["A", "B"], summary: false }).toPlain();
+    expect(out).not.toContain("%");
+  });
+  it("renders the status footer", () => {
+    const out = donut({ data: [30, 40, 30], status: "All systems operational" }).toPlain();
+    expect(out).toContain("Status: All systems operational");
+  });
+  it("noColor produces no ANSI escapes", () => {
+    const out = donut({ data: [30, 40, 30], noColor: true }).toString();
+    expect(out).not.toContain("\x1b[");
+  });
 });
 
 describe("heatmap", () => {
