@@ -10,6 +10,11 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
+- 🔜 **Next — founder direction (S09 candidate):** analyze `design-reference/`
+  (tui-chart.html · mudra-chart.html · mudra-dashboard.html) and rebuild the chart
+  look to match that design language. Founder feedback: current charts are
+  "not looking that great." Learn the reference, then carry it into the terminal
+  panel + renderers.
 - ✅ **S06** — Real publishable `dist/` build for `@chitra/core` (ESM + CJS + `.d.ts`, zero deps).
 - ✅ **S07** — CI workflows (`.github/workflows/ci.yml`: core · docs · chart-drift gates, pinned toolchain).
 - ✅ **Session 08 (S08)** — release.yml publish workflow (this session). v* tag push → re-runs S07
