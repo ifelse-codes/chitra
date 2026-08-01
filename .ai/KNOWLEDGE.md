@@ -64,6 +64,10 @@
 
 ## Where things live
 - `packages/core/src/`: `index.ts` (exports), `types.ts`, `ansi.ts`, `utils.ts`, `plot.ts`,
-  `themes/`, `renderers/` (braille/blocks/ascii), `charts/` (20 chart files).
+  `themes/`, `renderers/` (braille/blocks/ascii, `panel.ts`), `charts/` (20 chart files).
+- `design-reference/` — target design language to build toward (founder-sourced):
+  `tui-chart.html`, `mudra-chart.html`, `mudra-dashboard.html`. The terminal panel was
+  "modeled on the tui-chart.html reference design language"; next session should learn
+  these fully and rebuild the chart look to match.
 - `examples/basic.ts` — worked examples for all chart types.
 - `CONTRIBUTING.md`, `replit.md` (Replit agent notes), `darshan/SKILL.md` (output skill).

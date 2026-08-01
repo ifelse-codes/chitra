@@ -18,7 +18,9 @@
   15/15 green; 121 core tests green.
 
 ## Next Session
-- **Number:** 09 — candidates: flesh out `artifacts/api-server` beyond `/healthz` ·
-  S05 ground-truth remediation (S04 backfill + closeout-integrity gate) · exercise a
-  real `v0.1.0` release via `release.yml` (needs `NODE_AUTH_TOKEN` secret).
+- **Number:** 09 — **founder direction:** analyze `design-reference/` (tui-chart ·
+  mudra-chart · mudra-dashboard), learn the design language, and rebuild the chitra
+  chart look to match it. Founder feedback: current charts are "not looking that
+  great." Lower-priority backlog: `artifacts/api-server` beyond `/healthz` · S05
+  ground-truth remediation · exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
 - Open in a **new chat** (one session per chat).
