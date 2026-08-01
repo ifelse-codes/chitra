@@ -218,8 +218,8 @@ check_verify_demo_scripts() {
     ok "$NAME"; return
   fi
 
-  local V="scripts/verify-session-${N}.sh"
-  local D="scripts/demo-session-${N}.sh"
+  local V="scripts/verify-session-$(printf '%02d' "$N").sh"
+  local D="scripts/demo-session-$(printf '%02d' "$N").sh"
   local missing=()
   { [ -f "$V" ] && [ -s "$V" ]; } || missing+=("$V")
   { [ -f "$D" ] && [ -s "$D" ]; } || missing+=("$D")
