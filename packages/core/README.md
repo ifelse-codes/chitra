@@ -86,9 +86,28 @@ Chitra supports three rendering modes:
 Chitra includes 7 built-in themes that automatically map series data to colors:
 `"default"`, `"nord"`, `"dracula"`, `"github-dark"`, `"tokyo-night"`, `"solarized"`, and `"monochrome"`.
 
-## Documentation
+## Design Style
 
-For the full chart gallery, configuration options, and API references, see our [Docs Site](https://github.com/ifelse-codes/chitra).
+Chitra's look is built on the `design-reference/` language — tui-chart (terminal-native),
+mudra-chart (one-hue refinement), and mudra-dashboard (terminal translation). The target
+look for terminal output:
+
+- **Dashed panel frame**, mono-first typography, sharp corners. Floating `panel-tag`
+  labels (`- SUMMARY -`) sit on the frame line.
+- **Series identity = tone + dash + glyph**, never rainbow color alone. Each series is
+  separated by a tone from the theme's ramp, a dash pattern (solid / dashed / dotted /
+  dash-dot), and a glyph marker (`* o + x`).
+- **One accent hue per theme**, reserved for the primary or active series; other series
+  stay muted so the accent lands where the eye is pointing.
+- **Thin dashed gridlines** with a solid baseline axis, and `+` tick marks on both axes.
+- **Eyebrow captions** — uppercase, letter-spaced, mono — label the x/y axes.
+- **Metric summary cells** — LAST value prominent, MIN / MAX / AVG beneath, per series.
+- **SVG output mirrors the terminal model**: the web renderer draws the same tones,
+  dashes, glyphs, grid, and captions as the terminal renderer, from the same model.
+
+The exact look is derived from each theme's palette (mudra's greyscale tone ramp, the
+phosphor-green terminal accent, etc.), so all seven built-in themes keep working and the
+design language carries through unchanged.
 
 ## License
 
