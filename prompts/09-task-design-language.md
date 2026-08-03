@@ -39,7 +39,7 @@ look and feel. Founder feedback: current charts are "not looking that great."
 ## Exit Criteria
 - `scripts/verify-session-09.sh` exits 0 (31 checks).
 - `scripts/verify-closeout.sh` exits 0 with a session-09 review.
-- Core tests green (130), `pnpm --filter @chitra/core run typecheck` exit 0.
+- Core tests green (134), `pnpm --filter @chitra/core run typecheck` exit 0.
 
 ## Guardrails
 - Branch `session-09-design-reference` from `main`.
