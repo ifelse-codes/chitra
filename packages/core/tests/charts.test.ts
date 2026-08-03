@@ -123,6 +123,11 @@ describe("donut chart", () => {
     const out = donut({ data: [30, 40, 30], eyebrow: "Distribution · Requests" }).toPlain();
     expect(out).toContain("DISTRIBUTION · REQUESTS");
   });
+  it("pie renders the eyebrow caption and status row", () => {
+    const out = pie({ data: [30, 40, 30], eyebrow: "Requests by env", status: "ok" }).toPlain();
+    expect(out).toContain("REQUESTS BY ENV");
+    expect(out).toContain("Status: ok");
+  });
   it("renders the pattern glyph legend", () => {
     const out = donut({ data: [30, 40, 30], labels: ["CPU", "MEM", "NET"] }).toPlain();
     expect(out).toContain("CPU");
