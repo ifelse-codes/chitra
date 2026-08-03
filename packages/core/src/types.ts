@@ -202,6 +202,8 @@ export interface SankeyOptions extends BaseChartOptions {
 
 export interface AreaChartOptions extends LineChartOptions {
   fillChar?: string;
+  /** Eyebrow caption under the header (uppercase, spaced). */
+  eyebrow?: string;
 }
 
 export interface ChartResult {
