@@ -107,16 +107,16 @@ export interface ScatterPlotOptions extends BaseChartOptions {
 export interface PieChartOptions extends BaseChartOptions {
   data: number[];
   radius?: number;
-}
-
-export interface DonutChartOptions extends PieChartOptions {
-  innerRadius?: number;
   /** Shown top-right of the dashed panel frame. */
   timestamp?: string;
   /** Shown in the panel footer, e.g. "All systems operational ✓". */
   status?: string;
   /** Eyebrow caption under the header (uppercase, spaced). */
   eyebrow?: string;
+}
+
+export interface DonutChartOptions extends PieChartOptions {
+  innerRadius?: number;
   /** Show value + pct metric cells below the legend. Default true. */
   summary?: boolean;
 }
@@ -202,6 +202,8 @@ export interface SankeyOptions extends BaseChartOptions {
 
 export interface AreaChartOptions extends LineChartOptions {
   fillChar?: string;
+  /** Eyebrow caption under the header (uppercase, spaced). */
+  eyebrow?: string;
 }
 
 export interface ChartResult {

@@ -65,7 +65,18 @@ run_check "donut-shared-renderer"     grep -q "buildSlices" packages/core/src/ch
 run_check "donut-runs"                bash -c 'echo "import { donut } from \"./packages/core/src/charts/donut.js\"; const o = donut({ data: [30,40,30], labels: [\"X\",\"Y\",\"Z\"], status: \"ok\" }); if (!o.toString().includes(\"Status: ok\")) process.exit(1);" > .donut-smoke.mts; ./packages/core/node_modules/.bin/tsx .donut-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .donut-smoke.mts; exit $rc'
 run_check "pie-plain-patterns"        bash -c 'echo "import { pie } from \"./packages/core/src/charts/pie.js\"; const o = pie({ data: [40,30,30], noColor: true }); if (!o.toPlain().includes(\"█\")) process.exit(1);" > .pie-smoke.mts; ./packages/core/node_modules/.bin/tsx .pie-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .pie-smoke.mts; exit $rc'
 
-# 6. Suite stays green
+# 6. Area chart carries the LOCKED language (line = fill's top edge, one accent,
+#    auto-scaled range, spaces not blank-braille, dashed panel + eyebrow)
+run_check "area-locked-renderer"      grep -q "lineTop" packages/core/src/charts/area.ts
+run_check "area-fill-top-edge"        grep -q "fill.fillColumn" packages/core/src/charts/area.ts
+run_check "area-spaces-not-blank"     grep -q 'b === 0 ? " "' packages/core/src/charts/area.ts
+run_check "area-auto-scale-range"     grep -q "opts.yMin ?? dataMin" packages/core/src/charts/area.ts
+run_check "area-accent-peak"          grep -q "peakCap" packages/core/src/charts/area.ts
+run_check "area-dashed-frame"         grep -q ", true)" packages/core/src/charts/area.ts
+run_check "area-eyebrow"              grep -q "eyebrow" packages/core/src/charts/area.ts
+run_check "area-runs"                 bash -c 'echo "import { area } from \"./packages/core/src/charts/area.js\"; const o = area({ data: [12,19,15,28,34,31,42,38,52,47,61,58] }); const s = o.toString(); if (!s.includes(\"┌╌\") || s.includes(\"\u2800\")) process.exit(1);" > .area-smoke.mts; ./packages/core/node_modules/.bin/tsx .area-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .area-smoke.mts; exit $rc'
+
+# 7. Suite stays green
 run_check "core-tests-green"          pnpm --filter @chitra/core run test
 run_check "core-typecheck"            pnpm --filter @chitra/core run typecheck
 
