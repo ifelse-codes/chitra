@@ -49,15 +49,21 @@ run_check "theme-accent-default"      grep -q 'accent: h("#8B7CF6")' packages/co
 run_check "panel-dashed-top"          grep -q 'dashed = false' packages/core/src/renderers/panel.ts
 run_check "panel-dashed-dash"         grep -q 'dashed ? "╌" : "─"' packages/core/src/renderers/panel.ts
 
-# 5. Donut renders the design language
+# 5. Donut + pie render the design language (shared ring renderer)
+run_check "ring-module-exists"        test -f packages/core/src/charts/ring.ts
+run_check "ring-braille-circle"       grep -q "BRAILLE_BITS" packages/core/src/charts/ring.ts
+run_check "ring-braille-glyph"        grep -q "braille(dots)" packages/core/src/charts/ring.ts
+run_check "ring-accent-largest"       grep -q "indexOf(Math.max" packages/core/src/charts/ring.ts
+run_check "ring-tone-ramp"            grep -q "tones\[i % tones.length\]" packages/core/src/charts/ring.ts
+run_check "ring-slice-sampler"        grep -q "sliceAt" packages/core/src/charts/ring.ts
+run_check "ring-right-legend"         grep -q "renderLegend" packages/core/src/charts/ring.ts
 run_check "donut-dashed-frame"        grep -q ', true)' packages/core/src/charts/donut.ts
-run_check "donut-accent-primary"      grep -q "i === 0 ? accent" packages/core/src/charts/donut.ts
-run_check "donut-tone-ramp"           grep -q "tones\[(i - 1)" packages/core/src/charts/donut.ts
 run_check "donut-eyebrow"             grep -q "eyebrow" packages/core/src/charts/donut.ts
-run_check "donut-glyph-legend"        grep -q "GLYPHS" packages/core/src/charts/donut.ts
-run_check "donut-metric-cells"        grep -q "metricCells" packages/core/src/charts/donut.ts
 run_check "donut-status-footer"       grep -q "opts.status" packages/core/src/charts/donut.ts
+run_check "pie-shared-renderer"       grep -q "buildSlices" packages/core/src/charts/pie.ts
+run_check "donut-shared-renderer"     grep -q "buildSlices" packages/core/src/charts/donut.ts
 run_check "donut-runs"                bash -c 'echo "import { donut } from \"./packages/core/src/charts/donut.js\"; const o = donut({ data: [30,40,30], labels: [\"X\",\"Y\",\"Z\"], status: \"ok\" }); if (!o.toString().includes(\"Status: ok\")) process.exit(1);" > .donut-smoke.mts; ./packages/core/node_modules/.bin/tsx .donut-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .donut-smoke.mts; exit $rc'
+run_check "pie-plain-patterns"        bash -c 'echo "import { pie } from \"./packages/core/src/charts/pie.js\"; const o = pie({ data: [40,30,30], noColor: true }); if (!o.toPlain().includes(\"█\")) process.exit(1);" > .pie-smoke.mts; ./packages/core/node_modules/.bin/tsx .pie-smoke.mts >/dev/null 2>&1; rc=$?; rm -f .pie-smoke.mts; exit $rc'
 
 # 6. Suite stays green
 run_check "core-tests-green"          pnpm --filter @chitra/core run test
