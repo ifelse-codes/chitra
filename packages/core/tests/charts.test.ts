@@ -27,6 +27,28 @@ describe("area chart", () => {
     const j = area({ data: [1, 2, 3] }).toJSON() as Record<string, unknown>;
     expect(j.type).toBe("area");
   });
+  it("draws the fill as braille with the line as its top edge", () => {
+    const out = area({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
+    expect(out).toMatch(/[\u2801-\u28FF]/); // lit braille dots present
+  });
+  it("uses the dashed panel frame + eyebrow like the LOCKED circular look", () => {
+    const out = area({ data: [12, 19, 15], title: "REVENUE", eyebrow: "Monthly · Trend" }).toString();
+    expect(out).toContain("┌╌");
+    expect(out).toContain("╌┐");
+    expect(out).toContain("MONTHLY · TREND");
+    expect(out).toContain("╌┘");
+  });
+  it("renders empty cells as spaces, never blank-braille", () => {
+    const out = area({ data: [12, 19, 15] }).toString();
+    expect(out).not.toContain("\u2800");
+  });
+  it("auto-scales the y-range to the data and accents only the peak + footer max", () => {
+    const out = area({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
+    expect(out).toContain("max 61");
+    expect(out).toContain("min 12");
+    const accent = "\x1b[38;2;139;124;246m";
+    expect(out).toContain(accent + "max 61");
+  });
 });
 
 describe("histogram", () => {
@@ -100,6 +122,11 @@ describe("donut chart", () => {
   it("renders the eyebrow caption uppercase", () => {
     const out = donut({ data: [30, 40, 30], eyebrow: "Distribution · Requests" }).toPlain();
     expect(out).toContain("DISTRIBUTION · REQUESTS");
+  });
+  it("pie renders the eyebrow caption and status row", () => {
+    const out = pie({ data: [30, 40, 30], eyebrow: "Requests by env", status: "ok" }).toPlain();
+    expect(out).toContain("REQUESTS BY ENV");
+    expect(out).toContain("Status: ok");
   });
   it("renders the pattern glyph legend", () => {
     const out = donut({ data: [30, 40, 30], labels: ["CPU", "MEM", "NET"] }).toPlain();

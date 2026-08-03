@@ -10,12 +10,10 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next — founder direction (S09 candidate):** analyze `design-reference/`
-  (tui-chart.html · mudra-chart.html · mudra-dashboard.html) and rebuild the chart
-  look to match that design language. Founder feedback: current charts are
-  "not looking that great." Learn the reference, then carry it into the terminal
-  panel + renderers.
-- ✅ **S09 — circular charts LOCKED (pie/donut braille-dot look):** see the
+- 🔜 **Next — founder direction (Session 10 candidate):** rebuild the remaining chart
+  families (`area`/`bar`/`line`/`sparkline`/…) to carry the LOCKED Session 09 look
+  and feel. Also pending: exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- ✅ **Session 09 (S09) — circular charts LOCKED (pie/donut braille-dot look):** see the
   "LOCKED: circular charts" contract in `packages/core/README.md`. The braille
   sub-pixel circle + dashed panel + tone-ramp/one-accent + right legend is the
   official look — **every future chart rebuild should carry this exact look and

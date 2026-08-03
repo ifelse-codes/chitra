@@ -15,7 +15,7 @@
   dots, no fill patterns / in-wedge labels. Area chart locked to the same language
   (line = fill's top edge, accent only on the peak). Docs site font stack updated to
   Cascadia Mono (only glyph-complete braille mono). `verify-session-09.sh`
-  31/31 green; 130 core tests green. Handoff for LLM polish at
+  31/31 green; 134 core tests green. Handoff for LLM polish at
   `scripts/ring-polish-handoff.mjs`; live preview `/tmp/ring-lab/index.html`.
 
 ## Next Session

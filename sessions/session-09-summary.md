@@ -1,6 +1,6 @@
 # Session 09 Summary — design-language rebuild: braille-dot circular charts LOCKED
 
-**Status: LANDED.** Branch `session-09-design-reference` merged to `main`. 130 core
+**Status: LANDED.** Branch `session-09-design-reference` merged to `main`. 134 core
 tests green; `verify-session-09.sh` 31/31; pie/donut look is the LOCKED official
 design language; area chart carries the same language.
 
@@ -20,16 +20,16 @@ design language; area chart carries the same language.
   spaces (never blank-braille `⠀`), accent only on the peak cap + footer `max`.
 - **Font fix**: Google-Fonts JetBrains Mono has no braille glyphs; docs site font
   stack now leads with **Cascadia Mono** (the only tested mono with 256/256 braille
-  glyphs and identical 0.6em advance for ASCII/braille/box-drawing). Docs tests 130.
+  glyphs and identical 0.6em advance for ASCII/braille/box-drawing). Docs tests 134.
 - **Gallery + docs**: `ansi-charts.json` regenerated (20 charts), `charts.ts`
-  updated, docs test stat 116→130.
+  updated, docs test stat 116→134.
 - **Handoff + preview**: `scripts/ring-polish-handoff.mjs` (self-contained, prints
   pie/donut in plain + color) for a future LLM to polish without touching the lib;
   live design preview at `/tmp/ring-lab/index.html`.
 - `scripts/verify-session-09.sh` — **ALL GREEN (31 pass, 0 fail)**; `demo-session-09.sh` — exit 0.
 
 ## Verification
-- `pnpm --filter @chitra/core run test` — 130/130.
+- `pnpm --filter @chitra/core run test` — 134/134.
 - `pnpm --filter @chitra/core run typecheck` — exit 0.
 - `scripts/verify-session-09.sh` — 31/31.
 

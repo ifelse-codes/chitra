@@ -62,7 +62,7 @@
     peak cap + footer `max` value. See "LOCKED: area chart" in `packages/core/README.md`.
   - Live design preview: `/tmp/ring-lab/index.html`; handoff for LLM polish:
     `scripts/ring-polish-handoff.mjs`.
-- **130 core tests stay green.** Never leave the suite red.
+- **134 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best chart lib ever created."*
 
 ## Environment quirks / gotchas
