@@ -1,76 +1,54 @@
 import type { PieChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
-import { formatNumber } from "../utils.js";
-
-const PIE_CHARS = ["█", "▓", "▒", "░", "▪", "▫", "◼", "◻"];
+import { stripAnsi } from "../ansi.js";
+import { buildSlices, renderRing, renderLegend } from "./ring.js";
+import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 export function pie(opts: PieChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
-  const width = opts.width ?? 40;
   const data = opts.data;
   const labels = opts.labels ?? data.map((_, i) => `Item ${i + 1}`);
-  const total = data.reduce((a, b) => a + b, 0);
-  const radius = opts.radius ?? Math.floor(Math.min(width, (opts.height ?? 20)) / 4);
+
+  const radius = opts.radius ?? 8;
+  const innerRadius = 0;
+
+  const { slices, total } = buildSlices(data, labels, theme);
 
   function buildLines(): string[] {
+    const ring = renderRing(slices, radius, innerRadius, noColor);
+    const legend = renderLegend(slices, noColor, theme);
+    const ringCols = radius * 4 + 1;
+    const width = opts.width ?? Math.max(ringCols + legend.width + 8, 52);
+
     const lines: string[] = [];
+    lines.push(frameTop(width, opts.title ?? "PIE", undefined, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
 
-    if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
-      lines.push("");
+    // ring on the left, legend on the right, vertically centred
+    const legendGap = 3;
+    const h = Math.max(ring.length, legend.rows.length);
+    const legendOffset = Math.max(0, Math.floor((ring.length - legend.rows.length) / 2));
+    for (let i = 0; i < h; i++) {
+      const ringRow = i < ring.length ? ring[i]! : "";
+      const legRow = i >= legendOffset && i < legendOffset + legend.rows.length
+        ? legend.rows[i - legendOffset]!
+        : "";
+      const content = padRow(ringRow, ringCols) + " ".repeat(legendGap) + legRow;
+      lines.push(frameRow(width, content, theme.axis, noColor));
     }
 
-    const cx = radius * 2;
-    const cy = radius;
-    const rows = radius * 2 + 1;
-    const cols = radius * 4 + 1;
-
-    const cumulative: number[] = [];
-    let cum = 0;
-    for (const v of data) {
-      cum += (v / total) * Math.PI * 2;
-      cumulative.push(cum);
-    }
-
-    for (let row = 0; row < rows; row++) {
-      let rowStr = "";
-      for (let col = 0; col < cols; col++) {
-        const dx = (col - cx) / 2;
-        const dy = row - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist <= radius) {
-          const angle = (Math.atan2(dy, dx) + Math.PI * 2) % (Math.PI * 2);
-          let seriesIdx = data.length - 1;
-          for (let i = 0; i < cumulative.length; i++) {
-            if (angle < cumulative[i]) {
-              seriesIdx = i;
-              break;
-            }
-          }
-          const color = theme.colors[seriesIdx % theme.colors.length];
-          const ch = PIE_CHARS[seriesIdx % PIE_CHARS.length];
-          rowStr += colorize(ch, color, noColor);
-        } else {
-          rowStr += " ";
-        }
-      }
-      lines.push(rowStr);
-    }
-
-    lines.push("");
-    data.forEach((v, i) => {
-      const pct = ((v / total) * 100).toFixed(1);
-      const color = theme.colors[i % theme.colors.length];
-      const label = labels[i];
-      const ch = PIE_CHARS[i % PIE_CHARS.length];
-      lines.push(
-        colorize(`${ch} ${label}: ${formatNumber(v)} (${pct}%)`, color, noColor)
-      );
-    });
-
+    lines.push(frameRule(width, theme.axis, noColor));
+    const foot = `${slices.length} slices · total ${formatTotal(total)}`;
+    lines.push(frameRow(width, foot, theme.axis, noColor));
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
+  }
+
+  function formatTotal(t: number): string {
+    if (t >= 1_000_000) return (t / 1_000_000).toFixed(2) + "M";
+    if (t >= 1_000) return (t / 1_000).toFixed(1) + "k";
+    return String(Math.round(t));
   }
 
   const output = buildLines().join("\n");
@@ -91,4 +69,9 @@ export function pie(opts: PieChartOptions): ChartResult {
       };
     },
   };
+}
+
+function padRow(row: string, width: number): string {
+  const len = stripAnsi(row).length;
+  return len >= width ? row : row + " ".repeat(width - len);
 }

@@ -2,87 +2,50 @@ import type { DonutChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { colorize, stripAnsi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
-
-const DONUT_CHARS = ["█", "▓", "▒", "░", "▪", "▫", "◼", "◻"];
+import { buildSlices, renderRing, renderLegend } from "./ring.js";
+import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 export function donut(opts: DonutChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
   const data = opts.data;
   const labels = opts.labels ?? data.map((_, i) => `Item ${i + 1}`);
-  const total = data.reduce((a, b) => a + b, 0);
+
   const radius = opts.radius ?? 8;
-  const innerRadius = opts.innerRadius ?? Math.floor(radius * 0.5);
+  const innerRadius = opts.innerRadius ?? Math.max(2, Math.floor(radius * 0.5));
+
+  const { slices, total } = buildSlices(data, labels, theme);
+  const centerText = formatNumber(total);
 
   function buildLines(): string[] {
+    const ring = renderRing(slices, radius, innerRadius, noColor, centerText, theme.label);
+    const legend = renderLegend(slices, noColor, theme, opts.summary !== false);
+    const ringCols = radius * 4 + 1;
+    const eyebrow = (opts.eyebrow ?? "DISTRIBUTION").toUpperCase();
+    const width = opts.width ?? Math.max(ringCols + legend.width + 8, 52);
+
     const lines: string[] = [];
+    lines.push(frameTop(width, opts.title ?? "DONUT", opts.timestamp, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
 
-    if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
-      lines.push("");
+    const legendGap = 3;
+    const h = Math.max(ring.length, legend.rows.length);
+    const legendOffset = Math.max(0, Math.floor((ring.length - legend.rows.length) / 2));
+    for (let i = 0; i < h; i++) {
+      const ringRow = i < ring.length ? ring[i]! : "";
+      const legRow = i >= legendOffset && i < legendOffset + legend.rows.length
+        ? legend.rows[i - legendOffset]!
+        : "";
+      const content = padRow(ringRow, ringCols) + " ".repeat(legendGap) + legRow;
+      lines.push(frameRow(width, content, theme.axis, noColor));
     }
 
-    const cx = radius * 2;
-    const cy = radius;
-    const rows = radius * 2 + 1;
-    const cols = radius * 4 + 1;
-
-    const cumulative: number[] = [];
-    let cum = 0;
-    for (const v of data) {
-      cum += (v / total) * Math.PI * 2;
-      cumulative.push(cum);
+    if (opts.status) {
+      lines.push(frameRule(width, theme.axis, noColor));
+      lines.push(frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor));
     }
-
-    const centerText = formatNumber(total);
-    const centerRow = Math.floor(rows / 2);
-
-    for (let row = 0; row < rows; row++) {
-      let rowStr = "";
-      for (let col = 0; col < cols; col++) {
-        const dx = (col - cx) / 2;
-        const dy = row - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist >= innerRadius && dist <= radius) {
-          const angle = (Math.atan2(dy, dx) + Math.PI * 2) % (Math.PI * 2);
-          let seriesIdx = data.length - 1;
-          for (let i = 0; i < cumulative.length; i++) {
-            if (angle < cumulative[i]) {
-              seriesIdx = i;
-              break;
-            }
-          }
-          const color = theme.colors[seriesIdx % theme.colors.length];
-          const ch = DONUT_CHARS[seriesIdx % DONUT_CHARS.length];
-          rowStr += colorize(ch, color, noColor);
-        } else if (dist < innerRadius) {
-          if (row === centerRow) {
-            const offset = col - cx + Math.floor(centerText.length / 2);
-            if (offset >= 0 && offset < centerText.length) {
-              rowStr += colorize(centerText[offset], theme.label, noColor);
-            } else {
-              rowStr += " ";
-            }
-          } else {
-            rowStr += " ";
-          }
-        } else {
-          rowStr += " ";
-        }
-      }
-      lines.push(rowStr);
-    }
-
-    lines.push("");
-    data.forEach((v, i) => {
-      const pct = ((v / total) * 100).toFixed(1);
-      const color = theme.colors[i % theme.colors.length];
-      const label = labels[i];
-      const ch = DONUT_CHARS[i % DONUT_CHARS.length];
-      lines.push(colorize(`${ch} ${label}: ${formatNumber(v)} (${pct}%)`, color, noColor));
-    });
-
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
@@ -104,4 +67,9 @@ export function donut(opts: DonutChartOptions): ChartResult {
       };
     },
   };
+}
+
+function padRow(row: string, width: number): string {
+  const len = stripAnsi(row).length;
+  return len >= width ? row : row + " ".repeat(width - len);
 }
