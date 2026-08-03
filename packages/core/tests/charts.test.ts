@@ -67,6 +67,15 @@ describe("pie chart", () => {
     expect(pcts[0]).toBe(50);
     expect(pcts[1]).toBe(50);
   });
+  it("draws a perfect round circle via braille sub-pixels", () => {
+    const out = pie({ data: [35, 25, 20, 12, 8], labels: ["A", "B", "C", "D", "E"] }).toPlain();
+    expect(out).toMatch(/[\u2801-\u28FF]/); // lit braille dots present
+    expect(out).toContain("█"); // legend swatches still block glyphs
+  });
+  it("spends the accent on one slice only in colour mode", () => {
+    const out = pie({ data: [40, 30, 30], theme: "default" }).toString();
+    expect(out).toContain("\x1b[38;2;139;124;246m"); // accent violet
+  });
 });
 
 describe("donut chart", () => {
@@ -92,11 +101,12 @@ describe("donut chart", () => {
     const out = donut({ data: [30, 40, 30], eyebrow: "Distribution · Requests" }).toPlain();
     expect(out).toContain("DISTRIBUTION · REQUESTS");
   });
-  it("renders the glyph legend", () => {
+  it("renders the pattern glyph legend", () => {
     const out = donut({ data: [30, 40, 30], labels: ["CPU", "MEM", "NET"] }).toPlain();
-    expect(out).toContain("*─CPU");
-    expect(out).toContain("o─MEM");
-    expect(out).toContain("+─NET");
+    expect(out).toContain("CPU");
+    expect(out).toContain("MEM");
+    expect(out).toContain("NET");
+    expect(out).toContain("30 (30.0%)");
   });
   it("renders metric cells with value and pct", () => {
     const out = donut({ data: [50, 50], labels: ["A", "B"] }).toPlain();
@@ -104,9 +114,11 @@ describe("donut chart", () => {
     expect(out).toContain("A");
     expect(out).toContain("B");
   });
-  it("summary: false suppresses metric cells", () => {
+  it("summary: false suppresses legend values", () => {
     const out = donut({ data: [50, 50], labels: ["A", "B"], summary: false }).toPlain();
-    expect(out).not.toContain("%");
+    expect(out).not.toContain("50.0%");
+    expect(out).toContain("A");
+    expect(out).toContain("B");
   });
   it("renders the status footer", () => {
     const out = donut({ data: [30, 40, 30], status: "All systems operational" }).toPlain();
