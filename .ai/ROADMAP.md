@@ -15,6 +15,14 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   look to match that design language. Founder feedback: current charts are
   "not looking that great." Learn the reference, then carry it into the terminal
   panel + renderers.
+- ✅ **S09 — circular charts LOCKED (pie/donut braille-dot look):** see the
+  "LOCKED: circular charts" contract in `packages/core/README.md`. The braille
+  sub-pixel circle + dashed panel + tone-ramp/one-accent + right legend is the
+  official look — **every future chart rebuild should carry this exact look and
+  feel**. Area chart locked to the same language too (line = fill top edge,
+  accent only on the peak). Docs site updated (Cascadia Mono font stack for
+  braille), handoff file at `scripts/ring-polish-handoff.mjs`, live preview at
+  `/tmp/ring-lab/index.html`.
 - ✅ **S06** — Real publishable `dist/` build for `@chitra/core` (ESM + CJS + `.d.ts`, zero deps).
 - ✅ **S07** — CI workflows (`.github/workflows/ci.yml`: core · docs · chart-drift gates, pinned toolchain).
 - ✅ **Session 08 (S08)** — release.yml publish workflow (this session). v* tag push → re-runs S07

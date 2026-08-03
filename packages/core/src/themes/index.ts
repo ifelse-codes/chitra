@@ -3,6 +3,9 @@ import { hexToAnsi, ansi } from "../ansi.js";
 
 const h = hexToAnsi;
 
+/** Greyscale tone ramp for mudra-style "one hue + tone ramp" separation. */
+export const GREY_TONES: string[] = ["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi);
+
 export const themes: Record<ThemeName, Theme> = {
   default: {
     name: "default",
@@ -15,6 +18,8 @@ export const themes: Record<ThemeName, Theme> = {
       ansi.brightRed,
       ansi.brightWhite,
     ],
+    accent: h("#8B7CF6"),
+    tones: GREY_TONES,
     axis: ansi.brightBlack,
     label: ansi.white,
     title: ansi.bold + ansi.brightWhite,
@@ -32,6 +37,8 @@ export const themes: Record<ThemeName, Theme> = {
       h("#bf616a"),
       h("#d08770"),
     ],
+    accent: h("#88c0d0"),
+    tones: GREY_TONES,
     axis: h("#4c566a"),
     label: h("#d8dee9"),
     title: h("#eceff4"),
@@ -49,6 +56,8 @@ export const themes: Record<ThemeName, Theme> = {
       h("#ff5555"),
       h("#ffb86c"),
     ],
+    accent: h("#bd93f9"),
+    tones: GREY_TONES,
     axis: h("#6272a4"),
     label: h("#f8f8f2"),
     title: h("#ffffff"),
@@ -66,6 +75,8 @@ export const themes: Record<ThemeName, Theme> = {
       h("#ff7b72"),
       h("#39c5cf"),
     ],
+    accent: h("#58a6ff"),
+    tones: GREY_TONES,
     axis: h("#30363d"),
     label: h("#8b949e"),
     title: h("#f0f6fc"),
@@ -83,6 +94,8 @@ export const themes: Record<ThemeName, Theme> = {
       h("#f7768e"),
       h("#73daca"),
     ],
+    accent: h("#7aa2f7"),
+    tones: GREY_TONES,
     axis: h("#3b4261"),
     label: h("#a9b1d6"),
     title: h("#c0caf5"),
@@ -100,6 +113,8 @@ export const themes: Record<ThemeName, Theme> = {
       h("#dc322f"),
       h("#6c71c4"),
     ],
+    accent: h("#268bd2"),
+    tones: GREY_TONES,
     axis: h("#586e75"),
     label: h("#93a1a1"),
     title: h("#fdf6e3"),
@@ -117,6 +132,8 @@ export const themes: Record<ThemeName, Theme> = {
       ansi.white,
       ansi.brightBlack,
     ],
+    accent: ansi.brightWhite,
+    tones: [ansi.white, ansi.brightBlack, ansi.black, ansi.brightBlack],
     axis: ansi.brightBlack,
     label: ansi.white,
     title: ansi.bold + ansi.brightWhite,
@@ -125,11 +142,13 @@ export const themes: Record<ThemeName, Theme> = {
 };
 
 export function resolveTheme(theme: ThemeName | Theme | undefined): Theme {
-  if (!theme) return themes.default;
-  if (typeof theme === "string") {
-    return themes[theme] ?? themes.default;
-  }
-  return theme;
+  const base = typeof theme === "string" ? themes[theme] : theme;
+  const t = base ?? themes.default;
+  return {
+    ...t,
+    accent: t.accent ?? t.colors[0] ?? GREY_TONES[0]!,
+    tones: t.tones ?? GREY_TONES,
+  };
 }
 
 export { type Theme, type ThemeName };

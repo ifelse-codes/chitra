@@ -46,7 +46,23 @@
 - **Public API stability**: exported fns (`line`/`bar`/`area`/`sparkline`/… + `plot()` fluent
   builder) shouldn't break for consumers. `BaseChartOptions` carries shared fields; specific
   charts only declare unique options. `PlotBuilder` wraps the same chart fns (no duplication).
-- **121 core tests stay green.** Never leave the suite red.
+- **LOCKED design (S09) — all future charts follow this look and feel** (see the
+  "LOCKED: circular charts" contract in `packages/core/README.md`):
+  - **Braille sub-pixel drawing** (2×4 dots/cell, supersampled 2×2 per dot) for smooth
+    round geometry — no blocky steps.
+  - **One accent hue on the primary/largest slice**, grey tone ramp (`#ECECEF→#6A6A75`)
+    on the rest — never per-slice fill patterns/stripes/in-wedge labels.
+  - **Dashed panel frame** (`┌╌…╌┐`, `│ ╌…╌ │`), eyebrow row, right-aligned legend
+    beside the ring, optional status row, donut center shows total.
+  - **Braille needs a glyph-complete mono font** (Cascadia Mono/Fira Code/Menlo) — docs
+    site font stack must keep one or braille columns misalign in the browser.
+  - **Area chart locked too** (S09): line = fill's interpolated top edge (no separate
+    stroke); y-range auto-scales to the data so the area fills the panel; empty cells are
+    spaces (never blank-braille `⠀` which renders as faint dots); one accent only on the
+    peak cap + footer `max` value. See "LOCKED: area chart" in `packages/core/README.md`.
+  - Live design preview: `/tmp/ring-lab/index.html`; handoff for LLM polish:
+    `scripts/ring-polish-handoff.mjs`.
+- **130 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best chart lib ever created."*
 
 ## Environment quirks / gotchas

@@ -18,6 +18,10 @@ export interface Theme {
   label: string;
   title: string;
   grid?: string;
+  /** One-hue accent (mudra design language). Falls back to colors[0]. */
+  accent?: string;
+  /** Greyscale tone ramp for non-accent series. Falls back to a grey ramp. */
+  tones?: string[];
 }
 
 export interface Padding {
@@ -107,6 +111,14 @@ export interface PieChartOptions extends BaseChartOptions {
 
 export interface DonutChartOptions extends PieChartOptions {
   innerRadius?: number;
+  /** Shown top-right of the dashed panel frame. */
+  timestamp?: string;
+  /** Shown in the panel footer, e.g. "All systems operational ✓". */
+  status?: string;
+  /** Eyebrow caption under the header (uppercase, spaced). */
+  eyebrow?: string;
+  /** Show value + pct metric cells below the legend. Default true. */
+  summary?: boolean;
 }
 
 export interface HeatmapOptions extends BaseChartOptions {

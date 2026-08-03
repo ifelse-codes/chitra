@@ -1,26 +1,27 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 08 — COMPLETE
-- **Type:** CODE — release.yml publish workflow + line-chart/SVG/dashboard upgrades
-- **Branch:** `session-08-release-workflow` (from `main`)
-- **Date last updated:** 2026-08-01
+- **Number:** 09 — COMPLETE
+- **Type:** CODE — design-language rebuild: braille-dot circular charts LOCKED
+- **Branch:** `session-09-design-reference` (from `main`)
+- **Date last updated:** 2026-08-03
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 08.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S07 (PR #4 landed S07 CI).
-- **S08 landed on `main`**: `.github/workflows/release.yml` (v* tag trigger; re-runs
-  the three S07 CI gates as `needs:` of a `publish` job; pinned Node 26 / pnpm 9.12.3;
-  `--access public` + `NODE_AUTH_TOKEN`). Line chart upgraded to SV-grade (ascii
-  connected renderer, clean X-axis, stable gridlines). Shared `LineChartModel` +
-  `toSVG()` web renderer, docs render real core SVG. Terminal dashboard panel look
-  (`timestamp` / `status` / `summary` options) with tests. `verify-session-08.sh`
-  15/15 green; 121 core tests green.
+- `.ai/SESSION` = 09.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S08.
+- **S09 landed on `main`**: the braille sub-pixel circular chart look (pie/donut)
+  is LOCKED as the official design language — dashed panel frame, one accent hue on
+  the largest slice, grey tone ramp, right-aligned legend, supersampled 2×2 braille
+  dots, no fill patterns / in-wedge labels. Area chart locked to the same language
+  (line = fill's top edge, accent only on the peak). Docs site font stack updated to
+  Cascadia Mono (only glyph-complete braille mono). `verify-session-09.sh`
+  31/31 green; 130 core tests green. Handoff for LLM polish at
+  `scripts/ring-polish-handoff.mjs`; live preview `/tmp/ring-lab/index.html`.
 
 ## Next Session
-- **Number:** 09 — **founder direction:** analyze `design-reference/` (tui-chart ·
-  mudra-chart · mudra-dashboard), learn the design language, and rebuild the chitra
-  chart look to match it. Founder feedback: current charts are "not looking that
-  great." Lower-priority backlog: `artifacts/api-server` beyond `/healthz` · S05
-  ground-truth remediation · exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- **Number:** 10 — **candidate:** rebuild more chart types (`area`, `bar`, `line`,
+  `sparkline`, …) to carry the LOCKED S09 look; or continue the `design-reference/`
+  deep-dive for remaining chart families. Lower-priority backlog:
+  `artifacts/api-server` beyond `/healthz` · S05 ground-truth remediation ·
+  exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
 - Open in a **new chat** (one session per chat).

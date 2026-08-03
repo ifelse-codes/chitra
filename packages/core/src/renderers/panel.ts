@@ -1,6 +1,6 @@
 // Shared terminal "panel" primitives — dashed-border frame, rule, padded
 // rows — modeled on the tui-chart.html reference design language. Any chart
-// renderer (line, bar, area, ...) can compose these into a consistent
+// renderer (line, bar, area, donut, ...) can compose these into a consistent
 // terminal-native look that mirrors the SVG/web output.
 import { colorize, visibleLength } from "../ansi.js";
 
@@ -10,23 +10,28 @@ export function frameTop(
   meta: string | undefined,
   frameColor: string,
   textColor: string,
-  noColor: boolean
+  noColor: boolean,
+  dashed = false
 ): string {
   const inner = width - 2;
   const left = title ? ` ${title} ` : "";
   const right = meta ? ` ${meta} ` : "";
   const dashCount = Math.max(1, inner - 2 - visibleLength(left) - visibleLength(right));
+  const dash = dashed ? "╌" : "─";
+  const tl = dashed ? "┌╌" : "┌─";
+  const tr = dashed ? "╌┐" : "─┐";
   return (
-    colorize("┌─", frameColor, noColor) +
+    colorize(tl, frameColor, noColor) +
     colorize(left, textColor, noColor) +
-    colorize("─".repeat(dashCount), frameColor, noColor) +
+    colorize(dash.repeat(dashCount), frameColor, noColor) +
     colorize(right, textColor, noColor) +
-    colorize("─┐", frameColor, noColor)
+    colorize(tr, frameColor, noColor)
   );
 }
 
-export function frameBottom(width: number, frameColor: string, noColor: boolean): string {
-  return colorize("└" + "─".repeat(width - 2) + "┘", frameColor, noColor);
+export function frameBottom(width: number, frameColor: string, noColor: boolean, dashed = false): string {
+  const dash = dashed ? "╌" : "─";
+  return colorize("└" + dash.repeat(width - 2) + "┘", frameColor, noColor);
 }
 
 export function frameRow(width: number, content: string, frameColor: string, noColor: boolean): string {
