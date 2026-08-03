@@ -1,6 +1,6 @@
 import type { PieChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { stripAnsi } from "../ansi.js";
+import { colorize, stripAnsi } from "../ansi.js";
 import { buildSlices, renderRing, renderLegend } from "./ring.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -22,8 +22,11 @@ export function pie(opts: PieChartOptions): ChartResult {
     const width = opts.width ?? Math.max(ringCols + legend.width + 8, 52);
 
     const lines: string[] = [];
-    lines.push(frameTop(width, opts.title ?? "PIE", undefined, theme.axis, theme.title, noColor, true));
+    lines.push(frameTop(width, opts.title ?? "PIE", opts.timestamp, theme.axis, theme.title, noColor, true));
     lines.push(frameRule(width, theme.axis, noColor));
+    if (opts.eyebrow) {
+      lines.push(frameRow(width, colorize(opts.eyebrow.toUpperCase(), theme.label, noColor), theme.axis, noColor));
+    }
 
     // ring on the left, legend on the right, vertically centred
     const legendGap = 3;
@@ -41,6 +44,9 @@ export function pie(opts: PieChartOptions): ChartResult {
     lines.push(frameRule(width, theme.axis, noColor));
     const foot = `${slices.length} slices · total ${formatTotal(total)}`;
     lines.push(frameRow(width, foot, theme.axis, noColor));
+    if (opts.status) {
+      lines.push(frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor));
+    }
     lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
