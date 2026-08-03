@@ -105,9 +105,46 @@ look for terminal output:
 - **SVG output mirrors the terminal model**: the web renderer draws the same tones,
   dashes, glyphs, grid, and captions as the terminal renderer, from the same model.
 
-The exact look is derived from each theme's palette (mudra's greyscale tone ramp, the
-phosphor-green terminal accent, etc.), so all seven built-in themes keep working and the
-design language carries through unchanged.
+### LOCKED: circular charts (pie / donut) — session 09 design
+
+The pie and donut look is **the locked reference for every future circular chart**. Rules
+that must not change:
+
+- **The circle is drawn as braille sub-pixels** (2 dots wide × 4 dots tall per cell) at
+  dot-space resolution, so the curve reads as a genuinely round circle — matching the
+  reference HTML's stroked SVG circles. **No** fill patterns (`█▓▒░▚▞`), **no** density
+  stripes, **no** radial seams, **no** in-wedge labels. Clean solid disc, round rim.
+- **Slice separation is tone ramp + one accent**, never per-slice fill patterns: the
+  largest slice gets the theme's single accent hue, the rest get the grey tone ramp
+  (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`). In color output the slices read apart;
+  in plain mode the legend is the separator.
+- **Edge quality**: each braille dot is supersampled at 2×2 sub-points and lit only when
+  the majority fall inside the ring — keeps the rim smooth and vertically symmetric.
+- **Right-aligned legend** beside the ring: solid swatch + label, value and percent
+  right-aligned. Ring on the left, legend vertically centred.
+- **Panel**: dashed frame (`┌╌…╌┐`), eyebrow row (uppercase, letter-spaced) under the
+  top rule, optional status row before the bottom rule. Donut centre shows the total.
+- **Braille rendering requires a glyph-complete mono font** (Cascadia Mono, Fira Code,
+  Menlo). Web/editor output must load one or the circle columns misalign.
+
+### LOCKED: area chart — session 09 design
+
+The area chart follows the same locked language. Rules that must not change:
+
+- **The line IS the fill's top edge.** No separate stroke pass: every column of the plot
+  is filled down to the baseline with interpolated sub-pixel braille, and the top dot of
+  each column is the line. This gives one clean continuous curve with no gap or jitter
+  between the stroke and the fill.
+- **Auto-scale the y-range to the data** (`yMin`/`yMax` default to the data min/max, not
+  0) so the area fills the panel height — no dead space hugging the bottom.
+- **Empty cells are spaces, never blank-braille (`⠀` U+2800).** Blank braille renders as
+  faint dots in browsers; plain spaces keep the panel clean.
+- **One accent, used only for what's relevant.** The peak (series max) gets a small 3-dot
+  accent cap on the line; the rest of the line is the tone ramp (`#A4A4AE`), the fill is
+  a lighter tone (`#C6C6CE`), and the footer's `max N` value is accent too. The whole
+  curve must never be painted accent.
+- **Same panel language**: dashed frame, eyebrow row, y-axis labels with `│` guide on the
+  left, footer `series · max · min · last`.
 
 ## License
 
