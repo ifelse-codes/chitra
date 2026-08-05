@@ -62,6 +62,8 @@ export interface LineChartOptions extends BaseChartOptions {
   status?: string;
   /** Show min/max/avg/last summary block below the chart. Default true when legend is shown. */
   summary?: boolean;
+  /** Eyebrow caption under the header (uppercase, spaced). */
+  eyebrow?: string;
 }
 
 export interface BarChartOptions extends BaseChartOptions {
@@ -202,8 +204,6 @@ export interface SankeyOptions extends BaseChartOptions {
 
 export interface AreaChartOptions extends LineChartOptions {
   fillChar?: string;
-  /** Eyebrow caption under the header (uppercase, spaced). */
-  eyebrow?: string;
 }
 
 export interface ChartResult {

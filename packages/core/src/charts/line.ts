@@ -2,7 +2,7 @@ import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { colorize, padStart, stripAnsi, visibleLength } from "../ansi.js";
 import { formatNumber } from "../utils.js";
-import { createLineChartModel, lineModelToPlain, lineModelToSvg, type LineChartModel, type LineSeriesModel } from "./line-model.js";
+import { createLineChartModel, lineModelToPlain, lineModelToSvg, type LineSeriesModel } from "./line-model.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -12,7 +12,117 @@ function terminalWidth(explicit?: number): number {
   return Math.max(60, Math.min(cols || 76, 100));
 }
 
-/** Renders a chitra-standard TUI panel: frame, header, legend, plot, summary, status. */
+/** The 3 dot-columns around the primary series max get the single accent —
+ *  the rest of the curve stays on the tone ramp (LOCKED: accent spent once). */
+function primaryPeakCap(series: LineSeriesModel | undefined, dotCols: number): Set<number> {
+  const cap = new Set<number>();
+  if (!series || series.values.length < 2) return cap;
+  let maxIdx = 0;
+  let maxVal = series.values[0] ?? Number.NEGATIVE_INFINITY;
+  series.values.forEach((v, i) => {
+    if (v > maxVal) {
+      maxVal = v;
+      maxIdx = i;
+    }
+  });
+  const peakDotX = Math.round((maxIdx / (series.values.length - 1)) * (dotCols - 1));
+  cap.add(peakDotX - 1);
+  cap.add(peakDotX);
+  cap.add(peakDotX + 1);
+  return cap;
+}
+
+/** Legend style hints — the primary is a solid line; each extra series is a
+ *  spaced glyph marker chain (○ + × □), shown here with its dash character so
+ *  the series keeps a recognizable identity even in monochrome. */
+const DASH_CHARS = ["──", "╌╌", "··", "─╌"];
+
+function dashCharsFor(seriesIndex: number): string {
+  if (seriesIndex === 0) return DASH_CHARS[0]!;
+  return DASH_CHARS[((seriesIndex - 1) % (DASH_CHARS.length - 1)) + 1]!;
+}
+
+/** Every series drops its glyph marker (○ + × □) at every 2nd data point, so
+ *  crossing curves are identifiable by shape even in monochrome — matching the
+ *  SVG (index % 2 === 0). Markers beat lower-priority braille but the accent
+ *  cap on the primary peak outranks them. */
+function markerCells(
+  series: LineSeriesModel[],
+  colors: string[],
+  plotCols: number,
+  plotRows: number,
+  yMin: number,
+  yMax: number,
+  noColor: boolean
+): Map<number, string> {
+  const markers = new Map<number, string>();
+  if (series.length === 0) return markers;
+  const dotCols = plotCols * 2;
+  const dotRows = plotRows * 4;
+  series.forEach((s, si) => {
+    if (s.values.length < 2) return;
+    for (let i = 0; i < s.values.length; i += 2) {
+      const dotX = Math.round((i / (s.values.length - 1)) * (dotCols - 1));
+      const cell = Math.floor(dotX / 2);
+      const v = s.values[i] ?? 0;
+      const norm = yMax === yMin ? 0.5 : (v - yMin) / (yMax - yMin);
+      const dotY = dotRows - 1 - Math.round(norm * (dotRows - 1));
+      const row = Math.floor(dotY / 4);
+      const key = row * plotCols + cell;
+      if (!markers.has(key)) markers.set(key, colorize(s.marker, colors[si]!, noColor));
+    }
+  });
+  return markers;
+}
+
+/** Merge per-series braille rows into one row; empty cells are SPACES — never
+ *  blank-braille (U+2800), which renders as faint dots. Priority per cell:
+ *  primary accent cap > glyph marker > series line > grid guide. */
+function mergeLineCells(
+  lines: string[],
+  markers: Map<number, string>,
+  row: number,
+  colors: string[],
+  accent: string,
+  cap: Set<number>,
+  noColor: boolean
+): string {
+  if (lines.length === 0) return "";
+  const len = Math.max(...lines.map((l) => l.length));
+  let out = "";
+  for (let i = 0; i < len; i++) {
+    let ch = " ";
+    let si = -1;
+    for (let k = 0; k < lines.length; k++) {
+      const c = lines[k]?.[i] ?? " ";
+      if (c !== " ") {
+        ch = c;
+        si = k;
+        break;
+      }
+    }
+    if (si === -1) {
+      out += " ";
+      continue;
+    }
+    const inCap = si === 0 && (cap.has(i * 2) || cap.has(i * 2 + 1));
+    if (inCap) {
+      out += colorize(ch, accent, noColor);
+      continue;
+    }
+    const marker = markers.get(row * len + i);
+    if (marker) {
+      out += marker;
+      continue;
+    }
+    out += colorize(ch, colors[si]!, noColor);
+  }
+  return out;
+}
+
+/** Renders a chitra-standard TUI panel carrying the LOCKED S09 design
+ *  language: dashed frame, eyebrow row, `│` y-guide, braille line on the tone
+ *  ramp with the accent spent once on the peak, footer stats. */
 export function line(opts: LineChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -23,154 +133,202 @@ export function line(opts: LineChartOptions): ChartResult {
 
   const model = createLineChartModel(opts);
   const innerWidth = width - 4; // minus "│ " ... " │"
+  const acc = theme.accent!;
+  const tones = theme.tones!;
+  const lineColor = tones[2] ?? tones[1]!;
+  const seriesColors = model.series.map((s, i) =>
+    i === 0 ? lineColor : theme.colors[i % theme.colors.length]
+  );
 
-  const yAxisWidth = Math.max(
-    formatNumber(model.yMax).length,
-    formatNumber(model.yMin).length,
-    ...model.yTicks.map((t) => formatNumber(t).length)
-  ) + 1;
-  const plotCols = Math.max(8, innerWidth - (showAxes ? yAxisWidth + 1 : 0));
-  const plotRows = height;
+  const yAxisW =
+    Math.max(
+      formatNumber(Math.round(model.yMax)).length,
+      formatNumber(Math.round(model.yMin)).length
+    ) + 1;
+  const plotCols = Math.max(8, innerWidth - yAxisW - 2);
+  const plotRows = Math.max(3, height - 2);
 
-  function plotRowLabel(row: number): { label: string; isTick: boolean } {
-    if (!showAxes) return { label: "", isTick: false };
-    const closest = model.yTicks.find((t) => {
-      const rowNorm = 1 - row / Math.max(1, plotRows - 1);
-      const tNorm = (t - model.yMin) / Math.max(1e-9, model.yMax - model.yMin);
-      return Math.abs(rowNorm - tNorm) < 0.5 / Math.max(1, plotRows - 1);
-    });
-    if (closest === undefined) return { label: " ".repeat(yAxisWidth), isTick: false };
-    return { label: padStart(formatNumber(closest), yAxisWidth), isTick: true };
+  const yStep = Math.max(1, Math.floor(plotRows / 5));
+  /** Gridline rows (every yStep) get a dotted guide that never hides a curve —
+   *  series cells and markers outrank it, and it skips the top/base rows. */
+  function isGridRow(row: number): boolean {
+    return row > 0 && row < plotRows - 1 && row % yStep === 0;
   }
 
-  function renderBraillePlot(): string[] {
+  function plotRowLabel(row: number): string {
+    if (!showAxes) return "";
+    const yVal = model.yMax - (row / Math.max(1, plotRows - 1)) * (model.yMax - model.yMin);
+    return (row % yStep === 0 || row === plotRows - 1)
+      ? padStart(formatNumber(Math.round(yVal)), yAxisW - 1)
+      : " ".repeat(yAxisW - 1);
+  }
+
+  function renderBrailleRows(): string[] {
     const canvases = model.series.map(() => new BrailleCanvas(plotCols, plotRows));
-    model.series.forEach((series, index) => {
-      plotLineOnBrailleCanvas(canvases[index], series.values, model.yMin, model.yMax);
+    model.series.forEach((s, si) => {
+      if (s.values.length >= 2) plotLineOnBrailleCanvas(canvases[si]!, s.values, model.yMin, model.yMax);
     });
-
+    const cap = primaryPeakCap(model.series[0], plotCols * 2);
+    const markers = markerCells(model.series, seriesColors, plotCols, plotRows, model.yMin, model.yMax, noColor);
+    const gridColor = [...seriesColors, theme.grid ?? theme.axis];
     const rows: string[] = [];
     for (let row = 0; row < plotRows; row++) {
-      const { label, isTick } = plotRowLabel(row);
-      const axisChar = showAxes ? colorize(isTick ? "├" : "│", theme.axis, noColor) : "";
-      const emptyChar = isTick ? colorize("·", theme.axis, noColor) : "\u2800";
-      const rowChars = canvases.map((c) => c.toLines(emptyChar)[row] ?? "");
-      const merged = mergeCanvasRows(rowChars, model.series, noColor, emptyChar);
-      const prefix = showAxes ? colorize(label, theme.label, noColor) + axisChar : "";
-      rows.push(prefix + merged);
+      const lines = canvases.map((c) => c.toLines(" ")[row] ?? "");
+      lines.push(isGridRow(row) ? "·".repeat(plotCols) : " ".repeat(plotCols));
+      const cells = mergeLineCells(lines, markers, row, gridColor, acc, cap, noColor);
+      const prefix = showAxes ? colorize(plotRowLabel(row) + "│", theme.axis, noColor) : "";
+      rows.push(prefix + cells);
     }
     return rows;
   }
 
-  function renderBlockPlot(): string[] {
+  function renderBlockRows(): string[] {
     const grid = Array.from({ length: plotRows }, () => Array<string>(plotCols).fill(""));
-    model.series.forEach((series, si) => {
-      const values = series.values;
-      const colorAnsi = series.color;
-      for (let col = 0; col < plotCols; col++) {
-        const exactX = (col / Math.max(1, plotCols - 1)) * (values.length - 1);
-        const idxL = Math.floor(exactX);
-        const idxR = Math.min(values.length - 1, Math.ceil(exactX));
-        const frac = exactX - idxL;
-        const val = values[idxL] + frac * (values[idxR] - values[idxL]);
-        const yNorm = model.yMax === model.yMin ? 0.5 : (val - model.yMin) / (model.yMax - model.yMin);
-        const yRow = Math.round((1 - yNorm) * (plotRows - 1));
+    const cellCap = new Set<number>();
+    const primary = model.series[0];
 
-        let ch = renderer === "ascii" ? series.marker : "●";
-        if (renderer === "ascii" && col > 0) {
-          const isExactPoint = frac < 0.1 || frac > 0.9;
-          if (!isExactPoint) {
-            const prevX = ((col - 1) / Math.max(1, plotCols - 1)) * (values.length - 1);
-            const prevVal = values[Math.floor(prevX)];
-            ch = val > prevVal + 1e-9 ? "/" : val < prevVal - 1e-9 ? "\\" : "-";
-          }
-        }
-        if (yRow >= 0 && yRow < plotRows && !grid[yRow][col]) {
-          grid[yRow][col] = colorize(ch, colorAnsi, noColor);
-        }
-      }
-    });
-
-    const rows: string[] = [];
-    for (let row = 0; row < plotRows; row++) {
-      const { label, isTick } = plotRowLabel(row);
-      const axisChar = showAxes ? colorize(isTick ? "├" : "│", theme.axis, noColor) : "";
-      const prefix = showAxes ? colorize(label, theme.label, noColor) + axisChar : "";
-      let rowStr = prefix;
-      for (let col = 0; col < plotCols; col++) {
-        rowStr += grid[row][col] || (isTick && showAxes ? colorize("┈", theme.axis, noColor) : " ");
-      }
-      rows.push(rowStr);
+    function setCell(col: number, yRow: number, ch: string, color: string): void {
+      if (yRow < 0 || yRow >= plotRows || col < 0 || col >= plotCols) return;
+      if (grid[yRow]![col]) return;
+      grid[yRow]![col] = colorize(ch, color, noColor);
     }
-    return rows;
-  }
 
-  function renderXAxis(): string[] {
-    if (!showAxes) return [];
-    const axisPrefix = " ".repeat(yAxisWidth);
-    const rows = [colorize(axisPrefix + "└" + "─".repeat(plotCols), theme.axis, noColor)];
-    if (model.labels.length > 0) {
-      const n = model.labels.length;
-      const positions = model.labels.map((_, i) => Math.round((i / Math.max(1, n - 1)) * (plotCols - 1)));
-      const tickChars = Array<string>(plotCols).fill("─");
-      positions.forEach((p) => { if (p >= 0 && p < plotCols) tickChars[p] = "┼"; });
-      rows[0] = colorize(axisPrefix + "└" + tickChars.join(""), theme.axis, noColor);
-      const labelChars = Array<string>(plotCols).fill(" ");
-      model.labels.forEach((label, i) => {
-        const pos = positions[i];
-        const truncated = label.slice(0, Math.max(1, Math.floor(plotCols / n) - 1));
-        for (let j = 0; j < truncated.length; j++) {
-          const col = pos - Math.floor(truncated.length / 2) + j;
-          if (col >= 0 && col < plotCols) labelChars[col] = truncated[j];
+    if (primary && primary.values.length >= 2) {
+      let maxIdx = 0;
+      let maxVal = primary.values[0] ?? Number.NEGATIVE_INFINITY;
+      primary.values.forEach((v, i) => {
+        if (v > maxVal) {
+          maxVal = v;
+          maxIdx = i;
         }
       });
-      rows.push(" ".repeat(yAxisWidth + 1) + colorize(labelChars.join(""), theme.label, noColor));
+      const peakCell = Math.round((maxIdx / (primary.values.length - 1)) * (plotCols - 1));
+      cellCap.add(peakCell - 1);
+      cellCap.add(peakCell);
+      cellCap.add(peakCell + 1);
+    }
+
+    const yRowFor = (v: number): number => {
+      const yNorm = model.yMax === model.yMin ? 0.5 : (v - model.yMin) / (model.yMax - model.yMin);
+      return Math.round((1 - yNorm) * (plotRows - 1));
+    };
+
+    model.series.forEach((s, si) => {
+      if (s.values.length < 2) return;
+      const color = seriesColors[si]!;
+      for (let i = 0; i < s.values.length; i += 2) {
+        const col = Math.round((i / (s.values.length - 1)) * (plotCols - 1));
+        setCell(col, yRowFor(s.values[i] ?? 0), s.marker, color);
+      }
+    });
+
+    model.series.forEach((s, si) => {
+      if (s.values.length < 2) return;
+      const color = seriesColors[si]!;
+      for (let col = 0; col < plotCols; col++) {
+        const exactX = (col / Math.max(1, plotCols - 1)) * (s.values.length - 1);
+        const idxL = Math.floor(exactX);
+        const idxR = Math.min(s.values.length - 1, Math.ceil(exactX));
+        const frac = exactX - idxL;
+        const val = idxL === idxR ? s.values[idxL]! : s.values[idxL]! * (1 - frac) + s.values[idxR]! * frac;
+        const yRow = yRowFor(val);
+
+        let ch: string;
+        if (renderer === "ascii") {
+          ch = s.marker;
+          if (col > 0) {
+            const isExactPoint = frac < 0.1 || frac > 0.9;
+            if (!isExactPoint) {
+              const prevX = ((col - 1) / Math.max(1, plotCols - 1)) * (s.values.length - 1);
+              const prevVal = s.values[Math.floor(prevX)]!;
+              ch = val > prevVal + 1e-9 ? "/" : val < prevVal - 1e-9 ? "\\" : "-";
+            }
+          }
+        } else {
+          ch = "●";
+        }
+        const isCap = si === 0 && cellCap.has(col);
+        setCell(col, yRow, ch, isCap ? acc : color);
+      }
+    });
+
+    for (let row = 0; row < plotRows; row++) {
+      if (!isGridRow(row)) continue;
+      for (let col = 0; col < plotCols; col++) {
+        if (!grid[row]![col]) grid[row]![col] = colorize("·", theme.grid ?? theme.axis, noColor);
+      }
+    }
+
+    const rows: string[] = [];
+    for (let row = 0; row < plotRows; row++) {
+      const prefix = showAxes ? colorize(plotRowLabel(row) + "│", theme.axis, noColor) : "";
+      rows.push(prefix + grid[row]!.join(""));
     }
     return rows;
+  }
+
+  function renderXAxisLabels(): string[] {
+    if (!showAxes || model.labels.length === 0) return [];
+    const n = model.labels.length;
+    const slotW = Math.max(1, Math.floor(plotCols / n));
+    const labelChars = Array<string>(plotCols).fill(" ");
+    model.labels.forEach((label, i) => {
+      const truncated = label.slice(0, slotW);
+      const slotStart = Math.round((i * plotCols) / n);
+      const slotEnd = Math.min(plotCols, Math.round(((i + 1) * plotCols) / n));
+      let startCol = slotStart + Math.floor((slotEnd - slotStart - truncated.length) / 2);
+      if (startCol < 0) startCol = 0;
+      for (let j = 0; j < truncated.length && startCol + j < plotCols; j++) {
+        labelChars[startCol + j] = truncated[j]!;
+      }
+    });
+    return [" ".repeat(yAxisW) + colorize(labelChars.join(""), theme.label, noColor)];
   }
 
   function renderLegend(): string[] {
     if (!model.showLegend || model.series.length === 0) return [];
-    const items = model.series.map((s) => colorize(`──${s.marker}── ${s.name}`, s.color, noColor));
+    const items = model.series.map((s, i) =>
+      colorize(`${dashCharsFor(i)}${s.marker}${dashCharsFor(i)} ${s.name}`, seriesColors[i]!, noColor)
+    );
     return wrapItems(items, innerWidth);
   }
 
   function renderSummary(): string[] {
-    if (!model.showSummary) return [];
-    const rows: string[] = [colorize("╌".repeat(innerWidth), theme.axis, noColor)];
-    const colWidth = Math.max(16, Math.floor(innerWidth / Math.max(1, model.series.length)));
-    let line1 = "", line2 = "", line3 = "", line4 = "", header = "";
-    model.series.forEach((s) => {
-      header += padVisible(colorize(s.name, s.color, noColor), colWidth);
-      line1 += padVisible(colorize(` min ${formatNumber(s.stats.min)}`, theme.label, noColor), colWidth);
-      line2 += padVisible(colorize(` max ${formatNumber(s.stats.max)}`, theme.label, noColor), colWidth);
-      line3 += padVisible(colorize(` avg ${formatNumber(s.stats.avg)}`, theme.label, noColor), colWidth);
-      line4 += padVisible(colorize(`last ${formatNumber(s.stats.last)}`, theme.label, noColor), colWidth);
+    if (model.series.length === 0) return [];
+    const nameW = Math.max(...model.series.map((s) => visibleLength(s.name) + 2));
+    const rows = model.series.map((s, si) => {
+      const stats = s.stats;
+      const name = colorize(`${s.marker} ${s.name}`.padEnd(nameW), seriesColors[si]!, noColor);
+      const maxPart = si === 0
+        ? colorize(`max ${formatNumber(stats.max)}`, acc, noColor)
+        : `max ${formatNumber(stats.max)}`;
+      return `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
     });
-    rows.push(header, line1, line2, line3, line4);
-    return rows;
+    return wrapItems(rows, innerWidth);
   }
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(frameTop(width, model.title, opts.timestamp, theme.axis, theme.title, noColor));
-    if (opts.timestamp || model.showLegend) {
-      lines.push(frameRule(width, theme.axis, noColor));
-    }
+    const eyebrow = (opts.eyebrow ?? "TREND").toUpperCase();
+    lines.push(frameTop(width, opts.title ?? "LINE", opts.timestamp, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
     for (const item of renderLegend()) lines.push(frameRow(width, item, theme.axis, noColor));
-    if (model.showLegend) lines.push(frameRow(width, "", theme.axis, noColor));
 
-    const plotRowsOut = renderer === "braille" ? renderBraillePlot() : renderBlockPlot();
+    const plotRowsOut = renderer === "braille" ? renderBrailleRows() : renderBlockRows();
     for (const row of plotRowsOut) lines.push(frameRow(width, row, theme.axis, noColor));
-    for (const row of renderXAxis()) lines.push(frameRow(width, row, theme.axis, noColor));
+    for (const row of renderXAxisLabels()) lines.push(frameRow(width, row, theme.axis, noColor));
 
-    for (const row of renderSummary()) lines.push(frameRow(width, row, theme.axis, noColor));
+    if (model.showSummary) {
+      lines.push(frameRule(width, theme.axis, noColor));
+      for (const row of renderSummary()) lines.push(frameRow(width, row, theme.axis, noColor));
+    }
 
     if (opts.status) {
       lines.push(frameRule(width, theme.axis, noColor));
       lines.push(frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor));
     }
-    lines.push(frameBottom(width, theme.axis, noColor));
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
@@ -195,11 +353,6 @@ export function line(opts: LineChartOptions): ChartResult {
   };
 }
 
-function padVisible(str: string, width: number): string {
-  const len = visibleLength(str);
-  return len >= width ? str : str + " ".repeat(width - len);
-}
-
 function wrapItems(items: string[], maxWidth: number): string[] {
   const rows: string[] = [];
   let current = "";
@@ -214,43 +367,4 @@ function wrapItems(items: string[], maxWidth: number): string[] {
   }
   if (current) rows.push(current);
   return rows;
-}
-
-function mergeCanvasRows(
-  rows: string[],
-  series: LineSeriesModel[],
-  noColor: boolean,
-  emptyChar: string = "\u2800"
-): string {
-  if (rows.length === 0) return "";
-  const visualRows = rows.map(extractVisualChars);
-  const len = visualRows[0]?.length ?? 0;
-  const emptyVisible = stripAnsi(emptyChar);
-  let result = "";
-
-  for (let i = 0; i < len; i++) {
-    let found = false;
-    for (let si = 0; si < visualRows.length; si++) {
-      const ch = visualRows[si][i];
-      if (ch && ch !== emptyVisible && ch !== "\u2800" && ch !== " ") {
-        result += colorize(ch, series[si].color, noColor);
-        found = true;
-        break;
-      }
-    }
-    if (!found) result += emptyChar;
-  }
-  return result;
-}
-
-function extractVisualChars(row: string): string[] {
-  const chars: string[] = [];
-  let inEscape = false;
-  for (let i = 0; i < row.length; i++) {
-    const ch = row[i];
-    if (ch === "\x1b") { inEscape = true; continue; }
-    if (inEscape) { if (ch === "m") inEscape = false; continue; }
-    chars.push(ch);
-  }
-  return chars;
 }
