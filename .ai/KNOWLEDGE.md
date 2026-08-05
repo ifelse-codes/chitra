@@ -31,7 +31,7 @@
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @chitra/core run test` | 121 tests |
+| `pnpm --filter @chitra/core run test` | 142 tests |
 | `pnpm --filter @chitra/core run test:coverage` | tests + coverage |
 | `pnpm --filter @chitra/core run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
@@ -60,9 +60,17 @@
     stroke); y-range auto-scales to the data so the area fills the panel; empty cells are
     spaces (never blank-braille `⠀` which renders as faint dots); one accent only on the
     peak cap + footer `max` value. See "LOCKED: area chart" in `packages/core/README.md`.
+  - **Line chart locked to the founder's `tui-chart (1).html` reference** (S10): every
+    series is a continuous thin braille line in its own colour (primary on the tone
+    ramp), every series drops its glyph marker (`* ○ + × □`, every 2nd index, matching
+    the SVG), dotted `·` gridlines on the y-step rows in the grid colour (series/markers
+    outrank them), and per-series `min/max/avg/last` summary rows with the primary's
+    `max` in accent. The primary keeps the 3-dot accent peak cap, and the cap outranks
+    markers. Block/ascii renderers share the look. See "LOCKED: line chart" in
+    `packages/core/README.md`.
   - Live design preview: `/tmp/ring-lab/index.html`; handoff for LLM polish:
     `scripts/ring-polish-handoff.mjs`.
-- **134 core tests stay green.** Never leave the suite red.
+- **142 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best chart lib ever created."*
 
 ## Environment quirks / gotchas
