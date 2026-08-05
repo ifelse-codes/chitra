@@ -146,6 +146,29 @@ The area chart follows the same locked language. Rules that must not change:
 - **Same panel language**: dashed frame, eyebrow row, y-axis labels with `│` guide on the
   left, footer `series · max · min · last`.
 
+### LOCKED: line chart — session 10 design
+
+The line chart carries the same locked language as the area chart. Rules that must not change:
+
+- **Every series is a continuous thin line** (braille sub-pixels, interpolated between points) —
+  each series in its own colour (`*` primary on the tone ramp, the rest from the theme palette),
+  so curves read like a classic terminal chart rather than a fill diagram.
+- **Every series drops its glyph marker at data points** (`* ○ + × □`, every 2nd index) so
+  crossing curves stay traceable by shape even in monochrome — matching the SVG web renderer.
+  The legend shows each series' identity (`──*── Up  ╌╌○╌╌ Down  ··+·· Base`).
+- **Dashed gridlines** on the y-step rows (dotted `·` guides in the grid colour) — series cells
+  and markers always outrank them, and the top/base rows stay clean.
+- **Auto-scale the y-range to the data** (`yMin`/`yMax` default to the data min/max) so the
+  line fills the panel height — no dead space hugging the bottom. The shared `LineChartModel`
+  feeds the same range to the SVG web renderer.
+- **Empty cells are spaces, never blank-braille (`⠀` U+2800).**
+- **One accent, spent once**: the primary's peak (series max) gets a 3-dot accent cap; the rest
+  of the curve stays on its tone ramp, and the primary's `max N` in the summary is accent too.
+- **Per-series summary rows** under the chart: `* Up · min N · max N · avg N · last N` for every
+  series (MIN / MAX / AVG / LAST), replacing the single footer line.
+- **Same panel language**: dashed frame (`┌╌…╌┐`), eyebrow row, `│` y-guide on the left,
+  series legend (`──*── name`), clean X-axis labels.
+
 ## License
 
 MIT
