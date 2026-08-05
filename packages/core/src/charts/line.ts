@@ -1,6 +1,6 @@
 import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, stripAnsi, visibleLength } from "../ansi.js";
+import { colorize, padStart, stripAnsi, visibleLength, ansi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { createLineChartModel, lineModelToPlain, lineModelToSvg, type LineSeriesModel } from "./line-model.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
@@ -150,7 +150,8 @@ export function line(opts: LineChartOptions): ChartResult {
 
   const yStep = Math.max(1, Math.floor(plotRows / 5));
   /** Gridline rows (every yStep) get a dotted guide that never hides a curve —
-   *  series cells and markers outrank it, and it skips the top/base rows. */
+   *  series cells and markers outrank it, and it skips the top/base rows. Rendered
+   *  dim so it reads as a faint backdrop, never a competing stroke. */
   function isGridRow(row: number): boolean {
     return row > 0 && row < plotRows - 1 && row % yStep === 0;
   }
@@ -170,7 +171,7 @@ export function line(opts: LineChartOptions): ChartResult {
     });
     const cap = primaryPeakCap(model.series[0], plotCols * 2);
     const markers = markerCells(model.series, seriesColors, plotCols, plotRows, model.yMin, model.yMax, noColor);
-    const gridColor = [...seriesColors, theme.grid ?? theme.axis];
+    const gridColor = [...seriesColors, ansi.dim + (theme.grid ?? theme.axis)];
     const rows: string[] = [];
     for (let row = 0; row < plotRows; row++) {
       const lines = canvases.map((c) => c.toLines(" ")[row] ?? "");
@@ -255,7 +256,7 @@ export function line(opts: LineChartOptions): ChartResult {
     for (let row = 0; row < plotRows; row++) {
       if (!isGridRow(row)) continue;
       for (let col = 0; col < plotCols; col++) {
-        if (!grid[row]![col]) grid[row]![col] = colorize("·", theme.grid ?? theme.axis, noColor);
+        if (!grid[row]![col]) grid[row]![col] = colorize("·", ansi.dim + (theme.grid ?? theme.axis), noColor);
       }
     }
 
