@@ -45,7 +45,11 @@ export function createLineChartModel(options: LineChartOptions): LineChartModel 
   const raw = options.data;
   const data = Array.isArray(raw[0]) ? raw as number[][] : [raw as number[]];
   const { min, max } = minMax(data.flat());
-  const ticks = niceTicks(options.yMin ?? min, options.yMax ?? max, 6);
+  // Auto-scale the y-range to the data (like the LOCKED area chart) so the
+  // line fills the panel height — no dead space hugging the bottom.
+  const yMin = options.yMin ?? min;
+  const yMax = options.yMax ?? max;
+  const ticks = niceTicks(yMin, yMax, 6);
   const theme = resolveTheme(options.theme);
   const longest = Math.max(...data.map((values) => values.length));
   const labels = options.labels?.length
@@ -61,9 +65,9 @@ export function createLineChartModel(options: LineChartOptions): LineChartModel 
     xLabel: options.xLabel ?? "Time",
     yLabel: options.yLabel ?? "Value",
     labels,
-    yMin: ticks.min,
-    yMax: ticks.max,
-    yTicks: ticks.ticks,
+    yMin,
+    yMax,
+    yTicks: ticks.ticks.filter((t) => t >= yMin - 1e-9 && t <= yMax + 1e-9),
     series: data.map((values, index) => ({
       name: options.seriesLabels?.[index] ?? `Series ${index + 1}`,
       color: theme.colors[index % theme.colors.length],
