@@ -110,6 +110,98 @@ describe("line chart", () => {
     expect(result.toPlain()).toContain("Status: All systems operational");
   });
 
+  it("texture-codes series strokes in monochrome (solid primary, dashed, dotted)", () => {
+    const result = line({
+      data: [
+        [1, 1, 1, 1],
+        [2, 2, 2, 2],
+        [3, 3, 3, 3],
+      ],
+      seriesLabels: ["A", "B", "C"],
+      noColor: true,
+      height: 15,
+      renderer: "braille",
+    });
+    const rows = result.toPlain().split("\n");
+    const brailleCount = (s: string): number =>
+      [...s].filter((ch) => {
+        const code = ch.charCodeAt(0);
+        return code >= 0x2800 && code <= 0x28ff;
+      }).length;
+    const counts = rows.map(brailleCount).filter((n) => n > 0).sort((a, b) => b - a);
+    expect(counts.length).toBe(3);
+    expect(counts[0]!).toBeGreaterThan(counts[1]!);
+    expect(counts[1]!).toBeGreaterThan(counts[2]!);
+  });
+
+  it("renders solid strokes in colour mode (texture is monochrome-only)", () => {
+    const opts = {
+      data: [
+        [2, 2, 2, 2],
+        [3, 3, 3, 3],
+        [4, 4, 4, 4],
+      ],
+      seriesLabels: ["A", "B", "C"],
+      yMin: 1,
+      yMax: 5,
+      height: 15,
+      renderer: "braille" as const,
+    };
+    const totalBraille = (noColor: boolean): number =>
+      line({ ...opts, noColor })
+        .toPlain()
+        .split("\n")
+        .map((s) =>
+          [...s].filter((ch) => {
+            const code = ch.charCodeAt(0);
+            return code >= 0x2800 && code <= 0x28ff;
+          }).length
+        )
+        .reduce((a, b) => a + b, 0);
+    const colour = totalBraille(false);
+    const mono = totalBraille(true);
+    expect(colour).toBeGreaterThan(mono * 1.5);
+  });
+
+  it("draws solid legend dashes in colour mode", () => {
+    const result = line({
+      data: [
+        [1, 2, 3, 4, 5, 6, 7, 8],
+        [8, 7, 6, 5, 4, 3, 2, 1],
+        [4, 5, 4, 5, 4, 5, 4, 5],
+      ],
+      seriesLabels: ["A", "B", "C"],
+      renderer: "braille",
+    });
+    const plain = result.toPlain();
+    expect(plain).toContain("──○── B");
+    expect(plain).toContain("──+── C");
+    expect(plain).not.toContain("╌╌○╌╌");
+    expect(plain).not.toContain("··+··");
+  });
+
+  it("renders + x-tick marks under the plot and a + at the top of the y-guide", () => {
+    const plain = line({ data: [1, 2, 3, 4, 5, 6, 7, 8], noColor: true, height: 15 }).toPlain();
+    const lines = plain.split("\n");
+    const labelIdx = lines.findIndex((l) => l.includes("7") && /\d\s+\d/.test(l));
+    expect(labelIdx).toBeGreaterThan(0);
+    expect(lines[labelIdx - 1]!.replace(/[│]/g, " ").trim()).toMatch(/^\+(\s*\+)*$/);
+    expect(plain).toContain("│ 8+");
+  });
+
+  it("renders per-series spark bars in the summary rows", () => {
+    const plain = line({
+      data: [
+        [1, 2, 3, 4],
+        [4, 3, 2, 1],
+      ],
+      seriesLabels: ["A", "B"],
+      noColor: true,
+    }).toPlain();
+    expect(plain).toContain("▁");
+    expect(plain).toContain("█");
+  });
+
   it("renders per-series min/max/avg/last summary rows", () => {
     const result = line({
       data: [
@@ -129,9 +221,14 @@ describe("line chart", () => {
     expect(plain).toContain("last 1");
   });
 
-  it("renders dashed gridlines on y-step rows", () => {
+  it("renders dashed gridlines on y-step rows when grid is enabled", () => {
+    const result = line({ data: [10, 20, 15, 30, 25, 40, 35, 50], height: 16, noColor: true, grid: true });
+    expect(result.toPlain()).toContain("· · ·"); // the dotted grid cadence
+  });
+
+  it("omits the dotted grid backdrop by default", () => {
     const result = line({ data: [10, 20, 15, 30, 25, 40, 35, 50], height: 16, noColor: true });
-    expect(result.toPlain()).toContain("·");
+    expect(result.toPlain()).not.toContain("· · ·");
   });
 
   it("summary: false suppresses the stats block", () => {

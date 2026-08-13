@@ -34,11 +34,10 @@ bar({
   theme: "tokyo-night"
 }).render(); // prints to stdout
 
-// 2. High-Resolution Line Chart (Braille renderer)
+// 2. Line Chart (braille renderer by default — smooth continuous curves)
 line({
   data: [10, 20, 15, 35, 28, 45, 38, 52],
-  title: "Revenue",
-  renderer: "braille"
+  title: "Revenue"
 }).render();
 
 // 3. Fluent API Builder
@@ -77,7 +76,10 @@ const json = chart.toJSON();
 ## Renderers
 
 Chitra supports three rendering modes:
-- **`braille` (default for continuous data):** Uses Unicode Braille patterns (⠀–⣿) to achieve 4× resolution over standard characters. Best for line, area, and scatter plots.
+- **`block` (default for line):** A glyph-only chain — each series is drawn as its own `* ○ +` marker
+  at every 2nd data point (exactly like the reference), with no `●` filler. Clean and airy: crossing
+  curves stay traceable by shape, and the plot keeps generous whitespace. Best for multi-series line charts.
+- **`braille`:** Uses Unicode Braille patterns (⠀–⣿) to achieve 4× resolution over standard characters. Best for area, scatter, and high-resolution single-series line plots.
 - **`blocks` (default for discrete data):** Uses Unicode Block elements (▁▂▃▄▅▆▇█). Best for bar, progress, and histograms.
 - **`ascii`:** Pure ASCII characters. Best for restrictive environments, legacy SSH sessions, or basic log files.
 
@@ -150,24 +152,38 @@ The area chart follows the same locked language. Rules that must not change:
 
 The line chart carries the same locked language as the area chart. Rules that must not change:
 
-- **Every series is a continuous thin line** (braille sub-pixels, interpolated between points) —
-  each series in its own colour (`*` primary on the tone ramp, the rest from the theme palette),
-  so curves read like a classic terminal chart rather than a fill diagram.
-- **Every series drops its glyph marker at data points** (`* ○ + × □`, every 2nd index) so
-  crossing curves stay traceable by shape even in monochrome — matching the SVG web renderer.
-  The legend shows each series' identity (`──*── Up  ╌╌○╌╌ Down  ··+·· Base`).
-- **Dashed gridlines** on the y-step rows (dotted `·` guides in the grid colour) — series cells
-  and markers always outrank them, and the top/base rows stay clean.
+- **Default renderer is `braille`: smooth continuous curves**, the faithful terminal analog of
+  the reference's SVG polylines — every series is a high-resolution braille line resampled
+  through a Catmull-Rom spline (one point per dot-column, so the curve bends smoothly instead
+  of jointing between raw points) with its glyph marker (`* ○ + × □`, every 2nd data point)
+  dropped on top. `renderer: "block"` (a glyph-only marker chain, no `●` filler — airy and
+  traceable) and `renderer: "ascii"` (`- / \` connectors) remain plain-terminal fallbacks.
+  Spline smoothing can be turned off with `smooth: false`.
+- **One hue + tone ramp, like the LOCKED pie/donut/area charts.** A lone line keeps the grey
+  body with the accent spent once on its peak (series max). With several series the primary
+  becomes the accent hero and every extra series recedes onto the shared grey tone ramp —
+  series identity comes from the glyph markers (`* ○ + × □`), never from separate bright hues.
+- **In monochrome the marker density is texture-coded** so crossing chains stay separable:
+  the primary (`*`) is DENSEST, the first extra series sparser, and later series sparsest.
+  The legend shows each series' texture + marker identity (`──*── Up  ╌╌○╌╌ Down  ··+·· Base`),
+  with solid `──` dashes for every series in colour mode.
+- **The dotted `·` grid backdrop is off by default** — the y labels and `│` guide already carry
+  the scale, so the plot reads clean. Opt back in with `grid: true` (dotted guide every 2nd
+  column on the y-step rows, dim so series cells and markers always outrank it).
+- **`+` axis ticks, like the reference**: a `+` x-tick row sits between the plot and the X
+  labels (axis colour, aligned to the label slots), and the y-guide starts with a `+` at the
+  top of the axis.
 - **Auto-scale the y-range to the data** (`yMin`/`yMax` default to the data min/max) so the
   line fills the panel height — no dead space hugging the bottom. The shared `LineChartModel`
   feeds the same range to the SVG web renderer.
-- **Empty cells are spaces, never blank-braille (`⠀` U+2800).**
+- **Empty cells are spaces** — the block plot never paints phantom fill or blank glyphs.
 - **One accent, spent once**: the primary's peak (series max) gets a 3-dot accent cap; the rest
   of the curve stays on its tone ramp, and the primary's `max N` in the summary is accent too.
 - **Per-series summary rows** under the chart: `* Up · min N · max N · avg N · last N` for every
-  series (MIN / MAX / AVG / LAST), replacing the single footer line.
+  series (MIN / MAX / AVG / LAST), each right-anchored with a compact spark bar (`▁▂▃▄▅▆▇█`)
+  echoing the reference's sparkline panel.
 - **Same panel language**: dashed frame (`┌╌…╌┐`), eyebrow row, `│` y-guide on the left,
-  series legend (`──*── name`), clean X-axis labels.
+  series legend (`──*── name`), `+` X-axis ticks with clean labels.
 
 ## License
 
