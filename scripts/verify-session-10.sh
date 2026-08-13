@@ -45,9 +45,13 @@ run_check "line-spaces-not-blank"   grep -q 'toLines(" ")' packages/core/src/cha
 run_check "line-accent-peak"        grep -q "primaryPeakCap" packages/core/src/charts/line.ts
 run_check "line-accent-once"        grep -q "if (inCap)" packages/core/src/charts/line.ts
 run_check "line-footer-max-accent"  grep -q 'max \${formatNumber' packages/core/src/charts/line.ts
-run_check "line-legend-glyph"       grep -q '\${dashCharsFor(i)}\${s.marker}' packages/core/src/charts/line.ts
+run_check "line-legend-glyph"       grep -q '\${dashCharsFor(i, noColor)}\${s.marker}' packages/core/src/charts/line.ts
 run_check "line-multi-dash"         grep -q 'markerCells' packages/core/src/charts/line.ts
 run_check "line-thin-line"          grep -q 'plotLineOnBrailleCanvas' packages/core/src/charts/line.ts
+run_check "line-texture"            grep -q 'seriesStrokeStep(si, noColor)' packages/core/src/charts/line.ts
+run_check "line-xticks"             grep -q 'cells\[mid\] = "+"' packages/core/src/charts/line.ts
+run_check "line-yguide-plus"        grep -q 'row === 0 ? "+" : "│"' packages/core/src/charts/line.ts
+run_check "line-spark"              grep -q 'SPARK_CHARS' packages/core/src/charts/line.ts
 run_check "line-gridlines"          grep -q 'theme.grid ?? theme.axis' packages/core/src/charts/line.ts
 run_check "line-summary-avg"        grep -q 'avg \${formatNumber' packages/core/src/charts/line.ts
 
