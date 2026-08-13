@@ -32,12 +32,29 @@ function primaryPeakCap(series: LineSeriesModel | undefined, dotCols: number): S
   return cap;
 }
 
-/** Legend style hints — the primary is a solid line; each extra series is a
- *  spaced glyph marker chain (○ + × □), shown here with its dash character so
- *  the series keeps a recognizable identity even in monochrome. */
+/** Texture-coded strokes, matching the reference's legend dash language: the
+ *  primary is SOLID (step 1), the first extra series is DASHED (step 2 — cell
+ *  on / cell off), and every later series is DOTTED (step 3). Keeps crossing
+ *  curves distinguishable in plain monochrome. */
+function lineTextureStep(seriesIndex: number): number {
+  if (seriesIndex === 0) return 1;
+  return seriesIndex === 1 ? 2 : 3;
+}
+
+/** Texture is a MONOCHROME fallback only — in colour mode every series draws
+ *  as a solid line exactly like the reference (the dash language lives on the
+ *  gridlines, not the series). */
+function seriesStrokeStep(seriesIndex: number, noColor: boolean): number {
+  return noColor ? lineTextureStep(seriesIndex) : 1;
+}
+
+/** Legend style hint text — in colour mode every legend is a solid `──glyph──`
+ *  dash pair (identity via colour, like the reference); in monochrome each
+ *  series keeps its own dash character so the texture survives without colour. */
 const DASH_CHARS = ["──", "╌╌", "··", "─╌"];
 
-function dashCharsFor(seriesIndex: number): string {
+function dashCharsFor(seriesIndex: number, noColor: boolean): string {
+  if (!noColor) return DASH_CHARS[0]!;
   if (seriesIndex === 0) return DASH_CHARS[0]!;
   return DASH_CHARS[((seriesIndex - 1) % (DASH_CHARS.length - 1)) + 1]!;
 }
@@ -122,7 +139,10 @@ function mergeLineCells(
 
 /** Renders a chitra-standard TUI panel carrying the LOCKED S09 design
  *  language: dashed frame, eyebrow row, `│` y-guide, braille line on the tone
- *  ramp with the accent spent once on the peak, footer stats. */
+ *  ramp with the accent spent once on the peak, `+` x-tick marks, and footer
+ *  stats per series. In colour mode every series draws solid like the
+ *  reference; in monochrome strokes are texture-coded (primary solid, extras
+ *  dashed/dotted) so crossing curves stay separable. */
 export function line(opts: LineChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -135,9 +155,16 @@ export function line(opts: LineChartOptions): ChartResult {
   const innerWidth = width - 4; // minus "│ " ... " │"
   const acc = theme.accent!;
   const tones = theme.tones!;
-  const lineColor = tones[2] ?? tones[1]!;
-  const seriesColors = model.series.map((s, i) =>
-    i === 0 ? lineColor : theme.colors[i % theme.colors.length]
+  // Same "one hue + tone ramp" language as the LOCKED pie/donut/area charts.
+  // A lone line keeps the LOCKED grey body with the accent spent once on its
+  // peak. With several series the primary becomes the accent hero (like the
+  // pie's largest slice) and the extras recede onto the shared grey ramp —
+  // identity among the greys comes from the glyph markers (`* ○ + × □`), never
+  // from separate bright hues.
+  const multiSeries = model.series.length > 1;
+  const toneOrder = [tones[2], tones[0], tones[3] ?? tones[1], tones[1]].filter(Boolean) as string[];
+  const seriesColors = model.series.map((_, i) =>
+    i === 0 && multiSeries ? acc : toneOrder[i % toneOrder.length]!
   );
 
   const yAxisW =
@@ -151,9 +178,17 @@ export function line(opts: LineChartOptions): ChartResult {
   const yStep = Math.max(1, Math.floor(plotRows / 5));
   /** Gridline rows (every yStep) get a dotted guide that never hides a curve —
    *  series cells and markers outrank it, and it skips the top/base rows. Rendered
-   *  dim so it reads as a faint backdrop, never a competing stroke. */
+   *  dim (one dot every 2nd column, like the reference's `9 9` dash) so it reads
+   *  as a faint backdrop, never a competing stroke. */
+  const showGrid = opts.grid ?? false;
   function isGridRow(row: number): boolean {
-    return row > 0 && row < plotRows - 1 && row % yStep === 0;
+    return showGrid && row > 0 && row < plotRows - 1 && row % yStep === 0;
+  }
+
+  function dashedGrid(cols: number): string {
+    let out = "";
+    for (let col = 0; col < cols; col++) out += col % 2 === 0 ? "·" : " ";
+    return out;
   }
 
   function plotRowLabel(row: number): string {
@@ -164,10 +199,14 @@ export function line(opts: LineChartOptions): ChartResult {
       : " ".repeat(yAxisW - 1);
   }
 
+  const smooth = opts.smooth ?? true;
   function renderBrailleRows(): string[] {
     const canvases = model.series.map(() => new BrailleCanvas(plotCols, plotRows));
     model.series.forEach((s, si) => {
-      if (s.values.length >= 2) plotLineOnBrailleCanvas(canvases[si]!, s.values, model.yMin, model.yMax);
+      if (s.values.length >= 2) {
+        plotLineOnBrailleCanvas(canvases[si]!, s.values, model.yMin, model.yMax, smooth);
+        canvases[si]!.thin(seriesStrokeStep(si, noColor));
+      }
     });
     const cap = primaryPeakCap(model.series[0], plotCols * 2);
     const markers = markerCells(model.series, seriesColors, plotCols, plotRows, model.yMin, model.yMax, noColor);
@@ -175,9 +214,10 @@ export function line(opts: LineChartOptions): ChartResult {
     const rows: string[] = [];
     for (let row = 0; row < plotRows; row++) {
       const lines = canvases.map((c) => c.toLines(" ")[row] ?? "");
-      lines.push(isGridRow(row) ? "·".repeat(plotCols) : " ".repeat(plotCols));
+      lines.push(isGridRow(row) ? dashedGrid(plotCols) : " ".repeat(plotCols));
       const cells = mergeLineCells(lines, markers, row, gridColor, acc, cap, noColor);
-      const prefix = showAxes ? colorize(plotRowLabel(row) + "│", theme.axis, noColor) : "";
+      const guide = row === 0 ? "+" : "│";
+      const prefix = showAxes ? colorize(plotRowLabel(row) + guide, theme.axis, noColor) : "";
       rows.push(prefix + cells);
     }
     return rows;
@@ -214,55 +254,68 @@ export function line(opts: LineChartOptions): ChartResult {
       return Math.round((1 - yNorm) * (plotRows - 1));
     };
 
+    /** Glyph-chain pass: every series drops its marker at every 2nd data point
+     *  (i += 2, matching the reference), and that's ALL the block renderer
+     *  draws — no `●` filler. The curve reads by following the marker chain,
+     *  so the plot stays airy and traceable with several crossing series. */
     model.series.forEach((s, si) => {
       if (s.values.length < 2) return;
       const color = seriesColors[si]!;
       for (let i = 0; i < s.values.length; i += 2) {
         const col = Math.round((i / (s.values.length - 1)) * (plotCols - 1));
-        setCell(col, yRowFor(s.values[i] ?? 0), s.marker, color);
+        const isCap = si === 0 && cellCap.has(col);
+        setCell(col, yRowFor(s.values[i] ?? 0), s.marker, isCap ? acc : color);
       }
     });
 
-    model.series.forEach((s, si) => {
-      if (s.values.length < 2) return;
-      const color = seriesColors[si]!;
-      for (let col = 0; col < plotCols; col++) {
-        const exactX = (col / Math.max(1, plotCols - 1)) * (s.values.length - 1);
-        const idxL = Math.floor(exactX);
-        const idxR = Math.min(s.values.length - 1, Math.ceil(exactX));
-        const frac = exactX - idxL;
-        const val = idxL === idxR ? s.values[idxL]! : s.values[idxL]! * (1 - frac) + s.values[idxR]! * frac;
-        const yRow = yRowFor(val);
+    /** The ascii renderer is the one exception: it needs a connecting line too,
+     *  because bare markers don't read in pure ASCII. So it paints an
+     *  interpolated `●`/slope line under its markers. The block renderer never
+     *  reaches this pass. */
+    if (renderer === "ascii") {
+      model.series.forEach((s, si) => {
+        if (s.values.length < 2) return;
+        const color = seriesColors[si]!;
+        const step = noColor ? 2 + Math.min(si, 2) : 2;
+        for (let col = 0; col < plotCols; col++) {
+          if (col % step !== 0) continue;
+          const exactX = (col / Math.max(1, plotCols - 1)) * (s.values.length - 1);
+          const idxL = Math.floor(exactX);
+          const idxR = Math.min(s.values.length - 1, Math.ceil(exactX));
+          const frac = exactX - idxL;
+          const val = idxL === idxR ? s.values[idxL]! : s.values[idxL]! * (1 - frac) + s.values[idxR]! * frac;
+          const yRow = yRowFor(val);
 
-        let ch: string;
-        if (renderer === "ascii") {
-          ch = s.marker;
+          let ch: string;
           if (col > 0) {
             const isExactPoint = frac < 0.1 || frac > 0.9;
             if (!isExactPoint) {
               const prevX = ((col - 1) / Math.max(1, plotCols - 1)) * (s.values.length - 1);
               const prevVal = s.values[Math.floor(prevX)]!;
               ch = val > prevVal + 1e-9 ? "/" : val < prevVal - 1e-9 ? "\\" : "-";
+            } else {
+              ch = s.marker;
             }
+          } else {
+            ch = s.marker;
           }
-        } else {
-          ch = "●";
+          const isCap = si === 0 && cellCap.has(col);
+          setCell(col, yRow, ch, isCap ? acc : color);
         }
-        const isCap = si === 0 && cellCap.has(col);
-        setCell(col, yRow, ch, isCap ? acc : color);
-      }
-    });
+      });
+    }
 
     for (let row = 0; row < plotRows; row++) {
       if (!isGridRow(row)) continue;
       for (let col = 0; col < plotCols; col++) {
-        if (!grid[row]![col]) grid[row]![col] = colorize("·", ansi.dim + (theme.grid ?? theme.axis), noColor);
+        if (col % 2 === 0 && !grid[row]![col]) grid[row]![col] = colorize("·", ansi.dim + (theme.grid ?? theme.axis), noColor);
       }
     }
 
     const rows: string[] = [];
     for (let row = 0; row < plotRows; row++) {
-      const prefix = showAxes ? colorize(plotRowLabel(row) + "│", theme.axis, noColor) : "";
+      const guide = row === 0 ? "+" : "│";
+      const prefix = showAxes ? colorize(plotRowLabel(row) + guide, theme.axis, noColor) : "";
       rows.push(prefix + grid[row]!.join(""));
     }
     return rows;
@@ -286,12 +339,46 @@ export function line(opts: LineChartOptions): ChartResult {
     return [" ".repeat(yAxisW) + colorize(labelChars.join(""), theme.label, noColor)];
   }
 
+  /** The reference puts a `+` on the x-axis at every tick. In the terminal that
+   *  becomes a dedicated axis-colour tick row between the plot and the label
+   *  row, with a `+` aligned to each label slot. */
+  function renderXTickMarks(): string[] {
+    if (!showAxes || model.labels.length === 0) return [];
+    const n = model.labels.length;
+    const cells = Array<string>(plotCols).fill(" ");
+    model.labels.forEach((_, i) => {
+      const slotStart = Math.round((i * plotCols) / n);
+      const slotEnd = Math.min(plotCols, Math.round(((i + 1) * plotCols) / n));
+      const mid = slotStart + Math.floor((slotEnd - slotStart) / 2);
+      cells[mid] = "+";
+    });
+    return [" ".repeat(yAxisW) + colorize(cells.join(""), theme.axis, noColor)];
+  }
+
   function renderLegend(): string[] {
     if (!model.showLegend || model.series.length === 0) return [];
     const items = model.series.map((s, i) =>
-      colorize(`${dashCharsFor(i)}${s.marker}${dashCharsFor(i)} ${s.name}`, seriesColors[i]!, noColor)
+      colorize(`${dashCharsFor(i, noColor)}${s.marker}${dashCharsFor(i, noColor)} ${s.name}`, seriesColors[i]!, noColor)
     );
     return wrapItems(items, innerWidth);
+  }
+
+  /** Compact block spark bar (`▁▂▃▄▅▆▇█`) — the terminal echo of the reference's
+   *  per-series sparkline in the summary panel. */
+  const SPARK_CHARS = "▁▂▃▄▅▆▇█";
+
+  function sparkline(values: number[], color: string, width = 14): string {
+    if (values.length === 0) return "";
+    const lo = Math.min(...values);
+    const hi = Math.max(...values);
+    const range = hi - lo || 1;
+    let out = "";
+    for (let i = 0; i < width; i++) {
+      const idx = Math.min(values.length - 1, Math.floor(((i + 0.5) / width) * values.length));
+      const t = ((values[idx] ?? lo) - lo) / range;
+      out += SPARK_CHARS[Math.min(7, Math.round(t * 7))]!;
+    }
+    return colorize(out, color, noColor);
   }
 
   function renderSummary(): string[] {
@@ -303,7 +390,12 @@ export function line(opts: LineChartOptions): ChartResult {
       const maxPart = si === 0
         ? colorize(`max ${formatNumber(stats.max)}`, acc, noColor)
         : `max ${formatNumber(stats.max)}`;
-      return `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
+      const left = `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
+      const room = innerWidth - visibleLength(left) - 3;
+      const sparkW = room < 4 ? 0 : Math.min(14, room);
+      const spark = sparkline(s.values, seriesColors[si]!, sparkW);
+      const pad = Math.max(0, innerWidth - visibleLength(left) - visibleLength(spark) - 1);
+      return left + " ".repeat(pad) + spark;
     });
     return wrapItems(rows, innerWidth);
   }
@@ -318,6 +410,7 @@ export function line(opts: LineChartOptions): ChartResult {
 
     const plotRowsOut = renderer === "braille" ? renderBrailleRows() : renderBlockRows();
     for (const row of plotRowsOut) lines.push(frameRow(width, row, theme.axis, noColor));
+    for (const row of renderXTickMarks()) lines.push(frameRow(width, row, theme.axis, noColor));
     for (const row of renderXAxisLabels()) lines.push(frameRow(width, row, theme.axis, noColor));
 
     if (model.showSummary) {

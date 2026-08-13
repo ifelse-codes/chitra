@@ -55,6 +55,22 @@ export class BrailleCanvas {
     for (let r = lo; r <= hi; r++) this.set(dotCol, r);
   }
 
+  /** Texture mask for line strokes: keeps only every `step`-th character
+   *  column and blanks the rest, so the same drawn line can be rendered
+   *  solid (step 1), dashed (step 2) or dotted (step 3). */
+  thin(step: number): void {
+    if (step <= 1) return;
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        if (c % step !== 0) {
+          for (let dr = 0; dr < 4; dr++) {
+            for (let dc = 0; dc < 2; dc++) this.unset(c * 2 + dc, r * 4 + dr);
+          }
+        }
+      }
+    }
+  }
+
   toLines(emptyChar: string = "\u2800"): string[] {
     const lines: string[] = [];
     for (let r = 0; r < this.rows; r++) {
@@ -81,15 +97,61 @@ export class BrailleCanvas {
   }
 }
 
+/** Centripetal-ish Catmull-Rom sample through control points `data` at real
+ *  index `u` (0..n-1). Endpoints are duplicated so the curve passes through the
+ *  first/last points. Returns a smoothly-interpolated value. */
+function catmullRom(data: number[], u: number): number {
+  const n = data.length;
+  if (n === 1) return data[0]!;
+  const i = Math.min(n - 2, Math.max(0, Math.floor(u)));
+  const t = u - i;
+  const p0 = data[Math.max(0, i - 1)]!;
+  const p1 = data[i]!;
+  const p2 = data[Math.min(n - 1, i + 1)]!;
+  const p3 = data[Math.min(n - 1, i + 2)]!;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (
+    2 * p1 +
+    (-p0 + p2) * t +
+    (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+    (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+  );
+}
+
 export function plotLineOnBrailleCanvas(
   canvas: BrailleCanvas,
   data: number[],
   yMin: number,
-  yMax: number
+  yMax: number,
+  smooth: boolean = false
 ): void {
   const n = data.length;
   if (n === 0) return;
   const { dotCols, dotRows } = canvas;
+
+  // Smooth mode: sample a Catmull-Rom spline at every dot-column so the curve
+  // reads as a continuous bend instead of angular straight segments between the
+  // few raw data points. Falls back to raw-point Bresenham when disabled or when
+  // there are too few points to interpolate.
+  if (smooth && n >= 3) {
+    const yFor = (v: number): number => {
+      const norm = yMax === yMin ? 0.5 : (v - yMin) / (yMax - yMin);
+      const clamped = Math.max(0, Math.min(1, norm));
+      return dotRows - 1 - Math.round(clamped * (dotRows - 1));
+    };
+    let prevX = 0;
+    let prevY = yFor(catmullRom(data, 0));
+    canvas.set(prevX, prevY);
+    for (let x = 1; x < dotCols; x++) {
+      const u = (x / (dotCols - 1)) * (n - 1);
+      const y = yFor(catmullRom(data, u));
+      drawBrailleLine(canvas, prevX, prevY, x, y);
+      prevX = x;
+      prevY = y;
+    }
+    return;
+  }
 
   for (let i = 0; i < n; i++) {
     const x = Math.round((i / (n - 1)) * (dotCols - 1));

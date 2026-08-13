@@ -64,6 +64,9 @@ export interface LineChartOptions extends BaseChartOptions {
   summary?: boolean;
   /** Eyebrow caption under the header (uppercase, spaced). */
   eyebrow?: string;
+  /** Dotted `·` backdrop on the y-step rows. Default false — the y labels and
+   *  `│` guide already carry the scale, so the plot reads cleaner without it. */
+  grid?: boolean;
 }
 
 export interface BarChartOptions extends BaseChartOptions {
