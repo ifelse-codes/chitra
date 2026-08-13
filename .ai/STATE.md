@@ -6,15 +6,20 @@
 `session-10-line-locked` (from `main`) — ready to PR. Remote: `github.com/ifelse-codes/chitra`.
 
 ## What Currently Works (observed, not claimed)
-- `pnpm --filter @chitra/core run test` — **142/142 pass** (7 files, incl. 18 line tests).
+- `pnpm --filter @chitra/core run test` — **148/148 pass** (7 files, incl. 24 line tests).
 - `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `scripts/verify-session-10.sh` — **ALL GREEN (24 pass, 0 fail)**; `demo-session-10.sh` — exit 0.
-- **`line()` carries the S10 reference-locked look** (founder's `tui-chart (1).html`):
-  every series a continuous thin braille line in its own colour, glyph markers on
-  every series every 2nd index (`* ○ + × □`), dotted `·` gridlines on y-step rows,
-  per-series `min/max/avg/last` summary rows with the primary `max` in accent, and
-  the LOCKED S09 panel (dashed frame, eyebrow, `│` y-guide, empty cells = spaces,
-  never blank-braille). Block/ascii renderers share the look.
+- `scripts/verify-session-10.sh` — **ALL GREEN (28 pass, 0 fail)**; `demo-session-10.sh` — exit 0.
+- **`line()` carries the S10 reference-locked look** (founder's `tui-chart (1).html`),
+  refined so it reads as one family with the LOCKED pie/donut/area charts:
+  **braille is the default renderer**; every series is a **smooth continuous curve**
+  (Catmull-Rom spline resampled one point per dot-column, `smooth: false` to disable);
+  colour follows the **one-hue + grey tone-ramp** language — a lone line keeps the grey
+  body with the accent spent once on its peak, and with several series the primary is the
+  accent hero while extras recede onto the grey ramp, identity carried by the glyph markers
+  (`* ○ + × □`). The dotted `·` grid backdrop is **off by default** (`grid: true` to opt in).
+  Per-series `min/max/avg/last` summary rows (primary `max` in accent), `+` x-ticks, and the
+  LOCKED S09 panel (dashed frame, eyebrow, `│` y-guide, empty cells = spaces) all retained.
+  Block/ascii remain plain-terminal fallbacks.
 - The three verify smoke checks genuinely run tsx (heredoc bug fixed) and self-clean.
 - **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
   surface; shared `LineChartModel` + `toSVG()`; dashboard panel options.
