@@ -1,52 +1,55 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S08 closed, 2026-08-01.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S10 closing, 2026-08-05.)
 
 ## Active Branch
-None — between sessions (S08 complete). Remote: `github.com/ifelse-codes/chitra`.
-Next session branches from `main`.
+`session-10-line-locked` (from `main`) — ready to PR. Remote: `github.com/ifelse-codes/chitra`.
 
 ## What Currently Works (observed, not claimed)
-- `pnpm --filter @chitra/core run test` — **121/121 pass**.
+- `pnpm --filter @chitra/core run test` — **148/148 pass** (7 files, incl. 24 line tests).
 - `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `pnpm --filter @chitra/core run build` — **real publishable dist** (ESM `index.js` +
-  CJS `index.cjs` + `index.d.ts`); zero runtime deps; ESM+CJS each expose 44+ exports.
-- `pnpm run typecheck` (full workspace) — **exit 0**.
-- **`.github/workflows/ci.yml` (S07)** — CI on push to `main` + every PR (core · docs ·
-  chart-drift), pinned Node 26 / pnpm 9.12.3, frozen install.
-- **`.github/workflows/release.yml` (S08)** — v* tag push only; 3 CI gates as `needs:`
-  of a `publish` job (`--access public`, `NODE_AUTH_TOKEN`), pinned toolchain.
+- `scripts/verify-session-10.sh` — **ALL GREEN (28 pass, 0 fail)**; `demo-session-10.sh` — exit 0.
+- **`line()` carries the S10 reference-locked look** (founder's `tui-chart (1).html`),
+  refined so it reads as one family with the LOCKED pie/donut/area charts:
+  **braille is the default renderer**; every series is a **smooth continuous curve**
+  (Catmull-Rom spline resampled one point per dot-column, `smooth: false` to disable);
+  colour follows the **one-hue + grey tone-ramp** language — a lone line keeps the grey
+  body with the accent spent once on its peak, and with several series the primary is the
+  accent hero while extras recede onto the grey ramp, identity carried by the glyph markers
+  (`* ○ + × □`). The dotted `·` grid backdrop is **off by default** (`grid: true` to opt in).
+  Per-series `min/max/avg/last` summary rows (primary `max` in accent), `+` x-ticks, and the
+  LOCKED S09 panel (dashed frame, eyebrow, `│` y-guide, empty cells = spaces) all retained.
+  Block/ascii remain plain-terminal fallbacks.
+- The three verify smoke checks genuinely run tsx (heredoc bug fixed) and self-clean.
 - **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
-  surface. Line chart: SV-grade ascii renderer, shared `LineChartModel` +
-  `toSVG()`, terminal dashboard panel (`timestamp` / `status` / `summary` options).
+  surface; shared `LineChartModel` + `toSVG()`; dashboard panel options.
 - **Docs** (`artifacts/chitra-docs`): chart pages render real core SVG output;
   `gen:charts:check` drift gate green.
-- `scripts/verify-session-08.sh` — **ALL GREEN (15/15)**; `demo-session-08.sh` — exit 0.
-- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` tracked and wired
-  (`core.hooksPath .githooks`), `.ai/hooks/*` committed.
+- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` wired; `.ai/hooks/*` committed.
 
 ## What Is Broken / Incomplete
-- Chart visuals are **not yet at the design-reference quality** (founder feedback at
-  S08 closeout). `design-reference/` (tui-chart · mudra-chart · mudra-dashboard) is the
-  target design language to learn and build toward.
+- The SVG `lineModelToSvg` does not yet mirror the terminal 1:1 (series colours are
+  parsed from ANSI, no `+` x-tick marks, no per-series stat boxes).
+- `bar`/`sparkline`/`histogram`/… still predate the reference-locked look.
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
 - **S05 ground-truth remediation debt (still open):** S04 verify/demo/summary backfill
-  and a closeout-integrity gate remain; `.ai/KNOWLEDGE.md` "NOT a git repo" falsehood
-  was corrected at S08 closeout.
+  and a closeout-integrity gate remain.
 - First real release (tag `v0.1.0`) not yet exercised — needs `NODE_AUTH_TOKEN`
   secret in repo settings.
 
 ## Milestones done
-- **S01** docs-from-lib chart generator · **S02** expanded examples · **S03** docs-site
-  polish · **S04** README / getting-started · **S05** NO-CODE ground-truth · **S06** real
-  publishable dist build · **S07** CI workflows · **S08** release.yml + line/SVG/dashboard
-  upgrades (this session).
+- **S01** docs-from-lib generator · **S02** expanded examples · **S03** docs-site
+  polish · **S04** README / getting-started · **S05** NO-CODE ground-truth · **S06**
+  real publishable dist · **S07** CI workflows · **S08** release.yml + line/SVG
+  dashboard · **S09** braille-dot circular charts LOCKED (pie/donut/area) · **S10**
+  line chart reference-locked (thin multi-series lines + glyphs + gridlines +
+  per-series stats).
 
 ## What Is In Progress
-- None — S08 landed on `main` (PR #5 merged). **Next session (founder direction):**
-  analyze `design-reference/` and rebuild the chart look to match it (charts "not
-  looking that great"). See [[roadmap]].
+- PR for `session-10-line-locked` → `main` (S10 closeout). **Next session (founder
+  direction):** carry the reference-locked look into the remaining chart families and
+  align the SVG web renderer. See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood
-  runs, billed to Vajra).
+  runs, billed to Vajra; S09/S10 in-repo).
