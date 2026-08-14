@@ -1,17 +1,20 @@
 # Current Task Pointer
 
-## Session 08 — release.yml publish workflow — COMPLETE
+## Session 10 — reference-lock the line chart: thin multi-series lines — COMPLETE
 
-- **Branch:** `session-08-release-workflow` (from `main`)
-- **Shipped:** `.github/workflows/release.yml` (v* tag push only; 3 S07 CI gates as
-  `needs:` of `publish`; Node 26 / pnpm 9.12.3, frozen; `--access public` +
-  `NODE_AUTH_TOKEN`) + line-chart SV-grade upgrade (ascii renderer, clean X-axis) +
-  shared `LineChartModel`/`toSVG()` + docs SVG output + terminal dashboard panel
-  (`timestamp`/`status`/`summary`) with tests. `verify-session-08.sh` 15/15; 121
-  core tests green. Built via a Vajra dogfood ride-along, independently re-verified.
-- Summary: `sessions/session-08-summary.md`. Review: `sessions/session-08-review.md`.
+- **Branch:** `session-10-line-locked` (from `main`)
+- **Shipped:** `line()` rebuilt to the founder's `tui-chart (1).html` reference —
+  every series a continuous thin braille line in its own colour, glyph markers on
+  every series (`* ○ + × □`, every 2nd index, matching the SVG), dotted `·`
+  gridlines on y-step rows, per-series `min/max/avg/last` summary rows (primary
+  `max` accent), block/ascii renderers aligned. README LOCKED contract updated,
+  tests 142/142, `verify-session-10.sh` 24/24 ALL GREEN, demo exit 0, docs gallery
+  regenerated. Fixed a verify-script heredoc bug that silently disabled the smoke
+  checks.
+- Summary: `sessions/session-10-summary.md`. Review: `sessions/session-10-review.md`
+  (ACCEPT, attested).
 
-Between sessions. **Next session (founder direction):** analyze `design-reference/`
-(tui-chart · mudra-chart · mudra-dashboard), learn that design language, and rebuild
-the chitra chart look to match it — current charts are "not looking that great."
-Open in a **new chat**.
+**Next session (S11 candidates):** carry the reference-locked line language into
+`bar`/`sparkline`/`histogram`; or bring `lineModelToSvg` fully in line with the
+terminal (color-matched series, `+` x-tick marks, per-series stat boxes); or exercise
+a real `v0.1.0` release (`NODE_AUTH_TOKEN`). Open in a **new chat**.

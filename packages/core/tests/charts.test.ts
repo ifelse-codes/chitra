@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   area,
+  line,
   histogram,
   scatter,
   pie,
@@ -48,6 +49,38 @@ describe("area chart", () => {
     expect(out).toContain("min 12");
     const accent = "\x1b[38;2;139;124;246m";
     expect(out).toContain(accent + "max 61");
+  });
+});
+
+describe("line chart (LOCKED S09 language)", () => {
+  it("renders the dashed panel frame + eyebrow like the LOCKED circular look", () => {
+    const out = line({
+      data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58],
+      title: "REVENUE",
+      eyebrow: "Monthly · Trend",
+    }).toString();
+    expect(out).toContain("┌╌");
+    expect(out).toContain("╌┐");
+    expect(out).toContain("MONTHLY · TREND");
+    expect(out).toContain("╌┘");
+  });
+  it("renders empty cells as spaces, never blank-braille", () => {
+    const out = line({ data: [12, 19, 15] }).toString();
+    expect(out).not.toContain("\u2800");
+  });
+  it("auto-scales the y-range to the data and accents only the peak + footer max", () => {
+    const out = line({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
+    expect(out).toContain("max 61");
+    expect(out).toContain("min 12");
+    const accent = "\x1b[38;2;139;124;246m";
+    expect(out).toContain(accent + "max 61");
+  });
+  it("spends the accent once — the curve itself stays on the tone ramp", () => {
+    const out = line({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
+    const accent = "\x1b[38;2;139;124;246m";
+    const tone = "\x1b[38;2;164;164;174m";
+    expect(out).toContain(tone); // the line's body is the tone ramp
+    expect(out).toContain(accent); // the accent is present (peak cap + footer max)
   });
 });
 

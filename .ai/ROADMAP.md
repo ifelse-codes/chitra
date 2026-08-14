@@ -10,9 +10,18 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next — founder direction (Session 10 candidate):** rebuild the remaining chart
-  families (`area`/`bar`/`line`/`sparkline`/…) to carry the LOCKED Session 09 look
-  and feel. Also pending: exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- 🔜 **Next — founder direction (Session 11 candidate):** carry the S10 reference-locked
+  line language into the remaining chart families (`bar`/`sparkline`/`histogram`/…),
+  and bring `lineModelToSvg` fully in line with the terminal (colour-matched series,
+  `+` x-tick marks, per-series stat boxes). Also pending: exercise a real `v0.1.0`
+  release (`NODE_AUTH_TOKEN`).
+- ✅ **Session 10 (S10) — line chart reference-locked (thin multi-series lines):**
+  `line()` now matches the founder's `tui-chart (1).html` reference — every series a
+  continuous thin braille line in its own colour, glyph markers on every series
+  (`* ○ + × □`, every 2nd index), dotted `·` gridlines on y-step rows, per-series
+  `min/max/avg/last` summary rows, primary keeps the LOCKED accent peak cap.
+  `verify-session-10.sh` 24/24 ALL GREEN, 142 tests, demo exit 0. See "LOCKED: line
+  chart" in `packages/core/README.md`.
 - ✅ **Session 09 (S09) — circular charts LOCKED (pie/donut braille-dot look):** see the
   "LOCKED: circular charts" contract in `packages/core/README.md`. The braille
   sub-pixel circle + dashed panel + tone-ramp/one-accent + right legend is the
@@ -23,7 +32,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   `/tmp/ring-lab/index.html`.
 - ✅ **S06** — Real publishable `dist/` build for `@chitra/core` (ESM + CJS + `.d.ts`, zero deps).
 - ✅ **S07** — CI workflows (`.github/workflows/ci.yml`: core · docs · chart-drift gates, pinned toolchain).
-- ✅ **Session 08 (S08)** — release.yml publish workflow (this session). v* tag push → re-runs S07
+- ✅ **Session 08 (S08)** — release.yml publish workflow. v* tag push → re-runs S07
   gates → `pnpm publish --access public` with `NODE_AUTH_TOKEN`. Plus line-chart
   SV-grade upgrade, shared `LineChartModel` + `toSVG()` web renderer, docs SVG
   output, and the terminal dashboard panel (`timestamp`/`status`/`summary`).
@@ -32,5 +41,5 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - S05 ground-truth remediation still open: S04 verify/demo/summary backfill + a closeout-integrity gate.
 
 ## Guardrails carried forward (see [[knowledge]])
-- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · 121 tests green ·
+- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · 142 tests green ·
   public API stability.
