@@ -44,7 +44,7 @@ run_check "branch-is-s11"       bash -c '
 '
 
 # ── CatalogPage component exists ──────────────────────────────
-run_check "catalog-component-exists" bash -c '
+run_check "catalog-component-exists-SOURCE-GREP" bash -c '
   [ -f "artifacts/chitra-docs/src/components/CatalogPage.tsx" ] || exit 1
   grep -q "PanelGroup" artifacts/chitra-docs/src/components/CatalogPage.tsx || exit 1
   grep -q "vim-editor" artifacts/chitra-docs/src/components/CatalogPage.tsx || exit 1
@@ -75,7 +75,7 @@ run_check "catalog-vim-features-SOURCE-GREP" bash -c '
   grep -q "vim-ta"         "$f" || exit 1
 '
 
-run_check "catalog-terminal-features" bash -c '
+run_check "catalog-terminal-features-SOURCE-GREP" bash -c '
   f="artifacts/chitra-docs/src/components/CatalogPage.tsx"
   grep -q "term-titlebar"  "$f" || exit 1
   grep -q "term-pill"      "$f" || exit 1
@@ -84,7 +84,7 @@ run_check "catalog-terminal-features" bash -c '
   grep -q "term-footer"    "$f" || exit 1
 '
 
-run_check "catalog-toolbar-features" bash -c '
+run_check "catalog-toolbar-features-SOURCE-GREP" bash -c '
   f="artifacts/chitra-docs/src/components/CatalogPage.tsx"
   grep -q "ct-run"         "$f" || exit 1
   grep -q "ct-select"      "$f" || exit 1
@@ -94,7 +94,7 @@ run_check "catalog-toolbar-features" bash -c '
 '
 
 # ── Live execution: evaluator present ─────────────────────────
-run_check "catalog-evaluator" bash -c '
+run_check "catalog-evaluator-SOURCE-GREP" bash -c '
   f="artifacts/chitra-docs/src/components/CatalogPage.tsx"
   grep -q "new Function"   "$f" || exit 1
   grep -q "chitraCore"     "$f" || exit 1
@@ -103,19 +103,19 @@ run_check "catalog-evaluator" bash -c '
 '
 
 # ── @chitra/core in docs deps ─────────────────────────────────
-run_check "core-dep-in-docs" bash -c '
+run_check "core-dep-in-docs-SOURCE-GREP" bash -c '
   grep -q "@chitra/core" artifacts/chitra-docs/package.json || exit 1
   [ -d "artifacts/chitra-docs/node_modules/@chitra/core" ] || exit 1
 '
 
 # ── App.tsx uses CatalogPage ───────────────────────────────────
-run_check "app-uses-catalog-page" bash -c '
+run_check "app-uses-catalog-page-SOURCE-GREP" bash -c '
   grep -q "CatalogPage" artifacts/chitra-docs/src/App.tsx || exit 1
   grep -q "content-catalog" artifacts/chitra-docs/src/App.tsx || exit 1
 '
 
 # ── CSS has catalog and vim styles ────────────────────────────
-run_check "css-has-catalog-styles" bash -c '
+run_check "css-has-catalog-styles-SOURCE-GREP" bash -c '
   f="artifacts/chitra-docs/src/index.css"
   grep -q "catalog-page"   "$f" || exit 1
   grep -q "vim-editor"     "$f" || exit 1

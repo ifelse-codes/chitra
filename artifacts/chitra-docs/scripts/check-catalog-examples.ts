@@ -79,19 +79,24 @@ if (notInjected.length > 0) {
   console.log(`ok    renderer + theme injected into all ${CHARTS.length} chart sources`);
 }
 
-// End-to-end corroboration: the rewrite must reach real output for at least the
-// charts that honour the renderer. Threshold is >0 by design here — the per-chart
-// assertion above is what makes a no-op impossible to hide.
+// End-to-end corroboration: the rewrite must reach real OUTPUT. `> 0` would be
+// satisfied forever by `line` alone — the one chart the original defect never
+// broke — so the floor is pinned to the number measured on the working build.
+// 5 of 20 charts honour the renderer (the rest are block/character charts that
+// legitimately render identically); if that count drops, something regressed.
 const braille = byRenderer.get("braille")!;
 const ascii = byRenderer.get("ascii")!;
 const comparable = [...braille.keys()].filter((id) => ascii.has(id));
+const RENDERER_SENSITIVE_CHARTS = 5; // measured on the working build
 const differing = comparable.filter((id) => braille.get(id) !== ascii.get(id));
 checked++;
-if (differing.length === 0) {
+if (differing.length < RENDERER_SENSITIVE_CHARTS) {
   failed++;
-  console.error("FAIL  no chart's OUTPUT changed between braille and ascii — the rewrite never reached the renderer");
+  console.error(
+    `FAIL  only ${differing.length} chart(s) changed OUTPUT between braille and ascii, expected >= ${RENDERER_SENSITIVE_CHARTS} — the rewrite is not reaching the renderer`,
+  );
 } else {
-  console.log(`ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii)`);
+  console.log(`ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii, floor ${RENDERER_SENSITIVE_CHARTS})`);
 }
 
 // A deliberately broken buffer must be CAUGHT (exit 1 + message), never thrown.
