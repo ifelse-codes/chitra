@@ -26,6 +26,13 @@ run_check() {
 run_check "core-tests"          pnpm --filter @chitra/core run test
 run_check "core-typecheck"      pnpm --filter @chitra/core run typecheck
 
+# ── The one check that is not a grep ──────────────────────────
+# Every other catalog check below greps the source for a string. That is how this
+# script reported 14/14 ALL GREEN while 19 of 20 chart pages failed to render in a
+# real browser. This one EXECUTES the shipped evaluator against all 20 examples,
+# every renderer, and a deliberately broken buffer.
+run_check "catalog-examples-execute" pnpm --filter @workspace/chitra-docs run check:catalog
+
 # ── Docs: typecheck, chart drift gate ─────────────────────────
 run_check "docs-typecheck"      pnpm --filter @workspace/chitra-docs run typecheck
 run_check "docs-gen-charts-check" pnpm --filter @workspace/chitra-docs run gen:charts:check

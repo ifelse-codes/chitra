@@ -9,7 +9,8 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "gen:charts": "tsx scripts/generate-charts.ts",
-    "gen:charts:check": "tsx scripts/generate-charts.ts --check"
+    "gen:charts:check": "tsx scripts/generate-charts.ts --check",
+    "check:catalog": "tsx scripts/check-catalog-examples.ts"
   },
   "dependencies": {
     "@chitra/core": "workspace:*"
