@@ -1,20 +1,20 @@
 # Current Task Pointer
 
-## Session 10 — reference-lock the line chart: thin multi-series lines — COMPLETE
+## Session 11 — catalog two-panel page: vim editor + live terminal preview — COMPLETE
 
-- **Branch:** `session-10-line-locked` (from `main`)
-- **Shipped:** `line()` rebuilt to the founder's `tui-chart (1).html` reference —
-  every series a continuous thin braille line in its own colour, glyph markers on
-  every series (`* ○ + × □`, every 2nd index, matching the SVG), dotted `·`
-  gridlines on y-step rows, per-series `min/max/avg/last` summary rows (primary
-  `max` accent), block/ascii renderers aligned. README LOCKED contract updated,
-  tests 142/142, `verify-session-10.sh` 24/24 ALL GREEN, demo exit 0, docs gallery
-  regenerated. Fixed a verify-script heredoc bug that silently disabled the smoke
-  checks.
-- Summary: `sessions/session-10-summary.md`. Review: `sessions/session-10-review.md`
-  (ACCEPT, attested).
+- **Branch:** `session-11-catalog-two-panel` (from `main`)
+- **Shipped:** `CatalogPage` component — two-panel interactive catalog for all 20
+  charts. Left: vim-styled editable buffer (line gutter, current-line highlight, `~`
+  markers, TS syntax highlighting, file tabs, modeline with NORMAL/INSERT). Right:
+  terminal preview (title bar + status pill, ANSI output via `ansiToHtml`, exit/timing
+  footer). Toolbar: Run, Copy ×2, Download ×2, Renderer, Theme, Reset. Live in-browser
+  evaluator: `@chitra/core` bundled, `new Function` + `globalThis.process` mock,
+  `.render()` → `.toString()` transform, errors caught and shown in panel.
+- Verify: `scripts/verify-session-11.sh` — 14/14 ALL GREEN.
+- Summary: `sessions/session-11-summary.md`. Review: `sessions/session-11-review.md`
+  (ACCEPT, one honest gap: block cursor is amber I-beam, not pixel-exact block).
 
-**Next session (S11 candidates):** carry the reference-locked line language into
-`bar`/`sparkline`/`histogram`; or bring `lineModelToSvg` fully in line with the
-terminal (color-matched series, `+` x-tick marks, per-series stat boxes); or exercise
-a real `v0.1.0` release (`NODE_AUTH_TOKEN`). Open in a **new chat**.
+**Next session (S12 candidates):** browser QA of the catalog page + fix any visual
+issues found during dev-server review; carry the reference-locked line language into
+`bar`/`sparkline`/`histogram`; bring `lineModelToSvg` in line with the terminal.
+Open in a **new chat**.
