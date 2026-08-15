@@ -23,6 +23,7 @@ const THEMES: ThemeChoice[] = [
 ];
 
 const LINE_H = 20; // px — must match CSS var(--vim-lh)
+const VIM_PAD = 10; // px — must match CSS var(--vim-pad)
 
 // ── Tokenizer ──────────────────────────────────────────────────────────────
 
@@ -214,6 +215,9 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   // Track latest values for the evaluator without stale closures
   const bufRef = useRef(buffer);
   const rendRef = useRef(renderer);
@@ -271,12 +275,19 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     return "";
   };
 
-  // Scroll-sync: keep highlight pre in sync with editable textarea
+  // Scroll-sync: the highlight pre, the gutter and the current-line stripe all
+  // have to follow the textarea. Mirroring only the pre left the line numbers,
+  // the `~` markers and the stripe frozen in place as soon as the buffer scrolled.
   const syncScroll = useCallback(() => {
-    if (preRef.current && textareaRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    const ta = textareaRef.current;
+    if (!ta) return;
+    if (preRef.current) {
+      preRef.current.scrollTop = ta.scrollTop;
+      preRef.current.scrollLeft = ta.scrollLeft;
     }
+    if (gutterRef.current) gutterRef.current.scrollTop = ta.scrollTop;
+    setScrollTop(ta.scrollTop);
+    setScrollLeft(ta.scrollLeft);
   }, []);
 
   // Cursor tracking
@@ -429,6 +440,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             <div className="vim-buffer">
               {/* Line number gutter */}
               <div
+                ref={gutterRef}
                 className="vim-gutter"
                 aria-hidden="true"
                 style={{ minWidth: `${gutterW + 2}ch` }}
@@ -451,10 +463,23 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
               <div className="vim-content-wrap">
                 {activeTab === "example.ts" ? (
                   <>
-                    {/* Current-line highlight */}
+                    {/* Current-line highlight — VIM_PAD must be added, the text
+                        layers are padded and the stripe is not; without it the
+                        stripe sat half a line above the line it highlights. */}
                     <div
                       className="vim-curline-hl"
-                      style={{ top: (curLine - 1) * LINE_H }}
+                      style={{ top: VIM_PAD + (curLine - 1) * LINE_H - scrollTop }}
+                    />
+                    {/* Block cursor — a real filled cell, not a coloured caret.
+                        The buffer font is monospace, so `ch` is the exact advance
+                        width and Ln/Col place the block without measuring. */}
+                    <div
+                      className="vim-block-cursor"
+                      style={{
+                        top: VIM_PAD + (curLine - 1) * LINE_H - scrollTop,
+                        left: `calc(${VIM_PAD}px + ${curCol - 1}ch - ${scrollLeft}px)`,
+                      }}
+                      data-mode={mode}
                     />
                     {/* Syntax-highlighted background pre */}
                     <pre

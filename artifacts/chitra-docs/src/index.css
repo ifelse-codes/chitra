@@ -1472,10 +1472,28 @@ body, button, input, textarea, select { font-family: var(--font-mono); }
   color: var(--text-tertiary);
 }
 
-/* Editable textarea sits on top, transparent text, visible caret */
+/* Real block cursor — a filled monospace cell, the vim signature. The buffer
+   font is monospace so 1ch is the exact advance width; Ln/Col place the block
+   without measuring text. NORMAL = solid block, INSERT = thin bar, as in vim. */
+.vim-block-cursor {
+  position: absolute;
+  width: 1ch;
+  height: var(--vim-lh);
+  background: var(--amber-l);
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 2;
+}
+.vim-block-cursor[data-mode="INSERT"] {
+  width: 2px;
+  opacity: 0.95;
+}
+
+/* Editable textarea sits on top; text and native caret hidden — the block
+   cursor above is the visible one. */
 .vim-ta {
   color: transparent;
-  caret-color: var(--amber-l);
+  caret-color: transparent;
   overflow: auto;
   z-index: 3;
   scrollbar-width: thin;
