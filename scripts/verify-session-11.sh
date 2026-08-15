@@ -52,7 +52,20 @@ run_check "catalog-component-exists" bash -c '
 '
 
 # ── CatalogPage: key features present ─────────────────────────
-run_check "catalog-vim-features" bash -c '
+# The three repairs that answered a cold REJECT on criterion 2 (real block cursor,
+# padding-corrected current-line stripe, gutter scroll-sync) were guarded by NOTHING:
+# the feature grep below matches strings that were all present in the rejected state.
+# These are still source greps — say so — but they now name the repairs specifically,
+# so reverting one is at least visible at close.
+run_check "catalog-repairs-present-SOURCE-GREP" bash -c '
+  f=artifacts/chitra-docs/src/components/CatalogPage.tsx
+  grep -q "vim-block-cursor"            "$f" || { echo "block cursor overlay missing"; exit 1; }
+  grep -q "VIM_PAD + (curLine - 1)"     "$f" || { echo "current-line stripe padding correction missing"; exit 1; }
+  grep -q "gutterRef.current.scrollTop" "$f" || { echo "gutter scroll-sync missing"; exit 1; }
+  grep -q "caret-color: transparent"    artifacts/chitra-docs/src/index.css || { echo "native caret not suppressed"; exit 1; }
+'
+
+run_check "catalog-vim-features-SOURCE-GREP" bash -c '
   f="artifacts/chitra-docs/src/components/CatalogPage.tsx"
   grep -q "vim-gutter"     "$f" || exit 1
   grep -q "vim-curline-hl" "$f" || exit 1

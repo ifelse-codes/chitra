@@ -128,16 +128,24 @@ fi
 header "Cumulative: Previous sessions"
 label "S08+ chart output (braille, blocks, ascii)"
 info "$ pnpm --filter @chitra/core run test (148 tests)"
-ok "All renderers verified by test suite"
+if printf '%s' "$CORE_TEST_OUT" | grep -q "148 passed"; then
+  ok "All renderers verified by test suite"
+else
+  fail "core test suite did not report 148 passed"
+fi
 
 label "S09 LOCKED circular charts (pie/donut/area)"
 if grep -q "LOCKED: circular charts" packages/core/README.md 2>/dev/null; then
   ok "LOCKED contract in README.md"
+else
+  fail "S09 LOCKED circular-chart contract missing from packages/core/README.md"
 fi
 
 label "S10 LOCKED line chart (braille, multi-series)"
 if grep -q "LOCKED: line chart" packages/core/README.md 2>/dev/null; then
   ok "LOCKED contract in README.md"
+else
+  fail "S10 LOCKED line-chart contract missing from packages/core/README.md"
 fi
 
 # ── Summary table ─────────────────────────────────────────────
