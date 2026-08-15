@@ -27,17 +27,24 @@ for (const chart of CHARTS) {
   }
 }
 
-// The renderer switch rewrites the source before evaluating — exercise every
-// renderer on one chart so a bad rewrite cannot pass by only being tested on the
-// default path.
+// The renderer/theme switch rewrites the source before evaluating. Exercise every
+// renderer against EVERY chart: testing one chart is not enough, because the chart
+// that survived the original defect (line) is exactly the one that already declared
+// a renderer key and so never took the injection path that was broken.
 for (const r of RENDERERS) {
-  const res = evalCode(CHARTS[0].code, r, "nord");
-  checked++;
-  if (res.exitCode !== 0) {
-    failed++;
-    console.error(`FAIL  renderer=${r}: ${res.error}`);
+  const broken: string[] = [];
+  for (const chart of CHARTS) {
+    const res = evalCode(chart.code, r, "nord");
+    checked++;
+    if (res.exitCode !== 0 || res.ansi.length === 0) {
+      failed++;
+      broken.push(chart.id);
+    }
+  }
+  if (broken.length > 0) {
+    console.error(`FAIL  renderer=${r}: ${broken.length} charts — ${broken.join(", ")}`);
   } else {
-    console.log(`ok    renderer=${r}`);
+    console.log(`ok    renderer=${r}  (all ${CHARTS.length} charts)`);
   }
 }
 
