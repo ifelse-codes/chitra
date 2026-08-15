@@ -51,11 +51,33 @@ final repaired state:
 
 ## The fakest green
 
-**Criterion 4 (live re-run)** is the fakest green — it works in the browser bundle but cannot be verified offline in the verify script. The verify script checks for the presence of `new Function`, `chitraCore`, `evalCode`, and `globalThis` in the source code, which confirms the evaluator is wired, but does NOT exercise it end-to-end (that requires a browser). The honest status is: the evaluator code is correct and complete; browser confirmation requires `PORT=3000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run dev`.
+**`ok renderer reaches output` — the only check that asserts the renderer selector
+changes real output.** It originally passed when a single chart differed, which `line`
+— the one chart the defect never broke — satisfies forever. Nineteen charts could
+silently ignore the renderer and it would stay green with a cheerful count. Named by a
+cold pass; the floor is now pinned to the 5 renderer-sensitive charts measured on the
+working build, but 5 is a constant in a script, not a derived truth.
 
-A secondary caveat: the `caret-color` amber cursor approximates the "block cursor" the brief specifies; a true pixel-perfect block cursor would require measuring monospace character width and overlaying an absolutely-positioned element, which was not implemented (the modeline `-- INSERT --` / `-- NORMAL --` indicator provides the mode signal instead).
+**Runner-up: `catalog-repairs-present-SOURCE-GREP`.** It greps for the literal strings
+`VIM_PAD + (curLine - 1)` and `gutterRef.current.scrollTop`. That asserts the author
+typed those characters — nothing more. It stays green if `LINE_H`'s `20` desyncs from
+CSS `--vim-lh`, a desync this summary lists as open.
 
----
+**The honest shape of the whole suite:** one check executes the evaluator (102 real
+evaluations, offline, no browser needed — the claim that this "requires a browser" was
+wrong and is retired). **Nine of the sixteen verify checks are source greps**, every one
+now suffixed `-SOURCE-GREP` so the suite stops presenting a read as a verification.
+
+## Contract deviation (recorded, not hidden)
+
+`prompts/11-task-catalog-two-panel.md` §LIVE EXECUTION says: "Strip `import` lines from
+buffer; transform `.render()` → `.toString()`". **That transform was never built**, and
+building it would have been wrong: it only works for a program that is a single
+expression, which is exactly why sparkline's three statements failed with
+`Unexpected token ';'`. What shipped instead runs the example as statements and captures
+what `.render()` writes to a mocked `process.stdout`, with an expression-position
+fallback. Better than the contract, but a deviation, and no grade recorded it until a
+third cold pass asked.
 
 ## How to launch in browser
 
@@ -111,8 +133,7 @@ was omitted". Clicking all 20 chart pages in a real browser showed otherwise.
 
 **After repair:** 20 of 20 chart pages render (`exit 0`); editing the buffer and
 pressing Run or ⌘/Ctrl+Enter changes the output; a syntax error is caught and shown
-with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`, widened in `46117df`) now executes all 20
-examples against all 3 renderers plus a deliberately broken buffer — **81 checks**.
+with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`, widened since) executes the real evaluator.
 The suite is now **102 checks** (20 examples + 60 renderer runs + 20 injection assertions + output-differs + syntax-catch, with the count pinned so it cannot silently shrink). Falsifiability, measured on both mutation shapes: a wholly no-op `injectOpt` → **81/102**; a no-op INSERT branch only, the exact 19-of-20 shape → **83/102**. `verify-session-11.sh` is now **16/16**.
 
 **The lesson, plainly:** every gate in this session was green and every rule was
