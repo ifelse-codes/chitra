@@ -3,6 +3,7 @@ import { CHARTS } from "./data/charts";
 import { ansiToHtml } from "./ansi";
 import ansiCharts from "./data/ansi-charts.json";
 import svgCharts from "./data/svg-charts.json";
+import { CatalogPage } from "./components/CatalogPage";
 
 const ANSI = ansiCharts as Record<string, string>;
 
@@ -272,56 +273,11 @@ function AiPage() {
   );
 }
 
-/* ── Page: Chart detail ─────────────────────────────────────── */
+/* ── Page: Chart detail — two-panel catalog view ──────────────── */
 function ChartPage({ id }: { id: string }) {
   const chart = CHARTS.find((c) => c.id === id);
   if (!chart) return null;
-  const accent = CHART_ACCENT[id] ?? "blue";
-  const meta = CHART_META[id];
-  return (
-    <div className="page">
-      <div className="page-header">
-        <div className="page-eyebrow">Chart Types</div>
-        <div className="page-title-row">
-          <h1>{chart.name}</h1>
-          <AccentChip accent={accent} />
-        </div>
-        <p className="lead">{chart.description}</p>
-      </div>
-
-      {meta && (
-        <div className="use-cases">
-          {meta.uses.map((u, i) => (
-            <div key={i} className="use-case-item">
-              <span className={`use-dot chip-${accent}`} />
-              <span>{u}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <h2>Preview</h2>
-      <SvgChart id={id} />
-      <Terminal id={id} plain={chart.preview} />
-
-      <h2>Code</h2>
-      <CodeBlock code={chart.code} />
-
-      {meta && meta.options.length > 0 && (
-        <>
-          <h2>Key options</h2>
-          <div className="options-table">
-            {meta.options.map((o) => (
-              <div key={o.name} className="option-row">
-                <code className="option-name">{o.name}</code>
-                <span className="option-desc">{o.desc}</span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
+  return <CatalogPage chart={chart} />;
 }
 
 /* ── Hero ───────────────────────────────────────────────────── */
@@ -535,7 +491,9 @@ export default function App() {
           ))}
         </nav>
 
-        <main className="content">{content()}</main>
+        <main className={`content${CHARTS.some((c) => c.id === active) ? " content-catalog" : ""}`}>
+          {content()}
+        </main>
       </div>
     </div>
   );
