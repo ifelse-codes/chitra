@@ -137,7 +137,9 @@ interface RunResult {
   error: string | null;
 }
 
-function evalCode(
+// Exported so `scripts/check-catalog-examples.ts` can execute the REAL evaluator
+// against every catalog example — a grep for `new Function` proves nothing.
+export function evalCode(
   code: string,
   renderer: RendererChoice,
   theme: ThemeChoice,
