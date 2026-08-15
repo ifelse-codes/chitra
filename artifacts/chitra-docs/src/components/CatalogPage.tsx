@@ -1,0 +1,530 @@
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { ansiToHtml } from "../ansi";
+import * as chitraCore from "@chitra/core";
+import type { ChartDef } from "../data/charts";
+
+type TabName = "example.ts" | "data.ts" | "output.txt";
+type VimMode = "NORMAL" | "INSERT";
+type RunStatus = "Ready" | "Running…" | "Error";
+type RendererChoice = "braille" | "blocks" | "ascii";
+type ThemeChoice =
+  | "default"
+  | "nord"
+  | "dracula"
+  | "github-dark"
+  | "tokyo-night"
+  | "solarized"
+  | "monochrome";
+
+const RENDERERS: RendererChoice[] = ["braille", "blocks", "ascii"];
+const THEMES: ThemeChoice[] = [
+  "default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome",
+];
+
+const LINE_H = 20; // px — must match CSS var(--vim-lh)
+
+// ── Tokenizer ──────────────────────────────────────────────────────────────
+
+function hlTs(code: string): string {
+  return code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/(\/\/[^\n]*)/g, '<span class="tok-comment">$1</span>')
+    .replace(
+      /\b(import|from|export|const|let|var|function|return|if|else|for|of|in|async|await|true|false|null|undefined|type|interface|new|typeof)\b/g,
+      '<span class="tok-kw">$1</span>',
+    )
+    .replace(
+      /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g,
+      '<span class="tok-str">$1</span>',
+    )
+    .replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tok-num">$1</span>')
+    .replace(
+      /\b([A-Z][A-Za-z0-9_]*)\b/g,
+      '<span class="tok-type">$1</span>',
+    )
+    .replace(
+      /\b([a-z_][A-Za-z0-9_]*)(?=\s*\()/g,
+      '<span class="tok-fn">$1</span>',
+    );
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function stripAnsi(s: string): string {
+  return s.replace(/\[[^m]*m/g, "");
+}
+
+function genDataTab(code: string, chartId: string): string {
+  const m = code.match(/data:\s*(\[[\s\S]*?\](?:\s*,)?)/m);
+  const arr = m ? m[1].replace(/,$/, "").trim() : "[]";
+  return `// Data used by the ${chartId} example\nexport const data = ${arr};\n`;
+}
+
+function offsetToLineCol(text: string, offset: number): { line: number; col: number } {
+  const before = text.substring(0, offset);
+  const lines = before.split("\n");
+  return { line: lines.length, col: lines[lines.length - 1].length + 1 };
+}
+
+// ── Code transformer ─────────────────────────────────────────────────────────
+
+function applyOverrides(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
+  let out = code;
+  if (/\brenderer\s*:/.test(out)) {
+    out = out.replace(/\brenderer\s*:\s*["'][^"']*["']/, `renderer: "${renderer}"`);
+  } else {
+    out = out.replace(
+      /(\})\s*\)\s*\.render\s*\(\s*\)\s*;?$/,
+      `$1,\n  renderer: "${renderer}"\n}).render();`,
+    );
+  }
+  if (/\btheme\s*:/.test(out)) {
+    out = out.replace(/\btheme\s*:\s*["'][^"']*["']/, `theme: "${theme}"`);
+  } else {
+    out = out.replace(
+      /(\})\s*\)\s*\.render\s*\(\s*\)\s*;?$/,
+      `$1,\n  theme: "${theme}"\n}).render();`,
+    );
+  }
+  return out;
+}
+
+function buildFnBody(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
+  const withOv = applyOverrides(code, renderer, theme);
+  const noImports = withOv.replace(/^import\s+[^\n]*(\n|$)/gm, "");
+  // Replace the trailing .render() call with .toString() so we capture the string
+  const withReturn = noImports.trimEnd().replace(/\.render\s*\(\s*\)\s*;?\s*$/, ".toString()");
+  return `"use strict";\nreturn (\n${withReturn}\n);`;
+}
+
+// ── Evaluator ────────────────────────────────────────────────────────────────
+
+interface RunResult {
+  ansi: string;
+  plain: string;
+  ms: number;
+  exitCode: number;
+  error: string | null;
+}
+
+function evalCode(
+  code: string,
+  renderer: RendererChoice,
+  theme: ThemeChoice,
+): RunResult {
+  const t0 = performance.now();
+  // Mock process.stdout so any stray .render() calls are captured
+  const captured: string[] = [];
+  const origProcess = (globalThis as Record<string, unknown>).process;
+  (globalThis as Record<string, unknown>).process = {
+    stdout: {
+      write: (s: string) => { captured.push(s); return true; },
+      columns: 80,
+      isTTY: true,
+    },
+    env: {},
+  };
+
+  try {
+    const fnBody = buildFnBody(code, renderer, theme);
+    const api = chitraCore as Record<string, unknown>;
+    const fn = new Function(...Object.keys(api), fnBody);
+    const result = fn(...Object.values(api));
+    const ms = Math.round(performance.now() - t0);
+
+    // Prefer explicit return value; fall back to captured stdout
+    let ansi: string;
+    if (typeof result === "string" && result.length > 0) {
+      ansi = result;
+    } else if (captured.length > 0) {
+      ansi = captured.join("").replace(/\n$/, "");
+    } else {
+      throw new Error(
+        "Chart returned no output. Ensure code calls a chart function like line({...}).toString().",
+      );
+    }
+
+    return { ansi, plain: stripAnsi(ansi), ms, exitCode: 0, error: null };
+  } catch (err) {
+    const ms = Math.round(performance.now() - t0);
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ansi: "", plain: "", ms, exitCode: 1, error: msg };
+  } finally {
+    (globalThis as Record<string, unknown>).process = origProcess;
+  }
+}
+
+// ── CatalogPage ──────────────────────────────────────────────────────────────
+
+export function CatalogPage({ chart }: { chart: ChartDef }) {
+  const pristine = useRef(chart.code);
+
+  const [buffer, setBuffer] = useState(chart.code);
+  const [activeTab, setActiveTab] = useState<TabName>("example.ts");
+  const [mode, setMode] = useState<VimMode>("NORMAL");
+  const [curLine, setCurLine] = useState(1);
+  const [curCol, setCurCol] = useState(1);
+  const [renderer, setRenderer] = useState<RendererChoice>("braille");
+  const [theme, setTheme] = useState<ThemeChoice>("default");
+  const [runStatus, setRunStatus] = useState<RunStatus>("Ready");
+  const [ansiOut, setAnsiOut] = useState("");
+  const [plainOut, setPlainOut] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [runMs, setRunMs] = useState(0);
+  const [exitCode, setExitCode] = useState(0);
+  const [copied, setCopied] = useState<"code" | "out" | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  // Track latest values for the evaluator without stale closures
+  const bufRef = useRef(buffer);
+  const rendRef = useRef(renderer);
+  const themeRef = useRef(theme);
+  bufRef.current = buffer;
+  rendRef.current = renderer;
+  themeRef.current = theme;
+
+  // Reset when navigating to a different chart
+  useEffect(() => {
+    pristine.current = chart.code;
+    setBuffer(chart.code);
+    setActiveTab("example.ts");
+    setAnsiOut("");
+    setPlainOut("");
+    setErrorMsg(null);
+    setExitCode(0);
+    setRunStatus("Ready");
+    setCurLine(1);
+    setCurCol(1);
+    setMode("NORMAL");
+  }, [chart.id]);
+
+  // Core run function — reads from refs for freshness
+  const run = useCallback(
+    (codeOverride?: string, rendOverride?: RendererChoice, themeOverride?: ThemeChoice) => {
+      const c = codeOverride ?? bufRef.current;
+      const r = rendOverride ?? rendRef.current;
+      const t = themeOverride ?? themeRef.current;
+      setRunStatus("Running…");
+      // Yield to React to update status UI before synchronous eval
+      setTimeout(() => {
+        const res = evalCode(c, r, t);
+        setAnsiOut(res.ansi);
+        setPlainOut(res.plain);
+        setRunMs(res.ms);
+        setExitCode(res.exitCode);
+        setErrorMsg(res.error);
+        setRunStatus(res.error ? "Error" : "Ready");
+      }, 0);
+    },
+    [],
+  );
+
+  // Auto-run on mount / chart navigation
+  useEffect(() => {
+    run(chart.code, "braille", "default");
+  }, [chart.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Tab content helpers
+  const tabContent = (tab: TabName): string => {
+    if (tab === "example.ts") return buffer;
+    if (tab === "data.ts") return genDataTab(chart.code, chart.id);
+    if (tab === "output.txt") return plainOut || stripAnsi(chart.preview);
+    return "";
+  };
+
+  // Scroll-sync: keep highlight pre in sync with editable textarea
+  const syncScroll = useCallback(() => {
+    if (preRef.current && textareaRef.current) {
+      preRef.current.scrollTop = textareaRef.current.scrollTop;
+      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
+  }, []);
+
+  // Cursor tracking
+  const trackCursor = useCallback(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const { line, col } = offsetToLineCol(bufRef.current, ta.selectionStart);
+    setCurLine(line);
+    setCurCol(col);
+  }, []);
+
+  // Keyboard handler
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Escape") {
+        setMode("NORMAL");
+        textareaRef.current?.blur();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        run();
+        return;
+      }
+    },
+    [run],
+  );
+
+  // Toolbar handlers
+  const handleRendererChange = (r: RendererChoice) => {
+    setRenderer(r);
+    run(undefined, r, themeRef.current);
+  };
+  const handleThemeChange = (t: ThemeChoice) => {
+    setTheme(t);
+    run(undefined, rendRef.current, t);
+  };
+
+  const copy = (what: "code" | "out") => {
+    navigator.clipboard.writeText(what === "code" ? buffer : plainOut);
+    setCopied(what);
+    setTimeout(() => setCopied(null), 1600);
+  };
+
+  const download = (what: "ts" | "txt") => {
+    const content = what === "ts" ? buffer : plainOut;
+    const name = `${chart.id}-example.${what === "ts" ? "ts" : "txt"}`;
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const reset = () => {
+    setBuffer(pristine.current);
+    setActiveTab("example.ts");
+  };
+
+  // Computed layout values
+  const lines = buffer.split("\n");
+  const totalLines = lines.length;
+  const gutterW = String(Math.max(totalLines, 10)).length;
+  const pct = Math.round((curLine / totalLines) * 100);
+  const statusClass =
+    runStatus === "Ready" ? "ready" : runStatus === "Running…" ? "running" : "error";
+
+  return (
+    <div className="catalog-page">
+      {/* ── Toolbar ─────────────────────────────────────────── */}
+      <div className="ct-bar">
+        <div className="ct-left">
+          <button
+            className={`ct-run ${runStatus === "Running…" ? "ct-run-busy" : ""}`}
+            onClick={() => run()}
+            title="Run (⌘+Enter)"
+            disabled={runStatus === "Running…"}
+          >
+            <span>{runStatus === "Running…" ? "⟳" : "▶"}</span>
+            <span>{runStatus === "Running…" ? "Running…" : "Run"}</span>
+          </button>
+          <span className={`ct-pill ct-pill-${statusClass}`}>{runStatus}</span>
+        </div>
+
+        <div className="ct-center">
+          <label className="ct-label">Renderer</label>
+          <select
+            className="ct-select"
+            value={renderer}
+            onChange={(e) => handleRendererChange(e.target.value as RendererChoice)}
+          >
+            {RENDERERS.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+
+          <label className="ct-label">Theme</label>
+          <select
+            className="ct-select"
+            value={theme}
+            onChange={(e) => handleThemeChange(e.target.value as ThemeChoice)}
+          >
+            {THEMES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="ct-right">
+          <button className="ct-btn" onClick={() => copy("code")}>
+            {copied === "code" ? "✓ Copied!" : "⧉ Code"}
+          </button>
+          <button className="ct-btn" onClick={() => copy("out")}>
+            {copied === "out" ? "✓ Copied!" : "⧉ Output"}
+          </button>
+          <button className="ct-btn" onClick={() => download("ts")}>⇩ .ts</button>
+          <button className="ct-btn" onClick={() => download("txt")}>⇩ .txt</button>
+          <button className="ct-btn ct-reset" onClick={reset}>↺ Reset</button>
+        </div>
+      </div>
+
+      {/* ── Two-panel split ──────────────────────────────────── */}
+      <PanelGroup direction="horizontal" className="catalog-panels">
+        {/* LEFT — vim editor */}
+        <Panel defaultSize={50} minSize={20} className="vim-panel">
+          <div className="vim-editor">
+            {/* Tab bar */}
+            <div className="vim-tabs">
+              <span className="vim-breadcrumb" aria-label="breadcrumb">
+                ▸ catalog/{chart.id}/
+              </span>
+              {(["example.ts", "data.ts", "output.txt"] as TabName[]).map((tab) => (
+                <button
+                  key={tab}
+                  className={`vim-tab${activeTab === tab ? " vim-tab-active" : ""}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Buffer */}
+            <div className="vim-buffer">
+              {/* Line number gutter */}
+              <div
+                className="vim-gutter"
+                aria-hidden="true"
+                style={{ minWidth: `${gutterW + 2}ch` }}
+              >
+                {lines.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`vim-ln${i + 1 === curLine && activeTab === "example.ts" ? " vim-ln-cur" : ""}`}
+                  >
+                    {i + 1}
+                  </div>
+                ))}
+                {/* ~ tilde markers past EOF */}
+                {Array.from({ length: 8 }, (_, i) => (
+                  <div key={`tilde-${i}`} className="vim-tilde">~</div>
+                ))}
+              </div>
+
+              {/* Content area */}
+              <div className="vim-content-wrap">
+                {activeTab === "example.ts" ? (
+                  <>
+                    {/* Current-line highlight */}
+                    <div
+                      className="vim-curline-hl"
+                      style={{ top: (curLine - 1) * LINE_H }}
+                    />
+                    {/* Syntax-highlighted background pre */}
+                    <pre
+                      ref={preRef}
+                      className="vim-hl"
+                      aria-hidden="true"
+                      dangerouslySetInnerHTML={{ __html: hlTs(buffer) }}
+                    />
+                    {/* Transparent textarea overlay — receives input */}
+                    <textarea
+                      ref={textareaRef}
+                      className="vim-ta"
+                      value={buffer}
+                      onChange={(e) => {
+                        setBuffer(e.target.value);
+                        bufRef.current = e.target.value;
+                        syncScroll();
+                        trackCursor();
+                      }}
+                      onFocus={() => setMode("INSERT")}
+                      onBlur={() => setMode("NORMAL")}
+                      onKeyDown={onKeyDown}
+                      onScroll={syncScroll}
+                      onSelect={trackCursor}
+                      onClick={trackCursor}
+                      onKeyUp={trackCursor}
+                      spellCheck={false}
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      data-gramm="false"
+                    />
+                  </>
+                ) : (
+                  <pre className="vim-hl vim-readonly">{tabContent(activeTab)}</pre>
+                )}
+              </div>
+            </div>
+
+            {/* Modeline */}
+            <div className="vim-modeline">
+              <span className={`vim-mode-badge vim-mode-${mode === "NORMAL" ? "normal" : "insert"}`}>
+                -- {mode} --
+              </span>
+              <span className="vim-ml-path"> catalog/{chart.id}/{activeTab}</span>
+              <span className="vim-ml-spacer" />
+              <span className="vim-ml-item">typescript</span>
+              <span className="vim-ml-sep"> │ </span>
+              <span className="vim-ml-item">Ln {curLine}, Col {curCol}</span>
+              <span className="vim-ml-sep"> │ </span>
+              <span className="vim-ml-item">{pct}%</span>
+            </div>
+          </div>
+        </Panel>
+
+        {/* Resize handle */}
+        <PanelResizeHandle className="catalog-resize-handle">
+          <div className="catalog-resize-bar" />
+        </PanelResizeHandle>
+
+        {/* RIGHT — terminal preview */}
+        <Panel defaultSize={50} minSize={20} className="term-panel">
+          <div className="term-preview">
+            {/* Title bar */}
+            <div className="term-titlebar">
+              <div className="term-dots">
+                <span className="term-dot term-dot-r" />
+                <span className="term-dot term-dot-y" />
+                <span className="term-dot term-dot-g" />
+              </div>
+              <span className="term-title">{chart.name}</span>
+              <span className={`term-pill term-pill-${statusClass}`}>{runStatus}</span>
+            </div>
+
+            {/* Body */}
+            <div className="term-body">
+              <div className="term-prompt">
+                <span className="term-prompt-dollar">$</span>
+                <span> tsx example.ts</span>
+              </div>
+
+              {errorMsg ? (
+                <div className="term-error-block">
+                  <pre className="term-error-msg">{errorMsg}</pre>
+                </div>
+              ) : ansiOut ? (
+                <pre
+                  className="term-output"
+                  dangerouslySetInnerHTML={{ __html: ansiToHtml(ansiOut) }}
+                />
+              ) : (
+                <pre className="term-output term-output-placeholder">{chart.preview}</pre>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="term-footer">
+              <span className={exitCode !== 0 ? "term-exit-err" : "term-exit-ok"}>
+                exit {exitCode}
+              </span>
+              <span className="term-sep"> · </span>
+              <span>{runMs}ms</span>
+              <span className="term-sep"> · </span>
+              <span>renderer={renderer}</span>
+              <span className="term-sep"> · </span>
+              <span>theme={theme}</span>
+            </div>
+          </div>
+        </Panel>
+      </PanelGroup>
+    </div>
+  );
+}
