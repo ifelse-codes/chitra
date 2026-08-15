@@ -26,29 +26,43 @@ const LINE_H = 20; // px — must match CSS var(--vim-lh)
 
 // ── Tokenizer ──────────────────────────────────────────────────────────────
 
+const KEYWORDS =
+  /^(?:import|from|export|const|let|var|function|return|if|else|for|of|in|async|await|true|false|null|undefined|type|interface|new|typeof)$/;
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Single pass: emitted markup is never re-scanned, so a class name like "tok-kw"
+// can no longer be picked up by a later string/keyword rule and rendered as text.
+const TOKEN_RE =
+  /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][A-Za-z0-9_$]*)/g;
+
 function hlTs(code: string): string {
-  return code
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/(\/\/[^\n]*)/g, '<span class="tok-comment">$1</span>')
-    .replace(
-      /\b(import|from|export|const|let|var|function|return|if|else|for|of|in|async|await|true|false|null|undefined|type|interface|new|typeof)\b/g,
-      '<span class="tok-kw">$1</span>',
-    )
-    .replace(
-      /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g,
-      '<span class="tok-str">$1</span>',
-    )
-    .replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tok-num">$1</span>')
-    .replace(
-      /\b([A-Z][A-Za-z0-9_]*)\b/g,
-      '<span class="tok-type">$1</span>',
-    )
-    .replace(
-      /\b([a-z_][A-Za-z0-9_]*)(?=\s*\()/g,
-      '<span class="tok-fn">$1</span>',
-    );
+  let out = "";
+  let last = 0;
+  let m: RegExpExecArray | null;
+  TOKEN_RE.lastIndex = 0;
+  while ((m = TOKEN_RE.exec(code)) !== null) {
+    out += esc(code.slice(last, m.index));
+    last = m.index + m[0].length;
+    const [raw, comment, str, num, word] = m;
+    if (comment) out += `<span class="tok-comment">${esc(comment)}</span>`;
+    else if (str) out += `<span class="tok-str">${esc(str)}</span>`;
+    else if (num) out += `<span class="tok-num">${num}</span>`;
+    else if (word) {
+      const isCall = /^\s*\(/.test(code.slice(last));
+      const cls = KEYWORDS.test(word)
+        ? "tok-kw"
+        : isCall
+          ? "tok-fn"
+          : /^[A-Z]/.test(word)
+            ? "tok-type"
+            : null;
+      out += cls ? `<span class="${cls}">${esc(word)}</span>` : esc(word);
+    } else out += esc(raw);
+  }
+  return out + esc(code.slice(last));
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -71,33 +85,46 @@ function offsetToLineCol(text: string, offset: number): { line: number; col: num
 
 // ── Code transformer ─────────────────────────────────────────────────────────
 
-function applyOverrides(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
-  let out = code;
-  if (/\brenderer\s*:/.test(out)) {
-    out = out.replace(/\brenderer\s*:\s*["'][^"']*["']/, `renderer: "${renderer}"`);
-  } else {
-    out = out.replace(
-      /(\})\s*\)\s*\.render\s*\(\s*\)\s*;?$/,
-      `$1,\n  renderer: "${renderer}"\n}).render();`,
-    );
-  }
-  if (/\btheme\s*:/.test(out)) {
-    out = out.replace(/\btheme\s*:\s*["'][^"']*["']/, `theme: "${theme}"`);
-  } else {
-    out = out.replace(
-      /(\})\s*\)\s*\.render\s*\(\s*\)\s*;?$/,
-      `$1,\n  theme: "${theme}"\n}).render();`,
-    );
-  }
-  return out;
+// Options object of a chart call — the closing `}` is only accepted when it is
+// followed by `).render(` / `).toString(`, so nested object literals are skipped.
+const CALL_OPTS_RE = /\{([\s\S]*?)\}(\s*\)\s*\.(?:render|toString)\s*\()/g;
+
+// Set `key` on EVERY chart call in the source: replace it in calls that already
+// declare it, insert it INSIDE the braces for calls that do not. The previous
+// version re-emitted the captured `}` before the inserted key, which closed the
+// options object early and produced `fn({...}, key: "v"})` — a syntax error
+// ("missing ) after argument list") on every example lacking a renderer/theme key.
+function injectOpt(code: string, key: string, value: string): string {
+  const existing = new RegExp(`\\b${key}\\s*:\\s*["'][^"']*["']`);
+  return code.replace(CALL_OPTS_RE, (_m, body: string, tail: string) => {
+    const next = existing.test(body)
+      ? body.replace(existing, `${key}: "${value}"`)
+      : `${body.replace(/\s*,?\s*$/, "")},\n  ${key}: "${value}"\n`;
+    return `{${next}}${tail}`;
+  });
 }
 
+function applyOverrides(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
+  return injectOpt(injectOpt(code, "renderer", renderer), "theme", theme);
+}
+
+function stripImports(code: string): string {
+  return code.replace(/^import\s+[^\n]*(\n|$)/gm, "");
+}
+
+// Run the example as STATEMENTS and capture what `.render()` writes to the mocked
+// process.stdout. The previous version wrapped the whole program in `return ( … )`,
+// which is only valid for a single expression — any multi-statement example (e.g.
+// sparkline's three calls) died with "Unexpected token ';'".
 function buildFnBody(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
-  const withOv = applyOverrides(code, renderer, theme);
-  const noImports = withOv.replace(/^import\s+[^\n]*(\n|$)/gm, "");
-  // Replace the trailing .render() call with .toString() so we capture the string
-  const withReturn = noImports.trimEnd().replace(/\.render\s*\(\s*\)\s*;?\s*$/, ".toString()");
-  return `"use strict";\nreturn (\n${withReturn}\n);`;
+  return `"use strict";\n${stripImports(applyOverrides(code, renderer, theme))}`;
+}
+
+// Fallback for code that ends in an expression (e.g. `…toString()`) and therefore
+// writes nothing to stdout.
+function buildReturnBody(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
+  const src = stripImports(applyOverrides(code, renderer, theme)).trimEnd().replace(/;$/, "");
+  return `"use strict";\nreturn (\n${src}\n);`;
 }
 
 // ── Evaluator ────────────────────────────────────────────────────────────────
@@ -129,21 +156,27 @@ function evalCode(
   };
 
   try {
-    const fnBody = buildFnBody(code, renderer, theme);
     const api = chitraCore as Record<string, unknown>;
-    const fn = new Function(...Object.keys(api), fnBody);
-    const result = fn(...Object.values(api));
+    const keys = Object.keys(api);
+    const vals = Object.values(api);
+    let result = new Function(...keys, buildFnBody(code, renderer, theme))(...vals);
+
+    // Code that ends in a bare expression writes nothing to stdout — re-run it
+    // in expression position and take its value.
+    if (captured.length === 0 && typeof result !== "string") {
+      result = new Function(...keys, buildReturnBody(code, renderer, theme))(...vals);
+    }
     const ms = Math.round(performance.now() - t0);
 
-    // Prefer explicit return value; fall back to captured stdout
+    // Prefer captured stdout (statement form); fall back to the returned value
     let ansi: string;
-    if (typeof result === "string" && result.length > 0) {
-      ansi = result;
-    } else if (captured.length > 0) {
+    if (captured.length > 0) {
       ansi = captured.join("").replace(/\n$/, "");
+    } else if (typeof result === "string" && result.length > 0) {
+      ansi = result;
     } else {
       throw new Error(
-        "Chart returned no output. Ensure code calls a chart function like line({...}).toString().",
+        "Chart returned no output. Ensure code calls a chart function like line({...}).render().",
       );
     }
 
@@ -301,6 +334,10 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   const reset = () => {
     setBuffer(pristine.current);
     setActiveTab("example.ts");
+    setMode("NORMAL");
+    // Restore the preview too — resetting the buffer while leaving a stale (or
+    // errored) preview on screen misreports the state of the code being shown.
+    run(pristine.current);
   };
 
   // Computed layout values
