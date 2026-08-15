@@ -15,7 +15,11 @@ header() { printf "\n${CYAN}${BOLD}══ %s ══${RESET}\n" "$1"; }
 label()  { printf "${YELLOW}${BOLD}▸ %s${RESET}\n" "$1"; }
 ok()     { printf "${GREEN}✓ %s${RESET}\n" "$1"; }
 info()   { printf "${DIM}  %s${RESET}\n" "$1"; }
-fail()   { printf "${RED}✗ %s${RESET}\n" "$1"; }
+# A demo that cannot fail is not a demo. Every ✗ now marks the run failed, and
+# the script exits non-zero at the end. (Cold review, S118: the original fail()
+# printed and returned 0, so this script exited 0 while 19 of 20 pages were broken.)
+DEMO_FAILED=0
+fail()   { printf "${RED}✗ %s${RESET}\n" "$1"; DEMO_FAILED=1; }
 
 header "Session ${SESSION} Demo — chitra docs catalog two-panel page"
 
@@ -79,7 +83,11 @@ fi
 
 header "S11: Core invariants (chart output LOCKED)"
 label "Core tests"
-if pnpm --filter @chitra/core run test 2>&1 | grep -q "148 passed"; then
+# NB: capture first, then grep. Under `set -o pipefail`, `cmd | grep -q` makes
+# grep exit on the first match, SIGPIPEs the producer, and fails the pipeline —
+# which is why this check reported a false ✗ (called "cosmetic" at S11 close).
+CORE_TEST_OUT="$(pnpm --filter @chitra/core run test 2>&1 || true)"
+if printf '%s' "$CORE_TEST_OUT" | grep -q "148 passed"; then
   ok "148/148 tests green"
 else
   fail "core tests failed"
@@ -100,7 +108,8 @@ else
 fi
 
 label "Chart drift gate"
-if pnpm --filter @workspace/chitra-docs run gen:charts:check 2>&1 | grep -q "up to date"; then
+GEN_OUT="$(pnpm --filter @workspace/chitra-docs run gen:charts:check 2>&1 || true)"
+if printf '%s' "$GEN_OUT" | grep -q "up to date"; then
   ok "gen:charts:check — all charts up to date"
 else
   fail "gen:charts:check failed"
@@ -137,18 +146,23 @@ header "Summary"
 printf "\n"
 printf "  %-40s %s\n" "Feature" "Status"
 printf "  %-40s %s\n" "----------------------------------------" "------"
-printf "  %-40s %s\n" "Two-panel layout (resizable split)"         "SHIPS"
-printf "  %-40s %s\n" "Vim editor (gutter/curline/~/.modeline)"    "SHIPS"
-printf "  %-40s %s\n" "TS syntax highlighting (hand-rolled)"       "SHIPS"
-printf "  %-40s %s\n" "File tabs (example.ts/data.ts/output.txt)"  "SHIPS"
-printf "  %-40s %s\n" "NORMAL/INSERT mode + Ln/Col modeline"       "SHIPS"
-printf "  %-40s %s\n" "Terminal preview (title/pill/ANSI/footer)"  "SHIPS"
-printf "  %-40s %s\n" "Toolbar (run/copy/download/reset)"          "SHIPS"
-printf "  %-40s %s\n" "Renderer + theme selectors"                 "SHIPS"
-printf "  %-40s %s\n" "In-browser new Function evaluator"         "SHIPS"
-printf "  %-40s %s\n" "Error capture (never white-screen)"        "SHIPS"
-printf "  %-40s %s\n" "Core chart output locked (148 tests)"      "SHIPS"
-printf "  %-40s %s\n" "gen:charts:check green"                    "SHIPS"
+# Derived, not typed. The catalog rows are decided by the executable check; the
+# rest by commands that can fail. A hardcoded "SHIPS" table is a claim, not a demo.
+if pnpm --filter @workspace/chitra-docs run check:catalog >/dev/null 2>&1; then
+  CATALOG="SHIPS (executed)"
+else
+  CATALOG="BROKEN"; DEMO_FAILED=1
+fi
+if [ -z "$(git diff main -- packages/core/src/)" ]; then CORE="SHIPS (locked)"; else CORE="DRIFTED"; DEMO_FAILED=1; fi
+if pnpm --filter @workspace/chitra-docs run gen:charts:check >/dev/null 2>&1; then GEN="SHIPS"; else GEN="BROKEN"; DEMO_FAILED=1; fi
+
+printf "  %-40s %s\n" "All 20 catalog examples execute"            "$CATALOG"
+printf "  %-40s %s\n" "Renderer + theme injection takes effect"    "$CATALOG"
+printf "  %-40s %s\n" "Error capture (never white-screen)"         "$CATALOG"
+printf "  %-40s %s\n" "Core chart output locked"                   "$CORE"
+printf "  %-40s %s\n" "gen:charts:check green"                     "$GEN"
+printf "\n  %s\n" "Not asserted by this script (source-read only, no DOM test):"
+printf "  %-40s %s\n" "  two-panel split · vim chrome · toolbar"   "unverified"
 printf "\n"
 info "To launch docs in browser:"
 info "  PORT=3000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run dev"
@@ -156,3 +170,8 @@ info "  Then navigate to a chart page (e.g. /line)"
 printf "\n"
 
 ok "Session ${SESSION} demo complete."
+
+if [ "$DEMO_FAILED" -ne 0 ]; then
+  printf "${RED}Demo FAILED — at least one check above did not pass.${RESET}\n"
+  exit 1
+fi
