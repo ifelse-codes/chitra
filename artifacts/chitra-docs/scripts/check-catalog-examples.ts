@@ -9,7 +9,7 @@
  * Exit 0 = every example evaluated to real output. Exit 1 = at least one failed.
  */
 import { CHARTS } from "../src/data/charts";
-import { evalCode } from "../src/components/CatalogPage";
+import { evalCode, applyOverrides } from "../src/components/CatalogPage";
 
 const RENDERERS = ["braille", "blocks", "ascii"] as const;
 
@@ -55,32 +55,43 @@ for (const r of RENDERERS) {
 
 // "It did not throw" is not "it did the right thing". A cold review pointed out
 // that turning injectOpt into `return code` would leave every check above green:
-// each chart would simply render with its own built-in renderer. So assert the
-// injection actually CHANGED something — at least one chart must render
-// differently under a different renderer, and switching themes must alter output.
+// each chart would simply render with its own built-in renderer.
+//
+// Asserting "output differs across renderers" is NOT enough on its own — many
+// chitra charts (gauge, progress, pie, heatmap…) legitimately render identically
+// under braille and ascii, so a no-op could hide behind them. So assert the
+// REWRITE directly, per chart: the transformed source must actually carry the
+// requested renderer and theme. That fails for every chart under a no-op, and it
+// covers injectOpt's INSERT branch (charts with no renderer key) as well as its
+// REPLACE branch — the insert branch is the one that broke 19 of 20 pages.
+const notInjected: string[] = [];
+for (const chart of CHARTS) {
+  const out = applyOverrides(chart.code, "ascii", "monochrome");
+  checked++;
+  if (!/renderer:\s*"ascii"/.test(out) || !/theme:\s*"monochrome"/.test(out)) {
+    failed++;
+    notInjected.push(chart.id);
+  }
+}
+if (notInjected.length > 0) {
+  console.error(`FAIL  renderer/theme not injected into ${notInjected.length} chart(s) — ${notInjected.join(", ")}`);
+} else {
+  console.log(`ok    renderer + theme injected into all ${CHARTS.length} chart sources`);
+}
+
+// End-to-end corroboration: the rewrite must reach real output for at least the
+// charts that honour the renderer. Threshold is >0 by design here — the per-chart
+// assertion above is what makes a no-op impossible to hide.
 const braille = byRenderer.get("braille")!;
 const ascii = byRenderer.get("ascii")!;
-const differing = [...braille.keys()].filter((id) => braille.get(id) !== ascii.get(id));
+const comparable = [...braille.keys()].filter((id) => ascii.has(id));
+const differing = comparable.filter((id) => braille.get(id) !== ascii.get(id));
 checked++;
 if (differing.length === 0) {
   failed++;
-  console.error("FAIL  renderer injection is a NO-OP — braille and ascii output are identical for all charts");
+  console.error("FAIL  no chart's OUTPUT changed between braille and ascii — the rewrite never reached the renderer");
 } else {
-  console.log(`ok    renderer injection takes effect  (${differing.length}/${braille.size} charts differ braille vs ascii)`);
-}
-
-// Same argument for the theme switch, which rides the second injectOpt call.
-const themed = CHARTS.filter((c) => {
-  const a = evalCode(c.code, "braille", "default");
-  const b = evalCode(c.code, "braille", "monochrome");
-  return a.exitCode === 0 && b.exitCode === 0 && a.ansi !== b.ansi;
-});
-checked++;
-if (themed.length === 0) {
-  failed++;
-  console.error("FAIL  theme injection is a NO-OP — default and monochrome output are identical for all charts");
-} else {
-  console.log(`ok    theme injection takes effect  (${themed.length}/${CHARTS.length} charts differ default vs monochrome)`);
+  console.log(`ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii)`);
 }
 
 // A deliberately broken buffer must be CAUGHT (exit 1 + message), never thrown.
@@ -91,6 +102,14 @@ if (bad.exitCode === 0 || !bad.error) {
   console.error("FAIL  syntax error was not caught");
 } else {
   console.log(`ok    syntax error caught: ${bad.error.slice(0, 40)}`);
+}
+
+// Pin the count. Without this, deleting an assertion yields a smaller, cheerful
+// "N/N passed" and exits 0 — a suite that shrinks silently is a suite that lies.
+const EXPECTED_CHECKS = CHARTS.length * (2 + RENDERERS.length) + 2;
+if (checked !== EXPECTED_CHECKS) {
+  failed++;
+  console.error(`FAIL  expected ${EXPECTED_CHECKS} checks, ran ${checked} — the suite changed shape`);
 }
 
 console.log(`\n${checked - failed}/${checked} catalog example checks passed`);

@@ -105,7 +105,10 @@ function injectOpt(code: string, key: string, value: string): string {
   });
 }
 
-function applyOverrides(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
+// Exported so the check suite can assert the REWRITE itself, not only that the
+// result ran. Output-differs is weak evidence: many chitra charts legitimately
+// render identically across renderers, so a no-op could hide behind them.
+export function applyOverrides(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
   return injectOpt(injectOpt(code, "renderer", renderer), "theme", theme);
 }
 
