@@ -1192,3 +1192,444 @@ body, button, input, textarea, select { font-family: var(--font-mono); }
 .metrics-summary { margin-top:16px; border-color:#4ee06a; position:relative; padding-top:19px; }.metrics-panel-tag { position:absolute; top:-10px; left:13px; background:#07090a; color:#70e35d; font-size:12px; padding:0 7px; }.metrics-summary-grid { grid-template-columns:repeat(4,1fr); }.metrics-stat { padding:2px 13px; border-color:rgba(78,224,106,.55); gap:8px; }.metrics-stat strong { color:var(--series); font-size:11px; margin-bottom:5px; }.metrics-stat pre { margin:0; color:#e6ede6; font:10px/1.55 var(--font-mono); }.metrics-stat pre em { color:#93a093; font-style:normal; }.metrics-bars { height:36px; gap:2px; }.metrics-status { margin-top:12px; padding:0 2px; font-size:12px; }.metrics-status b { color:#70e35d; }
 .metrics-drawer { position:fixed; inset:0 0 0 auto; z-index:500; width:min(380px,92vw); background:#080b0c; border-left:1px dashed #4ee06a; padding:18px; overflow:auto; box-shadow:-22px 0 42px rgba(0,0,0,.44); }.metrics-drawer header { display:flex; justify-content:space-between; color:#70e35d; font-size:13px; margin-bottom:18px; }.metrics-drawer header button { color:#70e35d; font:20px var(--font-mono); border:0; background:none; cursor:pointer; }.metrics-drawer label { display:block; color:#93a093; font-size:11px; margin:13px 0; }.metrics-drawer input:not([type=checkbox]):not([type=color]) { display:block; width:100%; margin-top:5px; padding:7px; font:11px var(--font-mono); color:#e6ede6; background:#0d1211; border:1px solid #253026; border-radius:4px; }.metrics-drawer fieldset { border:0; border-top:1px dashed #2f4030; padding:12px 0 0; margin:18px 0; }.metrics-drawer legend { color:#93a093; font-size:10px; letter-spacing:.08em; }.metrics-drawer .metrics-check { color:#d7e0d7; }.metrics-drawer .metrics-check input { accent-color:#70e35d; margin-right:7px; }.metrics-color { display:flex; align-items:center; justify-content:space-between; color:#d7e0d7!important; }.metrics-color input { width:30px; height:23px; padding:0; border:1px solid #253026; background:#0d1211; }.metrics-drawer p { color:#6d7a6d; font-size:10px; line-height:1.55; }
 @media (max-width:760px) { .metrics-tools { align-items:flex-start; flex-direction:column; }.metrics-tools > div { align-self:flex-end; }.metrics-summary-grid { grid-template-columns:1fr 1fr; }.metrics-stat:nth-child(2) { border-right:0; }.metrics-stat:nth-child(n+3) { border-top:1px dashed rgba(78,224,106,.55); padding-top:12px; } }
+
+/* ══ Catalog page — two-panel layout ═══════════════════════════ */
+
+/* Override padding for chart catalog pages */
+.content-catalog {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface-0);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────── */
+.ct-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-1);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.ct-left  { display: flex; align-items: center; gap: 6px; }
+.ct-center { display: flex; align-items: center; gap: 6px; margin: 0 auto; flex-wrap: wrap; }
+.ct-right { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+
+.ct-run {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.ct-run:hover:not(:disabled) { opacity: 0.85; }
+.ct-run:disabled { opacity: 0.5; cursor: default; }
+.ct-run-busy { background: var(--text-tertiary); }
+
+.ct-pill {
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.ct-pill-ready   { background: rgba(16,185,129,0.15); color: var(--green-l); border: 1px solid rgba(16,185,129,0.3); }
+.ct-pill-running { background: rgba(234,179,8,0.15);  color: #fbbf24;        border: 1px solid rgba(234,179,8,0.3); }
+.ct-pill-error   { background: rgba(239,68,68,0.15);  color: #f87171;        border: 1px solid rgba(239,68,68,0.3); }
+
+.ct-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.ct-select {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-xs);
+  padding: 2px 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+.ct-select:focus { border-color: var(--border-2); }
+
+.ct-btn {
+  padding: 3px 9px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+  white-space: nowrap;
+}
+.ct-btn:hover { color: var(--text-primary); background: var(--surface-3); }
+.ct-reset { color: var(--amber); border-color: rgba(201,159,74,0.25); }
+.ct-reset:hover { background: rgba(201,159,74,0.1); color: var(--amber-l); }
+
+/* ── Panel split ─────────────────────────────────────────────── */
+.catalog-panels {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.vim-panel, .term-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.catalog-resize-handle {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 5px;
+  background: transparent;
+  cursor: col-resize;
+  flex-shrink: 0;
+}
+.catalog-resize-handle:hover .catalog-resize-bar,
+.catalog-resize-handle[data-resize-handle-active] .catalog-resize-bar {
+  background: var(--border-2);
+}
+.catalog-resize-bar {
+  width: 1px;
+  background: var(--border-1);
+  transition: background 0.15s;
+}
+
+/* ── Vim editor ──────────────────────────────────────────────── */
+:root { --vim-lh: 20px; --vim-fs: 12.5px; --vim-pad: 10px; }
+
+.vim-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #070910;
+  font-family: var(--font-mono);
+  font-size: var(--vim-fs);
+}
+
+/* Tab bar */
+.vim-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 2px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-1);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vim-tabs::-webkit-scrollbar { display: none; }
+
+.vim-breadcrumb {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 0 6px 0 2px;
+  flex-shrink: 0;
+}
+
+.vim-tab {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s;
+}
+.vim-tab:hover { color: var(--text-secondary); }
+.vim-tab-active {
+  color: var(--text-primary);
+  border-bottom-color: var(--amber-l);
+}
+
+/* Buffer area */
+.vim-buffer {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Line number gutter */
+.vim-gutter {
+  flex-shrink: 0;
+  text-align: right;
+  padding: var(--vim-pad) 6px var(--vim-pad) 4px;
+  background: #070910;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  line-height: var(--vim-lh);
+  overflow: hidden;
+  user-select: none;
+}
+
+.vim-ln {
+  height: var(--vim-lh);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.vim-ln-cur { color: var(--amber-l); font-weight: 600; }
+
+.vim-tilde {
+  height: var(--vim-lh);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--surface-4);
+  font-size: 11px;
+}
+
+/* Content wrapper — houses the overlay pre + textarea */
+.vim-content-wrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Current-line highlight */
+.vim-curline-hl {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--vim-lh);
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Shared layout for the highlight pre and editable textarea */
+.vim-hl,
+.vim-ta {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: var(--vim-pad);
+  font-family: var(--font-mono);
+  font-size: var(--vim-fs);
+  line-height: var(--vim-lh);
+  white-space: pre;
+  tab-size: 2;
+  word-break: normal;
+  overflow-wrap: normal;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+}
+
+/* Syntax-highlighted pre sits behind */
+.vim-hl {
+  pointer-events: none;
+  color: var(--text-secondary);
+  overflow: hidden;
+  z-index: 2;
+}
+.vim-readonly {
+  pointer-events: auto;
+  overflow: auto;
+  position: relative;
+  height: 100%;
+  color: var(--text-tertiary);
+}
+
+/* Editable textarea sits on top, transparent text, visible caret */
+.vim-ta {
+  color: transparent;
+  caret-color: var(--amber-l);
+  overflow: auto;
+  z-index: 3;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-4) transparent;
+}
+.vim-ta::selection { background: rgba(139,92,246,0.35); }
+
+/* Token colors */
+.tok-kw      { color: #c084fc; }
+.tok-str     { color: #86efac; }
+.tok-num     { color: #fb923c; }
+.tok-comment { color: var(--text-dim); font-style: italic; }
+.tok-type    { color: #60a5fa; }
+.tok-fn      { color: #34d399; }
+
+/* Vim modeline */
+.vim-modeline {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  height: 22px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-1);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  overflow: hidden;
+}
+
+.vim-mode-badge {
+  padding: 0 6px;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.vim-mode-normal { color: var(--cyan-l); }
+.vim-mode-insert { color: var(--green-l); }
+
+.vim-ml-path  { color: var(--text-secondary); font-size: 10.5px; }
+.vim-ml-spacer { flex: 1; }
+.vim-ml-item  { color: var(--text-dim); }
+.vim-ml-sep   { color: var(--surface-4); }
+
+/* ── Terminal preview ─────────────────────────────────────────── */
+.term-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #020307;
+  font-family: var(--font-mono);
+}
+
+/* Title bar */
+.term-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.term-dots { display: flex; gap: 5px; }
+.term-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.term-dot-r { background: #ff5f57; }
+.term-dot-y { background: #ffbd2e; }
+.term-dot-g { background: #28ca41; }
+
+.term-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+  text-align: center;
+}
+
+.term-pill {
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.term-pill-ready   { background: rgba(16,185,129,0.15); color: var(--green-l); border: 1px solid rgba(16,185,129,0.25); }
+.term-pill-running { background: rgba(234,179,8,0.15);  color: #fbbf24;        border: 1px solid rgba(234,179,8,0.25); }
+.term-pill-error   { background: rgba(239,68,68,0.15);  color: #f87171;        border: 1px solid rgba(239,68,68,0.25); }
+
+/* Body */
+.term-body {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-4) transparent;
+  min-height: 0;
+}
+
+.term-prompt {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+.term-prompt-dollar { color: var(--green-l); font-weight: 700; }
+
+.term-output {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+.term-output-placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+
+.term-error-block {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  margin-top: 4px;
+}
+.term-error-msg {
+  font-size: 12px;
+  color: #f87171;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* Footer */
+.term-footer {
+  display: flex;
+  align-items: center;
+  padding: 3px 12px;
+  height: 22px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.term-exit-ok  { color: var(--green-l); font-weight: 600; }
+.term-exit-err { color: #f87171; font-weight: 600; }
+.term-sep      { color: var(--surface-4); margin: 0 2px; }
