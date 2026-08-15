@@ -1,3 +1,19 @@
+> **⚠ SUPERSEDED — RETAINED AS EVIDENCE, NOT AS A REVIEW.**
+>
+> This file was written by the same session that wrote the code. It is a **cold
+> code READ**: it verified structure by reading source and never executed the page.
+> It ticked "**Live evaluator** ✓ … correctly wired" on the exact code that was
+> broken on **19 of 20 chart pages**, and it *saw* the highlighter defect
+> ("later replacements can corrupt earlier spans … work fine") and waved it through
+> while it was actively printing `tok-kw">` into the buffer. Its attestation line was
+> never computed. Its verdict was `ACCEPT with one honest asterisk`.
+>
+> It is kept, unedited, because it is the clearest specimen this repo owns of a
+> review that passes a broken delivery. The real review is
+> `sessions/session-11-review.md`.
+
+---
+
 # Session 11 — Independent Cold Fidelity Review
 
 **Reviewer:** Claude Sonnet 4.6 (independent read, no prior context from this session)  
