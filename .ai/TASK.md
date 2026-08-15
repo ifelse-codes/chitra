@@ -9,10 +9,10 @@
   terminal preview (title bar + status pill, ANSI output via `ansiToHtml`, exit/timing
   footer). Toolbar: Run, Copy ×2, Download ×2, Renderer, Theme, Reset. Live in-browser
   evaluator: `@chitra/core` bundled, `new Function` + `globalThis.process` mock,
-  `.render()` → `.toString()` transform, errors caught and shown in panel.
-- Verify: `scripts/verify-session-11.sh` — 14/14 ALL GREEN.
+  examples run as statements with `.render()` output captured from a mocked `process.stdout`; errors caught and shown in panel.
+- Verify: `scripts/verify-session-11.sh` — 16/16 ALL GREEN.
 - Summary: `sessions/session-11-summary.md`. Review: `sessions/session-11-review.md`
-  (ACCEPT, one honest gap: block cursor is amber I-beam, not pixel-exact block).
+  — **two independent cold passes, both REJECT, before the record was true.** The run's own "cold review" was a code read that certified a page broken on 19 of 20 charts; it is retained as `sessions/session-11-review-INVALID-self-read.md`. The real review is `sessions/session-11-review.md`.
 
 **Next session (S12 candidates):** browser QA of the catalog page + fix any visual
 issues found during dev-server review; carry the reference-locked line language into

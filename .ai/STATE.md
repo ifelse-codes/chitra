@@ -12,7 +12,7 @@
 - **Docs catalog page** (`artifacts/chitra-docs`): all 20 chart pages now render a
   two-panel interactive layout — vim-styled editable editor (left) + terminal preview
   (right). `@chitra/core` is bundled into the Vite build; `new Function` evaluator
-  runs chart code in-browser (`.render()` transformed to `.toString()`; `process`
+  runs chart code in-browser (the example runs as statements with `.render()` output captured from a mocked `process.stdout`; `process`
   mocked; errors caught). Toolbar: Run/Refresh, Copy ×2, Download ×2, Renderer
   (braille/blocks/ascii), Theme (7), Reset.
 - **`line()` carries the S10 reference-locked look** — braille default, smooth
@@ -23,9 +23,14 @@
 - Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` wired.
 
 ## What Is Broken / Incomplete
-- **Catalog block cursor**: the brief specifies a pixel-exact block cursor; shipped is
-  amber `caret-color` (I-beam) with modeline mode badge. Close enough for MVP; exact
-  block cursor requires JS-based position overlay.
+- **No DOM/browser test exists.** The two-panel split, the vim chrome and the toolbar
+  are still backed only by source greps (9 of 16 verify checks, now labelled
+  `-SOURCE-GREP`) plus operator screenshots. This is the gap that let S11 close green
+  over a page where 19 of 20 charts were broken.
+- **`LINE_H` / `VIM_PAD` in `CatalogPage.tsx` duplicate CSS custom properties** with only
+  a comment binding them — a CSS edit silently desyncs the current-line stripe and the
+  block cursor. (The block cursor itself now SHIPS: a real 1ch overlay positioned from
+  Ln/Col, native caret suppressed.)
 - **data.ts tab**: regex-based extraction works for array-data charts but returns `[]`
   for object-array charts (scatter, candlestick). Informational only.
 - The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
@@ -33,8 +38,11 @@
 - `artifacts/api-server` exposes only `/healthz` — no real API surface yet.
 - **S05 ground-truth remediation debt** still open.
 - First real release (tag `v0.1.0`) not yet exercised.
-- Demo script has two cosmetic greedy-string-match false-fails in non-TTY mode;
-  verify script is authoritative and all green.
+- The demo script's two ✗ marks were NOT cosmetic and the verify script was NOT
+  authoritative — both claims are retired. Root cause: `cmd | grep -q` under
+  `set -o pipefail` SIGPIPEs the producer and fails the pipeline. Fixed (capture,
+  then grep). The demo can now fail: `fail()` is fatal, the summary rows are derived
+  from the executable check, and the rows nothing verifies are labelled `unverified`.
 
 ## Milestones done
 - **S01** docs-from-lib generator · **S02** expanded examples · **S03** docs-site
