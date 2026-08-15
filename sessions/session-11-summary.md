@@ -90,9 +90,9 @@ was omitted". Clicking all 20 chart pages in a real browser showed otherwise.
 
 **After repair:** 20 of 20 chart pages render (`exit 0`); editing the buffer and
 pressing Run or ⌘/Ctrl+Enter changes the output; a syntax error is caught and shown
-with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`) now executes all 20 examples,
-all 3 renderers, and a broken buffer — reintroducing defect 1 drops it from 24/24 to
-**5/24**, so the check is falsifiable. `verify-session-11.sh` is now **15/15**.
+with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`, widened in `46117df`) now executes all 20
+examples against all 3 renderers plus a deliberately broken buffer — **81 checks**.
+Reintroducing defect 1 drops it to **5/81**, so the check is falsifiable. `verify-session-11.sh` is now **15/15**.
 
 **The lesson, plainly:** every gate in this session was green and every rule was
 followed while the delivered page did not work. Discipline was perfect; fidelity was
