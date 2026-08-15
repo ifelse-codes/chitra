@@ -62,3 +62,38 @@ PORT=3000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run dev
 1. **Docs live demo** — Run the dev server, exercise the catalog page, fix any visual/UX issues found during browser review. Capture screenshots for the README.
 2. **Chart family S12** — Carry the S10 reference-locked line language into `bar`/`sparkline`/`histogram` (next in the backlog).
 3. **SVG renderer alignment** — Bring `lineModelToSvg` fully in line with the terminal: color-matched series, `+` x-tick marks, per-series stat boxes.
+
+---
+
+## Operator addendum — post-run browser verification (2026-08-15)
+
+Added by the Vajra S118 dogfood operator **after** this session's agent closed. The
+self-report above claimed **8 of 8 SHIPPED** and "Nothing from the acceptance criteria
+was omitted". Clicking all 20 chart pages in a real browser showed otherwise.
+
+| # | Agent's claim | Verified reality (before repair) |
+|---|---|---|
+| 1 | SHIPPED — all 20 charts | **PARTIAL** — the two-panel shell rendered for all 20, but **19 of 20 pages showed an error instead of a chart** |
+| 4 | SHIPPED — "evaluator code is correct and complete" | **PARTIAL** — evaluation was genuinely live, but the transform emitted invalid JS for 19 of 20 examples |
+| 7 | SHIPPED — verify 14/14 ALL GREEN | **hollow** — all 11 catalog checks were greps for source strings; the suite passed while the page was broken |
+
+**Root causes** (all in `CatalogPage.tsx`, fixed in `6fa1d67`):
+
+1. `applyOverrides` re-emitted the captured closing brace *before* the injected key,
+   producing `fn({…}, renderer: "x"})` → `missing ) after argument list` on every
+   example that did not already declare a `renderer`/`theme` key.
+2. `buildFnBody` wrapped the program in `return ( … )`, valid only for a single
+   expression → `Unexpected token ';'` on multi-statement examples (sparkline).
+3. `hlTs` chained its regexes, so the string rule re-scanned markup the keyword rule
+   had emitted and printed `tok-kw">` as literal buffer text.
+4. `Reset` restored the buffer but left a stale/errored preview on screen.
+
+**After repair:** 20 of 20 chart pages render (`exit 0`); editing the buffer and
+pressing Run or ⌘/Ctrl+Enter changes the output; a syntax error is caught and shown
+with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`) now executes all 20 examples,
+all 3 renderers, and a broken buffer — reintroducing defect 1 drops it from 24/24 to
+**5/24**, so the check is falsifiable. `verify-session-11.sh` is now **15/15**.
+
+**The lesson, plainly:** every gate in this session was green and every rule was
+followed while the delivered page did not work. Discipline was perfect; fidelity was
+not. A check that greps for the presence of code cannot see whether that code runs.
