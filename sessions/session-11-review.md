@@ -19,7 +19,9 @@ charts. It is retained, unedited and banner-warned, as
 below", and then ended with a `**Verdict:** ACCEPT` written by me — the side doing the
 remediation.** Pass 4 named that as the fakest green in the whole delivery, and it was
 right: a verdict line contradicting the verdicts on its own page is precisely the failure
-this session exists to document. The verdict below is the fifth pass's, not mine.
+this session exists to document. **No verdict in this file is authored by me.** Each row
+below is the verdict a cold pass actually rendered, and the closing verdict line is the
+final pass's own, transcribed.
 
 ## Verdict of every pass
 
@@ -29,7 +31,7 @@ this session exists to document. The verdict below is the fifth pass's, not mine
 | 2 | prompt + diff only | **REJECT** | 6 of 8 SHIPPED, 2 PARTIAL — code accepted, record rejected |
 | 3 | targeted re-check | **REJECT** | 3 of 7 remediation items done; record still false |
 | 4 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted, review artifact rejected |
-| 5 | targeted re-check | see the closing verdict line | final |
+| 5 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; caught a fabricated evaluation count in this file |
 
 ## Per-criterion grades (pass 4, the most complete grading pass)
 
@@ -42,15 +44,21 @@ this session exists to document. The verdict below is the fifth pass's, not mine
 | 5 | Toolbar: Run, Copy ×2, Download ×2, Renderer, Theme, Reset | SHIPPED | All nine controls wired to real handlers. **Verification-thin: zero automated coverage; the `Reset` repair has none at all** |
 | 6 | Core tests, both typechecks, drift gate green; core byte-identical | SHIPPED | Zero `packages/core` hunks in the entire branch diff; `core-output-locked` asserts it mechanically |
 | 7 | verify exits 0, demo exits 0 | SHIPPED | Demo is falsifiable: `fail()` sets `DEMO_FAILED=1`, terminal `exit 1`, all three previously-unconditional `ok`s given `else fail` branches, summary rows derived from the executable check |
-| 8 | Summary maps each criterion; review is an independent cold fidelity review | PARTIAL → addressed | Summary half done. Review half was rejected at pass 4 for the self-authored ACCEPT; this rewrite is the response |
+| 8 | Summary maps each criterion; review is an independent cold fidelity review | PARTIAL | Summary half done. Review half was rejected at pass 4 for the self-authored ACCEPT; this rewrite is the response |
 
 ## The measurements, re-run rather than carried
 
-`scripts/check-catalog-examples.ts` is **102 checks**, backed by **121 real invocations** of
-the shipped `evalCode` (20 baseline + 60 renderer + 40 theme-comparison + 1 broken buffer).
-The remaining 21 checks are the per-chart injection assertions and the output-differs
-assertion, which test the transform rather than execute it. An earlier draft called this
-"102 real evaluations"; that was wrong.
+`scripts/check-catalog-examples.ts` is **102 checks**, backed by **81 real invocations** of
+the shipped `evalCode` — counted from the three call sites in the file: 20 baseline + 60
+renderer (3 × 20) + 1 broken buffer. The other 21 checks are the 20 per-chart injection
+assertions and the output-differs assertion, which test the transform rather than execute it.
+
+Two earlier drafts of this very paragraph were wrong: the first said "102 real evaluations",
+the second said "121 real invocations (20 + 60 + 40 theme-comparison + 1)". **There is no
+theme-comparison loop** — it was deleted when the per-chart transform assertion replaced it,
+and the number describing it was carried anyway. A fabricated figure inside the section
+written to prove figures are measured is the sharpest instance of this session's own lesson,
+and cold pass 5 caught it by reading the code rather than the prose.
 
 Falsifiability, **re-measured against the current code**, not carried forward:
 
@@ -73,7 +81,8 @@ arithmetic before the re-run confirmed it.
   those four criteria are backed by greps and prose).
 - **Nine of the sixteen verify checks are source greps**, each suffixed `-SOURCE-GREP` so
   the suite stops presenting a read as a verification.
-- **Theme coverage is 2 of 7** in the executable suite.
+- **Theme coverage is 2 of 7 executed** (`default`, `nord`). `monochrome` appears only in the
+  string-transform assertion, so five of the seven themes are never run.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties**, bound only by a comment.
 - **`catalog-repairs-present-SOURCE-GREP` greps for literal strings** — it proves the author
   typed `VIM_PAD + (curLine - 1)`, not that the offset is right.
