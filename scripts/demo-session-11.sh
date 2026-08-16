@@ -116,11 +116,11 @@ else
 fi
 
 label "No core changes"
-changed=$(git diff main -- packages/core/src/ 2>/dev/null | wc -l)
+changed=$(git diff main -- packages/core 2>/dev/null | wc -l)
 if [ "$changed" -eq 0 ]; then
-  ok "packages/core/src unchanged from main"
+  ok "packages/core unchanged from main"
 else
-  fail "packages/core/src changed ($changed lines)"
+  fail "packages/core changed ($changed lines)"
 fi
 
 # ── Cumulative: previous sessions still green ─────────────────
@@ -161,7 +161,7 @@ if pnpm --filter @workspace/chitra-docs run check:catalog >/dev/null 2>&1; then
 else
   CATALOG="BROKEN"; DEMO_FAILED=1
 fi
-if [ -z "$(git diff main -- packages/core/src/)" ]; then CORE="SHIPS (locked)"; else CORE="DRIFTED"; DEMO_FAILED=1; fi
+if [ -z "$(git diff main -- packages/core)" ]; then CORE="SHIPS (locked)"; else CORE="DRIFTED"; DEMO_FAILED=1; fi
 if pnpm --filter @workspace/chitra-docs run gen:charts:check >/dev/null 2>&1; then GEN="SHIPS"; else GEN="BROKEN"; DEMO_FAILED=1; fi
 
 printf "  %-40s %s\n" "All 20 catalog examples execute"            "$CATALOG"
