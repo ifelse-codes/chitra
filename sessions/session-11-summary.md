@@ -63,9 +63,11 @@ working build, but 5 is a constant in a script, not a derived truth.
 typed those characters — nothing more. It stays green if `LINE_H`'s `20` desyncs from
 CSS `--vim-lh`, a desync this summary lists as open.
 
-**The honest shape of the whole suite:** one check executes the evaluator (102 real
-evaluations, offline, no browser needed — the claim that this "requires a browser" was
-wrong and is retired). **Nine of the sixteen verify checks are source greps**, every one
+**The honest shape of the whole suite:** one check executes the evaluator — **102 checks
+backed by 121 real invocations** of the shipped `evalCode` (20 baseline + 60 renderer + 40
+theme-comparison + 1 broken buffer); the other 21 checks test the transform rather than
+execute it. It runs offline, no browser needed — the earlier claim that verifying this
+"requires a browser" was wrong and is retired. **Nine of the sixteen verify checks are source greps**, every one
 now suffixed `-SOURCE-GREP` so the suite stops presenting a read as a verification.
 
 ## Contract deviation (recorded, not hidden)
@@ -92,11 +94,20 @@ PORT=3000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run dev
 
 ## Commit log (this branch)
 
-1. `chore(s11)`: open session — prompt, SESSION, SESSION-BOOT
-2. `feat(docs/s11)`: CatalogPage + App.tsx wiring
-3. `feat(docs/s11)`: catalog CSS, @chitra/core dep, vite fs.allow
-4. `chore(s11)`: verify + demo scripts
-5. *(this commit)*: session artifacts + .ai/ closeout
+**The governed run (6 commits)** — `c78a4dd` open session · `9028a3f` CatalogPage +
+App.tsx · `0c6abbb` catalog CSS, `@chitra/core` dep, vite fs.allow · `4422238` verify +
+demo scripts · `69dcfca` summary + the (invalid) review · `e9ce6b8` closeout.
+
+**The operator repair, after the page was found broken (11 commits)** — `6fa1d67` evaluator
+repair · `68bfc51` export `evalCode` · `fd8a5fd` the executable check · `8a46d61` addendum ·
+`46117df` per-chart renderer sweep · `1fef5cd` block cursor + stripe offset + gutter sync ·
+`fd857bc` make both checks able to fail · `eab613a` retire the self-read review ·
+`35c061e` assert the rewrite itself · `643940c` close three unconditional greens ·
+`a3c4792` regrade the record in place — plus the record corrections that followed each of
+four cold REJECTs.
+
+Run the log for the authoritative list; this section is a summary, not the source of truth:
+`git log --oneline main..session-11-catalog-two-panel`
 
 ---
 
@@ -134,7 +145,7 @@ was omitted". Clicking all 20 chart pages in a real browser showed otherwise.
 **After repair:** 20 of 20 chart pages render (`exit 0`); editing the buffer and
 pressing Run or ⌘/Ctrl+Enter changes the output; a syntax error is caught and shown
 with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`, widened since) executes the real evaluator.
-The suite is now **102 checks** (20 examples + 60 renderer runs + 20 injection assertions + output-differs + syntax-catch, with the count pinned so it cannot silently shrink). Falsifiability, measured on both mutation shapes: a wholly no-op `injectOpt` → **81/102**; a no-op INSERT branch only, the exact 19-of-20 shape → **83/102**. `verify-session-11.sh` is now **16/16**.
+The suite is now **102 checks** (20 examples + 60 renderer runs + 20 injection assertions + output-differs + syntax-catch, with the count pinned so it cannot silently shrink). Falsifiability, measured on both mutation shapes: a wholly no-op `injectOpt` → **81/102**; a no-op INSERT branch only, the exact 19-of-20 shape → **82/102**. `verify-session-11.sh` is now **16/16**.
 
 **The lesson, plainly:** every gate in this session was green and every rule was
 followed while the delivered page did not work. Discipline was perfect; fidelity was
