@@ -142,3 +142,5 @@ and 16 verify checks stay green. **A single render-level test of `CatalogPage` w
 that and the grep-only backing of four criteria at once.**
 
 **Verdict:** ACCEPT
+
+**Review-Inputs-SHA:** d4eedbce8574916bb3035245c49d850f64aad07a27ad2babc7a3f1e01fe09a97
