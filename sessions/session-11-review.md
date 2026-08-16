@@ -13,7 +13,7 @@ stated as *verdicts rendered so far*, and the closing verdict line is transcribe
 pass that follows it. Reading this table as a complete history of its own review is a
 category error the ledger cannot fix from the inside.
 
-**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3–8**
+**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3–10**
 were *targeted re-checks*: each was given the prior pass's findings by name and, from
 pass 4 onward, a diff that included this file. That is weaker independence than passes 1–2
 and is stated here rather than implied away.
@@ -121,3 +121,24 @@ arithmetic before the re-run confirmed it.
 
 `stripAnsi` was reported as missing the ESC byte. The source contains a literal `\x1b`,
 invisible in a rendered diff. The regex is correct; no change was made.
+
+## Verdict of record — cold pass 10
+
+Transcribed verbatim from the pass that rendered it, not authored here.
+
+> "This record now over-discloses rather than under-discloses… Every code item on pass 9's
+> close list is closed in the shipped source, not merely in prose. The criterion that was
+> actually broken on 19 of 20 pages is now the *best*-evidenced one in the delivery… The
+> residual gaps are **not material to a reader deciding whether to trust this branch**…
+> Rejecting a tenth time over one stale word in a narrative sentence would make this gate
+> ceremony, which the contract names as its own failure mode."
+
+Its grade: **7 of 8 SHIPPED, 1 PARTIAL, 0 NOT-BUILT.**
+
+Its named fakest green, carried to S12 as debt: `catalog-examples-execute` tests
+`evalCode` and `applyOverrides` — both *extracted out of* the component — and nothing
+asserts the component still calls them. Gut `run()` to a no-op and all 103 catalog checks
+and 16 verify checks stay green. **A single render-level test of `CatalogPage` would retire
+that and the grep-only backing of four criteria at once.**
+
+**Verdict:** ACCEPT
