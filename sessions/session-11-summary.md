@@ -11,8 +11,8 @@
 
 The rows below are the **corrected** grades. The original self-report said 8-of-8
 SHIPPED and "Nothing from the acceptance criteria was omitted", on a branch where
-19 of the 20 chart pages showed an error instead of a chart. **Seven independent cold
-passes, every one a REJECT**, forced the corrections. Each row now states what was true
+19 of the 20 chart pages showed an error instead of a chart. **Ten independent cold
+passes, nine of them a REJECT**, forced the corrections. Each row now states what was true
 **as delivered by the governed run** and what is true **after the operator repair**.
 
 ## Criterion map
