@@ -124,9 +124,11 @@ run_check "css-has-catalog-styles-SOURCE-GREP" bash -c '
 '
 
 # ── No changes to packages/core ───────────────────────────────
+# The invariant is "no changes to packages/core", not "no changes to its src/".
+# Diffing only src/ left tests, README and package.json unguarded.
 run_check "core-output-locked" bash -c '
-  changed=$(git diff main -- packages/core/src/ 2>/dev/null | wc -l)
-  [ "$changed" -eq 0 ] || { echo "packages/core/src changed: $changed lines"; exit 1; }
+  changed=$(git diff main -- packages/core 2>/dev/null | wc -l)
+  [ "$changed" -eq 0 ] || { echo "packages/core changed: $changed lines"; exit 1; }
 '
 
 ( cd ".ai/verify/session-${SESSION}" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true

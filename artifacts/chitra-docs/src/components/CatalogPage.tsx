@@ -214,7 +214,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [runMs, setRunMs] = useState(0);
   const [exitCode, setExitCode] = useState(0);
-  const [copied, setCopied] = useState<"code" | "out" | null>(null);
+  const [copied, setCopied] = useState<"code" | "out" | "out-empty" | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -278,15 +278,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   const tabContent = (tab: TabName): string => {
     if (tab === "example.ts") return buffer;
     if (tab === "data.ts") return genDataTab(chart.code, chart.id);
-    if (tab === "output.txt") {
-      // Never present canned output as if it were the run. After a failed run
-      // plainOut is "", and returning the pristine preview here silently showed a
-      // working chart beside a terminal reading `exit 1` — the same class of
-      // panel-mislabels-its-own-run defect a cold pass caught in the footer.
-      if (errorMsg) return `# run failed (exit ${exitCode})\n${errorMsg}`;
-      if (plainOut) return plainOut;
-      return `# not run yet — canned preview from the catalog, not this session's output\n${stripAnsi(chart.preview)}`;
-    }
+    if (tab === "output.txt") return resolveOutput().text;
     return "";
   };
 
@@ -341,14 +333,31 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     run(undefined, rendRef.current, t);
   };
 
+  // The class, not the instance: every surface that hands the user "the output"
+  // resolves it HERE. Three separate places (the output.txt tab, Copy output, the
+  // .txt download) each independently fell back to canned or empty content while
+  // reporting success. Cold passes 6, 7 and 8 each caught one. One resolver now.
+  const resolveOutput = (): { text: string; ok: boolean } => {
+    if (errorMsg) return { text: `# run failed (exit ${exitCode})\n${errorMsg}`, ok: false };
+    if (plainOut) return { text: plainOut, ok: true };
+    return { text: "# not run yet — no output from this session", ok: false };
+  };
+
   const copy = (what: "code" | "out") => {
-    navigator.clipboard.writeText(what === "code" ? buffer : plainOut);
-    setCopied(what);
+    if (what === "out") {
+      const { text, ok } = resolveOutput();
+      navigator.clipboard.writeText(text);
+      setCopied(ok ? "out" : "out-empty");
+      setTimeout(() => setCopied(null), 1600);
+      return;
+    }
+    navigator.clipboard.writeText(buffer);
+    setCopied("code");
     setTimeout(() => setCopied(null), 1600);
   };
 
   const download = (what: "ts" | "txt") => {
-    const content = what === "ts" ? buffer : plainOut;
+    const content = what === "ts" ? buffer : resolveOutput().text;
     const name = `${chart.id}-example.${what === "ts" ? "ts" : "txt"}`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -422,7 +431,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             {copied === "code" ? "✓ Copied!" : "⧉ Code"}
           </button>
           <button className="ct-btn" onClick={() => copy("out")}>
-            {copied === "out" ? "✓ Copied!" : "⧉ Output"}
+            {copied === "out" ? "✓ Copied!" : copied === "out-empty" ? "⚠ No output" : "⧉ Output"}
           </button>
           <button className="ct-btn" onClick={() => download("ts")}>⇩ .ts</button>
           <button className="ct-btn" onClick={() => download("txt")}>⇩ .txt</button>
@@ -585,7 +594,12 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
                   dangerouslySetInnerHTML={{ __html: ansiToHtml(ansiOut) }}
                 />
               ) : (
-                <pre className="term-output term-output-placeholder">{chart.preview}</pre>
+                <pre className="term-output term-output-placeholder">
+                  <span className="term-placeholder-note">
+                    {"// canned catalog preview — not this session's run\n"}
+                  </span>
+                  {chart.preview}
+                </pre>
               )}
             </div>
 
