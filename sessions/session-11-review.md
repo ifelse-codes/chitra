@@ -53,9 +53,9 @@ final pass's own, transcribed.
 
 `scripts/check-catalog-examples.ts` is **103 checks**, backed by **121 real invocations** of
 the shipped `evalCode` — counted from the five call sites in the file: 20 baseline + 60
-renderer (3 × 20) + 40 theme-comparison (2 × 20) + 1 broken buffer. The other 22 checks are
-the 20 per-chart injection assertions and the two output-differs assertions, which test the
-transform rather than execute it.
+renderer (3 × 20) + 40 theme-comparison (2 × 20) + 1 broken buffer. The other 22 checks are derived
+assertions — 20 regexes on the rewritten source, and 2 comparing outputs the 121 invocations
+already produced (so "derived", not "unexecuted").
 
 **This paragraph has been wrong twice, and both errors are the session's own lesson landing
 on its author.** Draft 1 said "102 real evaluations" (checks counted as evaluations). Draft 2
