@@ -278,7 +278,15 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   const tabContent = (tab: TabName): string => {
     if (tab === "example.ts") return buffer;
     if (tab === "data.ts") return genDataTab(chart.code, chart.id);
-    if (tab === "output.txt") return plainOut || stripAnsi(chart.preview);
+    if (tab === "output.txt") {
+      // Never present canned output as if it were the run. After a failed run
+      // plainOut is "", and returning the pristine preview here silently showed a
+      // working chart beside a terminal reading `exit 1` — the same class of
+      // panel-mislabels-its-own-run defect a cold pass caught in the footer.
+      if (errorMsg) return `# run failed (exit ${exitCode})\n${errorMsg}`;
+      if (plainOut) return plainOut;
+      return `# not run yet — canned preview from the catalog, not this session's output\n${stripAnsi(chart.preview)}`;
+    }
     return "";
   };
 
