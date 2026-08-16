@@ -25,7 +25,9 @@
 ## What Is Broken / Incomplete
 - **No DOM/browser test exists.** The two-panel split, the vim chrome and the toolbar
   are still backed only by source greps (9 of 16 verify checks, now labelled
-  `-SOURCE-GREP`) plus operator screenshots. This is the gap that let S11 close green
+  `-SOURCE-GREP`) plus screenshots captured during the governing Vajra session and committed
+  THERE, not here (`sessions/session-118-artifacts/screenshots/` in the vajra repo) — so from
+  this repo alone those four criteria rest on greps and prose. This is the gap that let S11 close green
   over a page where 19 of 20 charts were broken.
 - **`LINE_H` / `VIM_PAD` in `CatalogPage.tsx` duplicate CSS custom properties** with only
   a comment binding them — a CSS edit silently desyncs the current-line stripe and the
