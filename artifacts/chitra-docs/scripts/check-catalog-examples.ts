@@ -99,6 +99,27 @@ if (differing.length < RENDERER_SENSITIVE_CHARTS) {
   console.log(`ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii, floor ${RENDERER_SENSITIVE_CHARTS})`);
 }
 
+// The Theme control had NO end-to-end assertion: the only theme coverage was a
+// regex on rewritten source, so the feature could be entirely inert and still pass.
+// Cold pass 6 named that the fakest green in the delivery. Assert that switching
+// theme changes real OUTPUT, on the same measured-floor basis as the renderer.
+const THEME_SENSITIVE_CHARTS = 19; // measured on the working build (all but heatmap)
+const themeDiffering: string[] = [];
+for (const chart of CHARTS) {
+  const a = evalCode(chart.code, "braille", "default");
+  const b = evalCode(chart.code, "braille", "monochrome");
+  if (a.exitCode === 0 && b.exitCode === 0 && a.ansi !== b.ansi) themeDiffering.push(chart.id);
+}
+checked++;
+if (themeDiffering.length < THEME_SENSITIVE_CHARTS) {
+  failed++;
+  console.error(
+    `FAIL  only ${themeDiffering.length} chart(s) changed OUTPUT between themes, expected >= ${THEME_SENSITIVE_CHARTS} — the theme rewrite is not reaching the renderer`,
+  );
+} else {
+  console.log(`ok    theme reaches output  (${themeDiffering.length}/${CHARTS.length} charts differ default vs monochrome, floor ${THEME_SENSITIVE_CHARTS})`);
+}
+
 // A deliberately broken buffer must be CAUGHT (exit 1 + message), never thrown.
 const bad = evalCode("line({ data: [1,2,3] ).render();", "braille", "default");
 checked++;
@@ -109,9 +130,21 @@ if (bad.exitCode === 0 || !bad.error) {
   console.log(`ok    syntax error caught: ${bad.error.slice(0, 40)}`);
 }
 
-// Pin the count. Without this, deleting an assertion yields a smaller, cheerful
-// "N/N passed" and exits 0 — a suite that shrinks silently is a suite that lies.
-const EXPECTED_CHECKS = CHARTS.length * (2 + RENDERERS.length) + 2;
+// Pin the INPUTS as literals first. Deriving the expected total from the same
+// arrays the loops iterate would let a deleted chart or renderer shrink `checked`
+// and `EXPECTED_CHECKS` together, staying green at a smaller size — which is what
+// the previous version actually did, despite its comment. Cold pass 6 caught it.
+const EXPECTED_CHARTS = 20;
+const EXPECTED_RENDERERS = 3;
+if (CHARTS.length !== EXPECTED_CHARTS) {
+  failed++;
+  console.error(`FAIL  expected ${EXPECTED_CHARTS} charts, found ${CHARTS.length} — the input set changed`);
+}
+if (RENDERERS.length !== EXPECTED_RENDERERS) {
+  failed++;
+  console.error(`FAIL  expected ${EXPECTED_RENDERERS} renderers, found ${RENDERERS.length} — the input set changed`);
+}
+const EXPECTED_CHECKS = EXPECTED_CHARTS * (2 + EXPECTED_RENDERERS) + 3;
 if (checked !== EXPECTED_CHECKS) {
   failed++;
   console.error(`FAIL  expected ${EXPECTED_CHECKS} checks, ran ${checked} — the suite changed shape`);

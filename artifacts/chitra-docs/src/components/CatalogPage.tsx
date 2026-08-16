@@ -267,7 +267,11 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
   // Auto-run on mount / chart navigation
   useEffect(() => {
-    run(chart.code, "braille", "default");
+    // Run with the CURRENT renderer/theme, not hardcoded defaults. The selects and
+    // the footer are not reset when the chart changes, so forcing braille/default
+    // here made the footer report `renderer=ascii · theme=nord` over a run that
+    // used neither — the panel lying about the run it was labelling.
+    run(chart.code);
   }, [chart.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Tab content helpers
