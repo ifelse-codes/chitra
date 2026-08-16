@@ -2,10 +2,10 @@
 
 ## What this file is, and what it is not
 
-Seven cold passes, each `subagent_type: "fidelity-reviewer"`, none of them the agent that
-wrote the code. **The first six all REJECTED.**
+Eight cold passes, each `subagent_type: "fidelity-reviewer"`, none of them the agent that
+wrote the code. **The first seven all REJECTED.**
 
-**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3–7**
+**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3–8**
 were *targeted re-checks*: each was given the prior pass's findings by name and, from
 pass 4 onward, a diff that included this file. That is weaker independence than passes 1–2
 and is stated here rather than implied away.
@@ -16,8 +16,8 @@ charts. It is retained, unedited and banner-warned, as
 `sessions/session-11-review-INVALID-self-read.md`.
 
 **An earlier version of this file recorded two REJECTs, logged the third pass as "see
-below", and then ended with a `**Verdict:** ACCEPT` written by me — the side doing the
-remediation.** Pass 4 named that as the fakest green in the whole delivery, and it was
+below", and then ended with a self-authored ACCEPT verdict line — written by me, the side doing
+the remediation.** Pass 4 named that as the fakest green in the whole delivery, and it was
 right: a verdict line contradicting the verdicts on its own page is precisely the failure
 this session exists to document. **No verdict in this file is authored by me.** Each row
 below is the verdict a cold pass actually rendered, and the closing verdict line is the
@@ -33,7 +33,8 @@ final pass's own, transcribed.
 | 4 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted, review artifact rejected |
 | 5 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; caught a fabricated evaluation count in this file |
 | 6 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; found a live undisclosed defect (the footer mislabelling its own run), an anti-shrink pin that could not detect a shrunken input set, and a pass count rounded down in `.ai/TASK.md` |
-| 7 | targeted re-check | see the closing verdict line | verdict of record |
+| 7 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; found a second panel mislabelling its own run (`output.txt` after a failed run) and two review-history sentences still flattering themselves |
+| 8 | targeted re-check | see the closing verdict line | verdict of record |
 
 ## Per-criterion grades (pass 4, the most complete grading pass)
 
@@ -90,8 +91,12 @@ arithmetic before the re-run confirmed it.
   never run. The theme path now has an end-to-end assertion — it had none until pass 6
   named it the fakest green in the delivery.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties**, bound only by a comment.
-- **`catalog-repairs-present-SOURCE-GREP` greps for literal strings** — it proves the author
-  typed `VIM_PAD + (curLine - 1)`, not that the offset is right.
+- **`catalog-repairs-present-SOURCE-GREP` is the only guard on criterion 2's repairs and it
+  guards nothing that renders** — it would pass over a `CatalogPage` that returns `null`.
+  Four of the eight criteria are backed by nothing that ever renders the component.
+- **`output.txt` used to show canned catalog output after a failed run**, beside a terminal
+  reading `exit 1`. Found at pass 7, fixed: the tab now shows the error, or labels the
+  canned preview as not-this-session's-output.
 
 ## One pass-1 finding that was wrong
 
