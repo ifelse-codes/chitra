@@ -42,8 +42,8 @@ final repaired state:
   the preview chrome, copy/download/reset) are still backed only by source greps plus
   the operator's screenshots. Nine of the sixteen verify checks are source greps, now
   labelled `-SOURCE-GREP` so the suite stops presenting a read as a verification.
-- **Theme coverage is 2 of 7** in the executable check (`default`, `nord`, plus
-  `monochrome` in the injection assertion). Four theme strings are never executed.
+- **Theme coverage is 2 of 7 executed** (`default`, `nord`). `monochrome` appears only in
+  the string-transform assertion, so **five** of the seven themes are never run.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties** with only a comment binding
   them; a CSS edit silently desyncs the stripe and the block cursor.
 
@@ -63,10 +63,9 @@ working build, but 5 is a constant in a script, not a derived truth.
 typed those characters — nothing more. It stays green if `LINE_H`'s `20` desyncs from
 CSS `--vim-lh`, a desync this summary lists as open.
 
-**The honest shape of the whole suite:** one check executes the evaluator — **102 checks
-backed by 121 real invocations** of the shipped `evalCode` (20 baseline + 60 renderer + 40
-theme-comparison + 1 broken buffer); the other 21 checks test the transform rather than
-execute it. It runs offline, no browser needed — the earlier claim that verifying this
+**The honest shape of the whole suite:** **102 checks backed by 81 real invocations** of the
+shipped `evalCode` (three call sites: 20 baseline + 60 renderer + 1 broken buffer); the other
+21 checks test the transform rather than execute it. It runs offline, no browser needed — the earlier claim that verifying this
 "requires a browser" was wrong and is retired. **Nine of the sixteen verify checks are source greps**, every one
 now suffixed `-SOURCE-GREP` so the suite stops presenting a read as a verification.
 
