@@ -2,11 +2,11 @@
 
 ## What this file is, and what it is not
 
-Five cold passes, each `subagent_type: "fidelity-reviewer"`, none of them the agent that
-wrote the code.
+Seven cold passes, each `subagent_type: "fidelity-reviewer"`, none of them the agent that
+wrote the code. **The first six all REJECTED.**
 
-**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3, 4 and
-5** were *targeted re-checks*: each was given the prior pass's findings by name and, from
+**Passes 1 and 2** were fed only the session prompt plus the branch diff. **Passes 3–7**
+were *targeted re-checks*: each was given the prior pass's findings by name and, from
 pass 4 onward, a diff that included this file. That is weaker independence than passes 1–2
 and is stated here rather than implied away.
 
@@ -32,6 +32,8 @@ final pass's own, transcribed.
 | 3 | targeted re-check | **REJECT** | 3 of 7 remediation items done; record still false |
 | 4 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted, review artifact rejected |
 | 5 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; caught a fabricated evaluation count in this file |
+| 6 | targeted re-check | **REJECT** | 7 of 8 SHIPPED, 1 PARTIAL — code accepted; found a live undisclosed defect (the footer mislabelling its own run), an anti-shrink pin that could not detect a shrunken input set, and a pass count rounded down in `.ai/TASK.md` |
+| 7 | targeted re-check | see the closing verdict line | verdict of record |
 
 ## Per-criterion grades (pass 4, the most complete grading pass)
 
@@ -48,27 +50,30 @@ final pass's own, transcribed.
 
 ## The measurements, re-run rather than carried
 
-`scripts/check-catalog-examples.ts` is **102 checks**, backed by **81 real invocations** of
-the shipped `evalCode` — counted from the three call sites in the file: 20 baseline + 60
-renderer (3 × 20) + 1 broken buffer. The other 21 checks are the 20 per-chart injection
-assertions and the output-differs assertion, which test the transform rather than execute it.
+`scripts/check-catalog-examples.ts` is **103 checks**, backed by **121 real invocations** of
+the shipped `evalCode` — counted from the five call sites in the file: 20 baseline + 60
+renderer (3 × 20) + 40 theme-comparison (2 × 20) + 1 broken buffer. The other 22 checks are
+the 20 per-chart injection assertions and the two output-differs assertions, which test the
+transform rather than execute it.
 
-Two earlier drafts of this very paragraph were wrong: the first said "102 real evaluations",
-the second said "121 real invocations (20 + 60 + 40 theme-comparison + 1)". **There is no
-theme-comparison loop** — it was deleted when the per-chart transform assertion replaced it,
-and the number describing it was carried anyway. A fabricated figure inside the section
-written to prove figures are measured is the sharpest instance of this session's own lesson,
-and cold pass 5 caught it by reading the code rather than the prose.
+**This paragraph has been wrong twice, and both errors are the session's own lesson landing
+on its author.** Draft 1 said "102 real evaluations" (checks counted as evaluations). Draft 2
+said "121 real invocations (20 + 60 + 40 theme-comparison + 1)" while the theme loop had been
+DELETED — a number carried across the change that removed it, inside the section written to
+prove numbers are measured. Cold pass 5 caught it by reading the code rather than the prose.
+The theme loop was then restored with real teeth at pass 6, so 121 is now true — but it is
+true because it was re-counted from the five call sites, not because the earlier draft was
+right.
 
 Falsifiability, **re-measured against the current code**, not carried forward:
 
 | Mutation | Result |
 |---|---|
-| `injectOpt` returns `code` unchanged | **81 / 102** |
-| `injectOpt`'s INSERT branch only made a no-op (the 19-of-20 shape) | **82 / 102** |
-| unmutated | **102 / 102** |
+| `injectOpt` returns `code` unchanged | **81 / 103** |
+| `injectOpt`'s INSERT branch only made a no-op (the 19-of-20 shape) | **82 / 103** |
+| unmutated | **103 / 103** |
 
-An earlier draft claimed 83/102 for the second shape. That figure was measured before the
+An earlier draft claimed 83 for the second shape. That figure was measured before the
 output-differs floor was pinned to 5, and was carried across the very tightening it
 described — the same staleness class this review keeps catching. Pass 4 caught it by
 arithmetic before the re-run confirmed it.
@@ -81,8 +86,9 @@ arithmetic before the re-run confirmed it.
   those four criteria are backed by greps and prose).
 - **Nine of the sixteen verify checks are source greps**, each suffixed `-SOURCE-GREP` so
   the suite stops presenting a read as a verification.
-- **Theme coverage is 2 of 7 executed** (`default`, `nord`). `monochrome` appears only in the
-  string-transform assertion, so five of the seven themes are never run.
+- **Theme coverage is 3 of 7 executed** (`default`, `nord`, `monochrome`); four themes are
+  never run. The theme path now has an end-to-end assertion — it had none until pass 6
+  named it the fakest green in the delivery.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties**, bound only by a comment.
 - **`catalog-repairs-present-SOURCE-GREP` greps for literal strings** — it proves the author
   typed `VIM_PAD + (curLine - 1)`, not that the offset is right.

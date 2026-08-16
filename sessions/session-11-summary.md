@@ -42,8 +42,7 @@ final repaired state:
   the preview chrome, copy/download/reset) are still backed only by source greps plus
   the operator's screenshots. Nine of the sixteen verify checks are source greps, now
   labelled `-SOURCE-GREP` so the suite stops presenting a read as a verification.
-- **Theme coverage is 2 of 7 executed** (`default`, `nord`). `monochrome` appears only in
-  the string-transform assertion, so **five** of the seven themes are never run.
+- **Theme coverage is 3 of 7 executed** (`default`, `nord`, `monochrome`); four are never run.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties** with only a comment binding
   them; a CSS edit silently desyncs the stripe and the block cursor.
 
@@ -63,9 +62,9 @@ working build, but 5 is a constant in a script, not a derived truth.
 typed those characters — nothing more. It stays green if `LINE_H`'s `20` desyncs from
 CSS `--vim-lh`, a desync this summary lists as open.
 
-**The honest shape of the whole suite:** **102 checks backed by 81 real invocations** of the
-shipped `evalCode` (three call sites: 20 baseline + 60 renderer + 1 broken buffer); the other
-21 checks test the transform rather than execute it. It runs offline, no browser needed — the earlier claim that verifying this
+**The honest shape of the whole suite:** **103 checks backed by 121 real invocations** of the
+shipped `evalCode` (five call sites: 20 baseline + 60 renderer + 40 theme-comparison + 1
+broken buffer); the other 22 checks test the transform rather than execute it. It runs offline, no browser needed — the earlier claim that verifying this
 "requires a browser" was wrong and is retired. **Nine of the sixteen verify checks are source greps**, every one
 now suffixed `-SOURCE-GREP` so the suite stops presenting a read as a verification.
 
@@ -103,7 +102,7 @@ repair · `68bfc51` export `evalCode` · `fd8a5fd` the executable check · `8a46
 `fd857bc` make both checks able to fail · `eab613a` retire the self-read review ·
 `35c061e` assert the rewrite itself · `643940c` close three unconditional greens ·
 `a3c4792` regrade the record in place — plus the record corrections that followed each of
-four cold REJECTs.
+six cold REJECTs.
 
 Run the log for the authoritative list; this section is a summary, not the source of truth:
 `git log --oneline main..session-11-catalog-two-panel`
@@ -144,7 +143,7 @@ was omitted". Clicking all 20 chart pages in a real browser showed otherwise.
 **After repair:** 20 of 20 chart pages render (`exit 0`); editing the buffer and
 pressing Run or ⌘/Ctrl+Enter changes the output; a syntax error is caught and shown
 with `exit 1`. `check-catalog-examples.ts` (`fd8a5fd`, widened since) executes the real evaluator.
-The suite is now **102 checks** (20 examples + 60 renderer runs + 20 injection assertions + output-differs + syntax-catch, with the count pinned so it cannot silently shrink). Falsifiability, measured on both mutation shapes: a wholly no-op `injectOpt` → **81/102**; a no-op INSERT branch only, the exact 19-of-20 shape → **82/102**. `verify-session-11.sh` is now **16/16**.
+The suite is now **103 checks** (20 examples + 60 renderer runs + 20 injection assertions + 2 output-differs + syntax-catch, with the chart and renderer counts pinned as literals so a shrunken input set cannot pass). Falsifiability, measured on both mutation shapes: a wholly no-op `injectOpt` → **81/103**; a no-op INSERT branch only, the exact 19-of-20 shape → **82/103**. `verify-session-11.sh` is now **16/16**.
 
 **The lesson, plainly:** every gate in this session was green and every rule was
 followed while the delivered page did not work. Discipline was perfect; fidelity was
