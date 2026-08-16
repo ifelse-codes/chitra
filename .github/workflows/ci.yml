@@ -60,6 +60,11 @@ jobs:
       # in git; build them first or a fresh clone fails typecheck.
       - name: Build lib type declarations
         run: pnpm run typecheck:libs
+      # S11: the docs app imports @chitra/core at runtime, and core resolves through
+      # dist/ (gitignored). Without this the docs typecheck fails on a fresh clone
+      # with TS2307 while passing on any machine that happens to have a built dist.
+      - name: Build @chitra/core (docs imports it)
+        run: pnpm --filter @chitra/core run build
       - name: Typecheck
         run: pnpm --filter @workspace/chitra-docs run typecheck
       - name: Build
