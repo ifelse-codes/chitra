@@ -19,7 +19,7 @@
 **Reviewer:** Claude Sonnet 4.6 (independent read, no prior context from this session)  
 **Review date:** 2026-08-15  
 **Branch:** `session-11-catalog-two-panel`  
-**Verdict:** ACCEPT with one honest asterisk
+**Verdict (VOID — see banner):** ACCEPT with one honest asterisk
 
 ---
 

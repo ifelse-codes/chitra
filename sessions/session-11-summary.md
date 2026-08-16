@@ -68,7 +68,7 @@ has a floor of 5 (and its theme companion a floor of 19), so it has real teeth; 
 
 **The honest shape of the whole suite:** **103 checks backed by 121 real invocations** of the
 shipped `evalCode` (five call sites: 20 baseline + 60 renderer + 40 theme-comparison + 1
-broken buffer); the other 22 checks test the transform rather than execute it. It runs offline, no browser needed — the earlier claim that verifying this
+broken buffer); the other 22 checks are derived assertions — 20 on the rewritten source, 2 comparing outputs the 121 invocations already produced. It runs offline, no browser needed — the earlier claim that verifying this
 "requires a browser" was wrong and is retired. **Nine of the sixteen verify checks are source greps**, every one
 now suffixed `-SOURCE-GREP` so the suite stops presenting a read as a verification.
 
@@ -106,7 +106,7 @@ repair · `68bfc51` export `evalCode` · `fd8a5fd` the executable check · `8a46
 `fd857bc` make both checks able to fail · `eab613a` retire the self-read review ·
 `35c061e` assert the rewrite itself · `643940c` close three unconditional greens ·
 `a3c4792` regrade the record in place — plus the record corrections that followed each of
-six cold REJECTs.
+seven cold REJECTs.
 
 Run the log for the authoritative list; this section is a summary, not the source of truth:
 `git log --oneline main..session-11-catalog-two-panel`
