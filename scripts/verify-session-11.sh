@@ -26,6 +26,12 @@ run_check() {
 run_check "core-tests"          pnpm --filter @chitra/core run test
 run_check "core-typecheck"      pnpm --filter @chitra/core run typecheck
 
+# @chitra/core resolves through dist/, which is gitignored. Build it FIRST — before any
+# check that imports it — or this suite is order-dependent: on a fresh clone the docs
+# typecheck fails, while a later build step silently repairs the condition so a second
+# run passes. That is how CI went red on a branch whose verify was locally green.
+run_check "core-build-for-docs" pnpm --filter @chitra/core run build
+
 # ── The one check that is not a grep ──────────────────────────
 # Every other catalog check below greps the source for a string. That is how this
 # script reported 14/14 ALL GREEN while 19 of 20 chart pages failed to render in a
@@ -35,6 +41,12 @@ run_check "catalog-examples-execute" pnpm --filter @workspace/chitra-docs run ch
 
 # ── Docs: typecheck, chart drift gate ─────────────────────────
 run_check "docs-typecheck"      pnpm --filter @workspace/chitra-docs run typecheck
+
+# The suite proved the evaluator in Node and never in a bundle — named as a gap by the
+# accepting cold pass, then confirmed the hard way by CI. This BUILDS the docs app.
+run_check "docs-build" bash -c '
+  PORT=5000 BASE_PATH=/ pnpm --filter @workspace/chitra-docs run build
+'
 run_check "docs-gen-charts-check" pnpm --filter @workspace/chitra-docs run gen:charts:check
 
 # ── S11 branch structure ───────────────────────────────────────
