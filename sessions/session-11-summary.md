@@ -11,8 +11,8 @@
 
 The rows below are the **corrected** grades. The original self-report said 8-of-8
 SHIPPED and "Nothing from the acceptance criteria was omitted", on a branch where
-19 of the 20 chart pages showed an error instead of a chart. Two independent cold
-reviews (both REJECT) forced the corrections. Each row now states what was true
+19 of the 20 chart pages showed an error instead of a chart. **Seven independent cold
+passes, every one a REJECT**, forced the corrections. Each row now states what was true
 **as delivered by the governed run** and what is true **after the operator repair**.
 
 ## Criterion map
@@ -45,22 +45,26 @@ final repaired state:
 - **Theme coverage is 3 of 7 executed** (`default`, `nord`, `monochrome`); four are never run.
 - **`LINE_H` / `VIM_PAD` duplicate CSS custom properties** with only a comment binding
   them; a CSS edit silently desyncs the stripe and the block cursor.
+- **Copy ×2 and Download ×2 have no automated coverage** — grep plus one operator browser
+  pass only.
 
 ---
 
 ## The fakest green
 
-**`ok renderer reaches output` — the only check that asserts the renderer selector
-changes real output.** It originally passed when a single chart differed, which `line`
-— the one chart the defect never broke — satisfies forever. Nineteen charts could
-silently ignore the renderer and it would stay green with a cheerful count. Named by a
-cold pass; the floor is now pinned to the 5 renderer-sensitive charts measured on the
-working build, but 5 is a constant in a script, not a derived truth.
+**`catalog-repairs-present-SOURCE-GREP` — the only guard on criterion 2's three repairs,
+and it guards nothing that renders.** It asserts four literal substrings exist:
+`vim-block-cursor`, `VIM_PAD + (curLine - 1)`, `gutterRef.current.scrollTop`,
+`caret-color: transparent`. Delete the block-cursor div, the stripe and the gutter sync
+from the render tree while keeping the constants, the CSS rules and a comment, and the
+check stays green over a page where every repair it names is gone. **It would pass over a
+`CatalogPage` that returns `null`.** Its eight sibling greps share the property: four of
+the eight criteria are backed by nothing that ever renders the component.
 
-**Runner-up: `catalog-repairs-present-SOURCE-GREP`.** It greps for the literal strings
-`VIM_PAD + (curLine - 1)` and `gutterRef.current.scrollTop`. That asserts the author
-typed those characters — nothing more. It stays green if `LINE_H`'s `20` desyncs from
-CSS `--vim-lh`, a desync this summary lists as open.
+**Runner-up: `ok renderer reaches output`.** It originally passed when a single chart
+differed — which `line`, the one chart the defect never broke, satisfies forever. It now
+has a floor of 5 (and its theme companion a floor of 19), so it has real teeth; but 5 and
+19 are constants typed into a script, not derived truths.
 
 **The honest shape of the whole suite:** **103 checks backed by 121 real invocations** of the
 shipped `evalCode` (five call sites: 20 baseline + 60 renderer + 40 theme-comparison + 1

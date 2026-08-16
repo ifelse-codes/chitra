@@ -12,7 +12,7 @@
   examples run as statements with `.render()` output captured from a mocked `process.stdout`; errors caught and shown in panel.
 - Verify: `scripts/verify-session-11.sh` — 16/16 ALL GREEN.
 - Summary: `sessions/session-11-summary.md`. Review: `sessions/session-11-review.md`
-  — **seven cold fidelity passes; the first six all REJECTED.** Passes 1–2 were fed only the prompt + diff; passes 3–5 were targeted re-checks of the prior pass's findings. The run's own "cold review" was a code read that certified a page broken on 19 of 20 charts; it is retained as `sessions/session-11-review-INVALID-self-read.md`. The real review is `sessions/session-11-review.md`.
+  — **eight cold fidelity passes; the first seven all REJECTED.** Passes 1–2 were fed only the prompt + diff; passes 3–8 were targeted re-checks of the prior pass's findings. The run's own "cold review" was a code read that certified a page broken on 19 of 20 charts; it is retained as `sessions/session-11-review-INVALID-self-read.md`. The real review is `sessions/session-11-review.md`.
 
 **Next session (S12 candidates):** browser QA of the catalog page + fix any visual
 issues found during dev-server review; carry the reference-locked line language into
