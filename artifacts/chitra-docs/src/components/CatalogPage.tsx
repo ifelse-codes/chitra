@@ -212,9 +212,9 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   const [ansiOut, setAnsiOut] = useState("");
   const [plainOut, setPlainOut] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [runMs, setRunMs] = useState(0);
+  const [runMs, setRunMs] = useState<number | null>(null);
   const [exitCode, setExitCode] = useState(0);
-  const [copied, setCopied] = useState<"code" | "out" | "out-empty" | null>(null);
+  const [copied, setCopied] = useState<"code" | "out" | "out-empty" | "failed" | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
@@ -238,6 +238,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     setPlainOut("");
     setErrorMsg(null);
     setExitCode(0);
+    setRunMs(null); // a foreign run's timing must not sit under the new chart's footer
     setRunStatus("Ready");
     setCurLine(1);
     setCurCol(1);
@@ -277,7 +278,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   // Tab content helpers
   const tabContent = (tab: TabName): string => {
     if (tab === "example.ts") return buffer;
-    if (tab === "data.ts") return genDataTab(chart.code, chart.id);
+    if (tab === "data.ts") return genDataTab(buffer, chart.id); // buffer, not chart.code — the tab must follow edits
     if (tab === "output.txt") return resolveOutput().text;
     return "";
   };
@@ -343,16 +344,18 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     return { text: "# not run yet — no output from this session", ok: false };
   };
 
-  const copy = (what: "code" | "out") => {
-    if (what === "out") {
-      const { text, ok } = resolveOutput();
-      navigator.clipboard.writeText(text);
-      setCopied(ok ? "out" : "out-empty");
-      setTimeout(() => setCopied(null), 1600);
-      return;
+  // Await the clipboard promise before claiming success. Flipping to "✓ Copied!"
+  // synchronously reported a copy that silently rejects in an insecure context, an
+  // unfocused document, or on denied permission — the same report-a-thing-that-did-
+  // not-happen class, inside the function written to fix that class.
+  const copy = async (what: "code" | "out") => {
+    const { text, ok } = what === "code" ? { text: buffer, ok: true } : resolveOutput();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(what === "code" ? "code" : ok ? "out" : "out-empty");
+    } catch {
+      setCopied("failed");
     }
-    navigator.clipboard.writeText(buffer);
-    setCopied("code");
     setTimeout(() => setCopied(null), 1600);
   };
 
@@ -364,8 +367,10 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     const a = document.createElement("a");
     a.href = url;
     a.download = name;
+    document.body.appendChild(a); // Firefox ignores a click on a detached anchor
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0); // revoking synchronously races Safari
   };
 
   const reset = () => {
@@ -428,10 +433,10 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
         <div className="ct-right">
           <button className="ct-btn" onClick={() => copy("code")}>
-            {copied === "code" ? "✓ Copied!" : "⧉ Code"}
+            {copied === "code" ? "✓ Copied!" : copied === "failed" ? "⚠ Copy failed" : "⧉ Code"}
           </button>
           <button className="ct-btn" onClick={() => copy("out")}>
-            {copied === "out" ? "✓ Copied!" : copied === "out-empty" ? "⚠ No output" : "⧉ Output"}
+            {copied === "out" ? "✓ Copied!" : copied === "out-empty" ? "⚠ No output" : copied === "failed" ? "⚠ Copy failed" : "⧉ Output"}
           </button>
           <button className="ct-btn" onClick={() => download("ts")}>⇩ .ts</button>
           <button className="ct-btn" onClick={() => download("txt")}>⇩ .txt</button>
@@ -606,10 +611,10 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             {/* Footer */}
             <div className="term-footer">
               <span className={exitCode !== 0 ? "term-exit-err" : "term-exit-ok"}>
-                exit {exitCode}
+                exit {runMs === null ? "—" : exitCode}
               </span>
               <span className="term-sep"> · </span>
-              <span>{runMs}ms</span>
+              <span>{runMs === null ? "not run" : `${runMs}ms`}</span>
               <span className="term-sep"> · </span>
               <span>renderer={renderer}</span>
               <span className="term-sep"> · </span>
