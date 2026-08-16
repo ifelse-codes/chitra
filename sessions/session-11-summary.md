@@ -2,7 +2,7 @@
 
 **Branch:** `session-11-catalog-two-panel` (from `main`)  
 **Date:** 2026-08-15  
-**Verify:** `scripts/verify-session-11.sh` — **16/16 ALL GREEN** (was 14/14 at the original close, on a page where 19 of 20 charts were broken)  
+**Verify:** `scripts/verify-session-11.sh` — **18/18 ALL GREEN** (from a clean clone) (was 14/14 at the original close, on a page where 19 of 20 charts were broken)  
 **Demo:** `scripts/demo-session-11.sh` — exits 0
 
 ---
@@ -47,6 +47,11 @@ final repaired state:
   them; a CSS edit silently desyncs the stripe and the block cursor.
 - **Copy ×2 and Download ×2 have no automated coverage** — grep plus one operator browser
   pass only.
+- **The suite was green locally and red in CI**, and only CI caught it: `@chitra/core`
+  resolves through a gitignored `dist/`, so a fresh clone failed the docs typecheck while
+  every local run passed on a stale build. Fixed in `ci.yml` (build core in the docs job)
+  and in the verify script (`core-build-for-docs` before any importer, plus a real
+  `docs-build`). Verify is now **18/18 from a clean clone**, first run.
 
 ---
 

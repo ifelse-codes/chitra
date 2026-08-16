@@ -116,6 +116,13 @@ arithmetic before the re-run confirmed it.
   green, and it is.
 - **`hlTs` is a pure `string → string` function with zero executable coverage**, guarded
   only by a grep for its identifier, despite being root cause #3.
+- **CI caught what ten cold passes did not.** Pass 10 named the gap precisely — "proven in
+  Node, never in a browser bundle" — and it landed as a real failure minutes later: the
+  docs typecheck cannot resolve `@chitra/core` on a fresh clone, because core resolves
+  through a gitignored `dist/`. Every local verify had passed on a stale build. A reviewer
+  reading a diff cannot see this class; only a clean environment can. Closed by building
+  core before any importer in both `ci.yml` and the verify script, plus a real
+  `docs-build` check — verify is now 18/18 from a clean clone.
 
 ## One pass-1 finding that was wrong
 

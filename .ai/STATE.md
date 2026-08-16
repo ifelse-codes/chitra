@@ -8,7 +8,7 @@
 ## What Currently Works (observed, not claimed)
 - `pnpm --filter @chitra/core run test` — **148/148 pass** (7 files, incl. 24 line tests).
 - `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `scripts/verify-session-11.sh` — **ALL GREEN (16 pass, 0 fail)**; `demo-session-11.sh` — exit 0.
+- `scripts/verify-session-11.sh` — **ALL GREEN (18 pass, 0 fail)** (verified from a clean clone); `demo-session-11.sh` — exit 0.
 - **Docs catalog page** (`artifacts/chitra-docs`): all 20 chart pages now render a
   two-panel interactive layout — vim-styled editable editor (left) + terminal preview
   (right). `@chitra/core` is bundled into the Vite build; `new Function` evaluator
