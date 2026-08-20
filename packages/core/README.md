@@ -185,6 +185,32 @@ The line chart carries the same locked language as the area chart. Rules that mu
 - **Same panel language**: dashed frame (`┌╌…╌┐`), eyebrow row, `│` y-guide on the left,
   series legend (`──*── name`), `+` X-axis ticks with clean labels.
 
+### LOCKED: bar chart — session 12 design
+
+The bar chart now carries the same locked design language as the circular, area, and line
+chart families. Rules that must not change:
+
+- **One accent hue, spent once on the peak bar.** The single bar with the globally highest
+  value gets the theme's accent hue; every other bar uses the grey tone ramp
+  (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`). No raw `theme.colors[s % n]` rainbow
+  assignment. Series identity in multi-series charts comes from position and the summary
+  legend, not from separate bright hues — exactly like the circular and line locked charts.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), eyebrow row
+  (uppercase, letter-spaced), `│` y-guide with a `+` at the topmost row (matching the
+  `+` axis-tick language from the locked line chart), and two `│ ╌…╌ │` rule separators
+  (one below the eyebrow/legend, one above the summary).
+- **`+` x-axis ticks**: a dedicated tick row between the bar plot and the x-labels, with
+  a `+` mark centred under each bar group — directly mirroring the locked line chart's
+  x-tick row.
+- **Per-series summary rows** (MIN / MAX / AVG / LAST) under the chart, echoing the
+  line/area summary panel. The series that holds the global peak bar has its `max N`
+  value rendered in the accent colour.
+- **Auto-scale y-range**: `yMin` defaults to `min(0, dataMin)` so the baseline is always
+  at or below zero, and `yMax` defaults to the data maximum. Override with `yMin`/`yMax`.
+- **Empty cells are spaces** — the bar plot never writes phantom fill characters.
+- **Panel width auto-expands** to fit the widest summary row so the footer is never
+  clipped by the frame.
+
 ## License
 
 MIT
