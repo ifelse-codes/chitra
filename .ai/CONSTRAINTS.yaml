@@ -26,6 +26,12 @@ verify:
   script_pattern: 'scripts/verify-session-{NN}.sh'
   template: 'scripts/verify-session-template.sh'
   exit_zero_required: true
+  # S119 (vajra repo): clean-room re-run key, ported by S124 dogfood run (vajra init's
+  # skip-if-present is file-granularity, not key-granularity, so this key can't be merged
+  # into an existing CONSTRAINTS.yaml automatically — added by hand this session; disclosed
+  # gap, not fixed in vajra init code here). Default off — behavior unchanged unless enabled.
+  clean_room:
+    enabled: false
 
 demo:
   script_pattern: 'scripts/demo-session-{NN}.sh'
