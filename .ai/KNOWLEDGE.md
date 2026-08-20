@@ -68,9 +68,16 @@
     `max` in accent. The primary keeps the 3-dot accent peak cap, and the cap outranks
     markers. Block/ascii renderers share the look. See "LOCKED: line chart" in
     `packages/core/README.md`.
+  - **Bar chart locked (S12)**: `bar()` carries the shared locked design language. One
+    accent on the globally highest bar (spent once); all other bars use the grey tone
+    ramp — no per-series rainbow. Panel: dashed frame, eyebrow row, `+` y-guide top,
+    `+` x-tick row, rule separators, per-series MIN/MAX/AVG/LAST summary rows (peak-series
+    `max` in accent). Auto-scale y-range; empty cells are spaces; panel width auto-expands
+    to fit summary rows. See "LOCKED: bar chart — session 12 design" in
+    `packages/core/README.md`.
   - Live design preview: `/tmp/ring-lab/index.html`; handoff for LLM polish:
     `scripts/ring-polish-handoff.mjs`.
-- **142 core tests stay green.** Never leave the suite red.
+- **163 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best chart lib ever created."*
 
 ## Environment quirks / gotchas
