@@ -1,23 +1,26 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 11 — COMPLETE
-- **Type:** CODE — catalog two-panel page: vim editor + live terminal preview
-- **Branch:** `session-11-catalog-two-panel` (from `main`)
-- **Date last updated:** 2026-08-15
+- **Number:** 13 — COMPLETE
+- **Type:** CODE — docs catalog chrome at Darpan parity (Run ⌘↩, canon tokens)
+- **Branch:** `session-13-closeout` (work landed via PRs #12, #13 from `main`)
+- **Date last updated:** 2026-08-21
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 11.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S10.
-- **S10 merged**: `line()` reference-locked to the founder's `tui-chart (1).html`.
-  148/148 tests green, verify 28/28 green.
-- **S11 goal**: rebuild the docs site catalog (`artifacts/chitra-docs`) with a
-  two-panel interactive page for all 20 charts — vim-styled editable editor on the
-  left, live terminal preview on the right, in-browser `new Function` evaluator.
-  Prompt: `prompts/11-task-catalog-two-panel.md`.
+- `.ai/SESSION` = 13.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S12 + S13 UI work.
+- **S13 shipped**: docs catalog toolbar/chrome rebuilt to the founder's Darpan
+  design language — accent Run button with ⌘↩ keycap chip, global cmd/ctrl+enter
+  shortcut, white-alpha fg tiers ported from Darpan's `theater-tokens.css`
+  (verified against the live app), uppercase chips, ghost actions, inspector kv
+  footer, dashed empty state, RUN FAILED banner. Prompt:
+  `prompts/13-task-darpan-parity-chrome.md`.
+- Verify: `scripts/verify-session-13.sh` — 27/27 ALL GREEN. Demo exit 0.
+- Summary: `sessions/session-13-summary.md`. Review: `sessions/session-13-review.md`
+  — cold pass, **Verdict: ACCEPT** (attested; one NOT-BUILT row disclosed: no DOM test).
 
 ## Next Session
-- **Number:** 12 — carry the reference-locked line language into `bar`/`sparkline`/
-  `histogram`; or bring `lineModelToSvg` fully in line with the terminal; or exercise
-  a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- **Number:** 14 — candidates: scripted browser QA of all 20 catalog pages;
+  carry the reference-locked language into `sparkline`/`histogram`; exercise a
+  real `v0.1.0` release (`NODE_AUTH_TOKEN`).
 - Open in a **new chat** (one session per chat).
