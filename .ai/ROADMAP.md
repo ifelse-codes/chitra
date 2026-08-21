@@ -10,11 +10,18 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next — founder direction (Session 11 candidate):** carry the S10 reference-locked
-  line language into the remaining chart families (`bar`/`sparkline`/`histogram`/…),
-  and bring `lineModelToSvg` fully in line with the terminal (colour-matched series,
-  `+` x-tick marks, per-series stat boxes). Also pending: exercise a real `v0.1.0`
-  release (`NODE_AUTH_TOKEN`).
+- 🔜 **Next — founder direction (Session 14 candidate):** scripted browser QA of
+  all 20 catalog pages (close the no-DOM-test gap); carry the S10/S12 reference-
+  locked language into `sparkline`/`histogram`; bring `lineModelToSvg` fully in
+  line with the terminal. Also pending: exercise a real `v0.1.0` release
+  (`NODE_AUTH_TOKEN`).
+- ✅ **Session 13 (S13) — docs catalog chrome at Darpan parity:** toolbar on one
+  control metric; Run = Darpan `.btnPrimary` accent fill + ⌘↩ / Ctrl ↩ keycap;
+  global cmd/ctrl+enter shortcut; white-alpha fg tiers ported from Darpan's
+  `theater-tokens.css` after reading the real codebase + live app; uppercase
+  chips, ghost actions, inspector kv footer, dashed empty state, RUN FAILED
+  banner. PRs #12/#13. `verify-session-13.sh` 27/27 ALL GREEN, demo exit 0,
+  review ACCEPT (attested).
 - ✅ **Session 10 (S10) — line chart reference-locked (thin multi-series lines):**
   `line()` now matches the founder's `tui-chart (1).html` reference — every series a
   continuous thin braille line in its own colour, glyph markers on every series
