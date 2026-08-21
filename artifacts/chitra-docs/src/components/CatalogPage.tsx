@@ -8,6 +8,11 @@ type TabName = "example.ts" | "data.ts" | "output.txt";
 type VimMode = "NORMAL" | "INSERT";
 type RunStatus = "Ready" | "Running…" | "Error";
 type RendererChoice = "braille" | "blocks" | "ascii";
+
+// Run shortcut label — ⌘↩ on Apple platforms, Ctrl+↩ elsewhere
+const IS_MAC =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+const RUN_KBD = IS_MAC ? "⌘↩" : "Ctrl ↩";
 type ThemeChoice =
   | "default"
   | "nord"
@@ -307,7 +312,8 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     setCurCol(col);
   }, []);
 
-  // Keyboard handler
+  // Keyboard handler — Escape only; Run lives in a GLOBAL listener below so
+  // ⌘↩ / Ctrl+↩ fires anywhere on the page, not just inside the editor.
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Escape") {
@@ -315,14 +321,21 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
         textareaRef.current?.blur();
         return;
       }
+    },
+    [],
+  );
+
+  // Global run shortcut — ⌘↩ (mac) / Ctrl+↩ (everything else)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
         e.preventDefault();
         run();
-        return;
       }
-    },
-    [run],
-  );
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [run]);
 
   // Toolbar handlers
   const handleRendererChange = (r: RendererChoice) => {
@@ -398,11 +411,12 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
           <button
             className={`ct-run ${runStatus === "Running…" ? "ct-run-busy" : ""}`}
             onClick={() => run()}
-            title="Run (⌘+Enter)"
+            title={`Run (${RUN_KBD})`}
             disabled={runStatus === "Running…"}
           >
-            <span>{runStatus === "Running…" ? "⟳" : "▶"}</span>
-            <span>{runStatus === "Running…" ? "Running…" : "Run"}</span>
+            {runStatus === "Running…" && <span className="ct-run-spinner">⟳</span>}
+            <span>Run</span>
+            <span className="ct-kbd">{RUN_KBD}</span>
           </button>
           <span className={`ct-pill ct-pill-${statusClass}`}>{runStatus}</span>
         </div>
