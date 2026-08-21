@@ -605,6 +605,10 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
               {errorMsg ? (
                 <div className="term-error-block">
+                  <div className="term-error-head">
+                    <span className="term-error-chip">run failed</span>
+                    <span className="term-error-exit">exit {exitCode}</span>
+                  </div>
                   <pre className="term-error-msg">{errorMsg}</pre>
                 </div>
               ) : ansiOut ? (
@@ -622,17 +626,21 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Footer — inspector-style key/value row */}
             <div className="term-footer">
-              <span className={exitCode !== 0 ? "term-exit-err" : "term-exit-ok"}>
-                exit {runMs === null ? "—" : exitCode}
+              <span className="tf-k">exit</span>
+              <span className={`tf-v ${exitCode !== 0 ? "tf-err" : "tf-ok"}`}>
+                {runMs === null ? "—" : exitCode}
               </span>
-              <span className="term-sep"> · </span>
-              <span>{runMs === null ? "not run" : `${runMs}ms`}</span>
-              <span className="term-sep"> · </span>
-              <span>renderer={renderer}</span>
-              <span className="term-sep"> · </span>
-              <span>theme={theme}</span>
+              <span className="tf-div" />
+              <span className="tf-k">time</span>
+              <span className="tf-v">{runMs === null ? "not run" : `${runMs}ms`}</span>
+              <span className="tf-spacer" />
+              <span className="tf-k">renderer</span>
+              <span className="tf-v">{renderer}</span>
+              <span className="tf-div" />
+              <span className="tf-k">theme</span>
+              <span className="tf-v">{theme}</span>
             </div>
           </div>
         </Panel>
