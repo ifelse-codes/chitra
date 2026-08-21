@@ -1,20 +1,24 @@
 # Current Task Pointer
 
-## Session 11 — catalog two-panel page: vim editor + live terminal preview — COMPLETE
+## Session 13 — docs catalog chrome at Darpan parity — COMPLETE
 
-- **Branch:** `session-11-catalog-two-panel` (from `main`)
-- **Shipped:** `CatalogPage` component — two-panel interactive catalog for all 20
-  charts. Left: vim-styled editable buffer (line gutter, current-line highlight, `~`
-  markers, TS syntax highlighting, file tabs, modeline with NORMAL/INSERT). Right:
-  terminal preview (title bar + status pill, ANSI output via `ansiToHtml`, exit/timing
-  footer). Toolbar: Run, Copy ×2, Download ×2, Renderer, Theme, Reset. Live in-browser
-  evaluator: `@chitra/core` bundled, `new Function` + `globalThis.process` mock,
-  examples run as statements with `.render()` output captured from a mocked `process.stdout`; errors caught and shown in panel.
-- Verify: `scripts/verify-session-11.sh` — 16/16 ALL GREEN.
-- Summary: `sessions/session-11-summary.md`. Review: `sessions/session-11-review.md`
-  — **ten cold fidelity passes; the first nine all REJECTED.** Passes 1–2 were fed only the prompt + diff; passes 3–10 were targeted re-checks of the prior pass's findings. The run's own "cold review" was a code read that certified a page broken on 19 of 20 charts; it is retained as `sessions/session-11-review-INVALID-self-read.md`. The real review is `sessions/session-11-review.md`.
+- **Branches:** `session-13-docs-toolbar-polish` (PR #12, `3ee5156`) and
+  `session-13-darpan-parity-chrome` (PR #13, `bb1af74`), both merged to `main`;
+  closeout on `session-13-closeout`.
+- **Shipped:** catalog toolbar/chrome rebuilt to the founder's Darpan design
+  language. One control metric (24px/2px/mono); Run = Darpan `.btnPrimary`
+  (accent fill + accent border + warm near-black text) with a ⌘↩ / Ctrl ↩ keycap
+  chip; global cmd/ctrl+enter run shortcut via window listener; white-alpha fg
+  tiers (`oklch(1 0 0 / 0.92→0.36)`) ported from Darpan's `theater-tokens.css`
+  after reading the actual codebase + live app; squared uppercase status pills;
+  uppercase ghost actions; inspector key/value terminal footer; dashed
+  awaiting-run empty state; RUN FAILED chip banner; accent selection/focus,
+  line-tinted scrollbars, JetBrains Mono first.
+- Verify: `scripts/verify-session-13.sh` — 27/27 ALL GREEN.
+- Summary: `sessions/session-13-summary.md`. Review: `sessions/session-13-review.md`
+  — cold pass, **Verdict: ACCEPT** (attested). One NOT-BUILT disclosed: no
+  automated DOM/browser test for the chrome.
 
-**Next session (S12 candidates):** browser QA of the catalog page + fix any visual
-issues found during dev-server review; carry the reference-locked line language into
-`bar`/`sparkline`/`histogram`; bring `lineModelToSvg` in line with the terminal.
-Open in a **new chat**.
+**Next session (S14 candidates):** scripted browser QA of all 20 catalog pages;
+carry the reference-locked language into `sparkline`/`histogram`; exercise a real
+`v0.1.0` release. Open in a **new chat**.
