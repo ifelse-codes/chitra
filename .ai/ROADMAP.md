@@ -10,11 +10,18 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next — founder direction (Session 14 candidate):** scripted browser QA of
+- 🔜 **Next — founder direction (Session 15 candidate):** scripted browser QA of
   all 20 catalog pages (close the no-DOM-test gap); carry the S10/S12 reference-
   locked language into `sparkline`/`histogram`; bring `lineModelToSvg` fully in
   line with the terminal. Also pending: exercise a real `v0.1.0` release
   (`NODE_AUTH_TOKEN`).
+- ✅ **Session 14 (S14) — real URL routes + boot-scoped editor persistence:**
+  wouter drives navigation (`/chart/:id` for all 20 charts, `/install`
+  `/quickstart` `/fluent-api` `/ai-output`; refresh/back work; unknown ids fall
+  home). Editor edits persist across refresh/navigation until the dev server
+  restarts (localStorage keyed by an injected per-boot id); Reset restores
+  pristine. PR #15. `verify-session-14.sh` 20/20 ALL GREEN, demo exit 0, review
+  ACCEPT (attested).
 - ✅ **Session 13 (S13) — docs catalog chrome at Darpan parity:** toolbar on one
   control metric; Run = Darpan `.btnPrimary` accent fill + ⌘↩ / Ctrl ↩ keycap;
   global cmd/ctrl+enter shortcut; white-alpha fg tiers ported from Darpan's

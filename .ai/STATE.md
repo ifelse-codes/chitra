@@ -1,9 +1,9 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S13 closing, 2026-08-21.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S14 closing, 2026-08-21.)
 
 ## Active Branch
-`session-13-closeout` — S13 work already merged to `main` via PRs #12/#13; this branch carries closeout artifacts only.
+`session-14-closeout` — S14 work already merged to `main` via PR #15; this branch carries closeout artifacts only.
 
 ## What Currently Works (observed, not claimed)
 - `pnpm --filter @chitra/core run test` — **163/163 pass**.
@@ -20,12 +20,18 @@
   JetBrains Mono first.
 - **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`
   output surface; LOCKED families: circular (S09), line (S10), bar (S12).
+- **URL-driven docs navigation + boot-scoped persistence (S14)**: `/chart/:id`
+  routes for all 20 charts via wouter (refresh/back work, unknown ids fall home);
+  editor edits persist across refresh/navigation until the dev server restarts
+  (localStorage keyed by an injected per-boot id); Reset restores pristine.
 - Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` wired.
 
 ## What Is Broken / Incomplete
 - **No DOM/browser automated test exists for the docs site.** Toolbar/vim/terminal
-  chrome rests on source+executable checks plus founder live review; the S11-class
-  risk (green greps over a visually broken page) is mitigated but not eliminated.
+  chrome AND the new route/lifetime behavior rest on source+executable checks plus
+  founder live review; the S11-class risk (green greps over a visually broken page)
+  is mitigated but not eliminated. Route smoke (`curl /chart/* → 200`) proves SPA
+  fallback only, not React render.
 - `LINE_H` / `VIM_PAD` in `CatalogPage.tsx` still duplicate CSS custom properties
   with only a comment binding them.
 - data.ts tab returns `[]` for object-array charts (scatter, candlestick). Informational only.
@@ -42,10 +48,11 @@
   **S06** real publishable dist · **S07** CI workflows · **S08** release.yml +
   line/SVG dashboard · **S09** circular charts LOCKED · **S10** line chart
   reference-locked · **S11** catalog two-panel page · **S12** bar chart LOCKED ·
-  **S13** catalog chrome at Darpan parity (Run ⌘↩, canon tokens, inspector chrome).
+  **S13** catalog chrome at Darpan parity (Run ⌘↩, canon tokens, inspector chrome) ·
+  **S14** URL routes (`/chart/:id`) + boot-scoped editor persistence.
 
 ## What Is In Progress
-- Nothing mid-flight. **Next session (S14 candidates):** scripted browser QA of all
+- Nothing mid-flight. **Next session (S15 candidates):** scripted browser QA of all
   20 catalog pages; carry the reference-locked language into
   `sparkline`/`histogram`; exercise a real `v0.1.0` release. See [[roadmap]].
 
