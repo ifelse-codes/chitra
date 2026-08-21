@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { CHARTS } from "./data/charts";
 import { ansiToHtml } from "./ansi";
 import ansiCharts from "./data/ansi-charts.json";
@@ -423,11 +424,35 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
 }
 
 /* ── Root ───────────────────────────────────────────────────── */
+// URL is the source of truth: `/chart/line`, `/install`, … Real routes, so a
+// click on "line" lands on `host:port/chart/line` and refresh/back work.
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function pathToActive(path: string): { page: string; chartId: string | null } {
+  const p = (path.slice(BASE.length) || "/").replace(/\/+$/, "") || "/";
+  const m = p.match(/^\/chart\/([a-z0-9-]+)$/);
+  if (m) return { page: m[1], chartId: CHARTS.some((c) => c.id === m[1]) ? m[1] : null };
+  if (p === "/") return { page: "home", chartId: null };
+  return { page: p.slice(1), chartId: null };
+}
+
+function hrefFor(id: string): string {
+  const knownChart = CHARTS.some((c) => c.id === id);
+  const prefix = `${BASE}/`;
+  if (id === "home") return BASE || "/";
+  return knownChart ? `${prefix}chart/${id}` : `${prefix}${id}`;
+}
+
 export default function App() {
-  const [active, setActive] = useState("home");
+  const [location, navigate] = useLocation();
+  const { page: active, chartId } = pathToActive(location);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const nav = (id: string) => { setActive(id); setMobileOpen(false); window.scrollTo(0, 0); };
+  const nav = (id: string) => {
+    navigate(hrefFor(id));
+    setMobileOpen(false);
+    window.scrollTo(0, 0);
+  };
 
   const labelFor = (id: string) => {
     const map: Record<string, string> = {
@@ -443,7 +468,9 @@ export default function App() {
     if (active === "quickstart") return <QuickstartPage />;
     if (active === "fluent-api") return <FluentPage />;
     if (active === "ai-output")  return <AiPage />;
-    return <ChartPage id={active} />;
+    // A /chart/<unknown-id> URL falls back to the catalog home rather than a blank pane.
+    if (chartId)                 return <ChartPage key={chartId} id={chartId} />;
+    return <Hero onNav={nav} />;
   }
 
   return (

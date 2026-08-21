@@ -26,9 +26,25 @@ if (!basePath) {
   );
 }
 
+// One id per dev-server boot — editor overrides in localStorage are scoped to
+// it, so they live exactly until the server restarts.
+const bootId = `boot-${Date.now()}`;
+
 export default defineConfig({
   base: basePath,
   plugins: [
+    {
+      name: "chitra-boot-id",
+      transformIndexHtml() {
+        return [
+          {
+            tag: "script",
+            children: `window.__CHITRA_BOOT_ID__ = ${JSON.stringify(bootId)};`,
+            injectTo: "head-prepend",
+          },
+        ];
+      },
+    },
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
