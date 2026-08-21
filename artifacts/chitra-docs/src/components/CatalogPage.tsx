@@ -3,6 +3,12 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ansiToHtml } from "../ansi";
 import * as chitraCore from "@chitra/core";
 import type { ChartDef } from "../data/charts";
+import {
+  loadBufferOverride,
+  saveBufferOverride,
+  clearBufferOverride,
+  pruneStaleOverrides,
+} from "../lib/bufferStore";
 
 type TabName = "example.ts" | "data.ts" | "output.txt";
 type VimMode = "NORMAL" | "INSERT";
@@ -206,7 +212,10 @@ export function evalCode(
 export function CatalogPage({ chart }: { chart: ChartDef }) {
   const pristine = useRef(chart.code);
 
-  const [buffer, setBuffer] = useState(chart.code);
+  const [buffer, setBuffer] = useState(() => {
+    pruneStaleOverrides();
+    return loadBufferOverride(chart.id) ?? chart.code;
+  });
   const [activeTab, setActiveTab] = useState<TabName>("example.ts");
   const [mode, setMode] = useState<VimMode>("NORMAL");
   const [curLine, setCurLine] = useState(1);
@@ -234,10 +243,12 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   rendRef.current = renderer;
   themeRef.current = theme;
 
-  // Reset when navigating to a different chart
+  // Reset when navigating to a different chart — restore this chart's saved
+  // override if one exists (local persistence), else the pristine example.
+  // The run uses the RESOLVED code explicitly, so a restored buffer is what
+  // the preview shows on arrival.
   useEffect(() => {
     pristine.current = chart.code;
-    setBuffer(chart.code);
     setActiveTab("example.ts");
     setAnsiOut("");
     setPlainOut("");
@@ -248,7 +259,11 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     setCurLine(1);
     setCurCol(1);
     setMode("NORMAL");
-  }, [chart.id]);
+    const code = loadBufferOverride(chart.id) ?? chart.code;
+    setBuffer(code);
+    bufRef.current = code;
+    run(code);
+  }, [chart.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Core run function — reads from refs for freshness
   const run = useCallback(
@@ -271,15 +286,6 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     [],
   );
 
-  // Auto-run on mount / chart navigation
-  useEffect(() => {
-    // Run with the CURRENT renderer/theme, not hardcoded defaults. The selects and
-    // the footer are not reset when the chart changes, so forcing braille/default
-    // here made the footer report `renderer=ascii · theme=nord` over a run that
-    // used neither — the panel lying about the run it was labelling.
-    run(chart.code);
-  }, [chart.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Tab content helpers
   const tabContent = (tab: TabName): string => {
     if (tab === "example.ts") return buffer;
@@ -287,7 +293,6 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
     if (tab === "output.txt") return resolveOutput().text;
     return "";
   };
-
   // Scroll-sync: the highlight pre, the gutter and the current-line stripe all
   // have to follow the textarea. Mirroring only the pre left the line numbers,
   // the `~` markers and the stripe frozen in place as soon as the buffer scrolled.
@@ -387,6 +392,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
   };
 
   const reset = () => {
+    clearBufferOverride(chart.id);
     setBuffer(pristine.current);
     setActiveTab("example.ts");
     setMode("NORMAL");
@@ -539,6 +545,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
                       onChange={(e) => {
                         setBuffer(e.target.value);
                         bufRef.current = e.target.value;
+                        saveBufferOverride(chart.id, e.target.value);
                         syncScroll();
                         trackCursor();
                       }}
