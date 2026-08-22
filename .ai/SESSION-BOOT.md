@@ -1,28 +1,26 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 14 — COMPLETE
-- **Type:** CODE — real URL routes + boot-scoped editor persistence
-- **Branch:** `session-14-closeout` (work landed via PR #15 from `main`)
-- **Date last updated:** 2026-08-21
+- **Number:** 15 — COMPLETE
+- **Type:** CODE — scripted browser QA of all 20 catalog pages
+- **Branch:** `session-15-browser-qa` (PR pending)
+- **Date last updated:** 2026-08-22
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 14.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S13 + S14.
-- **S14 shipped**: docs site navigation is URL-driven — `/chart/:id` for all 20
-  charts (`/chart/line`…), `/install` `/quickstart` `/fluent-api` `/ai-output`;
-  refresh/back/forward work; unknown ids fall home. Editor edits persist to
-  localStorage scoped by a per-boot id (Vite `transformIndexHtml` injects
-  `window.__CHITRA_BOOT_ID__`): changes survive refresh/navigation until the dev
-  server restarts; Reset restores pristine; stale boots pruned. Prompt:
-  `prompts/14-task-url-routes-persistence.md`.
-- Verify: `scripts/verify-session-14.sh` — 20/20 ALL GREEN. Demo exit 0.
-- Summary: `sessions/session-14-summary.md`. Review: `sessions/session-14-review.md`
-  — cold pass, **Verdict: ACCEPT** (attested; NOT-BUILT disclosed: no automated
-  browser test for interactive route/lifetime behavior).
+- `.ai/SESSION` = 15.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S14; S15 on branch.
+- **S15 shipped**: Playwright-driven QA (`scripts/qa-catalog.mjs`) visits all 20
+  `/chart/:id` pages + 4 doc pages + `/`, asserts non-empty terminal output,
+  zero console/page errors, Run shortcut re-renders, edit→navigate→back persistence
+   smoke; screenshots + JSON artifacts under `.ai/verify/session-15/`.
+  Verify/demo scripts accept `--headed` flag (default headless).
+  Side-fix: widened chart route regex to accept camelCase ids (`horizontalBar`).
+- Verify: `scripts/verify-session-15.sh` — 8/8 ALL GREEN. Demo exit 0.
+- Summary: `sessions/session-15-summary.md`. Review: `sessions/session-15-review.md`
+   — cold pass, **Verdict: ACCEPT** (attested). NOT-BUILT disclosed: no CI
+   integration; persistence smoke covers one chart only.
 
 ## Next Session
-- **Number:** 15 — candidates: scripted browser QA of all 20 catalog pages
-  (closes the DOM-test gap); carry the reference-locked language into
-  `sparkline`/`histogram`; exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- **Number:** 16 — candidates: wire QA into CI; carry reference-locked language
+   into `sparkline`/`histogram`; exercise `v0.1.0` release.
 - Open in a **new chat** (one session per chat).
