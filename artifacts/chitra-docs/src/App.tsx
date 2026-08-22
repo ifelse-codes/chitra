@@ -430,7 +430,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function pathToActive(path: string): { page: string; chartId: string | null } {
   const p = (path.slice(BASE.length) || "/").replace(/\/+$/, "") || "/";
-  const m = p.match(/^\/chart\/([a-z0-9-]+)$/);
+  const m = p.match(/^\/chart\/([a-zA-Z0-9-]+)$/);
   if (m) return { page: m[1], chartId: CHARTS.some((c) => c.id === m[1]) ? m[1] : null };
   if (p === "/") return { page: "home", chartId: null };
   return { page: p.slice(1), chartId: null };
