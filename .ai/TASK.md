@@ -1,21 +1,18 @@
 # Current Task Pointer
 
-## Session 14 — real URL routes + boot-scoped editor persistence — COMPLETE
+## Session 15 — scripted browser QA of all 20 catalog pages — COMPLETE
 
-- **Branch:** `session-14-url-routes-persistence` (PR #15, `e31b982`); closeout on
-  `session-14-closeout`.
-- **Shipped:** URL-driven navigation via wouter — `/chart/:id` for all 20 charts,
-  `/install` `/quickstart` `/fluent-api` `/ai-output`, unknown ids fall home,
-  BASE_URL-aware. Editor persistence: overrides in localStorage keyed
-  `chitra-buffer:<boot-id>:<chart-id>`; boot id injected per dev-server start via
-  a Vite `transformIndexHtml` plugin (`window.__CHITRA_BOOT_ID__`); edits survive
-  refresh/navigation and re-run on arrival; Reset clears; stale boots pruned.
-  Lifetime = local until server restart, exactly as the founder asked.
-- Verify: `scripts/verify-session-14.sh` — 20/20 ALL GREEN.
-- Summary: `sessions/session-14-summary.md`. Review: `sessions/session-14-review.md`
-  — cold pass, **Verdict: ACCEPT** (attested). NOT-BUILT disclosed: no automated
-  browser test for interactive route/lifetime behavior.
+- **Branch:** `session-15-browser-qa` (PR pending)
+- **Shipped:** Playwright QA (`scripts/qa-catalog.mjs`) covering all 20 chart pages,
+   4 doc pages, and home; terminal output assertions; console/page error tracking;
+   Run shortcut re-render test; edit→navigate→back persistence smoke; screenshots
+   + JSON artifacts under `.ai/verify/session-15/`. Verify/demo scripts accept
+   `--headed` flag (default headless). Side-fix: widened chart route regex to accept
+   camelCase ids (`horizontalBar`).
+- Verify: `scripts/verify-session-15.sh` — 8/8 ALL GREEN.
+- Summary: `sessions/session-15-summary.md`. Review: `sessions/session-15-review.md`
+   — cold pass, **Verdict: ACCEPT** (attested). NOT-BUILT disclosed: no CI
+   integration; persistence smoke covers one chart only.
 
-**Next session (S15 candidates):** scripted browser QA of all 20 catalog pages;
-carry the reference-locked language into `sparkline`/`histogram`; exercise a real
-`v0.1.0` release. Open in a **new chat**.
+**Next session (S16 candidates):** wire QA into CI; carry reference-locked language
+into `sparkline`/`histogram`; exercise `v0.1.0` release. Open in a **new chat**.
