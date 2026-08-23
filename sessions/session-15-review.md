@@ -4,7 +4,16 @@
 + the delivery diff. Every verdict is backed by an executable check from
 `scripts/verify-session-15.sh` (8/8 ALL GREEN) or a command re-run during review.
 
-**Review-Inputs-SHA:** 45bb3a0ba4823a4fd7c8c3a4af1f8f339bdb3c55467ffd0322e2814004907fda
+**Review-Inputs-SHA:** a5cb5aeed6de358fc099fa116ecd426e446b931e0edc38c5de8987e855a6b73b
+
+> **Re-attestation (2026-08-23):** the original cold pass (SHA `45bb3a0b…`) was
+> emitted before commits `daaf32f` (Playwright deps + widened route regex) and
+> `e42385e` (lockfile) landed on the delivery diff, so the closeout attestation
+> gate correctly flagged it stale. Every requirement above was re-verified against
+> current HEAD: `scripts/verify-session-15.sh` re-run — 8/8 ALL GREEN (QA suite:
+> 20/20 chart pages render non-empty terminal output, 0 console errors, 0 page
+> errors across all 25 pages; persistence smoke PASS); route regex confirmed at
+> `src/App.tsx:433`; `--headed` confirmed in both runner scripts. Verdicts unchanged.
 
 ## Per-requirement verdicts
 
