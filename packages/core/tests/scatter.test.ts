@@ -108,8 +108,8 @@ describe("scatter chart — locked S17 design", () => {
     expect(c.grey).toBeGreaterThan(0);
   });
 
-  it("accent follows the primary series max-y point, not the global max", () => {
-    // series 0's max-y is (2,5); series 1 has a higher point (9,20) but is NOT primary.
+  it("multi-series: the whole PRIMARY GROUP is the accent, not a single point", () => {
+    // series 0 = [(1,1),(2,5)] is the accent hero; series 1 is a decoy with a higher point.
     const multi = [
       [
         { x: 1, y: 1 },
@@ -120,8 +120,16 @@ describe("scatter chart — locked S17 design", () => {
         { x: 8, y: 3 },
       ],
     ];
-    const plain = stripAnsi(scatter({ data: multi }).toString());
-    expect(plain).toMatch(/peak \(2, 5\)/);
+    // BOTH of series 0's points render in the accent hue — a group, not one dot — plus the
+    // legend + footer glyphs that mark it; the other group stays grey and nothing is rainbow.
+    const c = accentCensus({ data: multi, seriesLabels: ["Alpha", "Beta"] });
+    expect(c.accent).toBeGreaterThanOrEqual(2);
+    expect(c.grey).toBeGreaterThan(0);
+    expect(c.other).toBe(0);
+    // the footer names the accent GROUP, not a peak point.
+    const plain = stripAnsi(scatter({ data: multi, seriesLabels: ["Alpha", "Beta"] }).toString());
+    expect(plain).toMatch(/· ● Alpha/);
+    expect(plain).not.toMatch(/peak \(/);
   });
 
   it("respects an explicit highlight override", () => {

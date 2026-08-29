@@ -67,8 +67,10 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     }
   }
 
-  const yAxisWidth =
-    Math.max(formatNumber(Math.round(yMaxVal)).length, formatNumber(Math.round(yMinVal)).length) + 1;
+  const yRange = Math.abs(yMaxVal - yMinVal);
+  const yDecimals = yRange >= 10 ? 0 : yRange >= 1 ? 1 : 2;
+  const fmtY = (v: number): string => v.toFixed(yDecimals);
+  const yAxisWidth = Math.max(fmtY(yMaxVal).length, fmtY(yMinVal).length) + 1;
   const plotCols = Math.max(8, innerWidth - yAxisWidth);
   const plotRows = Math.max(3, height);
   const seriesLabels = opts.seriesLabels ?? series.map((_, i) => `Series ${i + 1}`);
@@ -80,7 +82,7 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     const yVal = yMaxVal - (row / Math.max(1, plotRows - 1)) * (yMaxVal - yMinVal);
     const label =
       row % yLabelStep === 0 || row === plotRows - 1
-        ? padStart(formatNumber(Math.round(yVal)), yAxisWidth - 1)
+        ? padStart(fmtY(yVal), yAxisWidth - 1)
         : " ".repeat(yAxisWidth - 1);
     return colorize(label, theme.label, noColor);
   }
@@ -119,20 +121,39 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       for (let col = 0; col < plotCols; col++) {
         let ch = " ";
         let si = -1;
-        for (let k = series.length - 1; k >= 0; k--) {
-          const c = canvasLines[k]![row]?.[col] ?? " ";
+        // Multi-series: the PRIMARY group (series 0) is the accent hero and wins the cell, so its
+        // colour survives an overlap. Single series: the topmost dot wins and the accent is spent
+        // once on the peak cell.
+        if (multiSeries) {
+          const c0 = canvasLines[0]![row]?.[col] ?? " ";
+          if (c0 !== " " && c0 !== "⠀") {
+            ch = c0;
+            si = 0;
+          } else {
+            for (let k = series.length - 1; k >= 1; k--) {
+              const c = canvasLines[k]![row]?.[col] ?? " ";
+              if (c !== " " && c !== "⠀") {
+                ch = c;
+                si = k;
+                break;
+              }
+            }
+          }
+        } else {
+          const c = canvasLines[0]![row]?.[col] ?? " ";
           if (c !== " " && c !== "⠀") {
             ch = c;
-            si = k;
-            break;
+            si = 0;
           }
         }
         if (si === -1) {
           rowStr += " ";
           continue;
         }
-        const isPeak = row * plotCols + col === peakKey;
-        rowStr += colorize(ch, isPeak ? acc : toneOrder[si % toneOrder.length]!, noColor);
+        const color = multiSeries
+          ? (si === 0 ? acc : toneOrder[si % toneOrder.length]!)
+          : (row * plotCols + col === peakKey ? acc : toneOrder[0]!);
+        rowStr += colorize(ch, color, noColor);
       }
       rows.push(rowStr);
     }
@@ -149,20 +170,39 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       peakRow = Math.round((1 - (peak.y - yMinVal) / ySpan) * (plotRows - 1));
     }
 
-    // Non-accent points first; the accent point is painted LAST so an
-    // overlapping point can never stomp it (spent once, always visible).
-    series.forEach((s, si) => {
-      const ch = GLYPHS[si % GLYPHS.length]!;
-      for (const pt of s) {
-        const col = Math.round(((pt.x - xMinVal) / xSpan) * (plotCols - 1));
-        const row = Math.round((1 - (pt.y - yMinVal) / ySpan) * (plotRows - 1));
-        if (col < 0 || col >= plotCols || row < 0 || row >= plotRows) continue;
-        if (row === peakRow && col === peakCol) continue;
-        if (grid[row]![col] === " ") grid[row]![col] = colorize(ch, toneOrder[si % toneOrder.length]!, noColor);
+    const plotPoint = (pt: { x: number; y: number }): [number, number] | null => {
+      const col = Math.round(((pt.x - xMinVal) / xSpan) * (plotCols - 1));
+      const row = Math.round((1 - (pt.y - yMinVal) / ySpan) * (plotRows - 1));
+      if (col < 0 || col >= plotCols || row < 0 || row >= plotRows) return null;
+      return [row, col];
+    };
+
+    if (multiSeries) {
+      // The non-primary groups render grey first; the PRIMARY group (series 0) is painted LAST,
+      // in the accent hue, ON TOP — so the important group reads as one solid coloured cluster and
+      // the rest recede. (A future interactive renderer can re-accent another group on hover.)
+      for (let si = series.length - 1; si >= 1; si--) {
+        const ch = GLYPHS[si % GLYPHS.length]!;
+        for (const pt of series[si]!) {
+          const rc = plotPoint(pt);
+          if (rc && grid[rc[0]]![rc[1]] === " ") grid[rc[0]]![rc[1]] = colorize(ch, toneOrder[si % toneOrder.length]!, noColor);
+        }
       }
-    });
-    if (peak && peakRow >= 0 && peakRow < plotRows && peakCol >= 0 && peakCol < plotCols) {
-      grid[peakRow]![peakCol] = colorize(GLYPHS[0]!, acc, noColor);
+      for (const pt of series[0]!) {
+        const rc = plotPoint(pt);
+        if (rc) grid[rc[0]]![rc[1]] = colorize(GLYPHS[0]!, acc, noColor);
+      }
+    } else {
+      // Single series: every point on the tone ramp, the accent spent LAST on the peak cell so an
+      // overlapping point can never stomp it.
+      for (const pt of series[0]!) {
+        const rc = plotPoint(pt);
+        if (!rc || (rc[0] === peakRow && rc[1] === peakCol)) continue;
+        if (grid[rc[0]]![rc[1]] === " ") grid[rc[0]]![rc[1]] = colorize(GLYPHS[0]!, toneOrder[0]!, noColor);
+      }
+      if (peak && peakRow >= 0 && peakRow < plotRows && peakCol >= 0 && peakCol < plotCols) {
+        grid[peakRow]![peakCol] = colorize(GLYPHS[0]!, acc, noColor);
+      }
     }
 
     const rows: string[] = [];
@@ -197,6 +237,12 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       theme.label,
       noColor
     );
+    // Multi-series: the footer names the accent GROUP (the highlighted primary series), not a
+    // single point — the accent is a whole cluster now, not one peak.
+    if (multiSeries) {
+      const tail = colorize(`${GLYPHS[0]} ${seriesLabels[0]}`, acc, noColor);
+      return head + colorize(" · ", theme.label, noColor) + tail;
+    }
     if (!peak) return head;
     const peakCell = colorize(`peak (${formatNumber(peak.x)}, ${formatNumber(peak.y)})`, acc, noColor);
     return head + colorize(" · ", theme.label, noColor) + peakCell;
