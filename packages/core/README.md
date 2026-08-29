@@ -211,6 +211,33 @@ chart families. Rules that must not change:
 - **Panel width auto-expands** to fit the widest summary row so the footer is never
   clipped by the frame.
 
+### LOCKED: scatter chart — session 17 design
+
+The scatter plot now carries the same locked design language as the circular, area, line,
+and bar chart families. Rules that must not change:
+
+- **One accent hue, spent once on the primary series' max-y point.** The single point with
+  the highest `y` in the primary series (series 0) gets the theme's accent hue; every other
+  point uses the grey tone ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`). No raw
+  `theme.colors[i % n]` rainbow assignment. On the braille renderer the accent is applied to
+  the point's own 2×4 CELL, so it survives even when other points share that cell. Ties on
+  max-y resolve to the first such point in data order (deterministic). An explicit
+  `highlight` index into the primary series overrides which point spends the accent.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), eyebrow row
+  (uppercase, letter-spaced — `CORRELATION` by default, overridable via `eyebrow`), `│`
+  y-guide with a `+` at the topmost row (matching the locked line/bar y-tick language), and
+  two `│ ╌…╌ │` rule separators (one below the eyebrow/legend, one above the summary).
+- **Summary footer** reporting `n <count> · x <min>..<max> · y <min>..<max> · peak (<x>, <y>)`,
+  with the `peak (x, y)` cell rendered in the accent colour. No Pearson r by default — a
+  correlation coefficient is dishonest for non-linear, multi-series, or zero-variance clouds,
+  so the footer reports only facts true for arbitrary point data.
+- **Multi-series identity** comes from glyph shape (`● ○ ◆ ◇ ▲ △`) and position, plus the
+  legend — never from separate bright hues. The primary series is the accent hero; the extras
+  recede onto the shared grey ramp, exactly like the locked line chart.
+- **Empty / degenerate data is safe**: empty data renders a framed panel with an `n 0` footer
+  and no `Infinity`/`NaN`; a single point or an all-equal-y cloud renders honestly with a
+  collapsed `min..max` range.
+
 ## License
 
 MIT
