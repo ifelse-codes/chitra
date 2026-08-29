@@ -1,9 +1,19 @@
 import type { ScatterPlotOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, padEnd, stripAnsi } from "../ansi.js";
-import { minMax, formatNumber } from "../utils.js";
+import { colorize, padStart, stripAnsi, visibleLength } from "../ansi.js";
+import { formatNumber } from "../utils.js";
 import { BrailleCanvas } from "../renderers/braille.js";
+import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
+const GLYPHS = ["●", "○", "◆", "◇", "▲", "△"];
+
+/** Renders a chitra-standard TUI panel carrying the LOCKED S17 design language:
+ *  dashed frame, eyebrow row, `│` y-guide with a `+` at the top row, braille or
+ *  glyph points on the grey tone ramp with the single accent hue spent ONCE on
+ *  the primary series' max-y point (survives the braille cell it shares), and an
+ *  `n · x-range · y-range · peak (x, y)` summary footer with the peak in accent.
+ *  No raw `theme.colors[i % n]` rainbow — series identity comes from glyph shape
+ *  and position, exactly like the LOCKED line/bar/area/circular charts. */
 export function scatter(opts: ScatterPlotOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -12,139 +22,218 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
   const renderer = opts.renderer ?? "braille";
   const showAxes = opts.showAxes !== false;
 
+  const acc = theme.accent!;
+  const tones = theme.tones!;
+  // Same "one hue + grey tone ramp" language as the LOCKED bar/line/area charts.
+  const toneOrder = [tones[2], tones[0], tones[3] ?? tones[1], tones[1]].filter(Boolean) as string[];
+
   const rawData = opts.data;
-  const isMulti = Array.isArray(rawData[0]) && !("x" in rawData[0]);
+  const isMulti = Array.isArray(rawData[0]) && !("x" in (rawData[0] as object));
   const series = isMulti
     ? (rawData as Array<Array<{ x: number; y: number }>>)
     : [rawData as Array<{ x: number; y: number }>];
 
   const allPoints = series.flat();
+  const n = allPoints.length;
+  const empty = n === 0;
+
+  const innerWidth = width - 4; // frame consumes "│ " ... " │"
+
+  // Ranges — guarded against empty data so the panel never emits Infinity/NaN.
   const allX = allPoints.map((p) => p.x);
   const allY = allPoints.map((p) => p.y);
-  const { min: xMin } = { min: opts.xMin ?? Math.min(...allX) };
-  const xMax = opts.xMax ?? Math.max(...allX);
-  const xMinVal = opts.xMin ?? Math.min(...allX);
-  const yMinVal = opts.yMin ?? Math.min(...allY);
-  const yMaxVal = opts.yMax ?? Math.max(...allY);
+  const xMinVal = opts.xMin ?? (empty ? 0 : Math.min(...allX));
+  const xMaxVal = opts.xMax ?? (empty ? 0 : Math.max(...allX));
+  const yMinVal = opts.yMin ?? (empty ? 0 : Math.min(...allY));
+  const yMaxVal = opts.yMax ?? (empty ? 0 : Math.max(...allY));
+  const xSpan = xMaxVal === xMinVal ? 1 : xMaxVal - xMinVal;
+  const ySpan = yMaxVal === yMinVal ? 1 : yMaxVal - yMinVal;
 
-  const yAxisWidth = Math.max(formatNumber(yMaxVal).length, formatNumber(yMinVal).length) + 1;
-  const plotCols = width - yAxisWidth - 2;
-  const plotRows = height;
+  // The one accent: the primary series' max-y point (first on ties, deterministic),
+  // or an explicit opts.highlight override into the primary series.
+  const primary = series[0] ?? [];
+  let peak: { x: number; y: number } | null = null;
+  if (primary.length > 0) {
+    if (opts.highlight != null && primary[opts.highlight]) {
+      peak = primary[opts.highlight]!;
+    } else {
+      let maxVal = -Infinity;
+      for (const pt of primary) {
+        if (pt.y > maxVal) {
+          maxVal = pt.y;
+          peak = pt;
+        }
+      }
+    }
+  }
+
+  const yAxisWidth =
+    Math.max(formatNumber(Math.round(yMaxVal)).length, formatNumber(Math.round(yMinVal)).length) + 1;
+  const plotCols = Math.max(8, innerWidth - yAxisWidth);
+  const plotRows = Math.max(3, height);
   const seriesLabels = opts.seriesLabels ?? series.map((_, i) => `Series ${i + 1}`);
+  const multiSeries = series.length > 1;
+  const seriesColors = series.map((_, i) => (i === 0 && multiSeries ? acc : toneOrder[i % toneOrder.length]!));
+
+  function yLabelFor(row: number): string {
+    const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
+    const yVal = yMaxVal - (row / Math.max(1, plotRows - 1)) * (yMaxVal - yMinVal);
+    const label =
+      row % yLabelStep === 0 || row === plotRows - 1
+        ? padStart(formatNumber(Math.round(yVal)), yAxisWidth - 1)
+        : " ".repeat(yAxisWidth - 1);
+    return colorize(label, theme.label, noColor);
+  }
+
+  function guideFor(row: number): string {
+    if (!showAxes) return "";
+    // `+` on the top row mirrors the LOCKED line/bar y-axis tick language.
+    return colorize(row === 0 ? "+" : "│", theme.axis, noColor);
+  }
+
+  function buildBrailleRows(): string[] {
+    const canvases = series.map((s) => {
+      const canvas = new BrailleCanvas(plotCols, plotRows);
+      for (const pt of s) {
+        const dotX = Math.round(((pt.x - xMinVal) / xSpan) * (canvas.dotCols - 1));
+        const dotY = canvas.dotRows - 1 - Math.round(((pt.y - yMinVal) / ySpan) * (canvas.dotRows - 1));
+        canvas.set(dotX, dotY);
+      }
+      return canvas;
+    });
+    const canvasLines = canvases.map((c) => c.toLines(" "));
+
+    // The accent point's CELL (col AND row), so it survives a shared 2x4 cell.
+    let peakKey = -1;
+    if (peak) {
+      const dotCols = plotCols * 2;
+      const dotRows = plotRows * 4;
+      const dotX = Math.round(((peak.x - xMinVal) / xSpan) * (dotCols - 1));
+      const dotY = dotRows - 1 - Math.round(((peak.y - yMinVal) / ySpan) * (dotRows - 1));
+      peakKey = Math.floor(dotY / 4) * plotCols + Math.floor(dotX / 2);
+    }
+
+    const rows: string[] = [];
+    for (let row = 0; row < plotRows; row++) {
+      let rowStr = yLabelFor(row) + guideFor(row);
+      for (let col = 0; col < plotCols; col++) {
+        let ch = " ";
+        let si = -1;
+        for (let k = series.length - 1; k >= 0; k--) {
+          const c = canvasLines[k]![row]?.[col] ?? " ";
+          if (c !== " " && c !== "⠀") {
+            ch = c;
+            si = k;
+            break;
+          }
+        }
+        if (si === -1) {
+          rowStr += " ";
+          continue;
+        }
+        const isPeak = row * plotCols + col === peakKey;
+        rowStr += colorize(ch, isPeak ? acc : toneOrder[si % toneOrder.length]!, noColor);
+      }
+      rows.push(rowStr);
+    }
+    return rows;
+  }
+
+  function buildGridRows(): string[] {
+    const grid: string[][] = Array.from({ length: plotRows }, () => Array(plotCols).fill(" "));
+
+    let peakRow = -1;
+    let peakCol = -1;
+    if (peak) {
+      peakCol = Math.round(((peak.x - xMinVal) / xSpan) * (plotCols - 1));
+      peakRow = Math.round((1 - (peak.y - yMinVal) / ySpan) * (plotRows - 1));
+    }
+
+    // Non-accent points first; the accent point is painted LAST so an
+    // overlapping point can never stomp it (spent once, always visible).
+    series.forEach((s, si) => {
+      const ch = GLYPHS[si % GLYPHS.length]!;
+      for (const pt of s) {
+        const col = Math.round(((pt.x - xMinVal) / xSpan) * (plotCols - 1));
+        const row = Math.round((1 - (pt.y - yMinVal) / ySpan) * (plotRows - 1));
+        if (col < 0 || col >= plotCols || row < 0 || row >= plotRows) continue;
+        if (row === peakRow && col === peakCol) continue;
+        if (grid[row]![col] === " ") grid[row]![col] = colorize(ch, toneOrder[si % toneOrder.length]!, noColor);
+      }
+    });
+    if (peak && peakRow >= 0 && peakRow < plotRows && peakCol >= 0 && peakCol < plotCols) {
+      grid[peakRow]![peakCol] = colorize(GLYPHS[0]!, acc, noColor);
+    }
+
+    const rows: string[] = [];
+    for (let row = 0; row < plotRows; row++) {
+      rows.push(yLabelFor(row) + guideFor(row) + grid[row]!.join(""));
+    }
+    return rows;
+  }
+
+  function buildLegend(): string[] {
+    if (!multiSeries || opts.legend === false) return [];
+    const items = seriesLabels.map((sl, i) =>
+      colorize(`${GLYPHS[i % GLYPHS.length]} ${sl}`, seriesColors[i]!, noColor)
+    );
+    const rows: string[] = [];
+    let cur = "";
+    for (const item of items) {
+      const candidate = cur ? cur + "  " + item : item;
+      if (visibleLength(candidate) > innerWidth && cur) {
+        rows.push(cur);
+        cur = item;
+      } else cur = candidate;
+    }
+    if (cur) rows.push(cur);
+    return rows;
+  }
+
+  function buildFooter(): string {
+    if (empty) return colorize("n 0", theme.label, noColor);
+    const head = colorize(
+      `n ${n} · x ${formatNumber(xMinVal)}..${formatNumber(xMaxVal)} · y ${formatNumber(yMinVal)}..${formatNumber(yMaxVal)}`,
+      theme.label,
+      noColor
+    );
+    if (!peak) return head;
+    const peakCell = colorize(`peak (${formatNumber(peak.x)}, ${formatNumber(peak.y)})`, acc, noColor);
+    return head + colorize(" · ", theme.label, noColor) + peakCell;
+  }
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const eyebrow = (opts.eyebrow ?? "CORRELATION").toUpperCase();
+    lines.push(frameTop(width, opts.title ?? "SCATTER", undefined, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
+    for (const item of buildLegend()) lines.push(frameRow(width, item, theme.axis, noColor));
 
-    if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
-    }
+    const plotRowsOut = empty ? [] : renderer === "braille" ? buildBrailleRows() : buildGridRows();
+    for (const row of plotRowsOut) lines.push(frameRow(width, row, theme.axis, noColor));
 
-    if (renderer === "braille") {
-      const canvases = series.map((s, si) => {
-        const canvas = new BrailleCanvas(plotCols, plotRows);
-        for (const pt of s) {
-          const dotX = Math.round(
-            ((pt.x - xMinVal) / (xMax === xMinVal ? 1 : xMax - xMinVal)) * (canvas.dotCols - 1)
-          );
-          const dotY =
-            canvas.dotRows -
-            1 -
-            Math.round(
-              ((pt.y - yMinVal) / (yMaxVal === yMinVal ? 1 : yMaxVal - yMinVal)) *
-                (canvas.dotRows - 1)
-            );
-          canvas.set(dotX, dotY);
-        }
-        return canvas;
-      });
-
-      const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
-      for (let row = 0; row < plotRows; row++) {
-        const yVal = yMaxVal - (row / (plotRows - 1)) * (yMaxVal - yMinVal);
-        const yLabel =
-          row % yLabelStep === 0 || row === plotRows - 1
-            ? padStart(formatNumber(yVal), yAxisWidth)
-            : " ".repeat(yAxisWidth);
-
-        const axisChar = showAxes ? colorize("│", theme.axis, noColor) : " ";
-        let rowStr = colorize(yLabel, theme.label, noColor) + axisChar;
-
-        for (let col = 0; col < plotCols; col++) {
-          let ch = "\u2800";
-          for (let si = series.length - 1; si >= 0; si--) {
-            const rowLine = canvases[si].toLines()[row] ?? "";
-            const c = rowLine[col] ?? "\u2800";
-            if (c !== "\u2800") {
-              ch = colorize(c, theme.colors[si % theme.colors.length], noColor);
-              break;
-            }
-          }
-          rowStr += ch;
-        }
-        lines.push(rowStr);
-      }
-    } else {
-      const grid: string[][] = Array.from({ length: plotRows }, () =>
-        Array(plotCols).fill(" ")
-      );
-
-      series.forEach((s, si) => {
-        const ch = ["●", "○", "◆", "◇", "▲", "△"][si % 6];
-        for (const pt of s) {
-          const col = Math.round(
-            ((pt.x - xMinVal) / (xMax === xMinVal ? 1 : xMax - xMinVal)) * (plotCols - 1)
-          );
-          const row = Math.round(
-            (1 - (pt.y - yMinVal) / (yMaxVal === yMinVal ? 1 : yMaxVal - yMinVal)) * (plotRows - 1)
-          );
-          if (col >= 0 && col < plotCols && row >= 0 && row < plotRows) {
-            grid[row][col] = colorize(ch, theme.colors[si % theme.colors.length], noColor);
-          }
-        }
-      });
-
-      const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
-      for (let row = 0; row < plotRows; row++) {
-        const yVal = yMaxVal - (row / (plotRows - 1)) * (yMaxVal - yMinVal);
-        const yLabel =
-          row % yLabelStep === 0 || row === plotRows - 1
-            ? padStart(formatNumber(yVal), yAxisWidth)
-            : " ".repeat(yAxisWidth);
-        const axisChar = showAxes ? colorize("│", theme.axis, noColor) : " ";
-        lines.push(colorize(yLabel, theme.label, noColor) + axisChar + grid[row].join(""));
-      }
-    }
-
-    if (showAxes) {
-      const axisWidth = renderer === "braille" ? plotCols * 2 : plotCols;
-      lines.push(" ".repeat(yAxisWidth) + colorize("└" + "─".repeat(axisWidth), theme.axis, noColor));
-
-      const xLabelLine =
-        padStart(formatNumber(xMinVal), yAxisWidth + 1) +
-        padEnd(formatNumber((xMinVal + xMax) / 2), Math.floor(axisWidth / 2)) +
-        formatNumber(xMax);
-      lines.push(colorize(xLabelLine, theme.label, noColor));
-    }
-
-    if (opts.legend !== false && series.length > 1) {
-      lines.push("");
-      lines.push(
-        seriesLabels
-          .map((sl, i) => colorize("● " + sl, theme.colors[i % theme.colors.length], noColor))
-          .join("  ")
-      );
-    }
-
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, buildFooter(), theme.axis, noColor));
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
   const output = buildLines().join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "scatter",
