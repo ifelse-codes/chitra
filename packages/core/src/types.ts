@@ -107,6 +107,11 @@ export interface ScatterPlotOptions extends BaseChartOptions {
   xMax?: number;
   yMin?: number;
   yMax?: number;
+  /** Eyebrow caption under the header (uppercase, letter-spaced). */
+  eyebrow?: string;
+  /** Optional override: index into the primary series that spends the one
+   *  accent hue. Defaults to the primary series' max-y point (LOCKED S17). */
+  highlight?: number;
 }
 
 export interface PieChartOptions extends BaseChartOptions {
