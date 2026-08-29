@@ -211,6 +211,40 @@ chart families. Rules that must not change:
 - **Panel width auto-expands** to fit the widest summary row so the footer is never
   clipped by the frame.
 
+### LOCKED: scatter chart — session 17 design
+
+The scatter plot now carries the same locked design language as the circular, area, line,
+and bar chart families. Rules that must not change:
+
+- **One accent hue, and what it lands on depends on how many series there are.** No raw
+  `theme.colors[i % n]` rainbow assignment, ever; everything not accented uses the grey tone
+  ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`).
+  - **Single series → one point.** The point with the highest `y` gets the accent, spent once.
+    On the braille renderer it is applied to the point's own 2×4 CELL, so it survives even when
+    other points share that cell. Ties resolve to the first such point in data order
+    (deterministic). An explicit `highlight` index overrides which point spends the accent.
+  - **Multiple series → the whole primary GROUP.** With more than one series, spending the
+    accent on a single dot is meaningless, so **series 0 as a whole becomes the accent hero** —
+    every one of its points is drawn in the accent hue, on top (it wins a shared cell / is
+    painted last), while the other groups recede onto the grey ramp. This mirrors the locked
+    line chart's "primary series is the hero" rule. A future interactive renderer may re-accent
+    a different group on hover.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), eyebrow row
+  (uppercase, letter-spaced — `CORRELATION` by default, overridable via `eyebrow`), `│`
+  y-guide with a `+` at the topmost row (matching the locked line/bar y-tick language), and
+  two `│ ╌…╌ │` rule separators (one below the eyebrow/legend, one above the summary).
+- **Summary footer** reporting `n <count> · x <min>..<max> · y <min>..<max>`, followed by the
+  accented tail: for a single series the peak point `peak (<x>, <y>)`; for multiple series the
+  name of the highlighted primary group (`● <label>`). No Pearson r by default — a correlation
+  coefficient is dishonest for non-linear, multi-series, or zero-variance clouds, so the footer
+  reports only facts true for arbitrary point data.
+- **Multi-series identity** comes from glyph shape (`● ○ ◆ ◇ ▲ △`) and position, plus the
+  legend — never from separate bright hues. The primary group is the accent hero; the extras
+  recede onto the shared grey ramp, exactly like the locked line chart.
+- **Empty / degenerate data is safe**: empty data renders a framed panel with an `n 0` footer
+  and no `Infinity`/`NaN`; a single point or an all-equal-y cloud renders honestly with a
+  collapsed `min..max` range.
+
 ## License
 
 MIT
