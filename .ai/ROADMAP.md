@@ -10,11 +10,24 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next — founder direction (Session 15 candidate):** scripted browser QA of
-  all 20 catalog pages (close the no-DOM-test gap); carry the S10/S12 reference-
-  locked language into `sparkline`/`histogram`; bring `lineModelToSvg` fully in
-  line with the terminal. Also pending: exercise a real `v0.1.0` release
-  (`NODE_AUTH_TOKEN`).
+- 🔜 **Next (Session 19 candidates):** carry the reference-locked language into the
+  last unlocked families `sparkline`/`histogram`; bring `lineModelToSvg` fully in line
+  with the terminal; exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- ✅ **Session 18 (S18) — heatmap chart LOCKED:** `heatmap()` re-rendered in the
+  reference/panel language — grey tone ramp (`#ECECEF→#6A6A75`, light→dark) as the
+  intensity encoding replacing the old 10-colour rainbow (`HEAT_COLORS_DARK`); the
+  single accent hue spent exactly once on the max-value cell (ties → first row-major);
+  dashed frame, `DENSITY` eyebrow, `│`/`+` guide, two rule separators,
+  `rows×cols · min..max · peak (r,c)` footer; empty/degenerate safe.
+  `verify-session-18.sh` 8/8 ALL GREEN (core 192/192), demo exit 0, review ACCEPT
+  (attested). See "LOCKED: heatmap chart" in `packages/core/README.md`. The locked
+  family now spans circular, area, line, bar, scatter, and heatmap.
+- ✅ **Session 17 (S17) — scatter chart reference-locked** (single-series peak accent,
+  multi-series primary-group accent; dashed panel, eyebrow, `+`/`│` guide, `n·x·y·peak`
+  footer). See "LOCKED: scatter chart" in `packages/core/README.md`.
+- ✅ **Session 15 (S15) — scripted browser QA of all 20 catalog pages:** Playwright
+  drives every `/chart/:id` + doc pages; non-empty terminal output, zero console/page
+  errors, Run-shortcut re-render, persistence smoke. `verify-session-15.sh` 8/8 GREEN.
 - ✅ **Session 14 (S14) — real URL routes + boot-scoped editor persistence:**
   wouter drives navigation (`/chart/:id` for all 20 charts, `/install`
   `/quickstart` `/fluent-api` `/ai-output`; refresh/back work; unknown ids fall
