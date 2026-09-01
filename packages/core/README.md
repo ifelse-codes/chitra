@@ -245,6 +245,30 @@ and bar chart families. Rules that must not change:
   and no `Infinity`/`NaN`; a single point or an all-equal-y cloud renders honestly with a
   collapsed `min..max` range.
 
+### LOCKED: heatmap chart — session 18 design
+
+The heatmap now carries the same locked design language as the circular, area, line, bar,
+and scatter chart families. Rules that must not change:
+
+- **Intensity IS the grey tone ramp.** Cell magnitude is encoded on the documented grey tone
+  ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by magnitude), with a matching
+  plain-text shade glyph (`░ ▒ ▓ █`) so the ordering survives `stripAnsi` / `noColor`. The old
+  10-colour blue→orange→red rainbow (`HEAT_COLORS_DARK`) is gone — no `theme.colors[i % n]`
+  rainbow, ever.
+- **One accent hue, spent EXACTLY once, on the peak cell.** The single maximum-value cell gets
+  the theme's accent hue; ties resolve to the first such cell in row-major order (deterministic).
+  Everything else stays on the grey ramp. The accent marks the peak — it is not a second scale.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase
+  letter-spaced eyebrow row (`DENSITY`), a `│` y-guide with a `+` at the topmost grid row
+  (matching the locked scatter/line/bar y-tick language), and two `│ ╌…╌ │` rule separators
+  (one below the eyebrow, one above the summary).
+- **Summary footer** reporting `<rows>×<cols> · <min>..<max>`, followed by the accented tail
+  `peak (<r>, <c>)` — the peak coordinates in the accent hue. Facts true for arbitrary matrix
+  data, never a fabricated statistic.
+- **Empty / degenerate data is safe**: an empty grid renders a framed panel with an `n 0` footer
+  and no `Infinity`/`NaN`; an all-equal grid renders honestly with a collapsed `min..max` range
+  and the accent still spent exactly once (on the first cell).
+
 ## License
 
 MIT
