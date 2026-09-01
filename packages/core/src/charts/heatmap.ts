@@ -1,97 +1,131 @@
 import type { HeatmapOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { colorize, padEnd, padStart, stripAnsi } from "../ansi.js";
-import { minMax, formatNumber } from "../utils.js";
-import { shadeCell } from "../renderers/blocks.js";
-import { hexToAnsi } from "../ansi.js";
+import { formatNumber } from "../utils.js";
+import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
-const HEAT_CHARS = [" ", "░", "▒", "▓", "█"];
-const HEAT_COLORS_DARK = [
-  "#0a0a2e",
-  "#1a1a5e",
-  "#1e3a8a",
-  "#1d4ed8",
-  "#3b82f6",
-  "#60a5fa",
-  "#93c5fd",
-  "#bfdbfe",
-  "#f97316",
-  "#ef4444",
-];
+// Plain-text shade ramp, one glyph per grey tone bucket (light → dark by
+// magnitude). Kept in lock-step with the theme's grey tone ramp so the
+// intensity reads even after stripAnsi (noColor / toPlain / toMarkdown).
+const HEAT_SHADES = ["░", "▒", "▓", "█"];
 
+/** Renders a chitra-standard TUI panel carrying the LOCKED S18 design language:
+ *  dashed frame, uppercase eyebrow row, `│` y-guide with a `+` at the top row,
+ *  and a grid whose intensity IS the grey tone ramp (`#ECECEF → #C6C6CE →
+ *  #A4A4AE → #6A6A75`, light → dark by magnitude). The single accent hue is
+ *  spent EXACTLY once, on the maximum-value cell (ties → first in row-major
+ *  order, deterministic). A `rows×cols · min..max · peak (r, c)` summary footer
+ *  carries the peak coords in the accent hue. No `theme.colors[i % n]` rainbow —
+ *  exactly like the LOCKED scatter/bar/line/area/circular charts. */
 export function heatmap(opts: HeatmapOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
-  const data = opts.data;
-  const rows = data.length;
-  const cols = data[0]?.length ?? 0;
+  const width = opts.width ?? 40;
+  const showAxes = opts.showAxes !== false;
   const cellWidth = opts.cellWidth ?? 3;
+
+  const acc = theme.accent!;
+  const tones = theme.tones!;
+
+  const data = opts.data ?? [];
+  const rows = data.length;
+  const cols = rows > 0 ? Math.max(...data.map((r) => r.length)) : 0;
+  const cells = data.flat();
+  const empty = cells.length === 0;
+
+  // Ranges — guarded against empty data so the panel never emits Infinity/NaN.
+  const minVal = empty ? 0 : Math.min(...cells);
+  const maxVal = empty ? 0 : Math.max(...cells);
+  const span = maxVal === minVal ? 1 : maxVal - minVal;
+
   const xLabels = opts.xLabels ?? Array.from({ length: cols }, (_, i) => String(i));
   const yLabels = opts.yLabels ?? Array.from({ length: rows }, (_, i) => String(i));
-  const yLabelWidth = Math.max(...yLabels.map((l) => l.length)) + 1;
+  const yLabelWidth = rows > 0 ? Math.max(...yLabels.map((l) => l.length)) + 1 : 0;
 
-  const allValues = data.flat();
-  const { min, max } = minMax(allValues);
+  // The one accent: the maximum-value cell, first in row-major order on ties.
+  let peakR = -1;
+  let peakC = -1;
+  if (!empty) {
+    let best = -Infinity;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < data[r]!.length; c++) {
+        if (data[r]![c]! > best) {
+          best = data[r]![c]!;
+          peakR = r;
+          peakC = c;
+        }
+      }
+    }
+  }
 
-  function getColor(value: number): string {
-    if (noColor) return "";
-    const normalized = max === min ? 0.5 : (value - min) / (max - min);
-    const idx = Math.min(Math.floor(normalized * HEAT_COLORS_DARK.length), HEAT_COLORS_DARK.length - 1);
-    return hexToAnsi(HEAT_COLORS_DARK[idx]);
+  // Bucket a value onto the grey tone ramp (light → dark). One bucket per tone.
+  function toneIdx(value: number): number {
+    const normalized = (value - minVal) / span;
+    return Math.min(Math.floor(normalized * tones.length), tones.length - 1);
+  }
+
+  function guideFor(row: number): string {
+    if (!showAxes) return "";
+    // `+` on the top grid row mirrors the LOCKED scatter/line/bar y-tick language.
+    return colorize(row === 0 ? "+" : "│", theme.axis, noColor);
+  }
+
+  function buildGridRows(): string[] {
+    const out: string[] = [];
+
+    // x-label header, aligned over the cells (past the y-label + guide gutter).
+    const gutter = " ".repeat(yLabelWidth) + (showAxes ? " " : "");
+    const xLabelLine =
+      gutter + xLabels.map((l) => padEnd(l.slice(0, cellWidth), cellWidth)).join("");
+    out.push(colorize(xLabelLine, theme.label, noColor));
+
+    for (let r = 0; r < rows; r++) {
+      let rowStr = colorize(padStart(yLabels[r] ?? String(r), yLabelWidth), theme.label, noColor);
+      rowStr += guideFor(r);
+      for (let c = 0; c < cols; c++) {
+        const value = data[r]![c];
+        if (value === undefined) {
+          rowStr += " ".repeat(cellWidth); // ragged rows: honest empty cell
+          continue;
+        }
+        if (r === peakR && c === peakC) {
+          rowStr += colorize("█".repeat(cellWidth), acc, noColor);
+          continue;
+        }
+        const idx = toneIdx(value);
+        const glyph = HEAT_SHADES[Math.min(idx, HEAT_SHADES.length - 1)]!;
+        rowStr += colorize(glyph.repeat(cellWidth), tones[idx]!, noColor);
+      }
+      out.push(rowStr);
+    }
+    return out;
+  }
+
+  function buildFooter(): string {
+    if (empty) return colorize("n 0", theme.label, noColor);
+    const head = colorize(
+      `${rows}×${cols} · ${formatNumber(minVal)}..${formatNumber(maxVal)}`,
+      theme.label,
+      noColor
+    );
+    const peakCell = colorize(`peak (${peakR}, ${peakC})`, acc, noColor);
+    return head + colorize(" · ", theme.label, noColor) + peakCell;
   }
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const eyebrow = "DENSITY";
+    lines.push(frameTop(width, opts.title ?? "HEATMAP", undefined, theme.axis, theme.title, noColor, true));
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
 
-    if (opts.title) {
-      lines.push(colorize(opts.title, theme.title, noColor));
-      lines.push("");
-    }
+    const gridRows = empty ? [] : buildGridRows();
+    for (const row of gridRows) lines.push(frameRow(width, row, theme.axis, noColor));
 
-    const xLabelLine =
-      " ".repeat(yLabelWidth) +
-      xLabels
-        .map((l) => padEnd(l.slice(0, cellWidth), cellWidth))
-        .join("");
-    lines.push(colorize(xLabelLine, theme.label, noColor));
-
-    for (let r = 0; r < rows; r++) {
-      const yLabel = padStart(yLabels[r] ?? String(r), yLabelWidth);
-      let rowStr = colorize(yLabel, theme.label, noColor);
-
-      for (let c = 0; c < cols; c++) {
-        const value = data[r][c];
-        const normalized = max === min ? 0.5 : (value - min) / (max - min);
-        const ch = HEAT_CHARS[Math.min(Math.floor(normalized * HEAT_CHARS.length), HEAT_CHARS.length - 1)];
-        const cell = ch.repeat(cellWidth);
-        const color = getColor(value);
-        rowStr += colorize(cell, color, noColor);
-      }
-      lines.push(rowStr);
-    }
-
-    lines.push("");
-    const legend = buildLegend(min, max);
-    lines.push(colorize(" ".repeat(yLabelWidth) + legend, theme.label, noColor));
-
+    lines.push(frameRule(width, theme.axis, noColor));
+    lines.push(frameRow(width, buildFooter(), theme.axis, noColor));
+    lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
-  }
-
-  function buildLegend(min: number, max: number): string {
-    const steps = 10;
-    let legend = "low ";
-    for (let i = 0; i < steps; i++) {
-      const normalized = i / (steps - 1);
-      const ch = HEAT_CHARS[Math.min(Math.floor(normalized * HEAT_CHARS.length), HEAT_CHARS.length - 1)];
-      const value = min + normalized * (max - min);
-      if (!noColor) {
-        legend += colorize(ch, getColor(value), false);
-      } else {
-        legend += ch;
-      }
-    }
-    legend += ` high [${formatNumber(min)}–${formatNumber(max)}]`;
-    return legend;
   }
 
   const output = buildLines().join("\n");
@@ -107,8 +141,9 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
         data: opts.data,
         xLabels,
         yLabels,
-        min,
-        max,
+        min: minVal,
+        max: maxVal,
+        peak: empty ? null : { row: peakR, col: peakC },
         plain: stripAnsi(output),
       };
     },
