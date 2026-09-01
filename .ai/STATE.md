@@ -1,63 +1,53 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S15 closing, 2026-08-22.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S18 closing, 2026-09-01.)
 
 ## Active Branch
-`session-15-browser-qa` — S15 work pending PR.
+`session-18-heatmap-lock` — S18 work pending PR.
 
 ## What Currently Works (observed, not claimed)
-- `pnpm --filter @chitra/core run test` — **163/163 pass**.
+- `pnpm --filter @chitra/core run test` — **192/192 pass** (15 heatmap tests added S18).
 - `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `scripts/verify-session-15.sh` — **ALL GREEN (8 pass, 0 fail)**; `demo-session-15.sh` — exit 0.
-- `check:catalog` — **103/103** catalog examples execute in-browser; docs typecheck clean.
-- **Docs catalog chrome at Darpan parity**: toolbar on one control metric
-  (24px/2px/mono); Run = Darpan `.btnPrimary` accent fill + ⌘↩ / Ctrl ↩ keycap;
-  global cmd/ctrl+enter shortcut (window listener); squared uppercase status
-  pills; uppercase ghost actions; inspector key/value terminal footer; dashed
-  awaiting-run empty state; RUN FAILED chip banner. Parity layer carries the
-  shipped white-alpha fg tiers (`oklch(1 0 0 / 0.92→0.36)`) read from Darpan's
-  `theater-tokens.css` + live app, accent selection/focus, line-tinted scrollbars,
-  JetBrains Mono first.
-- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`
-  output surface; LOCKED families: circular (S09), line (S10), bar (S12).
-- **URL-driven docs navigation + boot-scoped persistence (S14)**: `/chart/:id`
-  routes for all 20 charts via wouter (refresh/back work, unknown ids fall home);
-  editor edits persist across refresh/navigation until the dev server restarts
-  (localStorage keyed by an injected per-boot id); Reset restores pristine.
-- **Scripted browser QA (S15)**: Playwright drives Chromium through all 20 chart
-  pages + 4 doc pages + home; asserts non-empty terminal output, zero console/page
-  errors, Run shortcut re-renders, edit→navigate→back persistence smoke;
-  screenshots + JSON artifacts under `.ai/verify/session-15/`. Verify/demo scripts
-  accept `--headed` flag (default headless).
-- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` wired.
+- `scripts/verify-session-18.sh` — **ALL GREEN (8 pass, 0 fail)**; `demo-session-18.sh` — exit 0.
+- `pnpm --filter @workspace/chitra-docs run gen:charts:check` — no chart drift (previews in sync).
+- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
+  surface. LOCKED families now: circular (S09), area (S09), line (S10), bar (S12),
+  scatter (S17), **heatmap (S18)**.
+- **Heatmap (S18)**: intensity encoded on the documented grey tone ramp
+  (`#ECECEF→#C6C6CE→#A4A4AE→#6A6A75`, light→dark) with a matching `░▒▓█` plain-text shade;
+  one accent hue spent exactly once on the max cell (ties → first row-major); dashed
+  panel frame, `DENSITY` eyebrow, `│`/`+` guide, two rule separators,
+  `rows×cols · min..max · peak (r,c)` footer; empty/degenerate data safe. Contract block
+  `### LOCKED: heatmap chart — session 18 design` in `packages/core/README.md`.
+- **Docs catalog + browser QA (S13–S15)**: Darpan-parity chrome, `/chart/:id` routes,
+  boot-scoped editor persistence, Playwright QA across all 20 pages.
+- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the `.ai/hooks/*`
+  PreToolUse guards (commit / publish / session) wired.
 
 ## What Is Broken / Incomplete
-- `LINE_H` / `VIM_PAD` in `CatalogPage.tsx` still duplicate CSS custom properties
-  with only a comment binding them.
-- data.ts tab returns `[]` for object-array charts (scatter, candlestick). Informational only.
+- `sparkline`/`histogram` still predate the reference-locked look — the last unlocked
+  chart families.
 - The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
-- `sparkline`/`histogram` and other families still predate the reference-locked look (bar done S12).
 - `artifacts/api-server` exposes only `/healthz`.
-- **S05 ground-truth remediation debt** still open.
-- First real release (tag `v0.1.0`) not yet exercised.
-- Stale demo script: `demo-session-11.sh` still expects "148 passed"; suite is 163.
+- First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN`).
 - QA is local-only; not yet wired into CI.
+- `.ai/` bookkeeping had drifted (SESSION pointer stale at 15 while S16/S17 shipped);
+  re-synced to 18 this closeout. S16/S17 have no committed session summary/review.
+- **S05 ground-truth remediation debt** still open.
 
 ## Milestones done
-- **S01** docs-from-lib generator · **S02** expanded examples · **S03** docs-site
-  polish · **S04** README / getting-started · **S05** NO-CODE ground-truth ·
-  **S06** real publishable dist · **S07** CI workflows · **S08** release.yml +
-  line/SVG dashboard · **S09** circular charts LOCKED · **S10** line chart
-  reference-locked · **S11** catalog two-panel page · **S12** bar chart LOCKED ·
-  **S13** catalog chrome at Darpan parity (Run ⌘↩, canon tokens, inspector chrome) ·
-  **S14** URL routes (`/chart/:id`) + boot-scoped editor persistence ·
-  **S15** scripted browser QA of all 20 catalog pages.
+- **S01–S04** docs generator / examples / polish / README · **S05** NO-CODE ground-truth ·
+  **S06** publishable dist · **S07** CI workflows · **S08** release.yml + line/SVG ·
+  **S09** circular + area LOCKED · **S10** line LOCKED · **S11** catalog two-panel ·
+  **S12** bar LOCKED · **S13** Darpan-parity chrome · **S14** URL routes + persistence ·
+  **S15** scripted browser QA · **S17** scatter LOCKED · **S18** heatmap LOCKED.
 
 ## What Is In Progress
-- Nothing mid-flight. **Next session (S16 candidates):** wire QA into CI; carry
-  the reference-locked language into `sparkline`/`histogram`; exercise a real
+- Nothing mid-flight. **Next session (S19 candidates):** carry the locked language into
+  `sparkline`/`histogram`; bring `lineModelToSvg` to terminal parity; exercise a real
   `v0.1.0` release. See [[roadmap]].
 
 ## Cost Tracking
-- Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood
-  runs, billed to Vajra; S09–S15 in-repo).
+- Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
+  billed to Vajra; S09–S18 in-repo). S18 ran on the founder's $20/mo plan — two subagent
+  dispatches (tech-lead + fidelity-reviewer), kept tight.
