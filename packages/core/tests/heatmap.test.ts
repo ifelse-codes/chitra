@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { heatmap } from "../src/charts/heatmap.js";
-import { stripAnsi } from "../src/ansi.js";
+import { stripAnsi, hexToAnsi } from "../src/ansi.js";
 import { resolveTheme, GREY_TONES } from "../src/themes/index.js";
 
 const DATA = [
@@ -70,6 +70,26 @@ describe("heatmap chart — locked S18 design", () => {
     expect(plain).toMatch(/\d│[░▒▓█]/); // a y-label, │ elsewhere, then a cell
   });
 
+  it("anchors the guide: + only on the top grid row, │ on the rows below", () => {
+    const gridRows = plainLines({ data: DATA }).filter((l) => /^│ +\d[+│]/.test(l));
+    expect(gridRows.length).toBe(DATA.length);
+    // top grid row (y-label 0) carries + and not │; every row below is the reverse
+    expect(gridRows[0]).toMatch(/\d\+[░▒▓█]/);
+    expect(gridRows[0]).not.toMatch(/\d│[░▒▓█]/);
+    for (const row of gridRows.slice(1)) {
+      expect(row).toMatch(/\d│[░▒▓█]/);
+      expect(row).not.toMatch(/\d\+[░▒▓█]/);
+    }
+  });
+
+  it("a ragged matrix renders honest empty cells (widest row sets cols)", () => {
+    const plain = stripAnsi(heatmap({ data: [[1, 2, 3], [9]] }).toString());
+    // cols is the widest row (3); peak is the lone 9 at (1, 0); no NaN/Infinity
+    expect(plain).toMatch(/2×3 · 1\.\.9 · peak \(1, 0\)/);
+    expect(plain).not.toMatch(/NaN|Infinity/);
+    expect(accentCensus({ data: [[1, 2, 3], [9]] }).accent).toBe(1);
+  });
+
   // ── Summary footer ────────────────────────────────────────────
   it("footer reports rows×cols · min..max · peak (r, c)", () => {
     const plain = stripAnsi(heatmap({ data: DATA }).toString());
@@ -82,6 +102,14 @@ describe("heatmap chart — locked S18 design", () => {
     expect(c.accent).toBe(1);
     expect(c.other).toBe(0); // every non-accent cell is a documented grey tone
     expect(c.grey).toBeGreaterThan(0);
+  });
+
+  it("the ramp is the LITERAL documented greyscale (pinned to spec hexes)", () => {
+    // Pin GREY_TONES to the four spec hexes so a silent recolour of the ramp
+    // in themes/ can't move the chart and its oracle together and stay green.
+    expect(GREY_TONES).toEqual(
+      ["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi)
+    );
   });
 
   it("intensity encoding IS the documented grey tone ramp (light → dark)", () => {
