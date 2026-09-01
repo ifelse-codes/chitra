@@ -289,7 +289,7 @@ donut({
     id: "heatmap",
     name: "Heatmap",
     description:
-      "2D grid of values encoded as block density — ideal for activity matrices.",
+      "2D grid whose intensity is a grey tone ramp, with the single peak cell marked in the accent hue.",
     code: `import { heatmap } from "@chitra/core";
 
 heatmap({
