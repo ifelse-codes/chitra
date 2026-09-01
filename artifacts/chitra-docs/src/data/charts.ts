@@ -265,16 +265,18 @@ donut({
   {
     id: "heatmap",
     name: "Heatmap",
-    description: "2D grid of values encoded as block density — ideal for activity matrices.",
-    preview: `Activity Heatmap
-
-  0  1  2  3  4  
- 0      ░░░▒▒▒▓▓▓
- 1   ░░░▒▒▒▓▓▓███
- 2   ░░░▒▒▒▓▓▓███
- 3░░░▒▒▒▓▓▓██████
-
-  low   ░░▒▒▓▓██ high [1–12]`,
+    description: "2D grid whose intensity is a grey tone ramp, with the single peak cell marked in the accent hue.",
+    preview: `┌╌ Activity Heatmap ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ DENSITY                              │
+│    0  1  2  3  4                     │
+│  0+░░░░░░▒▒▒▓▓▓▓▓▓                   │
+│  1│░░░▒▒▒▒▒▒▓▓▓███                   │
+│  2│░░░▒▒▒▓▓▓▓▓▓███                   │
+│  3│▒▒▒▒▒▒▓▓▓██████                   │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ 4×5 · 1..12 · peak (3, 4)            │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
     code: `import { heatmap } from "@chitra/core";
 
 heatmap({
