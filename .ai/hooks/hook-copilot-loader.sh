@@ -13,6 +13,15 @@
 
 set -euo pipefail
 
+# jq preflight — fail-closed (AGENTS.md L147: a check that cannot evaluate FAILS).
+if ! command -v jq >/dev/null 2>&1; then
+  _VROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+  _VMAT="${VAJRA_GUARD_MATURITY:-$(grep -m1 '^maturity:' "$_VROOT/.ai/CONSTRAINTS.yaml" 2>/dev/null | awk '{print $2}' || echo L2)}"
+  [ "$_VMAT" = "L1" ] && { echo "[vajra] jq not on PATH — enforcement degraded to advise (L1)."; exit 0; }
+  echo "[vajra] BLOCKED: jq required for Vajra enforcement, not on PATH (fail-closed)." 1>&2
+  exit 2
+fi
+
 INPUT=$(cat 2>/dev/null || echo "{}")
 ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 CONSTRAINTS="$ROOT/.ai/CONSTRAINTS.yaml"
@@ -91,3 +100,4 @@ while IFS= read -r line; do
 done <<< "$RULES"
 
 exit 0
+# vajra-render-sha: 7a659ecf89ce0cce968e3c03cc871dbc22a406fffdcd54752d88adb828f7bdab
