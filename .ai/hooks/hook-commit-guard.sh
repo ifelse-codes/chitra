@@ -144,3 +144,4 @@ fi
   echo "  To downgrade to advice: set maturity: L1 in .ai/CONSTRAINTS.yaml."
 } 1>&2
 exit 2
+# vajra-render-sha: 1c20d47e19038d4852e63de9838a5534bec5eeffbd9c3eca36ed949e9460b37d

@@ -269,6 +269,36 @@ and scatter chart families. Rules that must not change:
   and no `Infinity`/`NaN`; an all-equal grid renders honestly with a collapsed `min..max` range
   and the accent still spent exactly once (on the first cell).
 
+### LOCKED: horizontalBar chart — session 19 design
+
+`horizontalBar` now carries the same locked design language as the circular, area, line, bar,
+scatter, and heatmap families — the S12 `bar` language rotated to the horizontal orientation.
+This closes the reference-language migration for the core chart set. Rules that must not change:
+
+- **One accent hue, spent once on the peak bar.** The single bar with the globally highest
+  value gets the theme's accent hue; every other bar uses the grey tone ramp
+  (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`). No raw `theme.colors[i % n]` rainbow assignment,
+  ever. Verified at raw-RGB level (accent count == 1). Ties resolve to the **first** maximum in
+  data order (deterministic).
+- **Same panel language as all locked charts, rotated to horizontal**: dashed frame (`┌╌…╌┐`),
+  an uppercase letter-spaced eyebrow row (`VALUES` by default, or the uppercased `xLabel`), a
+  rotated value-axis guide carrying the `+` tick vocabulary (`+╌…╌+` under the bars, `+` at the
+  baseline and max columns) with a `min .. max` scale row, and two `│ ╌…╌ │` rule separators
+  (one below the eyebrow, one above the summary).
+- **Empty cells are spaces** — the plot never writes the `░` phantom filler (both the blocks
+  and ascii renderers pass an explicit space empty-char).
+- **Per-item value labels**, each rendered to the right of its bar; the peak item's value is
+  rendered in the accent hue (mirroring bar's accented summary), and the summary footer names
+  the peak item (`n <count> · min · max · avg · peak <label>`, with `max` in the accent hue).
+- **Auto-scale value axis**: `yMin` defaults to `min(0, dataMin)` so the baseline is always at
+  or below zero, and `yMax` defaults to the data maximum. Override with `yMin`/`yMax`.
+- **Panel width auto-expands** to fit the longest label + bar + value and the eyebrow, so no
+  label or value is ever clipped by the frame.
+- **Empty / degenerate data is safe**: empty data renders a framed panel with an `n 0` footer
+  and no `NaN`; all-equal and single-item inputs render honestly with the accent spent exactly
+  once (on the first maximum). Public API (`toPlain()` / `toJSON()` type `"horizontalBar"`) is
+  unchanged, zero runtime deps.
+
 ## License
 
 MIT
