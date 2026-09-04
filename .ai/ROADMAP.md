@@ -10,9 +10,22 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 19 candidates):** carry the reference-locked language into the
-  last unlocked families `sparkline`/`histogram`; bring `lineModelToSvg` fully in line
-  with the terminal; exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`).
+- 🔜 **Next (Session 20 candidates):** bring `lineModelToSvg` to terminal parity (SVG
+  mirrors the locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`);
+  wire the local Playwright QA into CI.
+- ✅ **Session 19 (S19) — horizontalBar chart LOCKED (Vajra S144 full-loop dogfood):**
+  `horizontalBar()` re-rendered in the reference/panel language — the S12 `bar` language
+  rotated to horizontal. Rainbow `theme.colors[i % n]` and the `░` phantom filler removed:
+  ONE accent hue spent once on the global-max bar (first-max tie-break), grey tone ramp
+  (`#ECECEF→#6A6A75`) for every other bar; dashed frame, uppercase eyebrow, rotated `+`
+  value-axis guide + `min..max` scale row, two rule separators, per-item value labels with
+  the peak value in accent; SPACE empty cells; auto-scale (`min(0,dataMin)`) + auto-width;
+  empty/all-equal/single safe. Native chitra session driven by chitra's OWN fleet + hooks:
+  tech-lead first, binding crew verdict (4 required + 5 deferred-budget), provenance-verified
+  handoffs, S139 required-crew gate live. `verify-session-19.sh` 11/11 ALL GREEN (core
+  217/217), demo exit 0, review ACCEPT (attested, 8/8 SHIPPED). See "LOCKED: horizontalBar
+  chart" in `packages/core/README.md`. The locked family now spans circular, area, line,
+  bar, scatter, heatmap, and horizontalBar — the core-set migration is complete.
 - ✅ **Session 18 (S18) — heatmap chart LOCKED:** `heatmap()` re-rendered in the
   reference/panel language — grey tone ramp (`#ECECEF→#6A6A75`, light→dark) as the
   intensity encoding replacing the old 10-colour rainbow (`HEAT_COLORS_DARK`); the
