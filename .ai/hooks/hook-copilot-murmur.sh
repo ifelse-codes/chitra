@@ -104,3 +104,4 @@ while IFS= read -r line; do
 done <<< "$RULES"
 
 exit 0
+# vajra-render-sha: 8d9ff8ab591e537d12831254e1423e7830520303ca47f1716196b030a63d2fb6
