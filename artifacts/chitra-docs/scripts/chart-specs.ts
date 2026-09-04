@@ -359,13 +359,11 @@ gauge({
 horizontalBar({
   data: [892, 645, 534, 421, 289],
   labels: ["TypeScript", "Python", "Rust", "Go", "Ruby"],
-  width: 52,
 }).render();`,
     ...single(() =>
       horizontalBar({
         data: [892, 645, 534, 421, 289],
         labels: ["TypeScript", "Python", "Rust", "Go", "Ruby"],
-        width: 52,
       }),
     ),
   },
