@@ -52,4 +52,30 @@ case "$BRANCH" in
   ;;
 esac
 
+# Commit pre-authorization (S99) — the S97 Rung-1 blocker (b): an unattended `-p` run has no chat
+# channel to receive an approval token, so it can never commit and the Coder station can never
+# record a sha. The out-of-band token already exists (VAJRA_ALLOW_COMMIT=NN, the S93 un-forgeable
+# marker); nothing told the agent it was there. `vajra next` says this too, but a headless run may
+# never call it — the boot packet is the surface it always reads.
+#
+# Classification mirrors scripts/hook-commit-guard.sh exactly (session digits from a session-NN-*
+# branch; off such a branch any non-empty marker is accepted), so this line can never say
+# "pre-granted" where the guard would block. It is ADVISORY: the guard is the enforcing check.
+echo ""
+_SESS=$(echo "$BRANCH" | grep -oE '^session-[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+if [ -z "${VAJRA_ALLOW_COMMIT:-}" ]; then
+  echo "[commit approval] REQUIRED — no VAJRA_ALLOW_COMMIT in this launch environment."
+  echo "  A human must give an approval token in chat before any commit. For an UNATTENDED run,"
+  echo "  the founder pre-authorizes at launch: VAJRA_ALLOW_COMMIT=${_SESS:-NN} vajra claude"
+elif [ -z "$_SESS" ] || [ "${VAJRA_ALLOW_COMMIT}" = "$_SESS" ]; then
+  echo "[commit approval] PRE-GRANTED — VAJRA_ALLOW_COMMIT=${VAJRA_ALLOW_COMMIT} is set at launch."
+  echo "  That marker IS the founder's approval token for this session (S93); commits may proceed"
+  echo "  without a chat token. Advisory line — the L3 commit-guard remains the enforcing check."
+else
+  echo "[commit approval] NOT VALID HERE — VAJRA_ALLOW_COMMIT=${VAJRA_ALLOW_COMMIT} is scoped to"
+  echo "  session ${VAJRA_ALLOW_COMMIT}, but this branch is session ${_SESS}. The guard will BLOCK."
+  echo "  Relaunch with VAJRA_ALLOW_COMMIT=${_SESS}."
+fi
+
 exit 0
+# vajra-render-sha: fc238d32779d885ed6e58cf491c404e5787274a5f5f3e95b3ff29c130e983048

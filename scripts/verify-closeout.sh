@@ -562,6 +562,56 @@ if [ "${1:-}" = "--ledger-verify" ]; then
   fi
 fi
 
+# --- Required-crew gate (S139) — added MANUALLY by Vajra S144 dogfood ---------------------
+# WORKAROUND for two Vajra findings surfaced by this dogfood, both to be fixed in a follow-up
+# Vajra session:
+#   FINDING 1 — `vajra init --sync-fleet` upgrades roles + hooks + the constitution body, but
+#     NOT scripts/verify-closeout.sh (not a sync target). A brownfield adopter's close-gate is
+#     frozen at whatever `vajra init` scaffolded when it adopted; chitra adopted pre-S139, so it
+#     never received check_required_crew via the upgrade loop.
+#   FINDING 2 — the canonical gate hardcodes BIN="target/release/vajra" (Vajra's own Rust build
+#     output). chitra is a TypeScript project with no such path, so even a fresh scaffold's
+#     binary-backed gates could never run. Here BIN is resolved to the INSTALLED vajra on PATH.
+# Canonical S139 logic otherwise; requires a real tech-lead handoff + a handoff for every role
+# the tech-lead marked `required`, or the close cannot go green (behind the same founder waiver).
+check_required_crew() {
+  local NAME="required-crew"; local LOG="$ARTIFACTS/${NAME}.log"
+  if [ -z "$N" ]; then echo "BLOCK: N unresolved" > "$LOG"; bad "$NAME"; return; fi
+  : > "$LOG"
+  local BIN; BIN="$(command -v vajra || true)"
+  if [ -z "$BIN" ] || [ ! -x "$BIN" ]; then
+    echo "BLOCK: vajra not found on PATH — this check cannot evaluate the Crew gate." >> "$LOG"
+    if waiver_ok; then
+      echo "WAIVED: VAJRA_CLOSEOUT_WAIVER=$N — ${VAJRA_CLOSEOUT_WAIVER_REASON:-<no reason recorded>}" >> "$LOG"; ok "$NAME"
+    else
+      echo "FAIL: install vajra so this check can run, or record a founder waiver." >> "$LOG"; bad "$NAME"
+    fi
+    return
+  fi
+  local out code
+  out="$("$BIN" next --check-crew "$N" 2>&1)" && code=0 || code=$?
+  echo "$out" >> "$LOG"; echo "exit=$code" >> "$LOG"
+  if ! grep -q "=== crew: tech-lead for session" <<<"$out"; then
+    echo "BLOCK: the binary produced no Crew-gate output — this build does not carry the gate." >> "$LOG"
+    if waiver_ok; then
+      echo "WAIVED: VAJRA_CLOSEOUT_WAIVER=$N — ${VAJRA_CLOSEOUT_WAIVER_REASON:-<no reason recorded>}" >> "$LOG"; ok "$NAME"
+    else
+      echo "FAIL: \`vajra next --check-crew $N\` did not run the gate." >> "$LOG"; bad "$NAME"
+    fi
+    return
+  fi
+  if [ "$code" -eq 0 ]; then
+    echo "OK: session $N has a real tech-lead handoff and every role it marked \`required\` produced a governed handoff." >> "$LOG"
+    ok "$NAME"; return
+  fi
+  echo "BLOCK: session $N is missing its tech-lead handoff, or a role the tech-lead marked \`required\` produced no governed handoff." >> "$LOG"
+  if waiver_ok; then
+    echo "WAIVED: VAJRA_CLOSEOUT_WAIVER=$N — ${VAJRA_CLOSEOUT_WAIVER_REASON:-<no reason recorded>}" >> "$LOG"; ok "$NAME"
+  else
+    echo "FAIL: dispatch the tech-lead and each \`required\` role and run \`vajra next --role <name> --from <findings>\`, or record a founder waiver." >> "$LOG"; bad "$NAME"
+  fi
+}
+
 check_session_file
 check_required_files
 check_session_boot
@@ -574,6 +624,7 @@ check_execution_shas
 check_verify_demo_scripts
 check_fidelity_review
 check_review_attestation
+check_required_crew
 
 ( cd ".ai/verify/closeout" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
