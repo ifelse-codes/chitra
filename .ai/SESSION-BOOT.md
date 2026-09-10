@@ -1,37 +1,39 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 19 — COMPLETE
-- **Type:** CODE — lock the `horizontalBar` chart to the reference/panel design language
-- **Branch:** `session-19-horizontalbar-lock` (close on branch; main untouched)
-- **Date last updated:** 2026-09-04
+- **Number:** 20 — COMPLETE (closeout pending founder env steps)
+- **Type:** CODE — lock the `treemap` chart to the reference/panel design language
+- **Branch:** `session-20-treemap-lock` (close on branch; main untouched)
+- **Date last updated:** 2026-09-10
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 19.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S17; S18 + S19 on their branches.
-- **S19 shipped**: `horizontalBar()` re-rendered in the locked panel language — the S12
-  `bar` language rotated to horizontal. The rainbow `theme.colors[i % n]` and the `░`
-  phantom filler are gone: ONE accent hue spent once on the global-max bar (first-max
-  tie-break), grey tone ramp (`#ECECEF→#C6C6CE→#A4A4AE→#6A6A75`) for every other bar,
-  dashed frame + uppercase eyebrow (`VALUES`/`xLabel`) + rotated `+` value-axis guide +
-  `min..max` scale row + two rule separators, per-item value labels with the peak value in
-  accent, SPACE empty cells, auto-scale (`min(0,dataMin)` baseline) + auto-expanding width.
-  Empty/all-equal/single render safe. Docs previews regenerated; README carries the
-  `### LOCKED: horizontalBar chart — session 19 design` block. Public API unchanged.
-- **Governance (Vajra S144 full-loop dogfood)**: tech-lead dispatched FIRST; crew verdict
-  binds (4 required: implementation-advisor, qa-specialist, demo-producer, fidelity-reviewer;
-  5 deferred-budget). Every required role has a provenance-verified handoff
-  (`.ai/handoffs/session-19-*.md`); `vajra next --check-crew 19` → READY. The S139
-  required-crew gate is live in `scripts/verify-closeout.sh`.
-- Verify: `scripts/verify-session-19.sh` — 11/11 ALL GREEN (core 217/217). Demo exit 0.
-- Summary: `sessions/session-19-summary.md`. Review: `sessions/session-19-review.md`
-  — cold pass, **Verdict: ACCEPT** (attested, 8/8 SHIPPED).
+- `.ai/SESSION` = 20.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S17 (+S19 merge #21); S18 + S19 + S20 on their branches.
+- **S20 shipped**: `treemap()` re-rendered in the locked panel language — the S18 `heatmap`
+  language rotated onto the hierarchical area chart. Rainbow `theme.colors[i % n]` gone:
+  ONE accent hue spent once on the max leaf (first-flatten tie-break), grey tone ramp
+  (`#ECECEF→#C6C6CE→#A4A4AE→#6A6A75`) + shade glyphs (`░▒▓█`) by magnitude, dashed frame +
+  uppercase `AREA` eyebrow + `+`/`│` guide + two rule separators, `n · min..max · peak <label>`
+  footer (peak accented), honest leaf flatten, SPACE empty grid, sliver regions stay clean
+  blocks (labels stamp only when whole). Empty/all-equal/single safe. Docs previews
+  regenerated; `dist/` rebuilt (docs catalog executes examples against `dist/`);
+  README carries `### LOCKED: treemap chart — session 20 design`. Public API unchanged.
+- **Governance (recovered session):** built across pi (`~/.pi/.../2026-09-09T10-19-39...jsonl`)
+  + Command Code (`8b98ceae`, Kimi-K3, died on credits) + this chat. Tech-lead dispatched
+  FIRST with 4-required/5-deferred verdict (handoff recorded) but pi/Command-Code provenance
+  is unverifiable by the S139 gate → closeout needs `VAJRA_CLOSEOUT_WAIVER=20`. Two
+  independent cold passes returned REJECT (Req-6 proof hollow; behavior faithful); builder
+  tightened verify/test twice since (vacant-zero-cells + residue-membership + sliver rule).
+  A 3rd cold pass is owed post-commit before the verdict can flip to ACCEPT.
+- Verify: `scripts/verify-session-20.sh` — 12/12 ALL GREEN (core 236/236). Demo exit 0.
+- Summary: `sessions/session-20-summary.md`. Review: `sessions/session-20-review.md`
+  — cold passes, **Verdict: REJECT** on record (see file for fix delta + owed 3rd pass).
 - The locked family now spans circular (S09), area (S09), line (S10), bar (S12),
-  scatter (S17), heatmap (S18), **horizontalBar (S19)** — the reference-language migration
-  for the core chart set is complete.
+  scatter (S17), heatmap (S18), horizontalBar (S19), **treemap (S20)** — the first
+  hierarchical chart in the locked language.
 
 ## Next Session
-- **Number:** 20 — candidates: bring `lineModelToSvg` to terminal parity (SVG mirrors the
-  locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the
-  local Playwright QA into CI.
+- **Number:** 21 — candidates: `timeline` → `gauge` → `progress` mudra migration (pi proposal,
+  one story per session); bring `lineModelToSvg` to terminal parity; exercise a real
+  `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
 - Open in a **new chat** (one session per chat).

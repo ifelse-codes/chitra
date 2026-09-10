@@ -546,7 +546,7 @@ candlestick({
     id: "treemap",
     name: "Treemap",
     description:
-      "Hierarchical area chart — size encodes value, nesting encodes hierarchy.",
+      "Hierarchical area chart whose intensity is a grey tone ramp, with the single peak node marked in the accent hue.",
     code: `import { treemap } from "@chitra/core";
 
 treemap({

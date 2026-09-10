@@ -10,9 +10,22 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 20 candidates):** bring `lineModelToSvg` to terminal parity (SVG
-  mirrors the locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`);
-  wire the local Playwright QA into CI.
+- 🔜 **Next (Session 21 candidates):** `timeline` → `gauge` → `progress` mudra migration
+  (one story per session — the three charts the founder named alongside treemap); bring
+  `lineModelToSvg` to terminal parity (SVG mirrors the locked terminal 1:1); exercise a
+  real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- ✅ **Session 20 (S20) — treemap chart LOCKED (recovered session):** `treemap()`
+  re-rendered in the reference/panel language — the S18 `heatmap` language on the
+  hierarchical area chart. Rainbow `theme.colors[i % n]` removed: ONE accent hue spent once
+  on the max leaf (first-flatten tie-break), grey tone ramp (`#ECECEF→#6A6A75`) + shade
+  glyphs (`░▒▓█`) by magnitude; dashed frame, `AREA` eyebrow, `+`/`│` guide, two rule
+  separators; `n · min..max · peak <label>` footer (peak accented); honest leaf flatten;
+  SPACE empty grid; slivers stay clean blocks (whole-text-only labels); empty/all-equal
+  /single safe. Built across pi + Command Code (stopped on credits) + closer chat.
+  `verify-session-20.sh` 12/12 ALL GREEN (core 236/236), demo exit 0. Review REJECT on
+  record (Req-6 proof gap; 3rd pass owed) — closeout under founder waiver. See "LOCKED:
+  treemap chart" in `packages/core/README.md`. The locked family now spans circular, area,
+  line, bar, scatter, heatmap, horizontalBar, and treemap.
 - ✅ **Session 19 (S19) — horizontalBar chart LOCKED (Vajra S144 full-loop dogfood):**
   `horizontalBar()` re-rendered in the reference/panel language — the S12 `bar` language
   rotated to horizontal. Rainbow `theme.colors[i % n]` and the `░` phantom filler removed:
