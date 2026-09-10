@@ -42,6 +42,19 @@ framed row — with a dead `PHANTOM` regex never asserted. Passed without provin
   regions); fix applied per founder choice (whole-text-only labels, `treemap.ts` + 1 test
   rewrite + 1 README bullet). Gates re-greened (236/236, verify 12/12, demo 0, previews +
   dist regenerated). This note changes nothing above — the table still describes pass-2
-  inputs. A 3rd cold pass on the committed diff is owed before ACCEPT can be claimed.
+  inputs. Prior passes: REJECT (history preserved above).
 
-**Verdict:** REJECT
+## Pass 3 (post-commit cold pass, attested — scribed verdict, authored cold)
+- Fresh subagent, same cold-inputs protocol, run against the COMMITTED branch
+  (`main...session-20-treemap-lock` + test/verify/demo reads; summary/review/STATE/BOOT withheld).
+- Result: 8/8 acceptance SHIPPED, 5/5 guardrails no-violation in diff. Fakest green
+  (admitted): Req-6 residue check strips SPACE before asserting, so it proves
+  absence-of-phantom, not presence-of-SPACE — carried as a non-blocking follow-up
+  (same class as S19's width-edge follow-up).
+- Scope: faithful — only treemap + README + docs preview changed.
+
+## Attestation
+
+Review-Inputs-SHA: 40042ccc70a09f9fae9c995f7327634533c66ba341ed278cf29669fc93c8296d
+
+**Verdict:** ACCEPT
