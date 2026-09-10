@@ -299,6 +299,35 @@ This closes the reference-language migration for the core chart set. Rules that 
   once (on the first maximum). Public API (`toPlain()` / `toJSON()` type `"horizontalBar"`) is
   unchanged, zero runtime deps.
 
+### LOCKED: treemap chart — session 20 design
+
+`treemap` now carries the same locked design language as the circular, area, line, bar,
+scatter, and heatmap families — the S18 panel language applied to a hierarchical area chart.
+Rules that must not change:
+
+- **Intensity IS the grey tone ramp.** Each node's magnitude is encoded on the documented grey
+  tone ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by magnitude), with a
+  matching plain-text shade glyph (`░ ▒ ▓ █`) so the ordering survives `stripAnsi` / `noColor`.
+  The old `theme.colors[i % n]` rainbow assignment is gone — never a raw rainbow hue, ever.
+- **One accent hue, spent EXACTLY once, on the peak node.** The single maximum-value node gets
+  the theme's accent hue; ties resolve to the first such node in flatten/data order
+  (deterministic). Everything else stays on the grey ramp. The accent marks the peak — it is
+  not a second scale.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase
+  letter-spaced eyebrow row (`AREA`), a `│` y-guide with a `+` at the topmost plot row
+  (matching the locked scatter/line/bar y-tick language), and two `│ ╌…╌ │` rule separators
+  (one below the eyebrow, one above the summary).
+- **Summary footer** reporting `<n> · <min>..<max>`, followed by the accented tail
+  `peak <label>` — the peak node's label in the accent hue. Facts true for arbitrary
+  hierarchical data, never a fabricated statistic.
+- **Hierarchy flattens honestly**: a node with `children` contributes its leaves to the layout
+  (no parent node is drawn); the peak is the max leaf, first in flatten order on ties.
+- **Slivers stay clean blocks**: a region stamps its label + value only when the whole text
+  fits inside it — narrow slivers keep their ramp shade with no truncated `…` noise.
+- **Empty / degenerate data is safe**: an empty input renders a framed panel with an `n 0`
+  footer and no `Infinity`/`NaN`; an all-equal or single-node set renders honestly with a
+  collapsed `min..max` range and the accent still spent exactly once.
+
 ## License
 
 MIT
