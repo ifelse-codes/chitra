@@ -348,15 +348,19 @@ horizontalBar({
   {
     id: "timeline",
     name: "Timeline / Gantt",
-    description: "Horizontal Gantt-style bars for scheduling and sprint planning.",
-    preview: `Sprint Timeline
-
-Design  ▶█████████◀────────────────────────────────
-Build   ───────────▶███████████████████◀───────────
-Test    ───────────────────────────▶█████████◀─────
-Deploy  ──────────────────────────────────────▶███◀
-
-        0                    4                    8`,
+    description: "Gantt-style spans on a shared time scale — grey tone ramp by span length, with the single longest span marked in the accent hue.",
+    preview: `┌╌ Sprint Timeline ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ SPAN                                             │
+│ Design ▒▒▒▒▒▒▒▒▒▒─────────────────────────────── │
+│ Build  ──────────█████████████████████────────── │
+│ Test   ──────────────────────────▒▒▒▒▒▒▒▒▒▒───── │
+│ Deploy ────────────────────────────────────░░░░░ │
+│        +╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌+ │
+│        0                                       8 │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ n 4 · 0..8 · span Build                          │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
     code: `import { timeline } from "@chitra/core";
 
 timeline({
