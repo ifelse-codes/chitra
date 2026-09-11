@@ -371,7 +371,7 @@ horizontalBar({
     id: "timeline",
     name: "Timeline / Gantt",
     description:
-      "Horizontal Gantt-style bars for scheduling and sprint planning.",
+      "Gantt-style spans on a shared time scale — grey tone ramp by span length, with the single longest span marked in the accent hue.",
     code: `import { timeline } from "@chitra/core";
 
 timeline({
