@@ -328,6 +328,40 @@ Rules that must not change:
   footer and no `Infinity`/`NaN`; an all-equal or single-node set renders honestly with a
   collapsed `min..max` range and the accent still spent exactly once.
 
+### LOCKED: timeline chart — session 21 design
+
+`timeline` now carries the same locked design language as the circular, area, line, bar,
+scatter, heatmap, horizontalBar, and treemap families — the S18/S19 panel language applied
+to the Gantt/timeline. Rules that must not change:
+
+- **One accent hue, spent EXACTLY once, on the longest-span event.** The event whose span
+  (`end − start`) is the largest gets the theme's accent hue as a solid `█` run; ties resolve
+  to the first such event in event order (deterministic, the same strict-`>` rule as
+  bar/heatmap/treemap). Every other event is one tone from the documented grey ramp
+  (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by span length). The old
+  `theme.colors[i % n]` rainbow is gone — never a raw rainbow hue, ever. An explicit
+  `event.color` stays a user override, not a theme rainbow.
+- **Intensity IS the shade ramp** — the heatmap texture language. Each bar's shade glyph
+  (`░ ▒ ▓ █`, one per tone bucket, light → dark by span length) carries the ordering through
+  `stripAnsi` / `noColor`, so a plain-text render still reads longest-to-shortest at a
+  glance. The peak leaves the ramp for its solid accent block, exactly like the LOCKED
+  heatmap's peak cell.
+- **The `─` track IS the shared time scale** (axis colour), kept behind every event so spans
+  read against the full range — the v2 rule: keep the visible scale when exact reading
+  matters. It is scale furniture, not bar fill; it must never be mistaken for data.
+- **Point events render one lightest-shade glyph.** An event with no `end` (or an `end`
+  before its `start`) is honestly zero-length: exactly one `░` — the lightest ramp step.
+  The old `▶`/`◀` markers are retired glyphs, outside the locked vocabulary.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase eyebrow
+  row (`SPAN`), a `+╌…╌+` value-axis guide with a `min..max` scale row under the events
+  (matching the locked horizontalBar axis), and two `│ ╌…╌ │` rule separators.
+- **Summary footer** reporting `n · <min>..<max>`, followed by the accented tail
+  `span <label>` — the longest event's label in the accent hue. Facts true for arbitrary
+  event data, never a fabricated statistic.
+- **Empty / degenerate data is safe**: an empty input renders a framed panel with an
+  `n 0 · (no data)` footer and no `Infinity`/`NaN`; a collapsed range (every event at one
+  instant) renders honestly with the accent still spent exactly once.
+
 ## License
 
 MIT
