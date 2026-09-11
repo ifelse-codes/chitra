@@ -10,10 +10,27 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 21 candidates):** `timeline` → `gauge` → `progress` mudra migration
-  (one story per session — the three charts the founder named alongside treemap); bring
-  `lineModelToSvg` to terminal parity (SVG mirrors the locked terminal 1:1); exercise a
-  real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- 🔜 **Next (Session 22 candidates):** `gauge` → `progress` mudra migration (one story per
+  session — the rest of the founder-named trio, carrying the shade-texture ruling); the
+  founder-deferred family-wide plain-English footer pass (A trim / B plain words / B-diet,
+  one dedicated session); the plan-review bug-first queue (histogram decimal count labels +
+  accent flood, waterfall never-invisible deltas, funnel rainbow); bring `lineModelToSvg`
+  to terminal parity (SVG mirrors the locked terminal 1:1); exercise a real `v0.1.0`
+  release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- ✅ **Session 21 (S21) — timeline chart LOCKED (single-chat, plan-review cross-checked):**
+  `timeline()` re-rendered in the reference/panel language — the S18/S19 language on the
+  Gantt. Rainbow `theme.colors[i % n]` removed: ONE accent hue spent exactly once on the
+  longest-span event (ties → first in event order) as a solid `█` run, grey tone ramp
+  (`#ECECEF→#6A6A75`) + `░▒▓` shade texture by span bucket for every other event (the
+  heatmap language, added on founder review — ordering survives noColor); dashed frame,
+  `SPAN` eyebrow, `+╌…╌+` guide + `min..max` scale row, two rule separators; the `─` track
+  kept as the shared time scale (axis colour); point events render exactly one `░`;
+  `▶`/`◀` retired; `n · min..max · span <label>` footer (longest event accented);
+  collapsed-range guard; empty/all-equal/single safe. Docs previews regenerated, dist
+  rebuilt, README `### LOCKED: timeline chart` block. `verify-session-21.sh` 12/12 ALL
+  GREEN (core 259/259), demo exit 0. Cold review owed post-commit. See "LOCKED: timeline
+  chart" in `packages/core/README.md`. The locked family now spans circular, area, line,
+  bar, scatter, heatmap, horizontalBar, treemap, and timeline.
 - ✅ **Session 20 (S20) — treemap chart LOCKED (recovered session):** `treemap()`
   re-rendered in the reference/panel language — the S18 `heatmap` language on the
   hierarchical area chart. Rainbow `theme.colors[i % n]` removed: ONE accent hue spent once
