@@ -10,13 +10,30 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 26 candidates):** the audit queue's last unlocked charts —
-  **funnel** (`▼` arrows + rainbow, `funnel.ts:24`) and **waterfall** (row
-  quantization hides sub-row deltas); the founder-deferred family-wide plain-English
+- 🔜 **Next (Session 27 candidates):** the founder-deferred family-wide plain-English
   footer pass (A trim / B plain words / B-diet, one dedicated session, founder
   choice pending); bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI.
+- ✅ **Session 26 (S26) — waterfall + funnel + sankey + radar LOCKED (five
+  stories by founder direction):** `waterfall()` re-rendered (P0 flat-dash
+  downs now dashed outline boxes with 1-row minimum, integer y-labels, Start
+  darkest-grey `█` + Total accent `█` once, ups `▓`, downs outlined,
+  `┄` connectors, signed deltas, `START · Δ · TOTAL` foot, `steps` JSON);
+  `funnel()` centered (audit §3.4 item 2 reversed by founder order, on
+  research record — no `▼`), peak-stage accent once, integer pcts,
+  `CONVERSION` eyebrow + `IN · OUT · CONVERSION · DROP` foot; `sankey()` with
+  no `▶`, peak-flow accent once, toned `■` ledger, `FLOW` eyebrow + `PEAK`
+  foot; `radar()` with five braille rings + `+` ticks, accent primary,
+  dashed grey secondaries, `AVG · PEAK` foot (cold PARTIAL row 15: thin-edge /
+  stipple / dashed-ring grammar substituted per the founder reference image,
+  disclosed). Four `### LOCKED — session 26 design` README blocks.
+  `verify-session-26.sh` 24/24 ALL GREEN (core 391/391, +59 tests), demo exit
+  0 (9/9). Cold review ACCEPT (attested, 18/19 SHIPPED,
+  `Review-Inputs-SHA cc9736ec…be50559`). The locked family now spans circular,
+  area, line, bar, scatter, heatmap, horizontalBar, treemap, timeline, gauge,
+  progress, histogram, waterfall, funnel, sankey, and radar — the audit queue
+  is empty.
 - ✅ **Session 25 (S25) — histogram chart LOCKED (single-chat, resumed from a z-code
   token stop):** `histogram()` re-rendered in the reference/panel language — the
   S18–S23 language on the distribution chart, per the mudra audit's P1 queue (§5;
@@ -40,7 +57,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   `Review-Inputs-SHA b10d5b94…0a761`). See "LOCKED: histogram chart" in
   `packages/core/README.md`. The locked family now spans circular, area, line, bar,
   scatter, heatmap, horizontalBar, treemap, timeline, gauge, progress, and
-  histogram — funnel and waterfall remain.
+  histogram — funnel, waterfall, sankey, and radar followed in S26.
 - ✅ **Session 24 (S24) — docs-site grouped chart nav (PR #26):** catalog sidebar in
   six semantic categories (trend & time / comparison / distribution & density /
   part-to-whole / flow & accumulation / single value & progress) via a generated
