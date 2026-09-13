@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { CHARTS } from "./data/charts";
 import { ansiToHtml } from "./ansi";
@@ -104,9 +104,52 @@ const CHART_ACCENT: Record<string, string> = {
 
 const NAV_SECTIONS = [
   { label: "Start Here", items: ["install", "quickstart", "fluent-api"] },
-  { label: "Chart Types", items: CHARTS.map((c) => c.id) },
   { label: "Agent Output", items: ["ai-output"] },
 ];
+
+// Six semantic chart categories (S24 grouped nav). Stable, reader-facing —
+// grouping never reshuffles as ports land. Membership comes from the generated
+// `group` field (authored in scripts/chart-specs.ts).
+const NAV_GROUPS = [
+  "Trend & time",
+  "Comparison",
+  "Distribution & density",
+  "Part-to-whole",
+  "Flow & accumulation",
+  "Single value & progress",
+] as const;
+
+// Reader-facing order within each group, from the approved nav-groups mock.
+const CHART_ORDER = [
+  "line", "area", "timeline", "candlestick",
+  "bar", "horizontalBar", "scatter", "radar",
+  "histogram", "boxplot", "heatmap",
+  "pie", "donut", "treemap", "funnel",
+  "sankey", "waterfall",
+  "gauge", "progress", "sparkline",
+];
+
+// Per-chart glyphs, from the approved nav-groups mock.
+const CHART_GLYPH: Record<string, string> = {
+  line: "╭", area: "◣", timeline: "▬", candlestick: "┃",
+  bar: "█", horizontalBar: "▐", scatter: "∴", radar: "◆",
+  histogram: "▂", boxplot: "I", heatmap: "▒",
+  pie: "◕", donut: "◎", treemap: "▤", funnel: "▽",
+  sankey: "⋙", waterfall: "▟",
+  gauge: "◧", progress: "⊟", sparkline: "▁▃",
+};
+
+const NAV_COLLAPSED_KEY = "chitra:nav-collapsed:v1";
+
+function loadCollapsed(): string[] {
+  try {
+    const raw = localStorage.getItem(NAV_COLLAPSED_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter((g): g is string => typeof g === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 function hl(code: string): string {
   return code
@@ -447,6 +490,33 @@ export default function App() {
   const [location, navigate] = useLocation();
   const { page: active, chartId } = pathToActive(location);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState<string[]>(() =>
+    typeof localStorage !== "undefined" ? loadCollapsed() : [],
+  );
+
+  const persistCollapsed = (next: string[]) => {
+    setCollapsed(next);
+    try {
+      localStorage.setItem(NAV_COLLAPSED_KEY, JSON.stringify(next));
+    } catch {
+      /* private mode — collapse still works for the visit */
+    }
+  };
+
+  const toggleGroup = (group: string) =>
+    persistCollapsed(
+      collapsed.includes(group)
+        ? collapsed.filter((g) => g !== group)
+        : [...collapsed, group],
+    );
+
+  // Navigating to a chart auto-expands its group, even when collapsed before.
+  useEffect(() => {
+    const chart = CHARTS.find((c) => c.id === active);
+    if (chart && collapsed.includes(chart.group)) {
+      persistCollapsed(collapsed.filter((g) => g !== chart.group));
+    }
+  }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nav = (id: string) => {
     navigate(hrefFor(id));
@@ -501,21 +571,77 @@ export default function App() {
       <div className="main-layout">
         <nav className={`sidebar ${mobileOpen ? "open" : ""}`}>
           <button className="nav-home" onClick={() => nav("home")}>⬡ chitra</button>
-          {NAV_SECTIONS.map((s) => (
-            <div key={s.label} className="nav-section">
-              <div className="nav-section-label">{s.label}</div>
-              {s.items.map((id) => (
-                <button
-                  key={id}
-                  className={`nav-item ${active === id ? "active" : ""}`}
-                  onClick={() => nav(id)}
-                >
-                  <span className="accent-dot" />
-                  {labelFor(id)}
-                </button>
-              ))}
+          <div className="nav-section">
+            <div className="nav-section-label">Start Here</div>
+            {NAV_SECTIONS[0].items.map((id) => (
+              <button
+                key={id}
+                className={`nav-item ${active === id ? "active" : ""}`}
+                onClick={() => nav(id)}
+              >
+                {labelFor(id)}
+              </button>
+            ))}
+          </div>
+
+          <div className="nav-section">
+            <div className="nav-section-label">Chart Types</div>
+            <div className="nav-expand-row">
+              <button className="nav-expand-btn" onClick={() => persistCollapsed([])}>
+                expand all
+              </button>
+              <span className="nav-expand-sep" aria-hidden="true">·</span>
+              <button className="nav-expand-btn" onClick={() => persistCollapsed([...NAV_GROUPS])}>
+                collapse all
+              </button>
             </div>
-          ))}
+            {NAV_GROUPS.map((group) => {
+              const items = CHART_ORDER.flatMap((id) => {
+                const c = CHARTS.find((d) => d.id === id);
+                return c !== undefined && c.group === group ? [c] : [];
+              });
+              const isCollapsed = collapsed.includes(group);
+              return (
+                <div key={group} data-group={group} className={`nav-group${isCollapsed ? " collapsed" : ""}`}>
+                  <button
+                    className="nav-group-label"
+                    aria-expanded={!isCollapsed}
+                    onClick={() => toggleGroup(group)}
+                  >
+                    <span className="caret" aria-hidden="true">▾</span>
+                    {group}
+                    <span className="nav-group-count">{items.length}</span>
+                  </button>
+                  <div className="nav-group-items">
+                    {items.map((c) => (
+                      <button
+                        key={c.id}
+                        data-chart={c.id}
+                        className={`nav-item nav-item-chart ${active === c.id ? "active" : ""}`}
+                        onClick={() => nav(c.id)}
+                      >
+                        <span className="glyph" aria-hidden="true">{CHART_GLYPH[c.id] ?? "·"}</span>
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="nav-section">
+            <div className="nav-section-label">Agent Output</div>
+            {NAV_SECTIONS[1].items.map((id) => (
+              <button
+                key={id}
+                className={`nav-item ${active === id ? "active" : ""}`}
+                onClick={() => nav(id)}
+              >
+                {labelFor(id)}
+              </button>
+            ))}
+          </div>
         </nav>
 
         <main className={`content${CHARTS.some((c) => c.id === active) ? " content-catalog" : ""}`}>
