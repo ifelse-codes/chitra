@@ -401,6 +401,53 @@ applied to the single-value gauge, completing the founder-named trio (`timeline`
   `max`, `percent` (null when n/a), `bucket` (the 0–3 shade index, null when n/a), and
   `plain`. No existing key is removed; the public `GaugeOptions` shape is unchanged.
 
+### LOCKED: progress chart — session 23 design
+
+`progress` now carries the same locked design language as the area, line, bar, scatter,
+heatmap, horizontalBar, treemap, timeline, and gauge families — the S18–S22 panel
+language applied to the single-value progress bar, completing the founder-named trio
+(`timeline` → `gauge` → `progress`). Rules that must not change:
+
+- **Intensity IS the grey tone ramp.** The fill is encoded on the documented grey tone
+  ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by level), with the
+  matching plain-text shade glyph (`░ ▒ ▓ █`, one per tone bucket) so the level survives
+  `stripAnsi` / `noColor` — the heatmap/gauge texture language. The old
+  `theme.colors[2/3/1]` traffic-light band rainbow is gone — no `theme.colors[i % n]`
+  band rainbow, ever.
+- **One accent hue, spent EXACTLY once, on the fill's leading edge.** The theme's
+  accent hue is carried by a single solid `█` at the end of the fill run — the same
+  reading-edge element as the locked gauge; it marks exactly where the fill stops.
+  Everything else stays on the grey ramp.
+- **The `style` option stays accepted, the locked design supersedes it.** The public
+  `ProgressOptions` shape is unchanged — `style` (`"bar" | "blocks" | "braille" |
+  "ascii"`) is honoured as accepted input, but every style renders the same
+  shade-ramp panel. The retired glyphs — the `▁▂▃` sub-block texture, the `=`/`.`
+  ascii bar, and the naked `[`…`]` bracket bar with its trailing pct — are outside
+  the locked vocabulary and never render.
+- **The `─` track IS the shared value scale** (axis colour), kept behind the fill so
+  the level reads against the full `0..max` range.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase
+  eyebrow row (`PROGRESS`, or the uppercased `opts.label`), a `+╌…╌+` value-axis guide
+  with a `0..max` scale row under the bar, and two `│ ╌…╌ │` rule separators. Panel
+  width auto-expands so the eyebrow and summary are never clipped (an explicit `width`
+  is a floor, not a cap).
+- **Summary footer** reporting `value <v> · 0..<max> · <pct>%`, with the `value <v>`
+  fact in the accent hue. `showPercent: false` drops the `· <pct>%` fact from the
+  footer (the option keeps its meaning; the agent surface still carries `percent`).
+  Facts true for arbitrary input, never fabricated.
+- **Out-of-range and degenerate data are safe — and honest.** A `value` past `max`
+  clips the fill at full track width while the footer and `toJSON()` report the TRUE
+  value and TRUE percent (may exceed 100% or sit below 0%) — the old silent clamp
+  (which reported a clamped value and a percent that could never exceed 100) is
+  retired as a lie; a negative value renders an empty track, honestly reported; a
+  collapsed range (`max === 0`) never divides by zero (full when `value ≥ max`, empty
+  otherwise); a non-finite `value` renders a framed `value n/a` panel — no
+  `NaN`/`Infinity` anywhere.
+- **Agent surface is additive**: `toJSON()` returns `type: "progress"`, `value`
+  (TRUE, unclamped), `max`, `percent` (TRUE percent, null when n/a), `bucket` (the
+  0–3 shade index, null when n/a), and `plain`. No existing key is removed; the
+  public `ProgressOptions` shape is unchanged.
+
 ## License
 
 MIT
