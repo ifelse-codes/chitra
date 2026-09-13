@@ -7,6 +7,8 @@ export interface ChartDef {
   description: string;
   preview: string;
   code: string;
+  /** Semantic nav category (authored in chart-specs.ts). */
+  group: string;
 }
 
 export const CHARTS: ChartDef[] = [
@@ -56,6 +58,7 @@ line({
   theme: "default",
   renderer: "ascii", // Forces explicit line drawing (- / \\ o)
 }).render();`,
+    group: "Trend & time",
   },
   {
     id: "bar",
@@ -87,6 +90,7 @@ bar({
   title: "Monthly Sales",
   height: 10,
 }).render();`,
+    group: "Comparison",
   },
   {
     id: "area",
@@ -114,6 +118,7 @@ area({
   width: 52,
   height: 10,
 }).render();`,
+    group: "Trend & time",
   },
   {
     id: "sparkline",
@@ -135,6 +140,7 @@ sparkline({ data: [60, 62, 65, 63, 68, 70, 72, 69, 74, 78],
 // ASCII fallback
 sparkline({ data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
   label: "NET", renderer: "ascii" }).render();`,
+    group: "Single value & progress",
   },
   {
     id: "histogram",
@@ -162,6 +168,7 @@ histogram({
   height: 10,
   width: 40,
 }).render();`,
+    group: "Distribution & density",
   },
   {
     id: "scatter",
@@ -196,6 +203,7 @@ scatter({
   width: 50,
   height: 12,
 }).render();`,
+    group: "Comparison",
   },
   {
     id: "pie",
@@ -229,6 +237,7 @@ pie({
   data: [35, 25, 20, 12, 8],
   labels: ["Organic", "Direct", "Social", "Email", "Paid"],
 }).render();`,
+    group: "Part-to-whole",
   },
   {
     id: "donut",
@@ -261,6 +270,7 @@ donut({
   data: [30, 25, 22, 15, 8],
   labels: ["TypeScript", "Python", "Rust", "Go", "Other"],
 }).render();`,
+    group: "Part-to-whole",
   },
   {
     id: "heatmap",
@@ -290,6 +300,7 @@ heatmap({
   width: 40,
   height: 8,
 }).render();`,
+    group: "Distribution & density",
   },
   {
     id: "progress",
@@ -327,6 +338,7 @@ heatmap({
 progress({ value: 87, label: "Build" }).render();
 progress({ value: 62, label: "Tests" }).render();
 progress({ value: 34, label: "Coverage" }).render();`,
+    group: "Single value & progress",
   },
   {
     id: "gauge",
@@ -350,6 +362,7 @@ gauge({
   label: "CPU Load",
   width: 40,
 }).render();`,
+    group: "Single value & progress",
   },
   {
     id: "horizontalBar",
@@ -374,6 +387,7 @@ horizontalBar({
   data: [892, 645, 534, 421, 289],
   labels: ["TypeScript", "Python", "Rust", "Go", "Ruby"],
 }).render();`,
+    group: "Comparison",
   },
   {
     id: "timeline",
@@ -403,6 +417,7 @@ timeline({
   title: "Sprint Timeline",
   width: 52,
 }).render();`,
+    group: "Trend & time",
   },
   {
     id: "radar",
@@ -437,6 +452,7 @@ radar({
   title: "System Radar",
   width: 40,
 }).render();`,
+    group: "Comparison",
   },
   {
     id: "boxplot",
@@ -468,6 +484,7 @@ boxplot({
   width: 50,
   height: 12,
 }).render();`,
+    group: "Distribution & density",
   },
   {
     id: "waterfall",
@@ -494,6 +511,7 @@ waterfall({
   width: 50,
   showTotal: true,
 }).render();`,
+    group: "Flow & accumulation",
   },
   {
     id: "funnel",
@@ -515,6 +533,7 @@ funnel({
   labels: ["Visitors", "Sign-ups", "Trials", "Paid", "Enterprise"],
   width: 55,
 }).render();`,
+    group: "Part-to-whole",
   },
   {
     id: "candlestick",
@@ -559,6 +578,7 @@ candlestick({
   width: 72,
   theme: "dracula",
 }).render();`,
+    group: "Trend & time",
   },
   {
     id: "treemap",
@@ -594,6 +614,7 @@ treemap({
   width: 50,
   height: 10,
 }).render();`,
+    group: "Part-to-whole",
   },
   {
     id: "sankey",
@@ -622,5 +643,6 @@ sankey({
   ],
   width: 52,
 }).render();`,
+    group: "Flow & accumulation",
   },
 ];
