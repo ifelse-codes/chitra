@@ -214,9 +214,10 @@ describe("progress", () => {
     const plain = progress({ value: 50, noColor: true }).toPlain();
     expect(plain).toContain("50.0%");
   });
-  it("clamps value to max", () => {
+  it("reports the TRUE value for out-of-range input (S23: no silent clamp)", () => {
     const j = progress({ value: 200, max: 100 }).toJSON() as Record<string, unknown>;
-    expect(j.value).toBe(100);
+    expect(j.value).toBe(200);
+    expect(j.percent).toBe(200);
   });
   it("supports all styles", () => {
     for (const style of ["bar", "blocks", "braille", "ascii"] as const) {
