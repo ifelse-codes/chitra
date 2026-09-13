@@ -10,12 +10,22 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 24 candidates):** the founder-deferred family-wide plain-English
-  footer pass (A trim / B plain words / B-diet, one dedicated session — now unblocked
-  with the trio locked); the plan-review bug-first queue (histogram decimal count labels
-  + accent flood, waterfall never-invisible deltas, funnel rainbow); bring
-  `lineModelToSvg` to terminal parity (SVG mirrors the locked terminal 1:1); exercise a
-  real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- 🔜 **Next (Session 25 candidates):** the founder-deferred family-wide plain-English
+  footer pass (A trim / B plain words / B-diet, one dedicated session); the plan-review
+  bug-first queue (histogram decimal count labels + accent flood, waterfall
+  never-invisible deltas, funnel rainbow); bring `lineModelToSvg` to terminal parity
+  (SVG mirrors the locked terminal 1:1); exercise a real `v0.1.0` release
+  (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- ✅ **Session 24 (S24) — docs-site grouped chart nav (PR #26):** catalog sidebar in
+  six semantic categories (trend & time / comparison / distribution & density /
+  part-to-whole / flow & accumulation / single value & progress) via a generated
+  `group` field (`chart-specs.ts` → `generate-charts.ts` → `charts.ts`, drift gate
+  green); collapsible headers (caret, count tags, per-chart glyphs, persisted in
+  localStorage, active group auto-expanded) + expand-all/collapse-all. Lock state
+  stays internal: ALL status badges removed at founder direction mid-session (cold
+  review REJECTs the written badge half — founder waiver, delivery faithful to final
+  intent). Verify 12/12, demo exit 0, nav Playwright pass 14/14, S15 suite green on
+  the new DOM.
 - ✅ **Session 23 (S23) — progress chart LOCKED (single-chat, trio complete):**
   `progress()` re-rendered in the reference/panel language — the S18–S22 language on
   the single-value progress bar, completing the founder-named trio (`timeline` →

@@ -30,10 +30,20 @@ import {
 } from "../../../packages/core/src/index.js";
 import type { ChartResult } from "../../../packages/core/src/types.js";
 
+export type ChartGroup =
+  | "Trend & time"
+  | "Comparison"
+  | "Distribution & density"
+  | "Part-to-whole"
+  | "Flow & accumulation"
+  | "Single value & progress";
+
 export interface ChartSpec {
   id: string;
   name: string;
   description: string;
+  /** Semantic nav category — the sidebar grouping. Stable, reader-facing. */
+  group: ChartGroup;
   /** Human-facing snippet shown in the docs. Should mirror `ansi`/`plain`. */
   code: string;
   /** Colored output → src/data/ansi-charts.json (rendered to HTML by ansi.ts). */
@@ -64,6 +74,7 @@ function multi(...makes: Array<() => ChartResult>): Pick<ChartSpec, "ansi" | "pl
 export const SPECS: ChartSpec[] = [
   {
     id: "line",
+    group: "Trend & time",
     name: "Line Chart",
     description:
       "Continuous data over time, rendered with explicit ASCII line characters matching classical terminal monitoring.",
@@ -111,6 +122,7 @@ line({
   },
   {
     id: "bar",
+    group: "Comparison",
     name: "Bar Chart",
     description:
       "Vertical bars for comparing categorical values, with optional grouping and stacking.",
@@ -133,6 +145,7 @@ bar({
   },
   {
     id: "area",
+    group: "Trend & time",
     name: "Area Chart",
     description:
       "Like a line chart but with the area below filled in — great for volume/accumulation.",
@@ -155,6 +168,7 @@ area({
   },
   {
     id: "sparkline",
+    group: "Single value & progress",
     name: "Sparkline",
     description:
       "Compact inline charts — perfect for dashboards, logs, and status readouts.",
@@ -194,6 +208,7 @@ sparkline({ data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
   },
   {
     id: "histogram",
+    group: "Distribution & density",
     name: "Histogram",
     description: "Distribution of continuous data across configurable bins.",
     code: `import { histogram } from "@chitra/core";
@@ -217,6 +232,7 @@ histogram({
   },
   {
     id: "scatter",
+    group: "Comparison",
     name: "Scatter Plot",
     description:
       "Two-dimensional point data for spotting correlations and clusters.",
@@ -251,6 +267,7 @@ scatter({
   },
   {
     id: "pie",
+    group: "Part-to-whole",
     name: "Pie Chart",
     description:
       "Circular proportional chart for showing part-to-whole relationships.",
@@ -269,6 +286,7 @@ pie({
   },
   {
     id: "donut",
+    group: "Part-to-whole",
     name: "Donut Chart",
     description:
       "Pie chart with a hollow centre — great for showing a primary metric.",
@@ -287,6 +305,7 @@ donut({
   },
   {
     id: "heatmap",
+    group: "Distribution & density",
     name: "Heatmap",
     description:
       "2D grid whose intensity is a grey tone ramp, with the single peak cell marked in the accent hue.",
@@ -319,6 +338,7 @@ heatmap({
   },
   {
     id: "progress",
+    group: "Single value & progress",
     name: "Progress Bar",
     description:
       "Single-value progress panel in the locked design language — grey-tone fill with an accented leading edge. Great for build steps, quotas, and budgets.",
@@ -335,6 +355,7 @@ progress({ value: 34, label: "Coverage" }).render();`,
   },
   {
     id: "gauge",
+    group: "Single value & progress",
     name: "Gauge",
     description:
       "Single-value meter in the locked panel language — grey-tone fill with an accented reading edge. Great for KPIs, CPU usage, battery level.",
@@ -353,6 +374,7 @@ gauge({
   },
   {
     id: "horizontalBar",
+    group: "Comparison",
     name: "Horizontal Bar",
     description:
       "Bars running left-to-right — ideal for ranked lists and comparisons.",
@@ -371,6 +393,7 @@ horizontalBar({
   },
   {
     id: "timeline",
+    group: "Trend & time",
     name: "Timeline / Gantt",
     description:
       "Gantt-style spans on a shared time scale — grey tone ramp by span length, with the single longest span marked in the accent hue.",
@@ -401,6 +424,7 @@ timeline({
   },
   {
     id: "radar",
+    group: "Comparison",
     name: "Radar Chart",
     description:
       "Spider/radar chart for multi-axis comparison of a single entity.",
@@ -423,6 +447,7 @@ radar({
   },
   {
     id: "boxplot",
+    group: "Distribution & density",
     name: "Box Plot",
     description:
       "Statistical summary showing median, quartiles, and whiskers.",
@@ -453,6 +478,7 @@ boxplot({
   },
   {
     id: "waterfall",
+    group: "Flow & accumulation",
     name: "Waterfall",
     description:
       "Running total chart — shows cumulative effect of positive/negative values.",
@@ -477,6 +503,7 @@ waterfall({
   },
   {
     id: "funnel",
+    group: "Part-to-whole",
     name: "Funnel Chart",
     description:
       "Conversion funnel — visualise drop-off across stages of a pipeline.",
@@ -497,6 +524,7 @@ funnel({
   },
   {
     id: "candlestick",
+    group: "Trend & time",
     name: "Candlestick",
     description:
       "OHLC financial chart — open, high, low, close per period. Green = bullish (close > open), red = bearish.",
@@ -546,6 +574,7 @@ candlestick({
   },
   {
     id: "treemap",
+    group: "Part-to-whole",
     name: "Treemap",
     description:
       "Hierarchical area chart whose intensity is a grey tone ramp, with the single peak node marked in the accent hue.",
@@ -580,6 +609,7 @@ treemap({
   },
   {
     id: "sankey",
+    group: "Flow & accumulation",
     name: "Sankey Diagram",
     description: "Flow diagram showing how quantities move between nodes.",
     code: `import { sankey } from "@chitra/core";
