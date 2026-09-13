@@ -625,6 +625,79 @@ change:
   and `avg` (null when empty). The public `RadarChartOptions` shape is
   unchanged.
 
+### LOCKED: candlestick chart — session 27 design
+
+`candlestick` now carries the same locked design language as the waterfall
+family above — the S26 down-outline card applied to OHLC data. Rules that
+must not change:
+
+- **Tonal kinds, never rainbow.** Up candles are solid `▓` fills on a mid
+  grey tone; down candles are the dashed outline (`┌╌╌┐` top / `│  │` sides
+  / `└╌╌┘` bottom, the waterfall down language) on a light grey tone. The
+  old `theme.colors[2]` green / `theme.colors[5]` red flood is retired —
+  direction reads through `stripAnsi` / `noColor`. Doji candles (open ==
+  close) count as up (a 1-row solid).
+- **One accent hue, spent EXACTLY once, on the peak candle.** The highest
+  close (ties → first in data order) renders its body as solid `█` in the
+  theme's accent hue. Wicks always stay in the candle's own kind tone (never
+  accent): at raw-ANSI level the accent touches only solid `█` body mass
+  plus non-block text (the `LAST` foot fact).
+- **Adaptive price labels, never sprawl.** The S27 precision rule: integers
+  once the range spans 100+, otherwise ≤1dp (range ≥ 10) or ≤2dp, trimmed —
+  compact labels, never `162.55`-style float sprawl, and never silent integer
+  rounding of real prices. Locked `│`/`+` guide, dashed `└╌…╌` baseline,
+  truncated period labels under their candles.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
+  uppercase `OHLC` eyebrow (or `opts.title` uppercased), two `│ ╌…╌ │` rule
+  separators, and a foot row reporting `N <n> · HI <v> · LO <v> · LAST <v>`
+  with the `LAST` fact in the accent hue. Panel width auto-expands so facts
+  are never clipped (an explicit `width` is a floor; candles stay 4 wide so
+  outlines stay legible).
+- **Degenerate input is safe.** Empty / all-non-finite data renders a framed
+  `N 0 · (no data)` panel with null JSON facts (the old code crashed:
+  `Math.max(...[])` → `-Infinity` widths); a flat range (all OHLC equal)
+  pads ±1 so candles stay visible (never `NaN` rows); non-finite candles are
+  excluded, never plotted; narrow widths never `RangeError`.
+- **Agent surface is additive**: `toJSON()` returns the original keys
+  (`type`, `data`, `plain`) plus `count`, `high`, `low`, `last` (null when
+  there is no data). The public `CandlestickOptions` shape is unchanged.
+
+### LOCKED: boxplot chart — session 27 design
+
+`boxplot` now carries the same locked design language as the candlestick
+family above — the S18–S27 panel vocabulary on grouped spread data. Rules
+that must not change:
+
+- **Tonal groups, never rainbow.** The peak group (highest median, ties →
+  first in group order) renders box + whiskers + caps + median in the
+  theme's accent hue, spent EXACTLY once; every other group sits on the grey
+  tone ramp with its matching shade fill (`░▒▓` by share of the peak median
+  — the 2026-09-11 shade-texture ruling, so spread survives noColor). The
+  old `theme.colors[si % n]` rainbow is retired — no rainbow, ever.
+- **The median stays visually distinct from the box edges.** Box edges are
+  vertical `│` with a shade/`█` fill between them; the median is a
+  horizontal run (`───`, `═══` on the peak group) — direction tells them
+  apart with or without colour. Whiskers are `│`, caps `┬`/`┴`.
+- **Adaptive value labels** (`axisPriceFmt`, shared with candlestick):
+  integers when the range is wide, ≤2dp when tight. Locked `│`/`+` guide,
+  dashed `└╌…╌` baseline, truncated group labels, two rule separators.
+  Width is a floor (auto-expand, never clip; groups stay 7 wide so the
+  median marker never `RangeError`s on narrow widths — the old
+  `" ".repeat(mid - 1)` crash).
+- **Summary foot** reporting `GROUPS <n> · MED <v> · PEAK <label> <v>`, with
+  the `PEAK` fact in the accent hue. Facts true for the given data, never
+  fabricated.
+- **Degenerate input is safe.** Empty / all-non-finite renders a framed
+  `GROUPS 0 · (no data)` panel with null `stats`/`peakGroup` facts (the old
+  code crashed on `rawData[0]`); single-value groups render via the
+  flat-range guard (never `NaN`); non-finite samples are excluded before
+  `quartiles()`, never plotted; groups left with no finite samples are
+  dropped with their labels.
+- **Agent surface is additive**: `toJSON()` returns the original keys
+  (`type`, `data`, `labels`, `stats`, `plain`) plus `peakGroup`
+  (`{ label, index, median }`, null when there is no data). The public
+  `BoxPlotOptions` shape is unchanged.
+
 ## License
 
 MIT
