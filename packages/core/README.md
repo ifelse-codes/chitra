@@ -484,6 +484,147 @@ change:
   when there is no data) and `count` (the number of samples actually binned). The
   public `HistogramOptions` shape is unchanged.
 
+### LOCKED: waterfall chart — session 26 design
+
+`waterfall` now carries the same locked design language as the area, line, bar,
+scatter, heatmap, horizontalBar, treemap, timeline, gauge, progress, and histogram
+families — the audit's mudra waterfall card in the S18–S25 panel vocabulary.
+Rules that must not change:
+
+- **Down-deltas are visible by design.** Every negative step renders a dashed
+  outline box (`┌╌╌┐` top / `│  │` sides / `└╌╌┘` bottom); a sub-row delta
+  still renders a minimum one `┌╌╌┐` row. The old flat `─` dash on the baseline
+  (indistinguishable from zero — the chart could not tell its story) is retired.
+- **Tonal kinds, never rainbow.** Start and Total are solid `█` anchors (Start
+  on the darkest grey tone, Total in the theme's accent hue, spent EXACTLY
+  once); up-steps are solid `▓` on a mid grey tone; down-steps are the dashed
+  outline on a light grey tone. The old `theme.colors[i]`
+  positive/negative/total rainbow is retired — no `theme.colors[i % n]` flood,
+  ever. Kind reads through `stripAnsi` / `noColor`: `█` anchors vs `▓` ups vs
+  outlined downs (Start and Total share `█` as fellow level-anchors, told apart
+  by position, step labels, and the foot facts).
+- **Explicit color options stay user overrides** (like gauge thresholds):
+  `positiveColor` / `negativeColor` / `totalColor` replace the locked tone for
+  their kind when given; the glyph vocabulary never changes.
+- **Y-axis labels are integers**, with the locked `│`/`+` guide. Zero deltas
+  render an empty column (no mass, no outline) with the connector passing
+  through — never a dash, never a fill.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
+  uppercase eyebrow row carrying the `NET <signed>` metric, a signed-delta
+  label row above the plot (`+80` / `−120`), dashed `┄` connectors at each
+  running level in the 1-col gaps, a dashed `└╌…╌` baseline, truncated step
+  labels under their columns, and two `│ ╌…╌ │` rule separators. Panel width
+  auto-expands so facts are never clipped (an explicit `width` is a floor, not
+  a cap; bar width fits the longest delta fact, min 4 so outlines stay
+  legible).
+- **Summary foot** reporting `START <v> · Δ <signed…> · TOTAL <v>`, with the
+  `TOTAL` fact in the accent hue. Facts true for the given data, never
+  fabricated.
+- **Degenerate input is safe.** Empty data renders a framed
+  `TOTAL 0 · (no data)` panel with empty step facts; all-zero deltas render
+  empty columns — no `NaN`/`Infinity` anywhere.
+- **Agent surface is additive**: `toJSON()` returns the original keys (`type`,
+  `data`, `labels`, `total`, `plain`) plus `steps` (per-step
+  `{ label, delta, start, end, kind }`, `kind` in `start|up|down|total`, empty
+  when there is no data). The public `WaterfallOptions` shape is unchanged.
+
+### LOCKED: funnel chart — session 26 design
+
+`funnel` now carries the same locked design language as the waterfall family
+above — the audit's mudra funnel card (§3.4) in the panel vocabulary. Rules
+that must not change:
+
+- **Arrows deleted, rows CENTERED.** The `▼` connectors exist nowhere in mudra.
+  Rows are centered boxes, top-wide → bottom-narrow — the symmetric silhouette
+  that IS the funnel identity across every major chart library (ECharts,
+  PowerBI, Highcharts, Evidence, Atlassian, Wikipedia). This deliberately
+  REVERSES the audit's §3.4 item 2 (left-anchored rows), which rendered a
+  horizontal bar chart and lost the chart's reason to exist — reversed by
+  founder order with industry research on record, not silently. Centered boxes,
+  never tapered slopes (slopes distort comparison and stairstep in a
+  terminal). Labels stay in a fixed left column so row scanning survives.
+- **One accent hue, spent EXACTLY once, on the peak stage.** The highest-value
+  stage (ties → first in stage order, the family peak rule) renders a solid `█`
+  run in the theme's accent hue. Every other stage sits on the descending grey
+  tone ramp (`t1 → t2 → t2 → t3 …` down the stages — mudra's `.66 − i·.09`
+  descent) with its matching shade glyph (`░ ▒ ▓` by share of the peak) plus
+  one `▓` rounded-cap stand-in closing each non-peak bar. The old
+  `theme.colors[i % n]` rainbow is retired — no flood, ever.
+- **Percentages are integers** (`68%`, never `68.0%`) in the label tone.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
+  uppercase `CONVERSION <pct>%` metric eyebrow, two `│ ╌…╌ │` rule separators,
+  and a foot row reporting `IN <v> · OUT <v> · CONVERSION <pct>% · DROP <label>
+  −<pct>%` with the `CONVERSION` fact in the accent hue. Panel width
+  auto-expands (explicit `width` is a floor, not a cap).
+- **Degenerate input is safe.** Empty data renders a framed
+  `STAGES 0 · (no data)` panel with null facts; a zero first stage reports
+  `n/a` conversion (never div-by-zero `NaN`).
+- **Agent surface is additive**: `toJSON()` returns the original keys (`type`,
+  `data`, `labels`, `conversionRates`, `plain`) plus `conversion` (end-to-end,
+  null when unmeasurable) and `biggestDrop` (`{ label, pct }`, null when none).
+  The public `FunnelOptions` shape is unchanged.
+
+### LOCKED: sankey chart — session 26 design
+
+`sankey` now carries the same locked design language — the family language
+applied by analogy (no audit mockup exists for sankey). Rules that must not
+change:
+
+- **One accent hue, spent EXACTLY once, on the peak flow.** The highest-value
+  link (ties → first in link order) renders a solid `█` run in the theme's
+  accent hue. Every other flow sits on the grey tone ramp with its matching
+  shade glyph (`░ ▒ ▓` by share of the peak flow), widths proportional to
+  value. The old `theme.colors[i % n]` per-link and per-node rainbow is
+  retired — no flood, ever.
+- **The `▶` arrow is deleted.** Direction reads left-to-right (`source` flows
+  to `target`); the arrow is decoration — the same ruling that retired
+  funnel's `▼`.
+- **The node ledger stays, toned.** `Nodes:` keeps the `in:`/`out:` facts with
+  each `■` on the grey ramp, nodes ordered by total flow (loudest first).
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
+  uppercase `FLOW <total>` metric eyebrow, two `│ ╌…╌ │` rule separators, and a
+  foot row reporting `NODES <n> · LINKS <m> · PEAK <src> → <tgt> <v>` with the
+  peak value in the accent hue. Panel width auto-expands (explicit `width` is
+  a floor, not a cap).
+- **Degenerate input is safe.** Empty links render a framed
+  `NODES 0 · (no data)` panel with a null peak fact — no `NaN` anywhere.
+- **Agent surface is additive**: `toJSON()` returns the original keys (`type`,
+  `nodes`, `links`, `plain`) plus `peakFlow` (`{ source, target, value }`, null
+  when there is no data). The public `SankeyOptions` shape is unchanged.
+
+### LOCKED: radar chart — session 26 design
+
+`radar` now carries the same locked design language — the family language
+applied by analogy (no audit mockup exists for radar; the S09 circular geometry
+and the S10/S17 multi-series language are the playbooks). Rules that must not
+change:
+
+- **One accent hue, spent EXACTLY once, on the primary series.** Series 0 draws
+  a thickened sub-pixel braille rim with halo-ringed `●` vertices — all in
+  the theme's accent hue — over a sparse wash haze one tone dimmer (the
+  target's translucency: thin rim vanished beside neon; full tint buried the
+  grid). Every other series draws a DASHED braille polygon in its grey tone
+  with hollow `○` vertices. The old `theme.colors[si % n]` rainbow across
+  edges, vertices, and legend is retired — no flood, ever. Mass and kind
+  survive `stripAnsi` / `noColor` (shape, not hue).
+- **The grid is hexagonal radar grammar.** Five dashed braille hex rings
+  (20–100% of range) with `+` ticks at spoke crossings and dashed spokes —
+  the founder-supplied reference image. The `0..<max>` scale rides the
+  eyebrow (in-web numbers collide at terminal density).
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
+  `AXES <n> · SERIES <m>` structural eyebrow, a multi-series glyph legend,
+  two `│ ╌…╌ │` rule separators, and a foot row reporting
+  `AVG <v> · PEAK <axis> <v>` with the peak value in the accent hue. Panel
+  width auto-expands with a label margin beside the web (explicit `width` is a
+  floor, not a cap).
+- **Degenerate input is safe.** Empty axes render a framed
+  `AXES 0 · (no data)` panel with null facts; negatives and non-finite samples
+  collapse to the center — no `NaN`/`Infinity` anywhere.
+- **Agent surface is additive**: `toJSON()` returns the original keys (`type`,
+  `data`, `labels`, `plain`) plus `max` (`{ value, axis }`, null when empty)
+  and `avg` (null when empty). The public `RadarChartOptions` shape is
+  unchanged.
+
 ## License
 
 MIT
