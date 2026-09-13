@@ -1,38 +1,42 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S22 closing, 2026-09-13.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S23 closing, 2026-09-13.)
 
 ## Active Branch
-`session-22-gauge-mudra` — S22 complete on branch: delivery + summary + attested ACCEPT
+`session-23-progress-mudra` — S23 complete on branch: delivery + summary + attested ACCEPT
 review + closeout sync all committed; closeout gate green; PR to `main` is the last step.
 
 ## What Currently Works (observed, not claimed)
-- `pnpm --filter @chitra/core run test` — **284/284 pass** (25 new gauge tests: accent-once
-  census, chrome, footer, retired glyphs, ramp-survives-noColor, threshold override,
-  out-of-range clamp + true footer, collapsed range, n/a, toJSON).
-- `pnpm --filter @chitra/core run typecheck` — **exit 0**.
-- `scripts/verify-session-22.sh` — **ALL GREEN (13 pass, 0 fail)**; `demo-session-22.sh` —
-  exit 0, 7/7 live checks.
-- `pnpm --filter @workspace/chitra-docs run gen:charts:check` — no chart drift (previews in
-  sync with the locked gauge render); `check:catalog` 103/103.
+- `pnpm --filter @chitra/core run test` — **309/309 pass** (25 new progress tests:
+  accent-once census, chrome, footer, retired glyphs incl. no-brackets/no-subblocks/
+  no-ascii under every `style`, ramp-survives-noColor, style-superseded, out-of-range
+  honest footer + toJSON, collapsed range, n/a, toJSON surface).
+- `pnpm --filter @chitra/core run typecheck` — **exit 0**. Root `typecheck` (libs +
+  scripts + artifacts incl. docs) — **exit 0**.
+- `scripts/verify-session-23.sh` — **ALL GREEN (13 pass, 0 fail)**;
+  `demo-session-23.sh` — exit 0, 7/7 live checks.
+- `pnpm --filter @workspace/chitra-docs run gen:charts:check` — no chart drift (previews
+  in sync with the locked progress render).
 - **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
   surface. LOCKED families now: circular (S09), area (S09), line (S10), bar (S12),
   scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
-  **gauge (S22)**.
-- **gauge (S22)**: grey tone ramp `#ECECEF→#C6C6CE→#A4A4AE→#6A6A75` by level WITH its
+  gauge (S22), **progress (S23)** — the founder-named trio complete.
+- **progress (S23)**: grey tone ramp `#ECECEF→#C6C6CE→#A4A4AE→#6A6A75` by level WITH its
   matching plain-text shade glyph (`░ ▒ ▓ █`, one per tone bucket, light → dark — the
-  heatmap texture language per the founder's 2026-09-11 shade-texture ruling, so intensity
-  survives noColor); ONE accent hue spent EXACTLY once as the solid `█` on the fill's
-  leading edge (marks where the reading stops); explicit `thresholds` stay a user override
-  (tone replaced, glyph unchanged, accent yields); dashed frame, uppercase `LEVEL` eyebrow
-  (or `opts.label` uppercased), `+╌…╌+` guide + `min..max` scale row, two rule separators;
-  the dim `─` track (axis colour) is the shared scale; `┤`/`├` retired; out-of-range clamps
-  the fill (the old `"░".repeat(negative)` `RangeError` is gone) while the footer reports
-  the TRUE value and TRUE percent; non-finite → framed `value n/a` panel; collapsed range
-  safe; `value <v> · <min>..<max> · <pct>%` footer (value fact accented); `toJSON()` gains
-  additive `bucket` (0–3, `null` when n/a) and `percent`. Public API (`GaugeOptions`)
-  unchanged, zero runtime deps; dead `labelLine` removed. Contract block
-  `### LOCKED: gauge chart — session 22 design` in `packages/core/README.md`.
+  heatmap/gauge texture language per the founder's 2026-09-11 shade-texture ruling, so
+  intensity survives noColor); ONE accent hue spent EXACTLY once as the solid `█` on the
+  fill's leading edge; the `style` option stays accepted but the locked design supersedes
+  it (`▁▂▃` sub-blocks, `=`/`.` ascii, naked `[bar] pct` all retired under every style);
+  dashed frame, uppercase `PROGRESS` eyebrow (or `opts.label` uppercased), `+╌…╌+` guide
+  + `0..max` scale row, two rule separators; the dim `─` track (axis colour) is the
+  shared scale; **the silent clamp is retired as a lie** — the fill clamps to the track
+  while the footer AND `toJSON()` report the TRUE value and TRUE percent (the old code
+  clamped `value` into `0..max` before computing, so `value: 200, max: 100` reported 100
+  and 100%); non-finite → framed `value n/a` panel; collapsed range (`max === 0`) safe;
+  `value <v> · 0..<max> · <pct>%` footer (value fact accented); `showPercent: false`
+  drops the pct fact; `toJSON()` gains additive `bucket` (0–3, `null` when n/a) and a
+  true `percent`. Public API (`ProgressOptions`) unchanged, zero runtime deps. Contract
+  block `### LOCKED: progress chart — session 23 design` in `packages/core/README.md`.
 - **Docs catalog + browser QA (S13–S15)**: Darpan-parity chrome, `/chart/:id` routes,
   boot-scoped editor persistence, Playwright QA across all 20 pages.
 - Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the `.ai/hooks/*`
@@ -57,19 +61,19 @@ review + closeout sync all committed; closeout gate green; PR to `main` is the l
   **S19** horizontalBar LOCKED (Vajra S144 full-loop dogfood) · **S20** treemap LOCKED
   (recovered: pi + Command Code + closer chat) · **S21** timeline LOCKED (single-chat,
   plan-review cross-checked) · **S22** gauge LOCKED (single-chat, shade-texture ruling
-  carried).
+  carried) · **S23** progress LOCKED (single-chat, trio complete).
 
 ## What Is In Progress
-- S22 closeout final step: PR `session-22-gauge-mudra` → `main` (review ACCEPT attested;
-  gate green). **Founder deferral (from S21):** plain-English footer redesign, family-wide
-  (A trim / B plain words / B-diet) — one dedicated session, later. **Next session (S23
-  candidates):** `progress` (the last of the founder-named trio) → the deferred footer
-  pass; plan-review bug-first queue (histogram, waterfall, funnel); `lineModelToSvg`
-  parity; real `v0.1.0` release; Playwright QA into CI. See [[roadmap]].
+- S23 closeout final step: PR `session-23-progress-mudra` → `main` (review ACCEPT
+  attested; gate green). **Founder deferral (from S21):** plain-English footer redesign,
+  family-wide (A trim / B plain words / B-diet) — one dedicated session, later; now
+  unblocked with the trio locked. **Next session (S24 candidates):** the footer pass →
+  plan-review bug-first queue (histogram, waterfall, funnel); `lineModelToSvg` parity;
+  real `v0.1.0` release; Playwright QA into CI. See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
-  billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S22: single
-  ZCode chats (boot + plan + execute + verify + demo in one conversation each), one
-  cold-review subagent dispatched post-commit per session; dispatches kept narrow.
+  billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S23:
+  single ZCode chats (boot + plan + execute + verify + demo in one conversation each),
+  one cold-review subagent dispatched post-commit per session; dispatches kept narrow.
   Kept tight.
