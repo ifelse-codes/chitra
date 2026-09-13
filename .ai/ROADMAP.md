@@ -10,13 +10,33 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 22 candidates):** `gauge` → `progress` mudra migration (one story per
-  session — the rest of the founder-named trio, carrying the shade-texture ruling); the
-  founder-deferred family-wide plain-English footer pass (A trim / B plain words / B-diet,
-  one dedicated session); the plan-review bug-first queue (histogram decimal count labels +
-  accent flood, waterfall never-invisible deltas, funnel rainbow); bring `lineModelToSvg`
-  to terminal parity (SVG mirrors the locked terminal 1:1); exercise a real `v0.1.0`
-  release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- 🔜 **Next (Session 23 candidates):** `progress` — the last chart of the founder-named
+  trio (`timeline` → `gauge` → `progress`, carrying the shade-texture ruling, one story per
+  session); the founder-deferred family-wide plain-English footer pass (A trim / B plain
+  words / B-diet, one dedicated session); the plan-review bug-first queue (histogram decimal
+  count labels + accent flood, waterfall never-invisible deltas, funnel rainbow); bring
+  `lineModelToSvg` to terminal parity (SVG mirrors the locked terminal 1:1); exercise a real
+  `v0.1.0` release (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- ✅ **Session 22 (S22) — gauge chart LOCKED (single-chat, founder demo deck):**
+  `gauge()` re-rendered in the reference/panel language — the S18/S19/S21 language on the
+  single-value chart. Rainbow `theme.colors[1/3/2]` value bands removed: the fill is the
+  grey tone ramp (`#ECECEF→#C6C6CE→#A4A4AE→#6A6A75`) WITH its matching plain-text shade
+  glyph (`░ ▒ ▓ █`, one per tone bucket, light → dark by level — the heatmap texture
+  language per the founder's 2026-09-11 shade-texture ruling, so intensity survives
+  noColor); ONE accent hue spent EXACTLY once as the solid `█` on the fill's leading edge
+  (marks where the reading stops); explicit `thresholds` stay a user override (tone
+  replaced, glyph unchanged, accent yields). Dashed frame, uppercase `LEVEL` eyebrow (or
+  `opts.label` uppercased), `+╌…╌+` guide + `min..max` scale row, two rule separators; the
+  dim `─` track (axis colour) kept as the shared scale; `┤`/`├` endcaps retired;
+  out-of-range clamps the fill (the old `"░".repeat(negative)` `RangeError` is gone) while
+  the footer reports the TRUE value and TRUE percent; non-finite → framed `value n/a`
+  panel; collapsed range safe; `value <v> · <min>..<max> · <pct>%` footer (value fact
+  accented); `toJSON()` gains additive `bucket` (0–3, `null` when n/a) and `percent`.
+  Public API unchanged, zero runtime deps, dead `labelLine` removed.
+  `verify-session-22.sh` 13/13 ALL GREEN (core 284/284), demo exit 0 (7/7), review ACCEPT
+  (attested, 9/9 SHIPPED). See "LOCKED: gauge chart" in `packages/core/README.md`. The
+  locked family now spans circular, area, line, bar, scatter, heatmap, horizontalBar,
+  treemap, timeline, and gauge.
 - ✅ **Session 21 (S21) — timeline chart LOCKED (single-chat, plan-review cross-checked):**
   `timeline()` re-rendered in the reference/panel language — the S18/S19 language on the
   Gantt. Rainbow `theme.colors[i % n]` removed: ONE accent hue spent exactly once on the
