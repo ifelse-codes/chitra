@@ -50,6 +50,8 @@ export interface ChartDef {
   description: string;
   preview: string;
   code: string;
+  /** Semantic nav category (authored in chart-specs.ts). */
+  group: string;
 }
 
 export const CHARTS: ChartDef[] = [
@@ -63,6 +65,7 @@ export const CHARTS: ChartDef[] = [
     description: ${JSON.stringify(spec.description)},
     preview: \`${preview}\`,
     code: \`${code}\`,
+    group: ${JSON.stringify(spec.group)},
   },
 `;
   }).join("");
