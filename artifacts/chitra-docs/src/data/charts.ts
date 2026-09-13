@@ -294,15 +294,39 @@ heatmap({
   {
     id: "progress",
     name: "Progress Bar",
-    description: "Horizontal progress bars with precise sub-block rendering.",
-    preview: `Build     [██████████████████████████▁░░░] 87.0%
-Tests     [██████████████████▅░░░░░░░░░░░] 62.0%
-Coverage  [██████████▂░░░░░░░░░░░░░░░░░░░] 34.0%`,
+    description: "Single-value progress panel in the locked design language — grey-tone fill with an accented leading edge. Great for build steps, quotas, and budgets.",
+    preview: `┌╌ PROGRESS ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ BUILD                            │
+│ ████████████████████████████──── │
+│ +╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌+ │
+│ 0                            100 │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ value 87 · 0..100 · 87.0%        │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+┌╌ PROGRESS ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ TESTS                            │
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█──────────── │
+│ +╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌+ │
+│ 0                            100 │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ value 62 · 0..100 · 62.0%        │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+┌╌ PROGRESS ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ COVERAGE                         │
+│ ▒▒▒▒▒▒▒▒▒▒█───────────────────── │
+│ +╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌+ │
+│ 0                            100 │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ value 34 · 0..100 · 34.0%        │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
     code: `import { progress } from "@chitra/core";
 
-progress({ value: 87, label: "Build    " }).render();
-progress({ value: 62, label: "Tests    " }).render();
-progress({ value: 34, label: "Coverage " }).render();`,
+progress({ value: 87, label: "Build" }).render();
+progress({ value: 62, label: "Tests" }).render();
+progress({ value: 34, label: "Coverage" }).render();`,
   },
   {
     id: "gauge",
