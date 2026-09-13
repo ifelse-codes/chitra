@@ -1,15 +1,15 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 23 — COMPLETE (closeout gate + PR)
-- **Type:** CODE — lock the `progress` chart to the mudra reference/panel design language
-- **Branch:** `session-23-progress-mudra` (close on branch; main untouched)
+- **Number:** 24 — COMPLETE (closeout gate + PR)
+- **Type:** CODE — docs-site grouped chart nav; lock state stays internal (no badges)
+- **Branch:** `session-24-docs-nav-groups` (close on branch; main untouched until PR #26 merges)
 - **Date last updated:** 2026-09-13
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 23.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S22 (PR #24 merged the S22
-  gauge lock + its ACCEPT review).
+- `.ai/SESSION` = 24.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S23 (PR #25 merged the S23
+  progress lock + its ACCEPT review).
 - **S23 shipped**: `progress()` re-rendered in the locked panel language — completing the
   founder-named trio (`timeline` → `gauge` → `progress`). The `theme.colors[2/3/1]`
   traffic-light band rainbow is gone: the fill is the grey tone ramp
@@ -46,11 +46,25 @@
 - The locked family now spans circular (S09), area (S09), line (S10), bar (S12),
   scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
   gauge (S22), **progress (S23)** — the founder-named trio complete.
+- **S24 shipped**: catalog sidebar grouped into six semantic categories (generated
+  `group` field threaded `chart-specs.ts` → `generate-charts.ts` → `charts.ts`,
+  drift gate green), collapsible headers with caret + count tags + per-chart glyphs,
+  `localStorage` persistence, auto-expand of the active chart's group, expand-all /
+  collapse-all pair. **Lock state stays internal:** the founder directed removal of
+  ALL status badges mid-session, so the nav carries zero `locked`/`trio`/`in flight`/
+  session-number/queued vocabulary (cold review REJECTs the written badge half —
+  founder waiver recorded, delivery faithful to final intent).
+- Verify: `scripts/verify-session-24.sh` — 12/12 ALL GREEN (incl. the S15 browser
+  suite on the new DOM). Demo: `scripts/demo-session-24.sh` — exit 0, 4/4 PASS.
+  Nav Playwright pass (`scripts/qa-nav-groups.mjs`) — 14/14.
+- Summary: `sessions/session-24-summary.md`. Review: `sessions/session-24-review.md` —
+  **independent cold pass REJECT, attested-shape** (9 of 15 SHIPPED; every miss is the
+  founder-removed badge half; grouping/collapse/persist/auto-expand/glyphs/process
+  all SHIPPED). Fidelity gate covered by founder waiver `VAJRA_CLOSEOUT_WAIVER=24`,
+  disclosed in the summary.
 
 ## Next Session
-- **Number:** 24 — candidates: the founder-deferred family-wide plain-English footer pass
-  (A trim / B plain words / B-diet) — now unblocked with the trio locked; the
-  plan-review bug-first queue (histogram decimals + accent flood, waterfall
-  never-invisible, funnel rainbow); `lineModelToSvg` parity; real `v0.1.0` release
+- **Number:** 25 — candidates: the footer pass (A/B/B-diet); plan-review bug queue
+  (histogram, waterfall, funnel); `lineModelToSvg` parity; real `v0.1.0` release
   (`NODE_AUTH_TOKEN`); Playwright QA into CI.
 - Open in a **new chat** (one session per chat).

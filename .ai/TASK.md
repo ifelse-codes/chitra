@@ -1,33 +1,19 @@
 # Current Task Pointer
 
-## Session 23 — lock the `progress` chart to the mudra reference/panel design language — COMPLETE (closeout gate + PR)
+## Session 24 — docs-site grouped chart nav (lock state internal) — COMPLETE (closeout gate + PR)
 
-- **Branch:** `session-23-progress-mudra` (close on branch; main untouched)
-- **Shipped:** `progress()` re-rendered in the locked panel language — completing the
-  founder-named trio (`timeline` → `gauge` → `progress`). The `theme.colors[2/3/1]`
-  traffic-light band rainbow is gone: the fill is the grey tone ramp WITH its matching
-  plain-text shade glyph (`░ ▒ ▓ █`, one per tone bucket, light → dark — the
-  heatmap/gauge texture language per the founder's shade-texture ruling, so intensity
-  survives noColor); ONE accent hue spent EXACTLY once as a solid `█` on the fill's
-  leading edge. The `style` option stays accepted but the locked design supersedes it —
-  `▁▂▃` sub-blocks, `=`/`.` ascii, and the naked `[bar] pct` line are retired. **The
-  silent clamp is retired as a lie:** the fill clamps to the track while the footer AND
-  `toJSON()` report the TRUE value and TRUE percent; non-finite → framed `value n/a`
-  panel; collapsed range (`max === 0`) safe. Panel chrome: dashed frame, uppercase
-  `PROGRESS` eyebrow (or `opts.label` uppercased), `+╌…╌+` guide + `0..max` scale row,
-  two rule separators; the dim `─` track remains the shared scale. Footer
-  `value <v> · 0..<max> · <pct>%` with the `value <v>` fact in accent; `showPercent:
-  false` drops the pct fact. `toJSON()` gains additive `bucket` (0–3, `null` when n/a)
-  and a true `percent`. Public API unchanged, zero runtime deps. README
-  `### LOCKED: progress chart — session 23 design` block added; docs previews
-  regenerated; the outdated clamped-value assertion in `charts.test.ts` updated to the
-  honest contract.
-- Verify: `scripts/verify-session-23.sh` — 13/13 ALL GREEN (core 309/309, +25 progress).
-  Demo exit 0, 7/7 PASS. Summary: `sessions/session-23-summary.md`. Review:
-  `sessions/session-23-review.md` — independent cold pass ACCEPT, attested (11/14
-  SHIPPED; 3 PARTIAL = process facts not observable from a diff).
+- **Branch:** `session-24-docs-nav-groups` (close on branch; main untouched until PR #26 merges)
+- **Shipped:** catalog sidebar in six semantic groups (generated `group` field,
+  drift gate green); collapsible headers (caret, counts, glyphs, `localStorage`
+  persistence, auto-expand active, expand/collapse-all). Zero status badges —
+  founder-directed mid-session removal (lock state is internal).
+- Verify: `scripts/verify-session-24.sh` — 12/12 ALL GREEN (incl. S15 suite on the
+  new DOM). Demo exit 0, 4/4 PASS. Nav Playwright pass 14/14. Summary:
+  `sessions/session-24-summary.md`. Review: `sessions/session-24-review.md` —
+  independent cold pass REJECT (9/15; every miss is the removed badge half),
+  covered by founder waiver `VAJRA_CLOSEOUT_WAIVER=24`.
+- **PR #26** (`session-24-docs-nav-groups` → `main`) is the last step.
 
-**Next session (S24 candidates):** the founder-deferred family-wide plain-English
-footer pass (A trim / B plain words / B-diet); plan-review bug-first queue (histogram,
-waterfall, funnel); `lineModelToSvg` parity; real `v0.1.0` release; Playwright QA into
-CI. Open in a **new chat**.
+**Next session (S25 candidates):** the footer pass (A/B/B-diet); plan-review bug
+queue (histogram, waterfall, funnel); `lineModelToSvg` parity; `v0.1.0` release;
+Playwright QA into CI. Open in a **new chat**.
