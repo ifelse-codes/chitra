@@ -362,6 +362,45 @@ to the Gantt/timeline. Rules that must not change:
   `n 0 · (no data)` footer and no `Infinity`/`NaN`; a collapsed range (every event at one
   instant) renders honestly with the accent still spent exactly once.
 
+### LOCKED: gauge chart — session 22 design
+
+`gauge` now carries the same locked design language as the area, line, bar, scatter,
+heatmap, horizontalBar, treemap, and timeline families — the S18–S21 panel language
+applied to the single-value gauge, completing the founder-named trio (`timeline` →
+`gauge` → `progress`). Rules that must not change:
+
+- **Intensity IS the grey tone ramp.** The fill is encoded on the documented grey tone
+  ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by level), with the
+  matching plain-text shade glyph (`░ ▒ ▓ █`, one per tone bucket) so the level survives
+  `stripAnsi` / `noColor` — the heatmap/timeline texture language. The old
+  `theme.colors[1/3/2]` value-band rainbow is gone — no `theme.colors[i % n]` band
+  rainbow, ever.
+- **One accent hue, spent EXACTLY once, on the reading's leading edge.** The theme's
+  accent hue is carried by a single solid `█` at the end of the fill run — the
+  single-value analog of the locked peak element; it marks exactly where the reading
+  stops. Everything else stays on the grey ramp. Explicit `thresholds` stay a user
+  override: the matched threshold colour replaces the ramp tone on the whole fill (glyph
+  texture unchanged) and the accent edge yields to it.
+- **The `─` track IS the shared value scale** (axis colour), kept behind the fill so
+  the reading reads against the full range. The `┤` / `├` endcaps are retired glyphs,
+  outside the locked vocabulary.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase
+  eyebrow row (`LEVEL`, or the uppercased `opts.label`), a `+╌…╌+` value-axis guide with
+  a `min..max` scale row under the bar, and two `│ ╌…╌ │` rule separators. Panel width
+  auto-expands so the eyebrow and summary are never clipped (an explicit `width` is a
+  floor, not a cap).
+- **Summary footer** reporting `value <v> · <min>..<max> · <pct>%`, with the `value <v>`
+  fact in the accent hue. Facts true for arbitrary input, never fabricated.
+- **Out-of-range and degenerate data are safe**: a `value` past `max` clips the fill at
+  full track width while the footer reports the TRUE value and percent (may exceed 100%
+  or sit below 0%) — never a negative-`repeat` `RangeError`; a reading below `min`
+  renders an empty track, honestly reported; a collapsed range (`max === min`) never
+  divides by zero (full when `value ≥ max`, empty otherwise); a non-finite `value`
+  renders a framed `value n/a` panel — no `NaN`/`Infinity` anywhere.
+- **Agent surface is additive**: `toJSON()` returns `type: "gauge"`, `value`, `min`,
+  `max`, `percent` (null when n/a), `bucket` (the 0–3 shade index, null when n/a), and
+  `plain`. No existing key is removed; the public `GaugeOptions` shape is unchanged.
+
 ## License
 
 MIT
