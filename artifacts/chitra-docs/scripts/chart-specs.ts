@@ -529,7 +529,7 @@ funnel({
     group: "Trend & time",
     name: "Candlestick",
     description:
-      "OHLC financial chart — open, high, low, close per period. Green = bullish (close > open), red = bearish.",
+      "OHLC financial chart — open, high, low, close per period. Solid = bullish (close >= open), dashed outline = bearish; one accent marks the peak close.",
     // NOTE: prior docs referenced theme "neon", which does not exist in
     // @chitra/core (valid: default, nord, dracula, github-dark, tokyo-night,
     // solarized, monochrome). Corrected to "dracula".
