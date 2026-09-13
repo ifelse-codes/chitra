@@ -10,12 +10,37 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 25 candidates):** the founder-deferred family-wide plain-English
-  footer pass (A trim / B plain words / B-diet, one dedicated session); the plan-review
-  bug-first queue (histogram decimal count labels + accent flood, waterfall
-  never-invisible deltas, funnel rainbow); bring `lineModelToSvg` to terminal parity
-  (SVG mirrors the locked terminal 1:1); exercise a real `v0.1.0` release
-  (`NODE_AUTH_TOKEN`); wire the local Playwright QA into CI.
+- 🔜 **Next (Session 26 candidates):** the audit queue's last unlocked charts —
+  **funnel** (`▼` arrows + rainbow, `funnel.ts:24`) and **waterfall** (row
+  quantization hides sub-row deltas); the founder-deferred family-wide plain-English
+  footer pass (A trim / B plain words / B-diet, one dedicated session, founder
+  choice pending); bring `lineModelToSvg` to terminal parity (SVG mirrors the
+  locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
+  the local Playwright QA into CI.
+- ✅ **Session 25 (S25) — histogram chart LOCKED (single-chat, resumed from a z-code
+  token stop):** `histogram()` re-rendered in the reference/panel language — the
+  S18–S23 language on the distribution chart, per the mudra audit's P1 queue (§5;
+  §3.3 mockup is the fidelity target). Both P0 bugs retired: integer-only y-axis
+  count labels (the old decimal `31.11/22.22/13.33` counts lie) and the
+  `theme.colors[0]` accent flood. ONE accent hue spent EXACTLY once as a solid `█`
+  column on the mode bin (highest count, ties → first bin); every other bin takes
+  the grey tone ramp (`#ECECEF→#6A6A75`) WITH its matching plain-text shade glyph
+  (`░ ▒ ▓` by share of modal count — the founder's 2026-09-11 shade-texture ruling,
+  so "how full" survives noColor). Dashed frame, uppercase `DISTRIBUTION` eyebrow
+  (or `opts.xLabel`), dashed `└╌` baseline, bin-start labels, two rule separators;
+  `n · mode · p50 · p99` footer (mode fact accented, nearest-rank percentiles).
+  Degenerate-safe: empty → framed `n 0 · (no data)` panel with null JSON facts (the
+  old code printed `NaN NaN NaN` bin labels); collapsed range lands in bin 0;
+  non-finite samples excluded, never binned. Explicit `width` is a floor
+  (auto-width); `toJSON()` gains additive `mode`/`p50`/`p99` (null when empty) +
+  `count`. Public API unchanged, zero runtime deps. Docs previews regenerated
+  (drift gate green), README `### LOCKED: histogram chart` block.
+  `verify-session-25.sh` 13/13 ALL GREEN (core 332/332, +23 histogram tests), demo
+  exit 0 (7/7). Cold review ACCEPT (attested, 13/14 SHIPPED,
+  `Review-Inputs-SHA b10d5b94…0a761`). See "LOCKED: histogram chart" in
+  `packages/core/README.md`. The locked family now spans circular, area, line, bar,
+  scatter, heatmap, horizontalBar, treemap, timeline, gauge, progress, and
+  histogram — funnel and waterfall remain.
 - ✅ **Session 24 (S24) — docs-site grouped chart nav (PR #26):** catalog sidebar in
   six semantic categories (trend & time / comparison / distribution & density /
   part-to-whole / flow & accumulation / single value & progress) via a generated
