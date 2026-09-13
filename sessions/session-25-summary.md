@@ -1,7 +1,10 @@
 # Session 25 Summary — histogram LOCKED to the mudra panel language
 
-**Status:** BUILT + VERIFIED, UNCOMMITTED (awaiting founder commit token, per
-constitution `commit.autonomous: false`). Branch: `session-25-histogram-mudra`.
+**Status:** SHIPPED (2026-09-13) — commits `61e4d3b`→`815d35d` landed with the
+founder's in-chat commit approval (`VAJRA_ALLOW_COMMIT=25`, 4 atomic commits,
+≤3 files each); independent cold review `sessions/session-25-review.md` —
+**ACCEPT, attested** (13/14 SHIPPED; `Review-Inputs-SHA b10d5b94…0a761`).
+Branch: `session-25-histogram-mudra`.
 Verify: `scripts/verify-session-25.sh` — **13/13 ALL GREEN**. Demo:
 `scripts/demo-session-25.sh` — **exit 0, 7/7 PASS**. Core suite 332/332
 (+23 new histogram tests), typecheck exit 0, docs drift gate green,
