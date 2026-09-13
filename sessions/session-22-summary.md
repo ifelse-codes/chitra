@@ -45,8 +45,10 @@ solid `█` reading edge).
   cast before `.bucket`/`.percent` access).
 
 ## Governance
-- Crew: none dispatched for the build (single-chat session). The S139 required-crew gate is
-  satisfied by the founder-directed closeout recorded here; no waiver needed.
+- Crew: none dispatched for the build (single-chat session). The S139 required-crew gate
+  DID flag the missing tech-lead handoff at closeout — covered by the founder waiver
+  (`VAJRA_CLOSEOUT_WAIVER=22`, founder-directed closeout approved in chat), disclosed
+  here rather than hidden, same as the S21 summary anticipated.
 - Independent cold fidelity review owed POST-COMMIT (attestation hashes the committed diff +
   prompt): `sessions/session-22-review.md` follows the delivery commits.
 
