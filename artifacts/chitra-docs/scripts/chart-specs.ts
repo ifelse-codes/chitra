@@ -320,16 +320,17 @@ heatmap({
   {
     id: "progress",
     name: "Progress Bar",
-    description: "Horizontal progress bars with precise sub-block rendering.",
+    description:
+      "Single-value progress panel in the locked design language — grey-tone fill with an accented leading edge. Great for build steps, quotas, and budgets.",
     code: `import { progress } from "@chitra/core";
 
-progress({ value: 87, label: "Build    " }).render();
-progress({ value: 62, label: "Tests    " }).render();
-progress({ value: 34, label: "Coverage " }).render();`,
+progress({ value: 87, label: "Build" }).render();
+progress({ value: 62, label: "Tests" }).render();
+progress({ value: 34, label: "Coverage" }).render();`,
     ...multi(
-      () => progress({ value: 87, label: "Build    " }),
-      () => progress({ value: 62, label: "Tests    " }),
-      () => progress({ value: 34, label: "Coverage " }),
+      () => progress({ value: 87, label: "Build" }),
+      () => progress({ value: 62, label: "Tests" }),
+      () => progress({ value: 34, label: "Coverage" }),
     ),
   },
   {
