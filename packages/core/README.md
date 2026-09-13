@@ -448,6 +448,42 @@ language applied to the single-value progress bar, completing the founder-named 
   0–3 shade index, null when n/a), and `plain`. No existing key is removed; the
   public `ProgressOptions` shape is unchanged.
 
+### LOCKED: histogram chart — session 25 design
+
+`histogram` now carries the same locked design language as the area, line, bar,
+scatter, heatmap, horizontalBar, treemap, timeline, gauge, and progress families —
+the S12 `bar` orientation applied to binned distribution data. Rules that must not
+change:
+
+- **One accent hue, spent EXACTLY once, on the mode bin.** The bin with the highest
+  count (ties → first bin in bin order, deterministic) renders a solid `█` column in
+  the theme's accent hue — the same peak rule as bar/timeline/horizontalBar. Every
+  other bin sits on the grey tone ramp. The old `theme.colors[0]` wall (the only
+  chart in the core set that ignored the tone system entirely) is retired — no
+  `theme.colors[i % n]` flood, ever.
+- **Density IS the grey tone ramp — and the texture.** Each non-mode bin's shade
+  glyph (`░ ▒ ▓ █`, light → dark by its share of the modal count) carries the
+  density through `stripAnsi` / `noColor` — the heatmap/timeline/progress texture
+  language. Bars stay thin (width ≥ 3 where the panel allows) with real 1-col gaps.
+- **Y-axis labels are INTEGER counts.** Counts are integers — the old decimal
+  y-labels (`36.56` on a count axis) were a bug the axis told and are retired.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an uppercase
+  eyebrow row (`DISTRIBUTION`, or the uppercased `opts.xLabel`), a dashed `└╌…╌`
+  baseline, bin-start labels under their columns in the label tone, and two
+  `│ ╌…╌ │` rule separators. Panel width auto-expands so the eyebrow, bin labels,
+  and summary are never clipped (an explicit `width` is a floor, not a cap).
+- **Summary foot** reporting `n <count> · mode <value> · p50 <value> · p99 <value>`
+  (nearest-rank percentiles over the sample), with the `mode` fact in the accent
+  hue. Facts true for the given sample, never fabricated.
+- **Degenerate input is safe.** Empty / all-non-finite data renders a framed
+  `n 0 · (no data)` panel (no fabricated bin labels); a collapsed range (every
+  value equal) lands every sample in the first bin; non-finite samples are
+  excluded from the distribution — no `NaN`/`Infinity` anywhere.
+- **Agent surface is additive**: `toJSON()` returns the original keys (`type`,
+  `data`, `bins`, `binCounts`, `title`, `plain`) plus `mode`, `p50`, `p99` (null
+  when there is no data) and `count` (the number of samples actually binned). The
+  public `HistogramOptions` shape is unchanged.
+
 ## License
 
 MIT
