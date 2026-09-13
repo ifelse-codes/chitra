@@ -1078,6 +1078,78 @@ body, button, input, textarea, select { font-family: var(--font-mono); }
 .nav-item.active { background: var(--theater-bg-1); border-left-color: var(--theater-accent); }
 .nav-item.active .accent-dot { background: var(--theater-accent); }
 
+/* ══ Grouped chart nav (S24 — values from design-reference/nav-groups-mock.html) ══ */
+.nav-group-label {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  padding: 14px 16px 4px;
+}
+.nav-group:first-of-type .nav-group-label { padding-top: 12px; }
+.nav-group-label:hover { color: var(--text-tertiary); }
+.nav-group-label:focus-visible { outline: 1px solid var(--border-3); outline-offset: 2px; border-radius: 3px; }
+.caret {
+  display: inline-block;
+  width: 11px;
+  font-size: 9px;
+  color: var(--text-dim);
+  transition: transform 0.15s ease;
+}
+.nav-group.collapsed .caret { transform: rotate(-90deg); }
+.nav-group.collapsed .nav-group-items { display: none; }
+.nav-group-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.8;
+}
+.nav-group-items .nav-item {
+  padding-left: 22px;
+}
+.nav-item .glyph {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.nav-item.active .glyph { color: var(--purple-l); }
+
+/* expand all / collapse all pair under the Chart Types label */
+.nav-expand-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 2px;
+}
+.nav-expand-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.nav-expand-btn:hover { color: var(--text-secondary); text-decoration: underline; }
+.nav-expand-sep { font-size: 10px; color: var(--text-dim); }
+
 .content { padding: 36px clamp(20px, 5vw, 56px) 64px; }
 .page { max-width: 900px; }
 .page-header { margin-bottom: 28px; }
