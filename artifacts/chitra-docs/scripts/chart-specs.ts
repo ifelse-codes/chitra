@@ -434,14 +434,16 @@ radar({
   data: [8, 6, 9, 7, 5, 8],
   labels: ["Speed", "Safety", "UX", "Perf", "Cost", "Scale"],
   title: "System Radar",
-  width: 40,
+  width: 64,
+  height: 28,
 }).render();`,
     ...single(() =>
       radar({
         data: [8, 6, 9, 7, 5, 8],
         labels: ["Speed", "Safety", "UX", "Perf", "Cost", "Scale"],
         title: "System Radar",
-        width: 40,
+        width: 64,
+        height: 28,
       }),
     ),
   },

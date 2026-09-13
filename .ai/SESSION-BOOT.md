@@ -1,60 +1,53 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 25 — COMPLETE (closeout gate + PR)
-- **Type:** CODE — histogram locked to the mudra panel language
-- **Branch:** `session-25-histogram-mudra` (close on branch; main untouched until PR merges)
+- **Number:** 26 — COMPLETE (closeout gate + PR)
+- **Type:** CODE — waterfall + funnel + sankey + radar locked to the mudra panel language
+- **Branch:** `session-26-waterfall-mudra` (close on branch; main untouched until PR merges)
 - **Date last updated:** 2026-09-13
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 25.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S24 (PR #26 merged the
-  S24 grouped chart nav).
-- **S24 shipped**: docs catalog sidebar grouped into six semantic categories
-  (generated `group` field), collapsible headers with caret + count tags + glyphs,
-  `localStorage` persistence, auto-expand of the active group, expand/collapse-all.
-  Lock state stays internal — ALL status badges removed at founder direction
-  (cold review REJECT on the written badge half, founder waiver
-  `VAJRA_CLOSEOUT_WAIVER=24` disclosed in the summary). Verify 12/12, demo exit 0,
-  nav Playwright pass 14/14.
-- **S25 shipped**: `histogram()` re-rendered in the reference/panel language — the
-  S18–S23 language on the distribution chart, per the audit's P1 queue
-  (`design-reference/mudra-audit.md §5`; audit §3.3 mockup is the fidelity target).
-  **Both P0 bugs retired:** integer-only y-axis count labels (the old decimal
-  `31.11/22.22/13.33` counts lie) and the `theme.colors[0]` accent flood. The
-  single accent hue is spent EXACTLY once as a solid `█` column on the mode bin
-  (highest count, ties → first bin); every other bin takes the grey tone ramp
-  (`#ECECEF→#6A6A75`) WITH its matching plain-text shade glyph (`░ ▒ ▓` by share of
-  modal count — the founder's 2026-09-11 shade-texture ruling, so "how full"
-  survives noColor). Dashed frame, uppercase `DISTRIBUTION` eyebrow (or
-  `opts.xLabel`), dashed `└╌` baseline, bin-start labels, two rule separators;
-  footer `n <n> · mode <bin-start> · p50 <v> · p99 <v>` (mode fact accented,
-  nearest-rank percentiles). Degenerate-safe: empty → framed `n 0 · (no data)`
-  panel with null JSON facts (the old code printed `NaN NaN NaN` bin labels);
-  collapsed range lands in bin 0; non-finite samples excluded, never binned.
-  Explicit `width` is a floor (auto-width); `toJSON()` gains additive
-  `mode`/`p50`/`p99` (null when empty) + `count`. Public API unchanged, zero
-  runtime deps. README carries `### LOCKED: histogram chart — session 25 design`.
-- Verify: `scripts/verify-session-25.sh` — 13/13 ALL GREEN (core 332/332, +23 new
-  histogram tests). Demo: `scripts/demo-session-25.sh` — exit 0, 7/7 PASS. Three of
-  the session's own expectations were caught by the gates while verifying and fixed,
-  never hand-waved (nearest-rank p50, modal count, x-label row index); the render
-  was never wrong.
-- Summary: `sessions/session-25-summary.md`. Review: `sessions/session-25-review.md`
-  — **independent cold pass ACCEPT, attested** (13 of 14 SHIPPED; the 1 PARTIAL row
-  is a process fact a diff cannot carry — the founder commit approval, since
-  evidenced by the landed commits; `Review-Inputs-SHA b10d5b94…0a761` binds the
-  verdict to the committed diff + prompt). Fidelity + attestation gates pass
-  WITHOUT any waiver.
+- `.ai/SESSION` = 26.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S25 (PR #27 merged the
+  S25 histogram lock).
+- **S25 shipped**: `histogram()` re-rendered in the reference/panel language
+  (integer y-labels, accent-once mode bin, grey ramp + `░▒▓` texture, framed
+  `n 0 · (no data)` empty panel, `mode`/`p50`/`p99` JSON facts). Verify 13/13,
+  demo 7/7, cold review ACCEPT (attested, 13/14 SHIPPED).
+- **S26 shipped**: `waterfall()` + `funnel()` + `sankey()` + `radar()`
+  re-rendered in the reference/panel language, per the audit's remaining queue
+  (§3.4 funnel, §3.5 waterfall; sankey by analogy, radar from a
+  founder-supplied reference image). Five stories by explicit founder direction
+  (1-story rule waived, disclosed). Retired: waterfall P0 flat-dash downs
+  (now dashed outline boxes, sub-row keeps 1 row), decimal y-labels, the
+  `theme.colors[i]` rainbow on all four, funnel `▼` arrows (CENTERED
+  silhouette — audit §3.4 item 2 reversed by founder order, on research
+  record), sankey `▶` arrows. One accent spent exactly once per chart
+  (waterfall Total, funnel peak stage, sankey peak flow, radar primary
+  series); grey tone ramp + `░▒▓` shade texture elsewhere (founder's
+  2026-09-11 ruling). Dashed frames, metric eyebrows, two rule separators,
+  fact feet with accented key fact. Degenerate-safe throughout (framed
+  no-data panels, null JSON facts, never `NaN`). README carries four
+  `### LOCKED — session 26 design` blocks.
+- Verify: `scripts/verify-session-26.sh` — 24/24 ALL GREEN (core 391/391, +19
+  waterfall / +14 funnel / +12 sankey / +14 radar tests). Demo:
+  `scripts/demo-session-26.sh` — exit 0, 9/9 PASS. `chart-specs.ts` radar
+  preview widened (40→64, height 28) so the lock reads in the catalog;
+  `dist/` rebuilt (playground runs `dist`).
+- Summary: `sessions/session-26-summary.md`. Review: `sessions/session-26-review.md`
+  — **independent cold pass ACCEPT, attested** (18 of 19 SHIPPED; the 1 PARTIAL
+  is row 15 — radar's thin `─│╲╱` edges / `·` stipple / dashed rings rendered
+  as a braille rim + dot-wash + solid-set rings per the founder reference
+  image, disclosed in code + README; `Review-Inputs-SHA cc9736ec…be50559`
+  binds the verdict to the committed diff + prompt). Fidelity + attestation
+  gates pass WITHOUT any waiver.
 - The locked family now spans circular (S09), area (S09), line (S10), bar (S12),
   scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
-  gauge (S22), progress (S23), **histogram (S25)** — 12 locked; the audit queue's
-  remaining unlocked charts are funnel and waterfall.
+  gauge (S22), progress (S23), histogram (S25), **waterfall + funnel + sankey +
+  radar (S26)** — 16 locked; the audit queue is EMPTY.
 
 ## Next Session
-- **Number:** 26 — candidates: the audit queue's remaining unlocked charts
-  (**funnel**, **waterfall** — each still carries its P0/P1 language bugs); the
-  founder-deferred footer pass (A trim / B plain words / B-diet, one dedicated
-  session); `lineModelToSvg` parity; real `v0.1.0` release (`NODE_AUTH_TOKEN`);
-  Playwright QA into CI.
+- **Number:** 27 — candidates: the founder-deferred footer pass (A trim / B
+  plain words / B-diet, one dedicated session); `lineModelToSvg` parity; real
+  `v0.1.0` release (`NODE_AUTH_TOKEN`); Playwright QA into CI.
 - Open in a **new chat** (one session per chat).

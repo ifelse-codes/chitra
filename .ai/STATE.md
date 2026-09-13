@@ -1,42 +1,60 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S25 closing, 2026-09-13.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S26 closing, 2026-09-13.)
 
 ## Active Branch
-`session-25-histogram-mudra` — S25 complete on branch: delivery + summary + cold
-ACCEPT review (attested) + closeout sync all committed; closeout gate green with the
-crew waiver; PR to `main` is the last step.
+`session-26-waterfall-mudra` — S26 complete on branch: delivery (6 atomic
+commits) + summary + cold ACCEPT review (attested) + closeout sync all
+committed; closeout gate green with no waiver; PR to `main` is the last step.
 
 ## What Currently Works (observed, not claimed)
-- **`histogram()` (S25)**: locked panel language — dashed frame + `DISTRIBUTION`
-  eyebrow, one accent spent exactly once as a solid `█` on the mode bin (ties →
-  first), grey tone ramp + `░▒▓` shade texture by share of modal count (survives
-  noColor), integer-only y-axis count labels, dashed baseline, bin-start labels,
-  `n · mode · p50 · p99` foot (nearest-rank, mode accented). Empty → framed
-  `n 0 · (no data)` with null JSON facts; collapsed range → bin 0; non-finite
-  samples excluded, never binned. Explicit `width` is a floor. `toJSON()` additive
-  `mode`/`p50`/`p99`/`count`.
-- Docs previews for the histogram regenerated (drift gate green); docs typecheck
-  exit 0; standalone docs-site build verified serving the S25 render in both the
-  catalog card and the live `tsx` playground.
-- `scripts/verify-session-25.sh` — **ALL GREEN (13 pass, 0 fail)**;
-  `scripts/demo-session-25.sh` — exit 0, **7/7 PASS**.
-- `pnpm --filter @chitra/core run test` — **332/332 green** (+23 new histogram
-  tests); `typecheck` — exit 0.
+- **`waterfall()` (S26)**: locked panel language — dashed frame + `NET`
+  eyebrow, down-deltas as dashed outline boxes (`┌╌╌┐`/`│  │`/`└╌╌┘`, sub-row
+  keeps 1 row via rounding — the P0 flat-dash bug retired by design), Start
+  darkest-grey solid `█`, Total accent solid `█` spent exactly once, ups solid
+  `▓` mid-grey, downs outlined light-grey, integer y-labels with `│`/`+`
+  guide, dashed `└╌` baseline, `┄` connectors, signed delta row,
+  `START · Δ · TOTAL` foot (TOTAL accented). Empty → framed
+  `TOTAL 0 · (no data)` with `steps: []`; all-zero → empty columns.
+  `toJSON()` additive `steps` (`{label,delta,start,end,kind}`).
+  `positiveColor`/`negativeColor`/`totalColor` stay accepted as tone overrides.
+- **`funnel()` (S26)**: CENTERED rows in a shared field (top-wide →
+  bottom-narrow; audit §3.4 item 2 reversed by founder order, on research
+  record), no `▼`, peak stage solid `█` accent (ties → first), descending
+  grey ramp + `░▒▓` + `▓` end-cap, integer pcts, `CONVERSION <pct>%` eyebrow,
+  `IN · OUT · CONVERSION · DROP` foot (CONVERSION accented). Empty →
+  `STAGES 0 · (no data)` with null `conversion`/`biggestDrop`; zero-first →
+  `n/a` conversion.
+- **`sankey()` (S26)**: no `▶`, peak flow solid `█` accent (ties → first),
+  other flows ramp + `░▒▓` proportional widths, toned `■` node ledger ranked
+  by flow with `in:`/`out:` facts, `FLOW <total>` eyebrow,
+  `NODES · LINKS · PEAK` foot (peak accented). Empty → `NODES 0 · (no data)`
+  with null `peakFlow`.
+- **`radar()` (S26)**: five braille rings with `+` ticks and dashed spokes,
+  `0..<max>` scale in the `AXES · SERIES` eyebrow, accent primary with
+  braille rim + dot-wash fill + solid `●` vertices, dashed grey secondaries
+  with hollow `○` and no fill, `● ── / ○ ╌╌` legend, `AVG · PEAK` foot (peak
+  accented), unclipped labels, negatives/non-finite collapse to center.
+  Empty → `AXES 0 · (no data)` with null `max`/`avg`. (Cold review PARTIAL on
+  the thin-edge/stipple/dashed-ring glyph grammar — founder-reference
+  substitution, disclosed in code + README.)
+- `scripts/verify-session-26.sh` — **ALL GREEN (24 pass, 0 fail)**;
+  `scripts/demo-session-26.sh` — exit 0, **9/9 PASS**.
+- `pnpm --filter @chitra/core run test` — **391/391 green** (+59 new S26
+  tests); `typecheck` — exit 0; docs drift gate green.
 - **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
   surface. LOCKED families: circular (S09), area (S09), line (S10), bar (S12),
   scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
-  gauge (S22), progress (S23), **histogram (S25)** — 12 locked.
+  gauge (S22), progress (S23), histogram (S25), **waterfall + funnel + sankey +
+  radar (S26)** — 16 locked; the audit queue is EMPTY.
 - **Docs catalog + browser QA (S13–S15, S24)**: Darpan-parity chrome, `/chart/:id`
   routes, boot-scoped editor persistence, grouped sidebar with collapse/persist,
-  Playwright QA across all 20 pages.
+  Playwright QA across all 20 pages. S26 previews regenerated (drift gate
+  green); `dist/` rebuilt for the playground.
 - Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the `.ai/hooks/*`
   PreToolUse guards (commit / publish / session) wired.
 
 ## What Is Broken / Incomplete
-- The plan-review bug queue is still open: **waterfall** row-quantization hides any
-  sub-row delta and **funnel** still carries the `▼` arrows + rainbow (`funnel.ts:24`)
-  — both are the audit's remaining unlocked charts and the natural S26 target.
 - The founder-deferred footer pass (A trim / B plain words / B-diet) awaits a
   founder choice.
 - The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
@@ -57,18 +75,23 @@ crew waiver; PR to `main` is the last step.
   carried) · **S23** progress LOCKED (single-chat, trio complete) · **S24** grouped
   chart nav, badges out per founder order (single-chat, live glyph tuning) ·
   **S25** histogram LOCKED (single-chat, resumed from a z-code token stop; commits +
-  review + closeout completed in the closer chat).
+  review + closeout completed in the closer chat) ·
+  **S26** waterfall + funnel + sankey + radar LOCKED (five stories by founder
+  direction; funnel centered by founder order on research record;   radar from a
+  founder reference image — cold ACCEPT 18/19, row 15 PARTIAL disclosed).
 
 ## What Is In Progress
-- S25 closeout final step: merge PR `session-25-histogram-mudra` → `main`.
-  **Next (S26 candidates):** the audit queue's remaining unlocked charts (funnel,
-  waterfall); the footer pass (A/B/B-diet, founder choice); `lineModelToSvg` parity;
-  real `v0.1.0` release; Playwright QA into CI. See [[roadmap]].
+- S26 closeout final step: merge PR `session-26-waterfall-mudra` → `main`.
+  **Next (S27 candidates):** the founder-deferred footer pass (A/B/B-diet,
+  founder choice); `lineModelToSvg` parity; real `v0.1.0` release; Playwright
+  QA into CI. See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
-  billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S25:
+  billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S26:
   single ZCode chats (boot + plan + execute + verify + demo in one conversation each),
   one cold-review subagent dispatched post-commit per session; dispatches kept narrow.
   S25 additionally needed a closer chat after the build chat hit its token limit
-  (state recovery + founder commits + cold review + closeout). Kept tight.
+  (state recovery + founder commits + cold review + closeout). S26 ran five stories in
+  one session by explicit founder direction (waiver of the 1-story rule, disclosed).
+  Kept tight.

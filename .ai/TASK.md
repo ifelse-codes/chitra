@@ -1,24 +1,26 @@
 # Current Task Pointer
 
-## Session 25 — histogram LOCKED to the mudra panel language — COMPLETE (closeout gate + PR)
+## Session 26 — waterfall + funnel + sankey + radar LOCKED to the mudra panel language — COMPLETE (closeout gate + PR)
 
-- **Branch:** `session-25-histogram-mudra` (close on branch; main untouched until PR merges)
-- **Shipped:** `histogram()` re-rendered in the locked panel language — dashed
-  frame + `DISTRIBUTION` eyebrow, ONE accent hue spent exactly once as a solid
-  `█` on the mode bin (ties → first), grey tone ramp + `░▒▓` shade texture by
-  share of modal count, integer-only y-axis count labels, dashed baseline,
-  `n · mode · p50 · p99` foot (nearest-rank, mode accented). Both P0 bugs from
-  STATE's bug queue retired: decimal count labels + `theme.colors[0]` accent
-  flood. Degenerate-safe: empty → framed `n 0 · (no data)` panel with null JSON
-  facts; collapsed range → bin 0; non-finite samples excluded. README carries
-  `### LOCKED: histogram chart — session 25 design`.
-- Verify: `scripts/verify-session-25.sh` — 13/13 ALL GREEN (core 332/332, +23
-  histogram tests). Demo exit 0, 7/7 PASS. Summary: `sessions/session-25-summary.md`.
-  Review: `sessions/session-25-review.md` — independent cold pass ACCEPT, attested
-  (13/14 SHIPPED; `Review-Inputs-SHA b10d5b94…0a761`).
-- **PR** (`session-25-histogram-mudra` → `main`) is the last step.
+- **Branch:** `session-26-waterfall-mudra` (close on branch; main untouched until PR merges)
+- **Shipped:** four charts re-rendered in the locked panel language — dashed
+  frames + metric eyebrows + two rules + fact feet (key fact accented), one
+  accent hue spent exactly once per chart (waterfall Total anchor, funnel peak
+  stage, sankey peak flow, radar primary series), grey tone ramp + `░▒▓`
+  shade texture elsewhere, integer labels, degenerate-safe no-data panels
+  with null JSON facts. Retired: waterfall P0 flat-dash downs + decimal
+  y-labels, all four `theme.colors[i]` rainbows, funnel `▼` (centered
+  silhouette by founder order, audit §3.4 item 2 reversed on research
+  record), sankey `▶`. Five stories by explicit founder direction
+  (1-story rule waived, disclosed). README carries four `### LOCKED — session
+  26 design` blocks.
+- Verify: `scripts/verify-session-26.sh` — 24/24 ALL GREEN (core 391/391, +59
+  new tests). Demo exit 0, 9/9 PASS. Summary: `sessions/session-26-summary.md`.
+  Review: `sessions/session-26-review.md` — independent cold pass ACCEPT, attested
+  (18/19 SHIPPED, row 15 PARTIAL disclosed; `Review-Inputs-SHA cc9736ec…be50559`).
+- **PR** (`session-26-waterfall-mudra` → `main`) is the last step.
 
-**Next session (S26 candidates):** the audit queue's remaining unlocked charts
-(**funnel**, **waterfall**); the founder-deferred footer pass (A/B/B-diet, needs a
-founder choice); `lineModelToSvg` parity; `v0.1.0` release; Playwright QA into CI.
-Open in a **new chat**.
+**Next session (S27 candidates):** the founder-deferred footer pass (A/B/B-diet,
+needs a founder choice); `lineModelToSvg` parity; `v0.1.0` release; Playwright
+QA into CI. The audit queue is empty — all queued charts locked. Open in a
+**new chat**.
