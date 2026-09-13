@@ -307,10 +307,16 @@ progress({ value: 34, label: "Coverage " }).render();`,
   {
     id: "gauge",
     name: "Gauge",
-    description: "Single-value meter — great for KPIs, CPU usage, battery level.",
-    preview: `┤▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░├
-0                                      100
-CPU Load: 73`,
+    description: "Single-value meter in the locked panel language — grey-tone fill with an accented reading edge. Great for KPIs, CPU usage, battery level.",
+    preview: `┌╌ GAUGE ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ CPU LOAD                             │
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█────────── │
+│ +╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌+ │
+│ 0                                100 │
+│ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ │
+│ value 73 · 0..100 · 73.0%            │
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
     code: `import { gauge } from "@chitra/core";
 
 gauge({
