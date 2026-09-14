@@ -10,12 +10,25 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 28 candidates):** the founder-deferred family-wide plain-English
+- 🔜 **Next (Session 29 candidates):** the founder-deferred family-wide plain-English
   footer pass (A trim / B plain words / B-diet, one dedicated session, founder
   choice pending); bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI; harden the candle ties-first test to assert
   second-candle exclusivity (S27 review note — code already correct).
+- ✅ **Session 28 (S28) — sparkline chart LOCKED (in progress, founder
+  in-chat direction on the throwaway v8 shape+shade prototype):** `sparkline()`
+  re-rendered in the reference/panel language — the heatmap strip grammar with
+  a pulse (height reads the trend, shade reads the intensity). Every reading is
+  one 2-wide column (≤4 rows by share of range) on the grey tone ramp with its
+  matching shade glyph (`░ ▒ ▓`, peak solid `█` accent once, ties → first);
+  dashed frame, label on top, `SPARKLINE` eyebrow, two rules,
+  `n · min · max · last · peak` foot (peak accented). Retired: the single-teal
+  `theme.colors[0]` strip, `▁▂▃` sub-blocks, braille/ascii paths (option
+  accepted, design superseded), backtick markdown, bare `""` on empty.
+  `verify-session-28.sh` 17/17 ALL GREEN (core 435/435, +15 tests), demo exit
+  0 (4/4). `### LOCKED: sparkline chart` README block. The locked family now
+  spans 19 charts.
 - ✅ **Session 27 (S27) — candlestick + boxplot LOCKED (two stories by founder
   direction, "candlestick boxplot migrate first"):** `candlestick()` re-rendered
   (bullish solids `▓` on mid-grey, bearish dashed outline boxes per the waterfall
