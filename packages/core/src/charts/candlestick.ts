@@ -37,10 +37,12 @@ export function axisPriceFmt(v: number, range: number): string {
  *  - **Adaptive price labels** (`axisPriceFmt`): integers when the range is
  *    wide, ≤2dp when tight — never the old `162.55`-style sprawl, and never
  *    silent integer rounding of real prices. `│`/`+` guide, dashed `└╌`
- *    baseline, truncated period labels, two rule separators.
- *  - Panel width auto-expands (explicit `width` is a floor, candles stay
- *    `CANDLE_MIN` wide so outlines never clip). Degenerate input is safe:
- *    empty / all-non-finite renders a framed `N 0 · (no data)` panel with
+ *    baseline, full period labels under their candles, two rule separators.
+ *  - Panel width auto-expands (explicit `width` is a floor, candles fit the
+ *    longest period label — never the old 4-char `Jan`/`Jan1` mush — with a
+ *    `CANDLE_MIN` floor so outlines never clip). The frame top carries
+ *    `opts.title`; the eyebrow stays `OHLC` (never an uppercased title echo).
+ *  - **Degenerate input is safe.** Empty / all-non-finite renders a framed `N 0 · (no data)` panel with
  *    null JSON facts; a flat range (all OHLC equal) pads ±1 so candles stay
  *    visible (never `NaN` rows); non-finite candles are excluded, never
  *    plotted. No `NaN`/`Infinity` anywhere. */
@@ -83,12 +85,15 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
   const low = empty ? null : Math.min(...valid.map((c) => c.low));
   const last = empty ? null : valid[valid.length - 1]!.close;
 
-  const eyebrow = (opts.title ?? "OHLC").toUpperCase();
+  const eyebrow = "OHLC";
+
+  // Candles fit the longest period label (never the 4-char `Jan`/`Jan1`
+  // mush), with a floor so outlines stay legible.
+  const candleW = Math.max(CANDLE_MIN, ...valid.map((c) => (c.label ?? "").length));
   const footPlain = empty
     ? "N 0 · (no data)"
     : `N ${n} · HI ${axisPriceFmt(high!, yRange)} · LO ${axisPriceFmt(low!, yRange)} · LAST ${axisPriceFmt(last!, yRange)}`;
 
-  const candleW = CANDLE_MIN;
   const mid = Math.floor(candleW / 2);
   const plotCols = n > 0 ? n * (candleW + 1) - 1 : 0;
 
