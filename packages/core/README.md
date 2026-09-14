@@ -646,12 +646,14 @@ must not change:
   once the range spans 100+, otherwise ≤1dp (range ≥ 10) or ≤2dp, trimmed —
   compact labels, never `162.55`-style float sprawl, and never silent integer
   rounding of real prices. Locked `│`/`+` guide, dashed `└╌…╌` baseline,
-  truncated period labels under their candles.
+  full period labels under their candles.
 - **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`), an
-  uppercase `OHLC` eyebrow (or `opts.title` uppercased), two `│ ╌…╌ │` rule
-  separators, and a foot row reporting `N <n> · HI <v> · LO <v> · LAST <v>`
+  uppercase `OHLC` eyebrow (the frame top carries `opts.title` — never an
+  uppercased title echo), two `│ ╌…╌ │` rule separators, and a foot row reporting
+  `N <n> · HI <v> · LO <v> · LAST <v>`
   with the `LAST` fact in the accent hue. Panel width auto-expands so facts
-  are never clipped (an explicit `width` is a floor; candles stay 4 wide so
+  are never clipped (an explicit `width` is a floor; candles fit the longest
+  period label in full — never `Jan`/`Jan1` mush — with a 4-wide floor so
   outlines stay legible).
 - **Degenerate input is safe.** Empty / all-non-finite data renders a framed
   `N 0 · (no data)` panel with null JSON facts (the old code crashed:
