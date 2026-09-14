@@ -700,6 +700,52 @@ that must not change:
   (`{ label, index, median }`, null when there is no data). The public
   `BoxPlotOptions` shape is unchanged.
 
+### LOCKED: sparkline chart — session 28 design
+
+`sparkline` now carries the same locked design language as the S18–S27
+panel vocabulary — the heatmap strip grammar with a pulse, on inline time
+data (the founder-approved v8 prototype). Rules that must not change:
+
+- **Shape + shade, never a single-colour strip.** Every plotted reading is
+  one 2-wide column, up to 4 rows tall by share of the data range (height
+  reads the trend); each column takes its shade glyph (`░ ▒ ▓ █` by share)
+  on the grey tone ramp (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`), so
+  intensity survives `stripAnsi` / `noColor` — the 2026-09-11
+  shade-texture ruling. The old single-teal `theme.colors[0]` strip is
+  retired — no flood, ever. Columns stay 2 wide so the dither glyphs render
+  as solid cells in browser fonts (1-wide `░▒▓` speckles outside the
+  terminal).
+- **One accent hue, spent EXACTLY once, on the peak reading.** The maximum
+  value (ties → first in data order, the family peak rule) renders a solid
+  `█` column in the theme's accent hue. Everything else stays on the ramp.
+- **The `renderer` option stays accepted, the locked design supersedes
+  it.** The public `SparklineOptions` shape is unchanged — `renderer`
+  (`"blocks" | "braille" | "ascii"`) is honoured as accepted input, but
+  every renderer draws the same shade-ramp panel. The retired glyphs — the
+  `▁▂▃` sub-block strip, the braille line, and the ascii glyphs — are
+  outside the locked vocabulary and never render.
+- **Same panel language as all locked charts**: dashed frame (`┌╌…╌┐`),
+  the label on the frame top (or `SPARKLINE`), an uppercase `SPARKLINE`
+  eyebrow, and two `│ ╌…╌ │` rule separators. Panel width auto-expands so
+  the strip and the summary are never clipped (an explicit `width` shaped
+  the columns and stays a floor, never a cap).
+- **Summary foot** reporting `n <count> · min <v> · max <v> · last <v> ·
+  peak <v>`, with the `peak` fact in the accent hue (`showValue: false`
+  drops the `last` fact). Every fact describes the PLOTTED points
+  (post-downsample), so the foot can never disagree with the strip.
+- **`width` keeps its meaning.** It counts plotted data columns; longer
+  input is deterministically downsampled on evenly spaced indices (stable
+  ties, stable re-renders).
+- **Degenerate input is safe.** Empty / all-non-finite renders a framed
+  `n 0 · (no data)` panel with null `min`/`max`/`last`/`peak` facts (the old
+  code returned a bare `""`); a flat range renders full columns (never
+  `NaN`); non-finite samples are excluded from the plot, the facts, and
+  the count — never plotted, never counted; narrow widths never crash.
+- **Agent surface is additive**: `toJSON()` returns the original keys
+  (`type`, `data`, `label`, `plain`) plus `count`, `min`, `max`, `last`
+  (null when there is no data) and `peak` (`{ index, value }`, null when
+  there is no data). The public `SparklineOptions` shape is unchanged.
+
 ## License
 
 MIT
