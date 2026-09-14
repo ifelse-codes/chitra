@@ -117,6 +117,18 @@ spent exactly once, grey tone ramp with shade texture so kind survives
     suite stays green; the rebuilt `dist/` carries both locks (the docs
     playground executes `dist`, not `src`); zero runtime deps.
 
+## Founder amendment (2026-09-14, post-ACCEPT polish on the open PR branch)
+
+On the docs playground the locked candle showed two defects, fixed by founder
+direction ("fit + de-dupe"):
+
+- Req 2's "truncated period labels" is amended: candles auto-fit the longest
+  period label in full (4-wide floor kept) — ten distinct dates rendered as
+  `Jan`/`Jan1` mush.
+- Req 2's eyebrow ("`OHLC`, or `opts.title` uppercased") is amended: the eyebrow
+  is always `OHLC`; the frame top alone carries `opts.title` (the title echoed
+  on two rows).
+
 ## Session constraints (constitution)
 
 - Two stories by founder direction (1-story rule waived, disclosed). Max 3
