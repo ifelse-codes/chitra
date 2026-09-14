@@ -75,6 +75,25 @@ describe("candlestick chart — locked S27 design", () => {
     expect(plainLines({ data: CANDLES })[0]).toContain("CANDLESTICK");
   });
 
+  it("fits the longest period label in full (never Jan/Jan1 mush)", () => {
+    const dated = [
+      { open: 142, high: 158, low: 138, close: 155, label: "Jan 8" },
+      { open: 155, high: 168, low: 148, close: 151, label: "Jan 9" },
+      { open: 195, high: 215, low: 190, close: 210, label: "Jan19" },
+    ];
+    const text = plainLines({ data: dated, noColor: true }).join("\n");
+    expect(text).toContain("Jan 8");
+    expect(text).toContain("Jan 9");
+    expect(text).toContain("Jan19");
+  });
+
+  it("keeps the eyebrow OHLC even when a title is set (no title echo)", () => {
+    const lines = plainLines({ data: CANDLES, title: "CHRX", noColor: true });
+    expect(lines[0]).toContain("CHRX");
+    expect(lines).toContainEqual(expect.stringContaining("OHLC"));
+    expect(lines.filter((l) => l.includes("CHRX")).length).toBe(1);
+  });
+
   it("keeps every panel row the same visible width", () => {
     const widths = new Set(plainLines({ data: CANDLES }).map((l) => [...l].length));
     expect(widths.size).toBe(1);
