@@ -29,7 +29,8 @@ export { createLineChartModel, lineModelToSvg } from "./charts/line-model.js";
 export type { LineChartModel, LineSeriesModel } from "./charts/line-model.js";
 export { sparklineBlocks, buildHorizontalBlockBar, blockHeight } from "./renderers/blocks.js";
 export { sparklineAscii, buildAsciiHBar } from "./renderers/ascii.js";
-export { ansi, colorize, stripAnsi, hexToAnsi } from "./ansi.js";
+export { frameTop, frameBottom, frameRow, frameRule } from "./renderers/panel.js";
+export { ansi, colorize, stripAnsi, truncateAnsi, hexToAnsi } from "./ansi.js";
 export {
   minMax,
   normalize,
