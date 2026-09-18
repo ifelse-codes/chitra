@@ -1,6 +1,6 @@
 import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, stripAnsi, visibleLength, ansi } from "../ansi.js";
+import { ansi, colorize, padStart, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { createLineChartModel, lineModelToPlain, lineModelToSvg, type LineSeriesModel } from "./line-model.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
@@ -402,36 +402,46 @@ export function line(opts: LineChartOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     const eyebrow = (opts.eyebrow ?? "TREND").toUpperCase();
-    lines.push(frameTop(width, opts.title ?? "LINE", opts.timestamp, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    for (const item of renderLegend()) lines.push(frameRow(width, item, theme.axis, noColor));
+
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(width, opts.title ?? "LINE", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(width, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      for (const item of renderLegend()) lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
+    }
 
     const plotRowsOut = renderer === "braille" ? renderBrailleRows() : renderBlockRows();
-    for (const row of plotRowsOut) lines.push(frameRow(width, row, theme.axis, noColor));
-    for (const row of renderXTickMarks()) lines.push(frameRow(width, row, theme.axis, noColor));
-    for (const row of renderXAxisLabels()) lines.push(frameRow(width, row, theme.axis, noColor));
+    for (const row of plotRowsOut) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of renderXTickMarks()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of renderXAxisLabels()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
-    if (model.showSummary) {
-      lines.push(frameRule(width, theme.axis, noColor));
-      for (const row of renderSummary()) lines.push(frameRow(width, row, theme.axis, noColor));
+    if (model.showSummary && !useCompact) {
+      if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
+      for (const row of renderSummary()) lines.push(useFrame ? frameRow(width, row, theme.axis, noColor) : row);
     }
 
-    if (opts.status) {
-      lines.push(frameRule(width, theme.axis, noColor));
-      lines.push(frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor));
+    if (opts.status && !useCompact) {
+      if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
+      lines.push(useFrame ? frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor) : colorize(`Status: ${opts.status}`, theme.title, noColor));
     }
-    lines.push(frameBottom(width, theme.axis, noColor, true));
+    if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return line({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
