@@ -1,6 +1,6 @@
 import type { RadarChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
+import { colorize, stripAnsi, truncateAnsi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { BrailleCanvas } from "../renderers/braille.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
@@ -340,22 +340,34 @@ export function radar(opts: RadarChartOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(
-      frameTop(effectiveWidth, opts.title ?? "RADAR", undefined, theme.axis, theme.title, noColor, true)
-    );
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    if (!empty) {
-      for (const row of buildWeb()) lines.push(frameRow(effectiveWidth, row, theme.axis, noColor));
-      lines.push(frameRow(effectiveWidth, legendRow(), theme.axis, noColor));
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
+    if (useFrame && !useCompact) {
+      lines.push(
+        frameTop(effectiveWidth, opts.title ?? "RADAR", undefined, theme.axis, theme.title, noColor, true)
+      );
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildSummary(), theme.axis, noColor));
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
+    if (!empty) {
+      for (const row of buildWeb()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      if (!useCompact) {
+        lines.push(useFrame ? frameRow(effectiveWidth, legendRow(), theme.axis, noColor) : legendRow());
+      }
+    }
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() {
@@ -367,6 +379,7 @@ export function radar(opts: RadarChartOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
+    toContent() { return radar({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

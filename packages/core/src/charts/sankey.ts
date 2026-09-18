@@ -1,7 +1,7 @@
 import type { SankeyOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padEnd, stripAnsi } from "../ansi.js";
-import { formatNumber } from "../utils.js";
+import { colorize, padEnd, stripAnsi, truncateAnsi } from "../ansi.js";
+import { fitBodyLines, formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 // Plain-text shade ramp for the flow widths (light → dark by share of the
@@ -144,23 +144,44 @@ export function sankey(opts: SankeyOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(
-      frameTop(effectiveWidth, opts.title ?? "SANKEY", undefined, theme.axis, theme.title, noColor, true)
-    );
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    links.forEach((l, i) => lines.push(frameRow(effectiveWidth, buildFlowRow(l, i), theme.axis, noColor)));
-    if (ranked.length > 0) {
-      lines.push(frameRow(effectiveWidth, colorize("Nodes:", theme.title, noColor), theme.axis, noColor));
-      ranked.forEach((r, i) => lines.push(frameRow(effectiveWidth, buildLedgerRow(r, i), theme.axis, noColor)));
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
+    if (useFrame && !useCompact) {
+      lines.push(
+        frameTop(effectiveWidth, opts.title ?? "SANKEY", undefined, theme.axis, theme.title, noColor, true)
+      );
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildSummary(), theme.axis, noColor));
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
+    const plotRows = [...links.map((l, i) => buildFlowRow(l, i)), ...ranked.map((r, i) => buildLedgerRow(r, i))];
+    const fitted = opts.height === undefined ? plotRows : fitBodyLines(plotRows, opts.height);
+    const flowCount = opts.height === undefined ? links.length : Math.min(links.length, fitted.length);
+    for (let i = 0; i < flowCount; i++) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, fitted[i]!, theme.axis, noColor) : fitted[i]!);
+    const ledgerFitted = fitted.slice(flowCount);
+    if (ledgerFitted.length > 0 && ranked.length > 0) {
+      if (!useCompact && opts.height === undefined) {
+        lines.push(useFrame ? frameRow(effectiveWidth, colorize("Nodes:", theme.title, noColor), theme.axis, noColor) : colorize("Nodes:", theme.title, noColor));
+      }
+      for (const row of ledgerFitted) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    } else if (opts.height === undefined && ranked.length > 0) {
+      if (!useCompact) {
+        lines.push(useFrame ? frameRow(effectiveWidth, colorize("Nodes:", theme.title, noColor), theme.axis, noColor) : colorize("Nodes:", theme.title, noColor));
+      }
+      ranked.forEach((r, i) => lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, buildLedgerRow(r, i), theme.axis, noColor) : buildLedgerRow(r, i)));
+    }
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() {
@@ -172,6 +193,7 @@ export function sankey(opts: SankeyOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
+    toContent() { return sankey({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

@@ -1,7 +1,7 @@
 import type { ProgressOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
-import { formatNumber } from "../utils.js";
+import { colorize, stripAnsi, truncateAnsi, upperAnsi, visibleLength } from "../ansi.js";
+import { fitBodyLines, formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 // Plain-text shade ramp, one glyph per grey tone bucket (light → dark by
@@ -57,7 +57,7 @@ export function progress(opts: ProgressOptions): ChartResult {
 
   const fillColor = tones[bucket]!;
 
-  const eyebrow = (opts.label ?? "PROGRESS").toUpperCase();
+  const eyebrow = upperAnsi(opts.label ?? "PROGRESS");
   const pct = finite ? (trueLevel * 100).toFixed(1) + "%" : "n/a";
   const pctTail = opts.showPercent === false ? "" : ` · ${pct}`;
   const summaryPlain = finite
@@ -69,7 +69,7 @@ export function progress(opts: ProgressOptions): ChartResult {
   // the frame padding (2 border cols + 2 inner pad — panel's inner = width-4).
   const effectiveWidth = Math.max(
     opts.width ?? 36,
-    eyebrow.length + 4,
+    visibleLength(eyebrow) + 4,
     summaryPlain.length + 4
   );
   const trackWidth = Math.max(1, effectiveWidth - 4);
@@ -116,24 +116,34 @@ export function progress(opts: ProgressOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(frameTop(effectiveWidth, "PROGRESS", undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildBar(), theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildGuide(), theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildScale(), theme.axis, noColor));
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildSummary(), theme.axis, noColor));
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(effectiveWidth, "PROGRESS", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
+    const progBody = fitBodyLines([buildBar(), buildGuide(), buildScale()], opts.height);
+    for (const row of progBody) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return progress({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
