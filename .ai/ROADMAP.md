@@ -10,12 +10,24 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 29 candidates):** the founder-deferred family-wide plain-English
+- 🔜 **Next (Session 29 — FIRST: cold review + PR of the S28 branch):** review the
+  12 S28-extension commits → PR `session-28-sparkline` → `main` → closeout.
+  Then the prior candidates: the founder-deferred family-wide plain-English
   footer pass (A trim / B plain words / B-diet, one dedicated session, founder
   choice pending); bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI; harden the candle ties-first test to assert
   second-candle exclusivity (S27 review note — code already correct).
+- ✅ **Session 28 extension — chart composability + SRE dashboard (this chat,
+  committed, review owed):** `frame?`/`compact?`/`maxWidth?` on
+  `BaseChartOptions` (+ sparkline/progress parity), `toContent()` on
+  `ChartResult`, body-exact `height` on all 20 charts (`fitBodyLines`,
+  `truncateAnsi`), 7 conformance tests (**442/442 green**, typecheck clean),
+  `playground/sre-dashboard/` committed (sim, CLI `--once`/live, :4173 with
+  `/frame` + `/cells` JSON, 2-col × 10-row no-scroll web grid at 3 rows/tile).
+  12 atomic commits (≤3 files, hooks green). Disclosed gaps: radar min-12
+  height clamp, boxplot/waterfall/candlestick axes outside height budget,
+  `toContent()` as re-render.
 - ✅ **Session 28 (S28) — sparkline chart LOCKED (in progress, founder
   in-chat direction on the throwaway v8 shape+shade prototype):** `sparkline()`
   re-rendered in the reference/panel language — the heatmap strip grammar with
@@ -236,5 +248,5 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - S05 ground-truth remediation still open: S04 verify/demo/summary backfill + a closeout-integrity gate.
 
 ## Guardrails carried forward (see [[knowledge]])
-- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · 142 tests green ·
+- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · 442 tests green ·
   public API stability.
