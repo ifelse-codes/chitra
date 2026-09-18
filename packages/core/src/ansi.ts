@@ -58,6 +58,44 @@ export function visibleLength(str: string): number {
   return stripAnsi(str).length;
 }
 
+/** Uppercase the visible text of a string while leaving ANSI escape
+ *  sequences untouched — `.toUpperCase()` would corrupt them (`m` → `M`). */
+export function upperAnsi(str: string): string {
+  return str
+    .split(/(\x1b\[[0-9;]*m)/)
+    .map((part) => (part.startsWith("\x1b") ? part : part.toUpperCase()))
+    .join("");
+}
+
+export function truncateAnsi(str: string, maxWidth: number): string {
+  if (maxWidth < 1) return "";
+  if (visibleLength(str) <= maxWidth) return str;
+  let out = "";
+  let vis = 0;
+  const re = /\x1b\[[0-9;]*m/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  const pushText = (text: string): boolean => {
+    for (const ch of text) {
+      if (vis >= maxWidth) return true;
+      out += ch;
+      vis++;
+    }
+    return vis >= maxWidth;
+  };
+  while ((m = re.exec(str)) !== null) {
+    if (pushText(str.slice(last, m.index))) {
+      out += ansi.reset;
+      return out;
+    }
+    out += m[0];
+    last = m.index + m[0].length;
+  }
+  pushText(str.slice(last));
+  out += ansi.reset;
+  return out;
+}
+
 export function padEnd(str: string, width: number, char = " "): string {
   const visible = visibleLength(str);
   if (visible >= width) return str;
