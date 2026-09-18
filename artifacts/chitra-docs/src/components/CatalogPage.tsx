@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { ansiToHtml } from "../ansi";
+import { ansiToHtml, wrapBraille } from "../ansi";
 import * as chitraCore from "@chitra/core";
 import type { ChartDef } from "../data/charts";
 import {
@@ -562,6 +562,8 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
                       data-gramm="false"
                     />
                   </>
+                ) : activeTab === "output.txt" ? (
+                  <pre className="vim-hl vim-readonly">{tabContent("output.txt")}</pre>
                 ) : (
                   <pre className="vim-hl vim-readonly">{tabContent(activeTab)}</pre>
                 )}
