@@ -120,3 +120,18 @@ export function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen - 1) + "…";
 }
+
+export function normalizeHeight(h: unknown): number | undefined {
+  if (h === undefined) return undefined;
+  const n = typeof h === "number" ? h : Number(h);
+  if (!Number.isFinite(n)) return undefined;
+  return Math.max(1, Math.floor(n));
+}
+
+export function fitBodyLines(lines: string[], height: number | undefined): string[] {
+  if (height === undefined) return lines;
+  const h = normalizeHeight(height) ?? lines.length;
+  if (lines.length === h) return lines;
+  if (lines.length > h) return lines.slice(0, h);
+  return lines.concat(Array<string>(h - lines.length).fill(""));
+}

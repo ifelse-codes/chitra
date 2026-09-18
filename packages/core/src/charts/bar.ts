@@ -1,6 +1,6 @@
 import type { BarChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, stripAnsi, visibleLength } from "../ansi.js";
+import { colorize, padStart, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { minMax, formatNumber } from "../utils.js";
 import { buildBlockBar } from "../renderers/blocks.js";
 import { buildAsciiBar } from "../renderers/ascii.js";
@@ -207,33 +207,44 @@ export function bar(opts: BarChartOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     // xLabel reused as the eyebrow caption; defaults to "VALUES" when absent.
     const eyebrow = (opts.xLabel ?? "VALUES").toUpperCase();
-    lines.push(frameTop(effectiveWidth, opts.title ?? "BAR", undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    for (const item of buildLegend()) lines.push(frameRow(effectiveWidth, item, theme.axis, noColor));
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(effectiveWidth, opts.title ?? "BAR", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      for (const item of buildLegend()) lines.push(useFrame ? frameRow(effectiveWidth, item, theme.axis, noColor) : item);
+    }
 
-    for (const row of buildPlotRows()) lines.push(frameRow(effectiveWidth, row, theme.axis, noColor));
+    for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
 
     const xTicks = buildXTicks();
-    if (xTicks) lines.push(frameRow(effectiveWidth, xTicks, theme.axis, noColor));
+    if (xTicks) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, xTicks, theme.axis, noColor) : xTicks);
     const xLabels = buildXLabels();
-    if (xLabels) lines.push(frameRow(effectiveWidth, xLabels, theme.axis, noColor));
+    if (xLabels) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, xLabels, theme.axis, noColor) : xLabels);
 
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    for (const row of buildSummary()) lines.push(frameRow(effectiveWidth, row, theme.axis, noColor));
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      for (const row of buildSummary()) lines.push(useFrame ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    }
 
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return bar({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {

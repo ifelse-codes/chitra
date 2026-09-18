@@ -1,6 +1,6 @@
 import type { WaterfallOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, padEnd, stripAnsi } from "../ansi.js";
+import { colorize, padEnd, padStart, stripAnsi, truncateAnsi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -240,26 +240,36 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(
-      frameTop(effectiveWidth, opts.title ?? "WATERFALL", undefined, theme.axis, theme.title, noColor, true)
-    );
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    if (!empty) {
-      lines.push(frameRow(effectiveWidth, buildDeltaRow(), theme.axis, noColor));
-      for (const row of buildPlotRows()) lines.push(frameRow(effectiveWidth, row, theme.axis, noColor));
-      const baseline = buildBaseline();
-      if (baseline) lines.push(frameRow(effectiveWidth, baseline, theme.axis, noColor));
-      const stepLabels = buildStepLabels();
-      if (stepLabels.trim()) lines.push(frameRow(effectiveWidth, stepLabels, theme.axis, noColor));
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
+    if (useFrame && !useCompact) {
+      lines.push(
+        frameTop(effectiveWidth, opts.title ?? "WATERFALL", undefined, theme.axis, theme.title, noColor, true)
+      );
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildSummary(), theme.axis, noColor));
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
+    if (!empty) {
+      lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, buildDeltaRow(), theme.axis, noColor) : buildDeltaRow());
+      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      const baseline = buildBaseline();
+      if (baseline) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline);
+      const stepLabels = buildStepLabels();
+      if (stepLabels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, stepLabels, theme.axis, noColor) : stepLabels);
+    }
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() {
@@ -271,6 +281,7 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
+    toContent() { return waterfall({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

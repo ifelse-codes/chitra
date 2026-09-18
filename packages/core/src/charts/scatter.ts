@@ -1,6 +1,6 @@
 import type { ScatterPlotOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, stripAnsi, visibleLength } from "../ansi.js";
+import { colorize, padStart, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { BrailleCanvas } from "../renderers/braille.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
@@ -250,22 +250,32 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     const eyebrow = (opts.eyebrow ?? "CORRELATION").toUpperCase();
-    lines.push(frameTop(width, opts.title ?? "SCATTER", undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    for (const item of buildLegend()) lines.push(frameRow(width, item, theme.axis, noColor));
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(width, opts.title ?? "SCATTER", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(width, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      for (const item of buildLegend()) lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
+    }
 
     const plotRowsOut = empty ? [] : renderer === "braille" ? buildBrailleRows() : buildGridRows();
-    for (const row of plotRowsOut) lines.push(frameRow(width, row, theme.axis, noColor));
+    for (const row of plotRowsOut) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, buildFooter(), theme.axis, noColor));
-    lines.push(frameBottom(width, theme.axis, noColor, true));
+    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() {
@@ -277,6 +287,7 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
+    toContent() { return scatter({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

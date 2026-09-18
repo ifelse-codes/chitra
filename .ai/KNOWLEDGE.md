@@ -102,3 +102,38 @@
   these fully and rebuild the chart look to match.
 - `examples/basic.ts` — worked examples for all chart types.
 - `CONTRIBUTING.md`, `replit.md` (Replit agent notes), `darshan/SKILL.md` (output skill).
+
+## S28 extension — composability + dashboard (2026-09-18, committed on `session-28-sparkline`)
+- **Composability API (all 20 charts):** `BaseChartOptions.frame?` (default true),
+  `compact?` (default false — body + axes only, no eyebrow/legend/summary),
+  `maxWidth?` (ANSI-safe per-line cap, `truncateAnsi` in `ansi.ts`);
+  `ChartResult.toContent()` (body-only; `toPlain()` semantics unchanged —
+  still strips ANSI only, keeps frame glyphs); explicit `height` is body-exact
+  rows-including-axes via `fitBodyLines`/`normalizeHeight` (`utils.ts`).
+  `SparklineOptions`/`ProgressOptions` carry frame/compact/height/maxWidth
+  parity. `index.ts` exports `frameTop`/`frameBottom`/`frameRow`/`frameRule` +
+  `truncateAnsi`. `toJSON()` data is unaffected by display opts; defaults are
+  unchanged (framed panels).
+- **Known contract gaps (disclosed, worked around):** radar min-clamps height
+  at 12 (`radar.ts:89`); boxplot/waterfall/candlestick append axis/label rows
+  outside the height budget; `toContent()` is a compact re-render (2× cost).
+- **Height gotcha:** `line` enforces min 3 plot rows (`max(3, height-2)`);
+  `area` plot rows = `height-2` (height 3 → 1 row; height 5 → exactly 3).
+  Waterfall/candlestick/boxplot honour `showAxes: false` (axes skipped).
+  Waterfall/candle/boxplot plot glyphs legitimately contain `┌╌┐`/`└╌┘`
+  (total blocks, wicks, baselines) — box-corner assertions must exempt them.
+- **SRE dashboard** (`playground/sre-dashboard/`, committed): `sre-sim.ts`
+  engine, `sre-dashboard.ts` CLI (`--once` + live), `sre-server.ts` (:4173,
+  `/frame` raw ANSI + `/cells?single=&wide=` JSON). Web grid: 2 cols × 10
+  rows, no-scroll, 20 tiles × exactly 3 rows, client-measured char widths
+  (canvas measure of tile/pre font), 2s poll. Lessons: equal-`1fr` rows starve
+  tall tiles (use content-weighted `fr`); flex-stretch defeats `margin:auto`
+  centering (needs a centering wrapper); per-tile font shrink loops backfire —
+  fixed type + exact line budgets won. Legends are the density floor (donut/pie
+  need 6 rows for 6 services; heatmap header + N).
+- **Suite is 442 tests** (`tests/composability.test.ts` +7 covers the contract).
+  `pnpm run lint` unrunnable — eslint binary not installed (pre-existing).
+- **Research spikes (no code):** TUI landscape — Ratatui's measure/render split
+  + constraint layout (Length/Min/Max/Ratio/Fill, kasuari) is the model to
+  steal; `ansi-to-tui` (official, truecolor) bridges Chitra ANSI → Ratatui
+  `Paragraph` via a Node sidecar today.

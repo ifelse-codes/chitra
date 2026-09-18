@@ -1,7 +1,7 @@
 import type { HeatmapOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padEnd, padStart, stripAnsi } from "../ansi.js";
-import { formatNumber } from "../utils.js";
+import { colorize, padEnd, padStart, stripAnsi, truncateAnsi } from "../ansi.js";
+import { fitBodyLines, formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 // Plain-text shade ramp, one glyph per grey tone bucket (light → dark by
@@ -114,26 +114,37 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     const eyebrow = "DENSITY";
-    lines.push(frameTop(width, opts.title ?? "HEATMAP", undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(width, opts.title ?? "HEATMAP", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(width, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
 
-    const gridRows = empty ? [] : buildGridRows();
-    for (const row of gridRows) lines.push(frameRow(width, row, theme.axis, noColor));
+    const gridRows = empty ? [] : fitBodyLines(buildGridRows(), opts.height);
+    for (const row of gridRows) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, buildFooter(), theme.axis, noColor));
-    lines.push(frameBottom(width, theme.axis, noColor, true));
+    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return heatmap({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
