@@ -69,14 +69,26 @@ function xterm256(n: number): string {
   return `rgb(${c(r)},${c(g)},${c(b)})`;
 }
 
+/** Wrap braille characters in <span class="br"> for plain text (no ANSI codes). */
+export function wrapBraille(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/[\u2800-\u28ff]/g, '<span class="br">$&</span>');
+}
+
 export function ansiToHtml(raw: string): string {
   const spans = parseAnsi(raw);
   return spans
     .map((s) => {
-      const text = s.text
+      let text = s.text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+      // JetBrains Mono renders braille (U+2800-U+28FF) at 2ch advance width.
+      // Wrap each braille char so CSS can force it back to 1ch.
+      text = text.replace(/[\u2800-\u28ff]/g, '<span class="br">$&</span>');
       const styles: string[] = [];
       if (s.fg) styles.push(`color:${s.fg}`);
       if (s.dim) styles.push("opacity:0.55");

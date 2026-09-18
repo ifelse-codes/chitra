@@ -1,6 +1,6 @@
 import type { PieChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi, truncateAnsi } from "../ansi.js";
+import { colorize, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { buildSlices, renderRing, renderLegend } from "./ring.js";
 import { fitBodyLines } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
@@ -21,7 +21,10 @@ export function pie(opts: PieChartOptions): ChartResult {
     const ring = renderRing(slices, radius, innerRadius, noColor);
     const legend = renderLegend(slices, noColor, theme);
     const ringCols = radius * 4 + 1;
-    const width = opts.width ?? Math.max(ringCols + legend.width + 8, 52);
+    const legendGap = 3;
+    const maxLegendRowLen = Math.max(0, ...legend.rows.map(r => visibleLength(r)));
+    const contentWidth = ringCols + legendGap + maxLegendRowLen;
+    const width = opts.width ?? Math.max(contentWidth + 4, 52);
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
 
@@ -35,7 +38,6 @@ export function pie(opts: PieChartOptions): ChartResult {
     }
 
     // ring on the left, legend on the right, vertically centred
-    const legendGap = 3;
     const h = Math.max(ring.length, legend.rows.length);
     const legendOffset = Math.max(0, Math.floor((ring.length - legend.rows.length) / 2));
     const combined: string[] = [];
@@ -91,6 +93,6 @@ export function pie(opts: PieChartOptions): ChartResult {
 }
 
 function padRow(row: string, width: number): string {
-  const len = stripAnsi(row).length;
+  const len = visibleLength(row);
   return len >= width ? row : row + " ".repeat(width - len);
 }

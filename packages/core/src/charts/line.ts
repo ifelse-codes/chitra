@@ -391,10 +391,12 @@ export function line(opts: LineChartOptions): ChartResult {
         ? colorize(`max ${formatNumber(stats.max)}`, acc, noColor)
         : `max ${formatNumber(stats.max)}`;
       const left = `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
-      const room = innerWidth - visibleLength(left) - 3;
+      const leftLen = visibleLength(left);
+      if (leftLen >= innerWidth) return left.slice(0, innerWidth);
+      const room = innerWidth - leftLen - 3;
       const sparkW = room < 4 ? 0 : Math.min(14, room);
       const spark = sparkline(s.values, seriesColors[si]!, sparkW);
-      const pad = Math.max(0, innerWidth - visibleLength(left) - visibleLength(spark) - 1);
+      const pad = Math.max(0, innerWidth - leftLen - visibleLength(spark) - 1);
       return left + " ".repeat(pad) + spark;
     });
     return wrapItems(rows, innerWidth);

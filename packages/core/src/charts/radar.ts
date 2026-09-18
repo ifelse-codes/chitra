@@ -94,6 +94,7 @@ export function radar(opts: RadarChartOptions): ChartResult {
   // 7-char label margin on x, 2-row margin on y.
   const Rd = Math.max(10, Math.min(Math.floor(dotCols / 2) - 14, Math.floor(dotRows / 2) - 8));
 
+  // Braille chars are 1 terminal column in most terminals.
   const effectiveWidth = Math.max(
     plotCols + 4,
     eyebrow.length + 4,

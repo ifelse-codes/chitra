@@ -102,9 +102,18 @@ export function area(opts: AreaChartOptions): ChartResult {
   const yMin = opts.yMin ?? dataMin;
   const yMax = opts.yMax ?? dataMax;
 
-  const yAxisW = Math.max(formatNumber(yMax).length, formatNumber(yMin).length) + 1;
-  const plotCols = width - yAxisW - 6;
+  const baseYAxisW = Math.max(formatNumber(yMax).length, formatNumber(yMin).length) + 1;
   const plotRows = height - 2;
+  // Compute the actual y-step labels to find the widest one.
+  const yStep = Math.max(1, Math.floor(plotRows / 5));
+  let maxLabelLen = baseYAxisW - 1;
+  for (let row = 0; row < plotRows; row++) {
+    if (row % yStep !== 0 && row !== plotRows - 1) continue;
+    const yVal = yMax - (row / Math.max(1, plotRows - 1)) * (yMax - yMin);
+    maxLabelLen = Math.max(maxLabelLen, formatNumber(yVal).length);
+  }
+  const yAxisW = maxLabelLen + 1;
+  const plotCols = width - yAxisW - 6;
   const acc = theme.accent!;
   const tones = theme.tones!;
   const lineColor = tones[2] ?? tones[1];

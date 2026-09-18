@@ -1,6 +1,6 @@
 import type { DonutChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi, truncateAnsi } from "../ansi.js";
+import { colorize, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { fitBodyLines, formatNumber } from "../utils.js";
 import { buildSlices, renderRing, renderLegend } from "./ring.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
@@ -23,7 +23,10 @@ export function donut(opts: DonutChartOptions): ChartResult {
     const legend = renderLegend(slices, noColor, theme, opts.summary !== false);
     const ringCols = radius * 4 + 1;
     const eyebrow = (opts.eyebrow ?? "DISTRIBUTION").toUpperCase();
-    const width = opts.width ?? Math.max(ringCols + legend.width + 8, 52);
+    const legendGap = 3;
+    const maxLegendRowLen = Math.max(0, ...legend.rows.map(r => visibleLength(r)));
+    const contentWidth = ringCols + legendGap + maxLegendRowLen;
+    const width = opts.width ?? Math.max(contentWidth + 4, 52);
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
 
@@ -36,7 +39,6 @@ export function donut(opts: DonutChartOptions): ChartResult {
       lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
     }
 
-    const legendGap = 3;
     const h = Math.max(ring.length, legend.rows.length);
     const legendOffset = Math.max(0, Math.floor((ring.length - legend.rows.length) / 2));
     const combined: string[] = [];
@@ -81,6 +83,6 @@ export function donut(opts: DonutChartOptions): ChartResult {
 }
 
 function padRow(row: string, width: number): string {
-  const len = stripAnsi(row).length;
+  const len = visibleLength(row);
   return len >= width ? row : row + " ".repeat(width - len);
 }
