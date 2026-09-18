@@ -1,45 +1,39 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S28 in progress, 2026-09-14.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S28 extension committed, 2026-09-18.)
 
 ## Active Branch
-`session-28-sparkline` — S28 delivery complete on branch: `sparkline()`
-locked to the panel language (5 atomic commits) + verify 17/17 + demo 4/4.
+`session-28-sparkline` — S28 sparkline lock (earlier) + 12-commit
+composability/dashboard extension (this chat), all committed, hooks green.
 Review, PR to `main`, and closeout sync still to go.
 
 ## What Currently Works (observed, not claimed)
-- **`sparkline()` (S28)**: locked panel language — dashed frame + `SPARKLINE`
-  eyebrow, label on the frame top, shape+shade columns (2-wide, ≤4 rows by
-  share of range), peak reading (ties → first) solid `█` accent spent exactly
-  once, grey tone ramp + `░▒▓` shade texture elsewhere (founder's 2026-09-11
-  ruling), `n · min · max · last · peak` foot (peak accented;
-  `showValue: false` drops `last`). `width` = plotted columns with
-  deterministic even-index downsample; panel auto-expands (floor, never cap).
-  Empty / all-non-finite → framed `n 0 · (no data)` with null JSON facts;
-  flat range renders full columns; non-finite excluded from plot, facts, and
-  count; narrow-safe. `toJSON()` keeps `type`/`data`/`label`/`plain` +=
-  `count`/`min`/`max`/`last`/`peak {index,value}`. `renderer` accepted,
-  design superseded (progress precedent). `SparklineOptions` unchanged.
-- `scripts/verify-session-28.sh` — **ALL GREEN (17 pass, 0 fail)**;
-  `scripts/demo-session-28.sh` — exit 0, **4/4 PASS** (accent ×4 on peak ·
-  grey ×67 · 0 leaks).
-- `pnpm --filter @chitra/core run test` — **435/435 green** (baseline 430:
-  S27's 428 + 2 polish tests; −10 old sparkline + 15 new S28 tests);
-  `typecheck` — exit 0; docs drift gate green; `dist/` rebuilt (gitignored).
-- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
-  surface. LOCKED families: circular (S09), area (S09), line (S10), bar (S12),
-  scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
-  gauge (S22), progress (S23), histogram (S25), waterfall + funnel + sankey +
-  radar (S26), candlestick + boxplot (S27), **sparkline (S28)** — 19 locked.
-- **Docs catalog + browser QA (S13–S15, S24)**: Darpan-parity chrome, `/chart/:id`
-  routes, boot-scoped editor persistence, grouped sidebar with collapse/persist,
-  Playwright QA across all 20 pages. S28 previews regenerated (drift gate
-  green; sparkline-only diff).
-- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the `.ai/hooks/*`
-  PreToolUse guards (commit / publish / session) wired.
+- **Composability on all 20 charts**: `frame?` (default true — full panel),
+  `frame: false` (content + eyebrow/legend/summary, no borders),
+  `compact: true` (plot body + axes only), `maxWidth?` (ANSI-safe per-line
+  cap), `toContent()` (body-only string; `toPlain()` unchanged),
+  `height` body-exact everywhere (`fitBodyLines`/`normalizeHeight` for the 10
+  charts that ignored it; radar still min-clamps 12; boxplot/waterfall/
+  candlestick append axes outside the height budget — known, disclosed).
+  `toJSON()` data untouched by display opts. Defaults unchanged (framed).
+- `pnpm --filter @chitra/core run test` — **442/442 green** (435 + 7 new
+  `composability.test.ts`); `typecheck` exit 0. `lint` unrunnable (eslint
+  binary missing — pre-existing, not caused here).
+- **SRE dashboard** (`playground/sre-dashboard/`, committed): sim engine, CLI
+  `--once` (158 lines, ≤78w) + live mode, HTTP server :4173 — 2-col × 10-row
+  no-scroll grid, 20 tiles × exactly 3 rows, client-measured widths
+  (`/cells?single=&wide=`), 2s refresh, `/frame` kept for CLI compat.
+- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`
+  output surface (`render`/`toString`/`toPlain`/`toContent`/`toMarkdown`/
+  `toJSON`/`toSVG?`). LOCKED families S09–S28 intact (no lock test touched).
+- Enforcement belt observed working: 3-file atomic cap + `VAJRA_ALLOW_COMMIT`
+  gate blocked correctly until founder approval; branch guard intact.
 
 ## What Is Broken / Incomplete
-- S28 review + PR + closeout still to go (this session).
+- S28 review + PR + closeout still to go (next session).
+- Radar `height` min-clamp (12) and boxplot/waterfall/candlestick axes-outside-
+  height are disclosed contract gaps (dashboard works around them).
+- `toContent()` is implemented as a compact re-render (double render cost).
 - The founder-deferred footer pass (A trim / B plain words / B-diet) awaits a
   founder choice.
 - The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
@@ -47,6 +41,10 @@ Review, PR to `main`, and closeout sync still to go.
 - First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN`).
 - QA is local-only; not yet wired into CI.
 - **S05 ground-truth remediation debt** still open.
+- Dirty-but-not-ours leftovers stay untracked: `.commandcode/`, `.freebuff/`,
+  `design-reference/*` (session-21/22/25 demos etc.), `playground/buffy-`
+  `dashboard/`, `playground/field-test-prompt.md`, `scripts/build-audit-html.mjs`,
+  `.ai/CHITRA-FRAME-FIX.md`, `.ai/CONTINUATION-PROMPT.md`.
 
 ## Milestones done
 - **S01–S04** docs generator / examples / polish / README · **S05** NO-CODE ground-truth ·
@@ -67,14 +65,14 @@ Review, PR to `main`, and closeout sync still to go.
   **S27** candlestick + boxplot LOCKED (two stories by founder direction; no audit
   mockups — family language by analogy, waterfall outline precedent; adaptive price
   precision approved at PLAN — cold ACCEPT 13/13, attested) ·
-  **S28** sparkline LOCKED (in progress — v8 shape+shade prototype approved in-chat;
-  no audit mockup — family language by analogy, heatmap-strip + histogram-peak playbooks).
+  **S28** sparkline LOCKED + **composability extension** (this chat: frame/compact/
+  maxWidth/toContent/exact-height on all 20, 7 conformance tests, 20-tile SRE
+  dashboard CLI + web — 12 atomic commits, 442/442 green, review owed).
 
 ## What Is In Progress
-- S28: review → PR `session-28-sparkline` → `main` → closeout.
-  **Next (S29 candidates):** the founder-deferred footer pass (A/B/B-diet,
-  founder choice); `lineModelToSvg` parity; real `v0.1.0` release; Playwright
-  QA into CI; candle ties-first exclusivity test hardening. See [[roadmap]].
+- S28: cold review of 12 extension commits → PR `session-28-sparkline` →
+  `main` → closeout. **Next (S29):** review + PR first; then footer pass /
+  SVG parity / release / QA-in-CI / candle hardening. See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
@@ -86,4 +84,6 @@ Review, PR to `main`, and closeout sync still to go.
   one session by explicit founder direction (waiver of the 1-story rule, disclosed);
   S27 ran two stories the same way. S28 was preceded by a fossil throwaway
   exploration (mudra gallery + pie/sparkline prototypes in tmp, lib untouched
-  until the founder said "lock"). Kept tight.
+  until the founder said "lock"). This chat (S28 extension): one conversation —
+  boot + 3-issue delivery + dashboard iterations (4→3→2 col) + research spikes
+  (TUI landscape, Ratatui bridge) + 12-commit close. Kept tight.
