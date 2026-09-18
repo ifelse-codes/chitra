@@ -54,8 +54,30 @@ export function stripAnsi(str: string): string {
   return str.replace(/\x1b\[[0-9;]*m/g, "");
 }
 
+/** Return the display width of a single character (1 or 2 columns). */
+function charWidth(ch: string): number {
+  const code = ch.codePointAt(0)!;
+  // CJK Unified Ideographs + extensions — 2 columns
+  if (
+    (code >= 0x4e00 && code <= 0x9fff) ||
+    (code >= 0x3400 && code <= 0x4dbf) ||
+    (code >= 0x20000 && code <= 0x2a6df)
+  ) return 2;
+  // Fullwidth forms (U+FF01–U+FF60) — 2 columns
+  if (code >= 0xff01 && code <= 0xff60) return 2;
+  // Braille Patterns (U+2800–U+28FF) — 1 column
+  if (code >= 0x2800 && code <= 0x28ff) return 1;
+  // Zero-width characters
+  if (
+    code === 0x200b || code === 0x200c || code === 0x200d || code === 0xfeff
+  ) return 0;
+  return 1;
+}
+
 export function visibleLength(str: string): number {
-  return stripAnsi(str).length;
+  let w = 0;
+  for (const ch of stripAnsi(str)) w += charWidth(ch);
+  return w;
 }
 
 /** Uppercase the visible text of a string while leaving ANSI escape
@@ -77,9 +99,10 @@ export function truncateAnsi(str: string, maxWidth: number): string {
   let m: RegExpExecArray | null;
   const pushText = (text: string): boolean => {
     for (const ch of text) {
-      if (vis >= maxWidth) return true;
+      const w = charWidth(ch);
+      if (vis + w > maxWidth) return true;
       out += ch;
-      vis++;
+      vis += w;
     }
     return vis >= maxWidth;
   };

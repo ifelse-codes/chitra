@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { radar } from "../src/charts/radar.js";
-import { stripAnsi } from "../src/ansi.js";
+import { stripAnsi, visibleLength } from "../src/ansi.js";
 import { resolveTheme, GREY_TONES } from "../src/themes/index.js";
 
 const DATA = [80, 60, 90, 70, 85];
@@ -72,7 +72,7 @@ describe("radar chart — locked S26 design", () => {
   });
 
   it("keeps every panel row the same visible width", () => {
-    const widths = new Set(plainLines({ data: DATA, labels: LABELS }).map((l) => [...l].length));
+    const widths = new Set(plainLines({ data: DATA, labels: LABELS }).map((l) => visibleLength(l)));
     expect(widths.size).toBe(1);
   });
 
