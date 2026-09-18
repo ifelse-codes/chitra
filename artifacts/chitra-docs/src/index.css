@@ -1589,6 +1589,7 @@ body, button, input, textarea, select { font-family: var(--font-mono); }
   position: relative;
   height: 100%;
   color: var(--text-tertiary);
+  font-family: monospace;
 }
 
 /* Real block cursor — a filled monospace cell, the vim signature. The buffer
@@ -1744,6 +1745,14 @@ body, button, input, textarea, select { font-family: var(--font-mono); }
   white-space: pre;
   overflow-x: auto;
   margin: 0;
+}
+/* Braille chars (U+2800–U+28FF) are 2ch in JetBrains Mono; force them to 1ch
+   so frame borders align like they do in real terminals. */
+.br {
+  display: inline-block;
+  width: 1ch;
+  overflow: hidden;
+  vertical-align: bottom;
 }
 .term-placeholder-note {
   color: var(--amber-l);
