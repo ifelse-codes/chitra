@@ -1,7 +1,7 @@
 import type { SparklineOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
-import { formatNumber } from "../utils.js";
+import { colorize, stripAnsi, truncateAnsi } from "../ansi.js";
+import { fitBodyLines, formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
 // Plain-text shade ramp, one glyph per grey tone bucket (light → dark by
@@ -75,19 +75,20 @@ export function sparkline(opts: SparklineOptions): ChartResult {
   const stripWidth = CELLW * pts.length;
   const effectiveWidth = Math.max(stripWidth + 4, eyebrow.length + 4, summaryPlain.length + 4);
 
-  function columnAt(i: number): { h: number; glyph: string; color: string } {
+  function columnAt(i: number, rows = ROWS): { h: number; glyph: string; color: string } {
     const v = pts[i]!;
     const share = max === min ? 1 : (v - min) / (max - min);
-    const h = 1 + Math.round(share * (ROWS - 1));
+    const h = 1 + Math.round(share * (rows - 1));
     if (i === peakIndex) return { h, glyph: "█", color: acc };
     const ti = Math.min(tones.length - 1, Math.floor(share * tones.length));
     return { h, glyph: LEVEL_SHADES[ti]!, color: tones[ti]! };
   }
 
+  const stripRows = opts.height === undefined ? ROWS : Math.max(1, Math.floor(opts.height));
   function buildStrip(): string[] {
-    const columns = pts.map((_, i) => columnAt(i));
+    const columns = pts.map((_, i) => columnAt(i, stripRows));
     const rows: string[] = [];
-    for (let r = ROWS; r >= 1; r--) {
+    for (let r = stripRows; r >= 1; r--) {
       let row = "";
       for (const col of columns) {
         row += r <= col.h ? colorize(col.glyph.repeat(CELLW), col.color, noColor) : " ".repeat(CELLW);
@@ -111,22 +112,33 @@ export function sparkline(opts: SparklineOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
-    lines.push(frameTop(effectiveWidth, title, undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-    for (const row of buildStrip()) lines.push(frameRow(effectiveWidth, row, theme.axis, noColor));
-    lines.push(frameRule(effectiveWidth, theme.axis, noColor));
-    lines.push(frameRow(effectiveWidth, buildSummary(), theme.axis, noColor));
-    lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(effectiveWidth, title, undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
+    for (const row of buildStrip()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return sparkline({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
