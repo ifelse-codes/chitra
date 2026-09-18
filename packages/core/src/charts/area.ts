@@ -1,6 +1,6 @@
 import type { AreaChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, padStart, stripAnsi } from "../ansi.js";
+import { colorize, padStart, stripAnsi, truncateAnsi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -119,10 +119,16 @@ export function area(opts: AreaChartOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     const eyebrow = (opts.eyebrow ?? "TREND").toUpperCase();
-    lines.push(frameTop(width, opts.title ?? "AREA", opts.timestamp, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(width, opts.title ?? "AREA", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(width, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+    }
 
     const yStep = Math.max(1, Math.floor(plotRows / 5));
     for (let row = 0; row < plotRows; row++) {
@@ -168,26 +174,31 @@ export function area(opts: AreaChartOptions): ChartResult {
         rowStr += cell ? colorize(cell, cellColor, noColor) : " ";
       }
 
-      lines.push(frameRow(width, rowStr, theme.axis, noColor));
+      lines.push(useFrame && !useCompact ? frameRow(width, rowStr, theme.axis, noColor) : rowStr);
     }
 
-    lines.push(frameRule(width, theme.axis, noColor));
-    const last = series[0]![series[0]!.length - 1];
-    const foot =
-      (isMulti ? `${seriesLabels[0]} · ` : "series · ") +
-      colorize(`max ${formatNumber(dataMax)}`, acc, noColor) +
-      ` · min ${formatNumber(dataMin)} · last ${formatNumber(last)}`;
-    lines.push(frameRow(width, foot, theme.axis, noColor));
-    lines.push(frameBottom(width, theme.axis, noColor, true));
+    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
+    if (!useCompact) {
+      const last = series[0]![series[0]!.length - 1];
+      const foot =
+        (isMulti ? `${seriesLabels[0]} · ` : "series · ") +
+        colorize(`max ${formatNumber(dataMax)}`, acc, noColor) +
+        ` · min ${formatNumber(dataMin)} · last ${formatNumber(last)}`;
+      lines.push(useFrame ? frameRow(width, foot, theme.axis, noColor) : foot);
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return area({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {

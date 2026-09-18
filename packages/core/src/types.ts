@@ -46,6 +46,12 @@ export interface BaseChartOptions {
   showAxes?: boolean;
   output?: OutputFormat;
   noColor?: boolean;
+  /** Show the panel frame (title bar, borders, footer). Default true. Set false for composability. */
+  frame?: boolean;
+  /** Strip frame + eyebrow + legend + summary, keep only chart body. Default false. */
+  compact?: boolean;
+  /** Hard cap on visible width per line. When set, output lines are clipped to this width (ANSI-safe). */
+  maxWidth?: number;
 }
 
 export interface LineChartOptions extends BaseChartOptions {
@@ -86,11 +92,15 @@ export interface HorizontalBarChartOptions extends BaseChartOptions {
 export interface SparklineOptions {
   data: number[];
   width?: number;
+  height?: number;
   renderer?: RendererType;
   theme?: ThemeName | Theme;
   noColor?: boolean;
   label?: string;
   showValue?: boolean;
+  frame?: boolean;
+  compact?: boolean;
+  maxWidth?: number;
 }
 
 export interface HistogramOptions extends BaseChartOptions {
@@ -143,11 +153,15 @@ export interface ProgressOptions {
   value: number;
   max?: number;
   width?: number;
+  height?: number;
   label?: string;
   showPercent?: boolean;
   theme?: ThemeName | Theme;
   noColor?: boolean;
   style?: "bar" | "blocks" | "braille" | "ascii";
+  frame?: boolean;
+  compact?: boolean;
+  maxWidth?: number;
 }
 
 export interface GaugeOptions extends BaseChartOptions {
@@ -220,6 +234,7 @@ export interface ChartResult {
   toMarkdown(): string;
   toJSON(): object;
   toPlain(): string;
+  toContent(): string;
   /** Available for chart types with a browser-native renderer. */
   toSVG?(): string;
 }

@@ -1,6 +1,6 @@
 import type { TreemapOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
-import { colorize, stripAnsi } from "../ansi.js";
+import { colorize, stripAnsi, truncateAnsi } from "../ansi.js";
 import { formatNumber } from "../utils.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -193,27 +193,38 @@ export function treemap(opts: TreemapOptions): ChartResult {
 
   function buildLines(): string[] {
     const lines: string[] = [];
+    const useFrame = opts.frame !== false;
+    const useCompact = opts.compact === true;
     const eyebrow = "AREA";
-    lines.push(frameTop(width, opts.title ?? "TREEMAP", undefined, theme.axis, theme.title, noColor, true));
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor));
-
-    if (!empty) {
-      for (const row of buildPlotRows()) lines.push(frameRow(width, row, theme.axis, noColor));
+    if (useFrame && !useCompact) {
+      lines.push(frameTop(width, opts.title ?? "TREEMAP", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(frameRule(width, theme.axis, noColor));
+    }
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
     }
 
-    lines.push(frameRule(width, theme.axis, noColor));
-    lines.push(frameRow(width, buildFooter(), theme.axis, noColor));
-    lines.push(frameBottom(width, theme.axis, noColor, true));
+    if (!empty) {
+      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    }
+
+    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
+    if (!useCompact) {
+      lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
+    }
+    if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
-  const output = buildLines().join("\n");
+  const rawLines = buildLines();
+  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const output = clippedLines.join("\n");
 
   return {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    toContent() { return treemap({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
