@@ -33,4 +33,4 @@ Faithful whole-contract build: all 20 charts changed-or-verifiably-compliant, al
 
 **Verdict:** ACCEPT
 
-**Review-Inputs-SHA:** 60438f92ef02da36d3fa4428afd983ea864311a90a1680e5aaac7ccdfbc4127a
+**Review-Inputs-SHA:** 60b6a98db10228d8b5fef9ca71866bf2dae05df5bf5ba645643cfeddec97bd18
