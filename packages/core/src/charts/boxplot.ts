@@ -30,10 +30,10 @@ const SPREAD_SHADES = ["░", "▒", "▓"];
  *    without colour.
  *  - **Adaptive value labels** (`axisPriceFmt`, shared with candlestick):
  *    integers when the range is wide, ≤2dp when tight. `│`/`+` guide, dashed
- *    `└╌` baseline, truncated group labels, two rule separators. Width is a
+  *    `└╌` baseline, truncated group labels, one rule separator. Width is a
  *    floor (auto-expand, never clip, never `RangeError` on narrow widths).
  *  - Degenerate input is safe: empty / all-non-finite renders a framed
- *    `GROUPS 0 · (no data)` panel with null `stats`/`peakGroup` facts;
+  *    `0 groups · (no data)` panel with null `stats`/`peakGroup` facts;
  *    single-value groups render via the flat-range guard (never `NaN`);
  *    non-finite samples are excluded before `quartiles()`, never plotted;
  *    groups left with no finite samples are dropped with their labels. */
@@ -94,8 +94,8 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
 
   const eyebrow = (opts.title ?? "SPREAD").toUpperCase();
   const footPlain = empty
-    ? "GROUPS 0 · (no data)"
-    : `GROUPS ${g} · MED ${axisPriceFmt(med!, yRange)} · PEAK ${peakLabel} ${axisPriceFmt(peakMedian!, yRange)}`;
+    ? "0 groups · (no data)"
+    : `${g} groups · median ${axisPriceFmt(med!, yRange)} · peak ${peakLabel} (${axisPriceFmt(peakMedian!, yRange)})`;
 
   const sw = GROUP_MIN;
   const mid = Math.floor(sw / 2);
@@ -223,11 +223,11 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
   function buildSummary(): string {
     if (empty) return colorize(footPlain, theme.label, noColor);
     const head = colorize(
-      `GROUPS ${g} · MED ${axisPriceFmt(med!, yRange)} · `,
+      `${g} groups · median ${axisPriceFmt(med!, yRange)} · `,
       theme.label,
       noColor
     );
-    return head + colorize(`PEAK ${peakLabel} ${axisPriceFmt(peakMedian!, yRange)}`, acc, noColor);
+    return head + colorize(`peak ${peakLabel} (${axisPriceFmt(peakMedian!, yRange)})`, acc, noColor);
   }
 
   function buildLines(): string[] {
@@ -250,7 +250,6 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
       const labels = buildGroupLabels();
       if (labels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels);
     }
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

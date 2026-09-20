@@ -22,9 +22,9 @@ describe("bar chart — locked S12 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has frame rule separator (│ ╌)", () => {
-    const plain = stripAnsi(bar({ data: [10, 20, 30] }).toString());
-    expect(plain).toMatch(/│ ╌/);
+  it("has exactly one frame rule separator (│ ╌) — S29 B-diet+", () => {
+    const lines = plainLines({ data: [10, 20, 30] });
+    expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
   });
 
   it("has eyebrow row (uppercase VALUES by default)", () => {
@@ -62,27 +62,22 @@ describe("bar chart — locked S12 design", () => {
   });
 
   // ── Summary rows ───────────────────────────────────────────────
-  it("has per-series summary row with min/max/avg/last", () => {
+  it("has per-series summary row with avg/peak", () => {
     const plain = stripAnsi(bar({ data: [10, 20, 30, 15, 25] }).toString());
-    expect(plain).toContain("min");
-    expect(plain).toContain("max");
     expect(plain).toContain("avg");
-    expect(plain).toContain("last");
+    expect(plain).toContain("peak");
+    expect(plain).not.toContain("min ");
+    expect(plain).not.toContain("last ");
   });
 
-  it("summary contains correct max value", () => {
+  it("summary contains correct peak value", () => {
     const plain = stripAnsi(bar({ data: [10, 50, 30] }).toString());
-    expect(plain).toContain("max 50");
+    expect(plain).toContain("peak 50");
   });
 
-  it("summary contains correct min value", () => {
+  it("summary contains correct avg value", () => {
     const plain = stripAnsi(bar({ data: [10, 50, 30] }).toString());
-    expect(plain).toContain("min 10");
-  });
-
-  it("summary contains correct last value", () => {
-    const plain = stripAnsi(bar({ data: [10, 50, 30] }).toString());
-    expect(plain).toContain("last 30");
+    expect(plain).toContain("avg 30");
   });
 
   // ── Color contract ─────────────────────────────────────────────
@@ -93,7 +88,7 @@ describe("bar chart — locked S12 design", () => {
   it("applies accent to the peak bar and tone ramp to all others (no rainbow)", () => {
     const plain = stripAnsi(bar({ data: [10, 99, 30], noColor: true }).toString());
     expect(plain).toContain("█");
-    expect(plain).toContain("max 99");
+    expect(plain).toContain("peak 99");
   });
 
   it("colors the peak bar with theme.accent and every other bar with a theme.tones entry (real color check)", () => {
@@ -133,7 +128,7 @@ describe("bar chart — locked S12 design", () => {
     // Regression test: the panel's own auto-width formula used to size itself exactly to the
     // summary text with zero room left over for the spark, so sparkStr() always returned "".
     const plain = stripAnsi(bar({ data: [10, 20, 30, 15, 25] }).toString());
-    const summaryLine = plain.split("\n").find((l) => l.includes("last 25"));
+    const summaryLine = plain.split("\n").find((l) => l.includes("peak 30"));
     expect(summaryLine).toBeDefined();
     expect(summaryLine).toMatch(SPARK_CHARS);
   });
@@ -142,7 +137,7 @@ describe("bar chart — locked S12 design", () => {
     const plain = stripAnsi(
       bar({ data: [[10, 20, 15], [8, 25, 12]], seriesLabels: ["Up", "Down"] }).toString()
     );
-    const lines = plain.split("\n").filter((l) => l.includes("min") && l.includes("last"));
+    const lines = plain.split("\n").filter((l) => l.includes("avg") && l.includes("peak"));
     expect(lines.length).toBe(2);
     for (const line of lines) {
       expect(line).toMatch(SPARK_CHARS);
@@ -162,9 +157,9 @@ describe("bar chart — locked S12 design", () => {
     const plain = stripAnsi(
       bar({ data: [[10, 20], [15, 25]], seriesLabels: ["A", "B"] }).toString()
     );
-    // Both series appear in summary (each has min/max/avg/last)
-    const minMatches = (plain.match(/min /g) ?? []).length;
-    expect(minMatches).toBeGreaterThanOrEqual(2);
+    // Both series appear in summary (each has avg/peak)
+    const peakMatches = (plain.match(/peak /g) ?? []).length;
+    expect(peakMatches).toBeGreaterThanOrEqual(2);
   });
 
   // ── Edge cases ─────────────────────────────────────────────────
@@ -191,8 +186,8 @@ describe("bar chart — locked S12 design", () => {
 
   it("supports ascii renderer", () => {
     const plain = stripAnsi(bar({ data: [10, 20, 30], renderer: "ascii" }).toString());
-    expect(plain).toContain("min");
-    expect(plain).toContain("max");
+    expect(plain).toContain("avg");
+    expect(plain).toContain("peak");
   });
 
   it("toMarkdown wraps in code block", () => {

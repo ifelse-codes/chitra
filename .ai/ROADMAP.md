@@ -10,12 +10,18 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 29 candidates):** the founder-deferred family-wide plain-English
-  footer pass (A trim / B plain words / B-diet, one dedicated session, founder
-  choice pending); bring `lineModelToSvg` to terminal parity (SVG mirrors the
+- 🔜 **Next (Session 30 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI; harden the candle ties-first test to assert
   second-candle exclusivity (S27 review note — code already correct).
+- ✅ **Session 29 (S29) — family-wide footer pass B-diet+ (founder ballot pick
+  on real renders, closes the S21 deferral):** plain-words takeaway footers +
+  one rule separator on all 20 charts (donut exempt by design: already
+  single-rule, legend owns facts). `verify-session-29.sh` 12/12 ALL GREEN
+  (core 444/444), demo exit 0 (4/4). Cold REJECT 4/8 → fixed (donut proof +
+  rule/ties asserts) → cold ACCEPT 8/8
+  (`Review-Inputs-SHA 60438f92…c4127a`). `### LOCKED: family-wide footer
+  (B-diet+)` README block, authoritative over S09–S28 footer lines.
 - ✅ **Session 28 (S28) — sparkline chart LOCKED (in progress, founder
   in-chat direction on the throwaway v8 shape+shade prototype):** `sparkline()`
   re-rendered in the reference/panel language — the heatmap strip grammar with

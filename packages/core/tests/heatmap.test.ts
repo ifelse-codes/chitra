@@ -55,9 +55,9 @@ describe("heatmap chart — locked S18 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has the uppercase eyebrow row (DENSITY)", () => {
@@ -85,15 +85,15 @@ describe("heatmap chart — locked S18 design", () => {
   it("a ragged matrix renders honest empty cells (widest row sets cols)", () => {
     const plain = stripAnsi(heatmap({ data: [[1, 2, 3], [9]] }).toString());
     // cols is the widest row (3); peak is the lone 9 at (1, 0); no NaN/Infinity
-    expect(plain).toMatch(/2×3 · 1\.\.9 · peak \(1, 0\)/);
+    expect(plain).toMatch(/2×3 grid · peak \(1, 0\)/);
     expect(plain).not.toMatch(/NaN|Infinity/);
     expect(accentCensus({ data: [[1, 2, 3], [9]] }).accent).toBe(1);
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports rows×cols · min..max · peak (r, c)", () => {
+  it("footer reports R×C grid · peak (r, c)", () => {
     const plain = stripAnsi(heatmap({ data: DATA }).toString());
-    expect(plain).toMatch(/4×5 · 1\.\.12 · peak \(3, 4\)/);
+    expect(plain).toMatch(/4×5 grid · peak \(3, 4\)/);
   });
 
   // ── The one accent, spent once on the max cell (S17 RGB method) ─
@@ -141,9 +141,9 @@ describe("heatmap chart — locked S18 design", () => {
   });
 
   // ── Degenerate data is safe ───────────────────────────────────
-  it("empty data renders a framed n 0 panel with no Infinity/NaN", () => {
+  it("empty data renders a framed 0 cells panel with no Infinity/NaN", () => {
     const plain = stripAnsi(heatmap({ data: [] }).toString());
-    expect(plain).toMatch(/n 0/);
+    expect(plain).toMatch(/0 cells · \(no data\)/);
     expect(plain).not.toMatch(/Infinity|NaN/);
     expect(plain).toMatch(/^┌╌/m);
     expect(plain).toMatch(/^└╌/m);
@@ -151,7 +151,7 @@ describe("heatmap chart — locked S18 design", () => {
 
   it("an all-equal grid renders honestly with a collapsed range", () => {
     const plain = stripAnsi(heatmap({ data: [[5, 5], [5, 5]] }).toString());
-    expect(plain).toMatch(/2×2 · 5\.\.5 · peak \(0, 0\)/);
+    expect(plain).toMatch(/2×2 grid · peak \(0, 0\)/);
     expect(plain).not.toMatch(/NaN|Infinity/);
     // even with zero variance the accent is still spent exactly once
     expect(accentCensus({ data: [[5, 5], [5, 5]] }).accent).toBe(1);

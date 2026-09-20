@@ -56,9 +56,9 @@ describe("sankey chart — locked S26 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ nodes: NODES, links: LINKS }).filter((l) => /^│ ╌+ │$/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("carries the total-flow metric in the eyebrow row", () => {

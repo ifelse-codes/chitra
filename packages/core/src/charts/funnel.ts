@@ -165,7 +165,6 @@ export function funnel(opts: FunnelOptions): ChartResult {
     }
     const bodyRows = fitBodyLines(data.map((v, i) => buildStageRow(v, i)), opts.height);
     for (const row of bodyRows) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

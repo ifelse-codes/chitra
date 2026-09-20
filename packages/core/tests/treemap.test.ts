@@ -56,9 +56,9 @@ describe("treemap chart — locked S20 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has the uppercase eyebrow row (AREA)", () => {
@@ -80,9 +80,9 @@ describe("treemap chart — locked S20 design", () => {
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports n · min..max · peak <label>", () => {
+  it("footer reports N leaves · peak <label>", () => {
     const plain = stripAnsi(treemap({ data: DATA }).toString());
-    expect(plain).toMatch(/n 5 · 3\.\.45 · peak TS/);
+    expect(plain).toMatch(/5 leaves · peak TS/);
   });
 
   // ── The one accent, spent on the max node (S18 RGB method) ────
@@ -132,7 +132,7 @@ describe("treemap chart — locked S20 design", () => {
     expect(plain).toMatch(/Python/);
     expect(plain).toMatch(/Rust/);
     expect(plain).not.toMatch(/…/); // no truncated-label noise in slivers
-    expect(plain).toMatch(/n 5 · 3\.\.45 · peak TS/); // all five leaves still laid out
+    expect(plain).toMatch(/5 leaves · peak TS/); // all five leaves still laid out
   });
 
   it("nested children flatten; peak is the max leaf (first in flatten order)", () => {
@@ -144,13 +144,13 @@ describe("treemap chart — locked S20 design", () => {
       { label: "Docs", value: 5 },
     ];
     const plain = stripAnsi(treemap({ data: nested }).toString());
-    expect(plain).toMatch(/n 3 · 2\.\.8 · peak TS/);
+    expect(plain).toMatch(/3 leaves · peak TS/);
   });
 
   // ── Degenerate data is safe ───────────────────────────────────
-  it("empty data renders a framed n 0 panel with no Infinity/NaN", () => {
+  it("empty data renders a framed 0 leaves panel with no Infinity/NaN", () => {
     const plain = stripAnsi(treemap({ data: [] }).toString());
-    expect(plain).toMatch(/n 0/);
+    expect(plain).toMatch(/0 leaves · \(no data\)/);
     expect(plain).not.toMatch(/Infinity|NaN/);
     expect(plain).toMatch(/^┌╌/m);
     expect(plain).toMatch(/^└╌/m);
@@ -162,7 +162,7 @@ describe("treemap chart — locked S20 design", () => {
       { label: "B", value: 5 },
     ];
     const plain = stripAnsi(treemap({ data }).toString());
-    expect(plain).toMatch(/n 2 · 5\.\.5 · peak A/);
+    expect(plain).toMatch(/2 leaves · peak A/);
     expect(plain).not.toMatch(/NaN|Infinity/);
     expect(accentCensus({ data }).accent).toBeGreaterThan(0);
     expect(accentCensus({ data }).other).toBe(0);
@@ -171,7 +171,7 @@ describe("treemap chart — locked S20 design", () => {
   it("a single node renders safely with the accent spent on it", () => {
     const data = [{ label: "Only", value: 12 }];
     const plain = stripAnsi(treemap({ data }).toString());
-    expect(plain).toMatch(/n 1 · 12\.\.12 · peak Only/);
+    expect(plain).toMatch(/1 leaves · peak Only/);
     expect(accentCensus({ data }).accent).toBeGreaterThan(0);
     expect(accentCensus({ data }).other).toBe(0);
   });
@@ -184,8 +184,8 @@ describe("treemap chart — locked S20 design", () => {
 
   it("empty cells are SPACE — no phantom filler outside the shade ramp", () => {
     const vacant = treemap({ data: [], width: 50, height: 10, noColor: true }).toString();
-    expect(vacant).not.toMatch(/[░▒▓█]/); // vacant canvas: zero cells, framed n 0 only
-    expect(vacant).toMatch(/n 0/);
+    expect(vacant).not.toMatch(/[░▒▓█]/); // vacant canvas: zero cells, framed 0 leaves only
+    expect(vacant).toMatch(/0 leaves/);
     const out = treemap({ data: DATA, width: 50, height: 10, noColor: true }).toString();
     expect(out).toContain("░"); // lightest ramp glyph is legal fill, not phantom
     expect(out).not.toContain("⠀"); // braille-blank phantom never

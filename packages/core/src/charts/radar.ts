@@ -37,8 +37,8 @@ const DOT_BITS = [
  *    it** (the S23 progress precedent): braille web in every mode.
  *  - Magnitudes clamp at zero (negatives and non-finite samples collapse to
  *    the center, never `NaN`).
- *  - Same panel language as all locked charts: dashed frame, `AXES · SERIES`
- *    eyebrow, glyph legend, two rules, `AVG · PEAK` foot (peak accented).
+  *  - Same panel language as all locked charts: dashed frame, `AXES · SERIES`
+  *    eyebrow, glyph legend, one rule, `average · peak` foot (peak accented).
  *    Width auto-expands (explicit `width` is a floor, not a cap). */
 export function radar(opts: RadarChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
@@ -81,8 +81,8 @@ export function radar(opts: RadarChartOptions): ChartResult {
     ? "AXES 0"
     : `AXES ${numAxes} · SERIES ${series.length} · 0..${formatNumber(yMax)}`;
   const footPlain = empty
-    ? "AXES 0 · (no data)"
-    : `AVG ${formatNumber(overallAvg)} · PEAK ${axisLabels[peakAxis] ?? ""} ${formatNumber(overallMax)}`;
+    ? "0 axes · (no data)"
+    : `average ${formatNumber(overallAvg)} · peak ${axisLabels[peakAxis] ?? ""} (${formatNumber(overallMax)})`;
 
   // Plot area in character cells; the web lives in square braille dots.
   const plotCols = Math.max(24, Math.min(opts.width ?? 56, 76));
@@ -332,11 +332,11 @@ export function radar(opts: RadarChartOptions): ChartResult {
   function buildSummary(): string {
     if (empty) return colorize(footPlain, theme.label, noColor);
     const head = colorize(
-      `AVG ${formatNumber(overallAvg)} · PEAK ${axisLabels[peakAxis] ?? ""} `,
+      `average ${formatNumber(overallAvg)} · `,
       theme.label,
       noColor
     );
-    return head + colorize(formatNumber(overallMax), acc, noColor);
+    return head + colorize(`peak ${axisLabels[peakAxis] ?? ""} (${formatNumber(overallMax)})`, acc, noColor);
   }
 
   function buildLines(): string[] {
@@ -358,7 +358,6 @@ export function radar(opts: RadarChartOptions): ChartResult {
         lines.push(useFrame ? frameRow(effectiveWidth, legendRow(), theme.axis, noColor) : legendRow());
       }
     }
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

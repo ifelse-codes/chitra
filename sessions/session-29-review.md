@@ -1,0 +1,36 @@
+# Session 29 review — family-wide footer pass (B-diet+), independent cold review (second pass)
+
+## Method controls used
+- Cold inputs only: read `prompts/29-task-footer.md` (contract, 8 numbered requirements) on branch `session-29-footer`, plus the working-tree delivery `git diff main`. Nothing else read (no summary, no state, no prior review relied upon).
+- Untracked-by-design files judged by READING them: `scripts/verify-session-29.sh`, `scripts/demo-session-29.sh`, `prompts/29-task-footer.md` all read in full (never judged by absence from `git diff --name-only`).
+- `dist/` is gitignored by design — judged via the verify script's `dist-carries-lock` criterion (fresh run), not via diff presence.
+- `donut.ts` has no hunk — judged by RENDERING donut (1 rule, no footer; legend owns facts), i.e. "no change" is compliant, not a gap.
+- Every requirement hunted for real-behavior evidence: rendered charts directly, grepped tests per file, and EXECUTED both gates fresh (`verify-session-29.sh` exit 0, `demo-session-29.sh` exit 0).
+- No SHA computed. No commit made.
+- Verdict words used: SHIPPED (real behavior + test/gate evidence), PARTIAL (behavior present but a named piece missing), NOT-BUILT (no evidence of the required behavior).
+
+## Per-requirement table
+
+| Requirement | Verdict | Evidence |
+|---|---|---|
+| 1. Plain-words takeaway footers | SHIPPED with complete mapping evidence | Diff implements all 15 mappings: timeline `N events · longest L`, horizontalBar `N items · peak L (max)`, sparkline `N readings · peak P`, gauge/progress `V of A..B · P%`, histogram `N samples · peak M`, heatmap `R×C grid · peak (r, c)`, scatter `N points · peak (x, y)`, treemap `N leaves · peak L`, bar `name · avg C · peak B`, line `lowest/highest` rename, area `highest/lowest` rename, radar `average A · peak L (V)`, candlestick `N candles · high H · low L · last X`, boxplot `G groups · median M · peak L (V)`, pie/donut/waterfall/funnel/sankey text kept. Fresh verify criterion `footer-plain-words` PASS (11 footers match, 8 jargon patterns absent); unit tests assert exact strings (`highest 61`, `peak 50`, `peak a`, `lowest 1`/`highest 4`). |
+| 2. One rule separator | SHIPPED with one noted edge | 19 chart files each delete exactly the pre-footer `frameRule` line (`-if (useFrame && !useCompact) lines.push(frameRule(...))` in area, bar, boxplot, candlestick, funnel, gauge, heatmap, histogram, horizontalBar, line, pie, progress, radar, sankey, scatter, sparkline, timeline, treemap, waterfall). Donut correctly untouched: rendered donut shows exactly 1 rule and no footer (legend owns facts), so "no change" is compliant. Fresh verify `one-rule` renders all 20 charts → exactly 1 `│ ╌…╌ │` row each: PASS. Caveat: pie/donut with opt-in `status` set render a second rule before the status row (pre-existing status separator, outside the footer-rule clause, untested). |
+| 3. One accent, still spent once | SHIPPED with broad census evidence | Every rewritten `buildSummary`/footer keeps exactly one `colorize(takeaway, acc, …)` with the head in label tone (timeline `longest`, gauge bare value, histogram `peak`, radar `peak L (V)`, boxplot/candle takeaway); peak-selection code untouched everywhere so ties-first rules are unchanged. Tests: `accentCensus == 1` in gauge, heatmap (incl. ties + zero-variance), histogram, horizontalBar, progress; accent-on-takeaway asserts in bar, line (`accent + "highest 61"`), candlestick, sparkline, timeline. Fresh verify `accent-once` PASS (thin: 2-chart spot check — see fakest green). |
+| 4. Degenerate-safe, plain nouns | SHIPPED with all nouns landed | All 10 listed nouns in src: `0 events`, `0 readings`, `0 samples`, `0 candles`, `0 groups`, `0 axes`, `0 cells`, `0 leaves`, `0 points`, `0 items` — each suffixed `· (no data)`; gauge/progress non-finite → `n/a of min..max`, never NaN. Fresh verify `empty-plain` PASS (6 empties + honest null facts + NaN-free). Tests pin empties per file (funnel/sankey/waterfall/scatter/treemap/heatmap/histogram/hbar/radar/candle/box). Out-of-scope pre-existing warts, unchanged from main and not in the contract's noun list: `line({data: []})` throws the same `formatNumber` TypeError on main, `bar({data: []})` shows raw `-Infinity` stats on both trees. |
+| 5. Agent surface unchanged | SHIPPED with zero-counterexample evidence | Diff contains zero hunks touching any `toJSON`, `toContent`, or compact path (`useCompact` guards intact in all 20 files; `showValue` option still accepted, display-only). Fresh verify `tojson-stable` PASS (spark count/min/max/last/peak, timeline peak label, candle high/low/last). Compact paths untouched by construction (all removed `frameRule` lines were `!useCompact`-guarded). |
+| 6. Lock tests | SHIPPED with file-by-file coverage | Every affected test file asserts the 1-rule count (bar, boxplot, candlestick, charts/donut, funnel, gauge, heatmap, histogram, horizontalBar, line via charts, progress, radar, sankey, scatter, sparkline, timeline, treemap, waterfall — grep confirms ≥1 rule-count assertion each) plus new footer strings (`avg`/`peak`, `lowest`/`highest`, `V of A..B`, `n/a` panels). Ties-first exclusivity pinned in boxplot, candlestick, heatmap, histogram, horizontalBar (`peak a` first-max-wins), sparkline, timeline, treemap; empty panels pinned for every req-4 noun. Scatter/radar carry no ties-worded test, but their peak-selection code is byte-unchanged, so "unchanged" holds trivially. |
+| 7. Gates | SHIPPED with freshly executed runs | Not claimed — EXECUTED: `scripts/verify-session-29.sh` fresh run → `ALL GREEN (12 pass, 0 fail)`, exit 0 (covers plain footers, 20-chart one-rule, accent spot, empties, toJSON, core-tests-green, core-typecheck, readme block, drift gate, dist-carries-lock, zero-deps, branch). `scripts/demo-session-29.sh` fresh run → all 4 live checks PASS, exit 0 (honestly scoped: demo disclaims being the gate). Both scripts were READ (not name-only judged) and actually assert the new S29 strings. |
+| 8. Docs | SHIPPED with exact-heading-plus-artifacts evidence | README adds exactly `### LOCKED: family-wide footer (B-diet+) — session 29 design` (+30 lines, all formats + one-rule + accent + nouns + display-only + S09–S28 supersession sentence); fresh verify `readme-lock-block` PASS. Previews regenerated and footer-only: every non-frame line of `git diff main -- artifacts/` is empty (all changed lines are frame/preview art); fresh `chart-drift-gate` PASS. `dist/` rebuilt and current: fresh `dist-carries-lock` PASS (dist renders `5 readings · peak 5` + `longest B`). |
+
+## Count
+8 of 8 SHIPPED.
+
+## Fakest green
+Verify criterion `accent-once`: it certifies a family-wide single-accent claim on a 2-chart spot census (sparkline + timeline) — the thinnest gate in the script, and the easiest to game by re-scoping. It passes honestly here only because unit-level `accentCensus == 1` tests backfill the other 18 charts; had the builder broken accent discipline in (say) heatmap, this criterion would still have glowed green.
+
+## Scope sentence
+Faithful whole-contract build: all 20 charts changed-or-verifiably-compliant, all 8 requirements shipped with executed-gate evidence, no narrowing to green-checkmark subsets.
+
+**Verdict:** ACCEPT
+
+**Review-Inputs-SHA:** 60b6a98db10228d8b5fef9ca71866bf2dae05df5bf5ba645643cfeddec97bd18

@@ -50,9 +50,9 @@ describe("histogram chart — locked S25 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA }).filter((l) => /^│ ╌+ │$/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has an uppercase eyebrow row", () => {
@@ -99,6 +99,16 @@ describe("histogram chart — locked S25 design", () => {
     expect(census.grey).toBeGreaterThan(0);
   });
 
+  it("breaks mode ties toward the FIRST bin in bin order — S29 B-diet+", () => {
+    const theme = resolveTheme(undefined);
+    const out = histogram({ data: [1, 1, 9, 9], bins: 2 }).toString();
+    const accented = [...out.matchAll(/(\x1b\[[0-9;]*m)([^\x1b]+)(\x1b\[0m)/g)].filter(
+      (s) => s[1] === theme.accent && /█/.test(s[2]!)
+    );
+    expect(accented.length).toBeGreaterThan(0); // first mode bin spends the accent
+    expect(stripAnsi(out).split("\n").at(-2)).toContain("4 samples · peak 1");
+  });
+
   it("renders the shade-ramp texture (░▒▓) on non-mode bins", () => {
     const plain = stripAnsi(histogram({ data: DATA, bins: 5 }).toString());
     expect(plain).toContain("░");
@@ -129,21 +139,21 @@ describe("histogram chart — locked S25 design", () => {
     const lines = plainLines({ data: DATA, bins: 4 });
     // 4 bins over 1..9 → starts at 1, 3, 5, 7
     expect(lines.some((l) => l.includes("3"))).toBe(true);
-    expect(lines[lines.length - 4]).toContain("1"); // x-labels sit above the rule
+    expect(lines[lines.length - 3]).toContain("1"); // x-labels sit above the summary
   });
 
   // ── Summary foot ─────────────────────────────────────────────
-  it("carries an n · mode · p50 · p99 foot row", () => {
-    const summary = plainLines({ data: DATA }).find((l) => l.includes("mode "));
-    expect(summary).toContain(`n ${DATA.length}`);
-    expect(summary).toContain("p50 ");
-    expect(summary).toContain("p99 ");
+  it("carries an N samples · peak foot row", () => {
+    const summary = plainLines({ data: DATA }).find((l) => l.includes("peak "));
+    expect(summary).toContain(`${DATA.length} samples`);
+    expect(summary).not.toContain("p50 ");
+    expect(summary).not.toContain("p99 ");
   });
 
-  it("colors the mode fact in the accent hue", () => {
+  it("colors the peak fact in the accent hue", () => {
     const theme = resolveTheme(undefined);
     const out = histogram({ data: DATA }).toString();
-    const summaryLine = out.split("\n").find((l) => l.includes("mode "))!;
+    const summaryLine = out.split("\n").find((l) => l.includes("peak "))!;
     expect(summaryLine).toContain(theme.accent!);
   });
 
@@ -174,11 +184,11 @@ describe("histogram chart — locked S25 design", () => {
   });
 
   // ── Degenerate input is safe and honest ──────────────────────
-  it("renders a framed `n 0 · (no data)` panel for empty data", () => {
+  it("renders a framed `0 samples · (no data)` panel for empty data", () => {
     const lines = plainLines({ data: [] });
     expect(lines[0]).toMatch(/^┌╌/);
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
-    expect(lines.some((l) => l.includes("n 0 · (no data)"))).toBe(true);
+    expect(lines.some((l) => l.includes("0 samples · (no data)"))).toBe(true);
   });
 
   it("never NaNs on a collapsed range (all values equal)", () => {
@@ -198,8 +208,8 @@ describe("histogram chart — locked S25 design", () => {
   it("expands a narrow explicit width so the summary is never clipped", () => {
     const opts = { data: DATA, width: 20, noColor: true } as const;
     const lines = plainLines(opts);
-    const summary = lines.find((l) => l.includes("p99"))!;
-    expect(summary).toContain("p99 9");
+    const summary = lines.find((l) => l.includes("peak"))!;
+    expect(summary).toContain("peak 2.6");
     const widths = new Set(lines.map((l) => [...l].length));
     expect(widths.size).toBe(1); // every row shares one panel width
   });
