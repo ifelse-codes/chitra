@@ -50,9 +50,9 @@ describe("gauge chart — locked S22 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ value: 73 }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has the uppercase eyebrow row (LEVEL; opts.label uppercases)", () => {
@@ -157,17 +157,17 @@ describe("gauge chart — locked S22 design", () => {
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports value · min..max · pct with the reading accented", () => {
+  it("footer reports V of min..max · pct with the reading accented", () => {
     const plain = stripAnsi(gauge({ value: 73, min: 0, max: 100 }).toString());
-    expect(plain).toMatch(/value 73 · 0\.\.100 · 73\.0%/);
+    expect(plain).toMatch(/73 of 0\.\.100 · 73\.0%/);
     const acc = resolveTheme(undefined).accent!;
     const raw = gauge({ value: 73 }).toString();
-    expect(raw).toContain(`${acc}value 73`);
+    expect(raw).toContain(`${acc}73`);
   });
 
   it("honours explicit min/max (negative ranges format honestly)", () => {
     const plain = stripAnsi(gauge({ value: -2, min: -10, max: 10 }).toString());
-    expect(plain).toMatch(/value -2 · -10\.\.10 · 40\.0%/);
+    expect(plain).toMatch(/-2 of -10\.\.10 · 40\.0%/);
   });
 
   // ── Out-of-range is clipped on the bar, honest in the footer ──
@@ -175,7 +175,7 @@ describe("gauge chart — locked S22 design", () => {
     const c = accentCensus({ value: 140, min: 0, max: 100 });
     expect(c.accent).toBe(1);
     const plain = stripAnsi(gauge({ value: 140, min: 0, max: 100 }).toString());
-    expect(plain).toMatch(/value 140 · 0\.\.100 · 140\.0%/); // honest percent
+    expect(plain).toMatch(/140 of 0\.\.100 · 140\.0%/); // honest percent
     const row = plain.split("\n").find((l) => RAMP.test(l))!;
     expect(row).not.toMatch(/[░▒▓█]─/); // no track left — the bar is full
   });
@@ -184,7 +184,7 @@ describe("gauge chart — locked S22 design", () => {
     const out = gauge({ value: -10, min: 0, max: 100 }).toString();
     expect(out).toBeTruthy(); // no negative-repeat RangeError
     const plain = stripAnsi(out);
-    expect(plain).toMatch(/value -10 · 0\.\.100 · -10\.0%/);
+    expect(plain).toMatch(/-10 of 0\.\.100 · -10\.0%/);
     expect(plain.split("\n").some((l) => /^│ ─+ │$/.test(l))).toBe(true); // bar row = all dim track
   });
 
@@ -195,13 +195,13 @@ describe("gauge chart — locked S22 design", () => {
     expect(accentCensus({ value: 50, min: 50, max: 50 }).accent).toBe(1); // reading reaches max → full
     const empty = stripAnsi(gauge({ value: 40, min: 50, max: 50 }).toString());
     expect(empty).not.toMatch(/NaN|Infinity/);
-    expect(empty).toMatch(/value 40 · 50\.\.50 · 0\.0%/); // below the point → empty
+    expect(empty).toMatch(/40 of 50\.\.50 · 0\.0%/); // below the point → empty
   });
 
-  it("a non-finite reading renders a framed value n/a panel — never NaN", () => {
+  it("a non-finite reading renders a framed n/a panel — never NaN", () => {
     const plain = stripAnsi(gauge({ value: NaN, min: 0, max: 100 }).toString());
     expect(plain).not.toMatch(/NaN|Infinity/);
-    expect(plain).toMatch(/value n\/a · 0\.\.100/);
+    expect(plain).toMatch(/n\/a of 0\.\.100/);
     expect(plain).toMatch(/^┌╌/m);
     expect(plain).toMatch(/^└╌/m);
   });
