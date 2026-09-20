@@ -27,7 +27,7 @@ const AREA_SHADES = ["░", "▒", "▓", "█"];
  *  plot, and a squarified treemap whose intensity IS the grey tone ramp
  *  (`#ECECEF → #C6C6CE → #A4A4AE → #6A6A75`, light → dark by magnitude). The
  *  single accent hue is spent EXACTLY once, on the maximum-value node (ties →
- *  first in flatten/data order, deterministic). A `n · min..max · peak <label>`
+ *  first in flatten/data order, deterministic). A `N leaves · peak <label>`
  *  summary footer carries the peak label in the accent hue. No
  *  `theme.colors[i % n]` rainbow — exactly like the LOCKED heatmap. */
 export function treemap(opts: TreemapOptions): ChartResult {
@@ -181,9 +181,9 @@ export function treemap(opts: TreemapOptions): ChartResult {
   }
 
   function buildFooter(): string {
-    if (empty) return colorize("n 0", theme.label, noColor);
+    if (empty) return colorize("0 leaves · (no data)", theme.label, noColor);
     const head = colorize(
-      `n ${flatNodes.length} · ${formatNumber(minVal)}..${formatNumber(maxVal)}`,
+      `${flatNodes.length} leaves`,
       theme.label,
       noColor
     );
@@ -208,7 +208,6 @@ export function treemap(opts: TreemapOptions): ChartResult {
       for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
     }
 
-    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
     }

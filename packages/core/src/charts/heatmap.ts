@@ -14,7 +14,7 @@ const HEAT_SHADES = ["░", "▒", "▓", "█"];
  *  and a grid whose intensity IS the grey tone ramp (`#ECECEF → #C6C6CE →
  *  #A4A4AE → #6A6A75`, light → dark by magnitude). The single accent hue is
  *  spent EXACTLY once, on the maximum-value cell (ties → first in row-major
- *  order, deterministic). A `rows×cols · min..max · peak (r, c)` summary footer
+ *  order, deterministic). A `R×C grid · peak (r, c)` summary footer
  *  carries the peak coords in the accent hue. No `theme.colors[i % n]` rainbow —
  *  exactly like the LOCKED scatter/bar/line/area/circular charts. */
 export function heatmap(opts: HeatmapOptions): ChartResult {
@@ -102,9 +102,9 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
   }
 
   function buildFooter(): string {
-    if (empty) return colorize("n 0", theme.label, noColor);
+    if (empty) return colorize("0 cells · (no data)", theme.label, noColor);
     const head = colorize(
-      `${rows}×${cols} · ${formatNumber(minVal)}..${formatNumber(maxVal)}`,
+      `${rows}×${cols} grid`,
       theme.label,
       noColor
     );
@@ -128,7 +128,6 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
     const gridRows = empty ? [] : fitBodyLines(buildGridRows(), opts.height);
     for (const row of gridRows) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
-    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
     }
