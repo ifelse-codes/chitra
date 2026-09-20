@@ -10,8 +10,8 @@ const GLYPHS = ["●", "○", "◆", "◇", "▲", "△"];
 /** Renders a chitra-standard TUI panel carrying the LOCKED S17 design language:
  *  dashed frame, eyebrow row, `│` y-guide with a `+` at the top row, braille or
  *  glyph points on the grey tone ramp with the single accent hue spent ONCE on
- *  the primary series' max-y point (survives the braille cell it shares), and an
- *  `n · x-range · y-range · peak (x, y)` summary footer with the peak in accent.
+ *  the primary series' max-y point (survives the braille cell it shares), and a
+ *  `N points · peak (x, y)` summary footer with the peak in accent.
  *  No raw `theme.colors[i % n]` rainbow — series identity comes from glyph shape
  *  and position, exactly like the LOCKED line/bar/area/circular charts. */
 export function scatter(opts: ScatterPlotOptions): ChartResult {
@@ -231,9 +231,9 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
   }
 
   function buildFooter(): string {
-    if (empty) return colorize("n 0", theme.label, noColor);
+    if (empty) return colorize("0 points · (no data)", theme.label, noColor);
     const head = colorize(
-      `n ${n} · x ${formatNumber(xMinVal)}..${formatNumber(xMaxVal)} · y ${formatNumber(yMinVal)}..${formatNumber(yMaxVal)}`,
+      `${n} points`,
       theme.label,
       noColor
     );
@@ -265,7 +265,6 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     const plotRowsOut = empty ? [] : renderer === "braille" ? buildBrailleRows() : buildGridRows();
     for (const row of plotRowsOut) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
-    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
     }
