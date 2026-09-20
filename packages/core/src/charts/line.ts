@@ -387,10 +387,10 @@ export function line(opts: LineChartOptions): ChartResult {
     const rows = model.series.map((s, si) => {
       const stats = s.stats;
       const name = colorize(`${s.marker} ${s.name}`.padEnd(nameW), seriesColors[si]!, noColor);
-      const maxPart = si === 0
-        ? colorize(`max ${formatNumber(stats.max)}`, acc, noColor)
-        : `max ${formatNumber(stats.max)}`;
-      const left = `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
+      const highestPart = si === 0
+        ? colorize(`highest ${formatNumber(stats.max)}`, acc, noColor)
+        : `highest ${formatNumber(stats.max)}`;
+      const left = `${name} · lowest ${formatNumber(stats.min)} · ${highestPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
       const leftLen = visibleLength(left);
       if (leftLen >= innerWidth) return left.slice(0, innerWidth);
       const room = innerWidth - leftLen - 3;
@@ -423,7 +423,6 @@ export function line(opts: LineChartOptions): ChartResult {
     for (const row of renderXAxisLabels()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
     if (model.showSummary && !useCompact) {
-      if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
       for (const row of renderSummary()) lines.push(useFrame ? frameRow(width, row, theme.axis, noColor) : row);
     }
 
