@@ -31,18 +31,18 @@ export function axisPriceFmt(v: number, range: number): string {
  *    candles (open == close) count as up (a 1-row solid).
  *  - **One accent, spent EXACTLY once.** The peak candle (highest close, ties
  *    → first in data order, the family peak rule) renders its body as solid
- *    `█` in the theme's accent hue. Wicks always stay in the candle's own
- *    kind tone (never accent), so at raw-ANSI level the accent touches only
- *    solid `█` body mass plus non-block text (the `LAST` foot fact).
+  *    `█` in the theme's accent hue. Wicks always stay in the candle's own
+  *    kind tone (never accent), so at raw-ANSI level the accent touches only
+  *    solid `█` body mass plus non-block text (the `last` foot fact).
  *  - **Adaptive price labels** (`axisPriceFmt`): integers when the range is
  *    wide, ≤2dp when tight — never the old `162.55`-style sprawl, and never
- *    silent integer rounding of real prices. `│`/`+` guide, dashed `└╌`
- *    baseline, full period labels under their candles, two rule separators.
+  *    silent integer rounding of real prices. `│`/`+` guide, dashed `└╌`
+  *    baseline, full period labels under their candles, one rule separator.
  *  - Panel width auto-expands (explicit `width` is a floor, candles fit the
  *    longest period label — never the old 4-char `Jan`/`Jan1` mush — with a
  *    `CANDLE_MIN` floor so outlines never clip). The frame top carries
  *    `opts.title`; the eyebrow stays `OHLC` (never an uppercased title echo).
- *  - **Degenerate input is safe.** Empty / all-non-finite renders a framed `N 0 · (no data)` panel with
+  *  - **Degenerate input is safe.** Empty / all-non-finite renders a framed `0 candles · (no data)` panel with
  *    null JSON facts; a flat range (all OHLC equal) pads ±1 so candles stay
  *    visible (never `NaN` rows); non-finite candles are excluded, never
  *    plotted. No `NaN`/`Infinity` anywhere. */
@@ -91,8 +91,8 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
   // mush), with a floor so outlines stay legible.
   const candleW = Math.max(CANDLE_MIN, ...valid.map((c) => (c.label ?? "").length));
   const footPlain = empty
-    ? "N 0 · (no data)"
-    : `N ${n} · HI ${axisPriceFmt(high!, yRange)} · LO ${axisPriceFmt(low!, yRange)} · LAST ${axisPriceFmt(last!, yRange)}`;
+    ? "0 candles · (no data)"
+    : `${n} candles · high ${axisPriceFmt(high!, yRange)} · low ${axisPriceFmt(low!, yRange)} · last ${axisPriceFmt(last!, yRange)}`;
 
   const mid = Math.floor(candleW / 2);
   const plotCols = n > 0 ? n * (candleW + 1) - 1 : 0;
@@ -200,11 +200,11 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
   function buildSummary(): string {
     if (empty) return colorize(footPlain, theme.label, noColor);
     const head = colorize(
-      `N ${n} · HI ${axisPriceFmt(high!, yRange)} · LO ${axisPriceFmt(low!, yRange)} · `,
+      `${n} candles · high ${axisPriceFmt(high!, yRange)} · low ${axisPriceFmt(low!, yRange)} · `,
       theme.label,
       noColor
     );
-    return head + colorize(`LAST ${axisPriceFmt(last!, yRange)}`, acc, noColor);
+    return head + colorize(`last ${axisPriceFmt(last!, yRange)}`, acc, noColor);
   }
 
   function buildLines(): string[] {
@@ -227,7 +227,6 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
       const labels = buildPeriodLabels();
       if (labels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels);
     }
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }
