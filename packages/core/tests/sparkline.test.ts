@@ -24,13 +24,13 @@ function census(raw: string): { accent: number; grey: number; other: number } {
 }
 
 describe("sparkline (S28 LOCKED)", () => {
-  it("renders the locked panel: dashed frame, eyebrow, 2 rules, uniform width", () => {
+  it("renders the locked panel: dashed frame, eyebrow, 1 rule, uniform width", () => {
     const lines = stripAnsi(
       sparkline({ data: [1, 3, 2, 5, 4], noColor: true }).toString()
     ).split("\n");
     expect(lines[0]).toMatch(/^┌╌/);
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
-    expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(2);
+    expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
     expect(lines.some((l) => l.includes("SPARKLINE"))).toBe(true);
     expect(new Set(lines.map((l) => [...l].length)).size).toBe(1);
   });
@@ -42,10 +42,10 @@ describe("sparkline (S28 LOCKED)", () => {
     expect(first).toContain("CPU");
   });
 
-  it("foot reports n · min · max · last · peak with the peak accented", () => {
+  it("foot reports C readings · peak with the peak accented", () => {
     const raw = sparkline({ data: [1, 3, 2, 5, 4] }).toString();
     const foot = raw.split("\n").find((l) => l.includes("peak "))!;
-    expect(stripAnsi(foot)).toContain("n 5 · min 1 · max 5 · last 4 · peak 5");
+    expect(stripAnsi(foot)).toContain("5 readings · peak 5");
     expect(foot).toContain(theme.accent!);
   });
 
@@ -81,7 +81,7 @@ describe("sparkline (S28 LOCKED)", () => {
 
   it("renders a framed no-data panel with null facts on empty input", () => {
     const empty = sparkline({ data: [] });
-    expect(empty.toPlain()).toContain("n 0 · (no data)");
+    expect(empty.toPlain()).toContain("0 readings · (no data)");
     expect(empty.toPlain().startsWith("┌╌")).toBe(true);
     const j = empty.toJSON() as Record<string, unknown>;
     expect(j.count).toBe(0);
@@ -128,12 +128,12 @@ describe("sparkline (S28 LOCKED)", () => {
     expect(again).toBe(text);
   });
 
-  it("showValue:false drops the last fact from the footer", () => {
+  it("showValue:false keeps the takeaway-only footer", () => {
     const text = stripAnsi(
       sparkline({ data: [1, 3, 2, 5, 4], showValue: false, noColor: true }).toString()
     );
     expect(text).not.toContain("last");
-    expect(text).toContain("peak 5");
+    expect(text).toContain("5 readings · peak 5");
   });
 
   it("toJSON is additive (legacy keys kept, facts added)", () => {
