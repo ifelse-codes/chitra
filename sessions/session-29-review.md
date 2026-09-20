@@ -32,3 +32,5 @@ Verify criterion `accent-once`: it certifies a family-wide single-accent claim o
 Faithful whole-contract build: all 20 charts changed-or-verifiably-compliant, all 8 requirements shipped with executed-gate evidence, no narrowing to green-checkmark subsets.
 
 **Verdict:** ACCEPT
+
+**Review-Inputs-SHA:** 60438f92ef02da36d3fa4428afd983ea864311a90a1680e5aaac7ccdfbc4127a
