@@ -62,9 +62,9 @@ describe("candlestick chart — locked S27 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: CANDLES }).filter((l) => /^│ ╌+ │$/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("carries the OHLC eyebrow row", () => {
@@ -165,25 +165,25 @@ describe("candlestick chart — locked S27 design", () => {
   });
 
   // ── Foot facts ────────────────────────────────────────────────
-  it("reports N · HI · LO · LAST facts, LAST accented", () => {
+  it("reports candles · high · low · last facts, last accented", () => {
     const theme = resolveTheme("default");
     const raw = candlestick({ data: CANDLES }).toString();
-    const foot = raw.split("\n").find((l) => l.includes("LAST "))!;
+    const foot = raw.split("\n").find((l) => l.includes("last "))!;
     expect(foot).toBeDefined();
     expect(foot.includes(theme.accent!)).toBe(true);
     const text = stripAnsi(raw);
-    expect(text).toContain("N 3");
-    expect(text).toContain("HI 115");
-    expect(text).toContain("LO 95");
-    expect(text).toContain("LAST 107");
+    expect(text).toContain("3 candles");
+    expect(text).toContain("high 115");
+    expect(text).toContain("low 95");
+    expect(text).toContain("last 107");
   });
 
   // ── Degenerate-safe ───────────────────────────────────────────
-  it("renders empty data as a framed N 0 · (no data) panel", () => {
+  it("renders empty data as a framed 0 candles · (no data) panel", () => {
     const c = candlestick({ data: [] });
     const text = c.toPlain();
     expect(text).toMatch(/^┌╌/);
-    expect(text).toContain("N 0 · (no data)");
+    expect(text).toContain("0 candles · (no data)");
     expect(text).not.toContain("NaN");
     expect(text).not.toContain("Infinity");
     const j = c.toJSON() as Record<string, unknown>;
