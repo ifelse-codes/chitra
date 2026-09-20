@@ -21,8 +21,8 @@ const SPAN_SHADES = ["░", "▒", "▓", "█"];
  *  heatmap. The dim `─`
  *  track behind each event IS the shared time scale (axis colour), so spans
  *  read against the full range; a `+╌…╌+` value-axis guide and a `min..max`
- *  scale row anchor it. Two `│ ╌…╌ │` rule separators and a
- *  `n · min..max · span <label>` footer naming the longest event in the accent
+ *  scale row anchor it. One `│ ╌…╌ │` rule separator and a
+ *  `N events · longest <label>` footer naming the longest event in the accent
  *  hue. Point events (no `end`) render a single lightest-shade glyph — the old
  *  `▶`/`◀` markers are retired glyphs, outside the locked vocabulary. */
 export function timeline(opts: TimelineOptions): ChartResult {
@@ -69,8 +69,8 @@ export function timeline(opts: TimelineOptions): ChartResult {
   const labelWidth = hasData ? Math.max(...events.map((e) => e.label.length)) : 0;
   const eyebrow = (opts.xLabel ?? "SPAN").toUpperCase();
   const summaryPlain = hasData
-    ? `n ${events.length} · ${formatNumber(rangeMin)}..${formatNumber(rangeMax)} · span ${peakLabel}`
-    : "n 0 · (no data)";
+    ? `${events.length} events · longest ${peakLabel}`
+    : "0 events · (no data)";
 
   // Auto-width: expand the panel so the widest of {label + a readable track},
   // the eyebrow, and the summary row is never clipped by the frame. `+4` is
@@ -131,11 +131,11 @@ export function timeline(opts: TimelineOptions): ChartResult {
   function buildSummary(): string {
     if (!hasData) return colorize(summaryPlain, theme.label, noColor);
     const head = colorize(
-      `n ${events.length} · ${formatNumber(rangeMin)}..${formatNumber(rangeMax)} · `,
+      `${events.length} events · `,
       theme.label,
       noColor
     );
-    const tail = colorize(`span ${peakLabel}`, acc, noColor);
+    const tail = colorize(`longest ${peakLabel}`, acc, noColor);
     return head + tail;
   }
 
@@ -155,7 +155,6 @@ export function timeline(opts: TimelineOptions): ChartResult {
     if (showAxes && hasData) bodyRows.push(buildGuide(), buildScale());
     for (const row of fitBodyLines(bodyRows, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
 
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

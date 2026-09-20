@@ -10,9 +10,10 @@ import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.j
  *  the S12 `bar` language rotated to the horizontal orientation: dashed frame,
  *  uppercase eyebrow, one accent hue spent once on the peak bar with the grey
  *  tone ramp for every other bar (never a `theme.colors` rainbow), a rotated
- *  `+` value-axis guide, `│ ╌…╌ │` rule separators, per-item value labels (the
+ *  `+` value-axis guide, one `│ ╌…╌ │` rule separator, per-item value labels (the
  *  peak item's value in accent), auto-scale + auto-width, and SPACE empty cells
- *  (never the `░` phantom filler). */
+ *  (never the `░` phantom filler). A `N items · peak <label> (<max>)` footer
+ *  carries the takeaway in the accent hue. */
 export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -54,8 +55,8 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
   };
   const peakLabel = hasData ? labels[accentIdx]! : "";
   const summaryPlain = hasData
-    ? `n ${data.length} · min ${formatNumber(stats.min)} · max ${formatNumber(stats.max)} · avg ${formatNumber(stats.avg)} · peak ${peakLabel}`
-    : "n 0 · (no data)";
+    ? `${data.length} items · peak ${peakLabel} (${formatNumber(stats.max)})`
+    : "0 items · (no data)";
 
   // Auto-width: expand the panel so the widest of {a real bar + its label/value},
   // the eyebrow, and the summary row is never clipped by the frame. `+4` is the
@@ -103,11 +104,9 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
 
   function buildSummary(): string {
     if (!hasData) return colorize(summaryPlain, theme.label, noColor);
-    const maxPart = colorize(`max ${formatNumber(stats.max)}`, acc, noColor);
     return (
-      colorize(`n ${data.length} · min ${formatNumber(stats.min)} · `, theme.label, noColor) +
-      maxPart +
-      colorize(` · avg ${formatNumber(stats.avg)} · peak ${peakLabel}`, theme.label, noColor)
+      colorize(`${data.length} items · `, theme.label, noColor) +
+      colorize(`peak ${peakLabel} (${formatNumber(stats.max)})`, acc, noColor)
     );
   }
 
@@ -127,7 +126,6 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
     if (showAxes && hasData) bodyRows.push(buildAxisGuide(), buildAxisScale());
     for (const row of fitBodyLines(bodyRows, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
 
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }
