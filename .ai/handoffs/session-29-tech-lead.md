@@ -1,9 +1,9 @@
 ---
 role: tech-lead
 session: 29
-agent: opencode-session (single-chat: ballot + 3 build batches + 2 cold reviews)
-source-sha: 60438f92ef02da36d3fa4428afd983ea864311a90a1680e5aaac7ccdfbc4127a
-captured: 2026-09-20T15:20:00Z
+agent: opencode-session (single-chat: ballot + 3 build batches + 2 cold reviews; vajra dispatch unverifiable in this opencode runtime — see closeout note)
+source-sha: 5ca714b4416a5deab5e8eb733183f23c411d9db8ad2cfd976d425f6e7c6e86d2
+captured: 2026-09-20T15:25:00Z
 cost_usd: null
 ---
 
@@ -41,5 +41,5 @@ crew release-coordinator — deferred-budget — budget: 300000 tokens — No re
 Four required roles map to four deliverables: the lock, the tests, the demo/previews, and the independent review. Budget: ~7.5M raw tokens.
 
 ## Handoff Delta
-- `+` new: tech-lead handoff for session 29 (footer lock + docs app run)
+- `~` re-run: tech-lead handoff restored with full crew record (prior stub: 318-byte `vajra next --role` re-run, provenance unverifiable in opencode runtime)
 - prior stage: session 28 closeout (sparkline lock)
