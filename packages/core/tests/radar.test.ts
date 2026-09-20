@@ -56,9 +56,9 @@ describe("radar chart — locked S26 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA, labels: LABELS }).filter((l) => /^│ ╌+ │$/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("carries the structural facts in the eyebrow row", () => {
@@ -108,22 +108,22 @@ describe("radar chart — locked S26 design", () => {
   });
 
   // ── Foot facts ────────────────────────────────────────────────
-  it("reports AVG · PEAK facts, PEAK accented", () => {
+  it("reports average · peak facts, peak accented", () => {
     const theme = resolveTheme("default");
     const raw = radar({ data: DATA, labels: LABELS }).toString();
-    const footLine = raw.split("\n").find((l) => l.includes("PEAK "))!;
+    const footLine = raw.split("\n").find((l) => l.includes("peak "))!;
     expect(footLine.includes(theme.accent!)).toBe(true);
     const text = stripAnsi(raw);
-    expect(text).toContain("AVG 77");
-    expect(text).toContain("PEAK Range 90");
+    expect(text).toContain("average 77");
+    expect(text).toContain("peak Range (90)");
   });
 
   // ── Degenerate-safe ───────────────────────────────────────────
-  it("renders empty axes as a framed AXES 0 · (no data) panel", () => {
+  it("renders empty axes as a framed 0 axes · (no data) panel", () => {
     const r = radar({ data: [], labels: [] });
     const text = r.toPlain();
     expect(text).toMatch(/^┌╌/);
-    expect(text).toContain("AXES 0 · (no data)");
+    expect(text).toContain("0 axes · (no data)");
     expect(text).not.toContain("NaN");
     const j = r.toJSON() as Record<string, unknown>;
     expect(j.max).toBeNull();
