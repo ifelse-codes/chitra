@@ -22,13 +22,13 @@ const LEVEL_SHADES = ["░", "▒", "▓", "█"];
  *  supersedes it — no `▁▂▃` sub-block texture, no `=`/`.` ascii glyphs, no
  *  naked `[`…`]` bracket bar, ever. Panel chrome: dashed frame, uppercase
  *  eyebrow (`PROGRESS`, or `opts.label` uppercased), a `+╌…╌+` value-axis
- *  guide with a `0..max` scale row, two rule separators, and the dim `─`
- *  track (axis colour) as the shared scale. A `value <v> · 0..max · pct`
+ *  guide with a `0..max` scale row, one rule separator, and the dim `─`
+ *  track (axis colour) as the shared scale. A `<v> of 0..max · pct`
  *  footer carries the reading in the accent hue. The fill length clamps to
  *  the track, but the footer and `toJSON()` report the TRUE value and TRUE
  *  percent — the old silent clamp (which reported a clamped value and a
  *  percent that could never exceed 100) is retired as a lie. A non-finite
- *  `value` renders a framed `value n/a` panel; a collapsed range
+ *  `value` renders a framed `n/a of 0..max` panel; a collapsed range
  *  (`max === 0`) never divides by zero. */
 export function progress(opts: ProgressOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
@@ -40,7 +40,7 @@ export function progress(opts: ProgressOptions): ChartResult {
   const acc = theme.accent!;
   const tones = theme.tones!;
 
-  // A non-finite reading renders an honest `value n/a` panel — never NaN.
+  // A non-finite reading renders an honest `n/a of min..max` panel — never NaN.
   const finite = Number.isFinite(value) && Number.isFinite(max);
   // A collapsed range (max == min == 0) must never divide by zero — the level
   // reads full when the reading reaches max, empty otherwise.
@@ -61,8 +61,8 @@ export function progress(opts: ProgressOptions): ChartResult {
   const pct = finite ? (trueLevel * 100).toFixed(1) + "%" : "n/a";
   const pctTail = opts.showPercent === false ? "" : ` · ${pct}`;
   const summaryPlain = finite
-    ? `value ${formatNumber(value)} · ${formatNumber(min)}..${formatNumber(max)}${pctTail}`
-    : `value n/a · ${formatNumber(min)}..${formatNumber(max)}`;
+    ? `${formatNumber(value)} of ${formatNumber(min)}..${formatNumber(max)}${pctTail}`
+    : `n/a of ${formatNumber(min)}..${formatNumber(max)}`;
 
   // Auto-width: expand the panel so the eyebrow and the summary row are never
   // clipped by the frame — an explicit `width` is a floor, not a cap. `+4` is
@@ -106,11 +106,11 @@ export function progress(opts: ProgressOptions): ChartResult {
   function buildSummary(): string {
     if (!finite) return colorize(summaryPlain, theme.label, noColor);
     const head = colorize(
-      ` · ${formatNumber(min)}..${formatNumber(max)}${pctTail}`,
+      ` of ${formatNumber(min)}..${formatNumber(max)}${pctTail}`,
       theme.label,
       noColor
     );
-    const reading = colorize(`value ${formatNumber(value)}`, acc, noColor);
+    const reading = colorize(`${formatNumber(value)}`, acc, noColor);
     return reading + head;
   }
 
@@ -127,7 +127,6 @@ export function progress(opts: ProgressOptions): ChartResult {
     }
     const progBody = fitBodyLines([buildBar(), buildGuide(), buildScale()], opts.height);
     for (const row of progBody) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }
