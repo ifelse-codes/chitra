@@ -57,9 +57,9 @@ describe("timeline chart — locked S21 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ events: EVENTS }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has the uppercase eyebrow row (SPAN)", () => {
@@ -91,9 +91,9 @@ describe("timeline chart — locked S21 design", () => {
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports n · min..max · span <label>", () => {
+  it("footer reports N events · longest <label>", () => {
     const plain = stripAnsi(timeline({ events: EVENTS }).toString());
-    expect(plain).toMatch(/n 4 · 0\.\.8 · span Build/);
+    expect(plain).toMatch(/4 events · longest Build/);
   });
 
   // ── Intensity IS the shade ramp (the heatmap texture language) ──
@@ -142,14 +142,14 @@ describe("timeline chart — locked S21 design", () => {
   it("the accent lands on the LONGEST span (ties → first in event order)", () => {
     // Build (4) is the longest span; a tie between two 3-spans resolves to the first.
     const plain = stripAnsi(timeline({ events: EVENTS }).toString());
-    expect(plain).toMatch(/span Build/);
+    expect(plain).toMatch(/longest Build/);
     const tie = [
       { label: "first", start: 0, end: 3 },
       { label: "second", start: 1, end: 4 },
       { label: "short", start: 0, end: 1 },
     ];
     const tiePlain = stripAnsi(timeline({ events: tie }).toString());
-    expect(tiePlain).toMatch(/span first/);
+    expect(tiePlain).toMatch(/longest first/);
     expect(accentCensus({ events: tie }).accent).toBe(1);
   });
 
@@ -170,9 +170,9 @@ describe("timeline chart — locked S21 design", () => {
   });
 
   // ── Degenerate data is safe ───────────────────────────────────
-  it("empty events render a framed n 0 panel with no Infinity/NaN", () => {
+  it("empty events render a framed 0 events panel with no Infinity/NaN", () => {
     const plain = stripAnsi(timeline({ events: [] }).toString());
-    expect(plain).toMatch(/n 0 · \(no data\)/);
+    expect(plain).toMatch(/0 events · \(no data\)/);
     expect(plain).not.toMatch(/Infinity|NaN/);
     expect(plain).toMatch(/^┌╌/m);
     expect(plain).toMatch(/^└╌/m);
@@ -184,7 +184,7 @@ describe("timeline chart — locked S21 design", () => {
       { label: "b", start: 5 },
     ];
     const plain = stripAnsi(timeline({ events: same }).toString());
-    expect(plain).toMatch(/span a/); // tie → first event takes the accent
+    expect(plain).toMatch(/longest a/); // tie → first event takes the accent
     expect(plain).not.toMatch(/NaN|Infinity/);
     expect(accentCensus({ events: same }).accent).toBe(1);
   });
@@ -219,15 +219,15 @@ describe("timeline chart — locked S21 design", () => {
     expect(glyphs[0]).toBe("░");
   });
 
-  it("a single event renders safely with its own min..max", () => {
+  it("a single event renders safely with its own longest label", () => {
     const plain = stripAnsi(timeline({ events: [{ label: "solo", start: 2, end: 5 }] }).toString());
-    expect(plain).toMatch(/n 1 · 2\.\.5 · span solo/);
+    expect(plain).toMatch(/1 events · longest solo/);
     expect(accentCensus({ events: [{ label: "solo", start: 2, end: 5 }] }).accent).toBe(1);
   });
 
   it("honours explicit min/max scale overrides", () => {
     const plain = stripAnsi(timeline({ events: EVENTS, min: -2, max: 10 }).toString());
-    expect(plain).toMatch(/-2\.\.10/);
+    expect(plain).toMatch(/-2\s+10/);
   });
 
   it("noColor renders plain shade glyphs and no escape codes", () => {
