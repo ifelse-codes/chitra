@@ -61,9 +61,9 @@ describe("scatter chart — locked S17 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has eyebrow row (uppercase CORRELATION by default)", () => {
@@ -81,9 +81,9 @@ describe("scatter chart — locked S17 design", () => {
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports n · x-range · y-range · peak", () => {
+  it("footer reports N points · peak", () => {
     const plain = stripAnsi(scatter({ data: DATA }).toString());
-    expect(plain).toMatch(/n 8 · x 1\.\.10 · y 2\.\.12 · peak \(10, 12\)/);
+    expect(plain).toMatch(/8 points · peak \(10, 12\)/);
   });
 
   it("does NOT report a Pearson r / correlation coefficient by default", () => {
@@ -138,15 +138,15 @@ describe("scatter chart — locked S17 design", () => {
   });
 
   // ── Degenerate data is safe ───────────────────────────────────
-  it("empty data renders a framed n 0 panel with no Infinity/NaN", () => {
+  it("empty data renders a framed 0 points panel with no Infinity/NaN", () => {
     const plain = stripAnsi(scatter({ data: [] }).toString());
-    expect(plain).toMatch(/n 0/);
+    expect(plain).toMatch(/0 points · \(no data\)/);
     expect(plain).not.toMatch(/Infinity|NaN/);
   });
 
   it("a single point renders honestly (collapsed range, itself as peak)", () => {
     const plain = stripAnsi(scatter({ data: [{ x: 3, y: 5 }] }).toString());
-    expect(plain).toMatch(/n 1 · x 3\.\.3 · y 5\.\.5 · peak \(3, 5\)/);
+    expect(plain).toMatch(/1 points · peak \(3, 5\)/);
     expect(plain).not.toMatch(/NaN/);
   });
 });

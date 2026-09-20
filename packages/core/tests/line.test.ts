@@ -110,6 +110,11 @@ describe("line chart", () => {
     expect(result.toPlain()).toContain("Status: All systems operational");
   });
 
+  it("has exactly one frame rule separator (│ ╌) — S29 B-diet+", () => {
+    const lines = line({ data: [1, 2, 3] }).toPlain().split("\n");
+    expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
+  });
+
   it("texture-codes series strokes in monochrome (solid primary, dashed, dotted)", () => {
     const result = line({
       data: [
@@ -202,7 +207,7 @@ describe("line chart", () => {
     expect(plain).toContain("█");
   });
 
-  it("renders per-series min/max/avg/last summary rows", () => {
+  it("renders per-series lowest/highest/avg/last summary rows", () => {
     const result = line({
       data: [
         [1, 2, 3, 4],
@@ -211,12 +216,12 @@ describe("line chart", () => {
       seriesLabels: ["A", "B"],
     });
     const plain = result.toPlain();
-    expect(plain).toContain("min");
-    expect(plain).toContain("max");
+    expect(plain).toContain("lowest");
+    expect(plain).toContain("highest");
     expect(plain).toContain("avg");
     expect(plain).toContain("last");
-    expect(plain).toContain("min 1");
-    expect(plain).toContain("max 4");
+    expect(plain).toContain("lowest 1");
+    expect(plain).toContain("highest 4");
     expect(plain).toContain("avg 2.5");
     expect(plain).toContain("last 1");
   });
@@ -234,7 +239,7 @@ describe("line chart", () => {
   it("summary: false suppresses the stats block", () => {
     const result = line({ data: [1, 2, 3], summary: false });
     const plain = result.toPlain();
-    expect(plain).not.toContain("min");
+    expect(plain).not.toContain("lowest");
     expect(plain).not.toContain("last");
   });
 

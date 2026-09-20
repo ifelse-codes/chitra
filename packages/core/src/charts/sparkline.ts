@@ -29,13 +29,12 @@ const ROWS = 4;
  *  The `renderer` option stays accepted (public API unchanged) but the
  *  locked design supersedes it — no `▁▂▃` sub-blocks, no braille line, no
  *  ascii glyphs, ever. Panel chrome: dashed frame, uppercase `SPARKLINE`
- *  eyebrow, two rule separators, and an `n · min · max · last · peak` footer
- *  (the peak fact accented; `showValue: false` drops the `last` fact).
- *  `width` keeps its meaning (plotted data columns; longer input is
+ *  eyebrow, one rule separator, and a `C readings · peak <max>` footer
+ *  (the peak fact accented). `width` keeps its meaning (plotted data columns; longer input is
  *  deterministically downsampled to fit) and stays a floor for the panel,
  *  never a cap. Non-finite samples are excluded from the plot and every
  *  fact — never plotted, never counted; empty / all-non-finite input
- *  renders a framed `n 0 · (no data)` panel with null JSON facts. */
+ *  renders a framed `0 readings · (no data)` panel with null JSON facts. */
 export function sparkline(opts: SparklineOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -64,10 +63,8 @@ export function sparkline(opts: SparklineOptions): ChartResult {
   const title = opts.label ?? "SPARKLINE";
   const summaryPlain =
     count === 0
-      ? `n 0 · (no data)`
-      : `n ${count} · min ${formatNumber(min)} · max ${formatNumber(max)}` +
-        (opts.showValue === false ? `` : ` · last ${formatNumber(last)}`) +
-        ` · peak ${formatNumber(max)}`;
+      ? `0 readings · (no data)`
+      : `${count} readings · peak ${formatNumber(max)}`;
 
   // Auto-width: expand the panel so the strip and the summary are never
   // clipped — an explicit `width` shaped the columns above and stays a
@@ -101,9 +98,7 @@ export function sparkline(opts: SparklineOptions): ChartResult {
   function buildSummary(): string {
     if (count === 0) return colorize(summaryPlain, theme.label, noColor);
     const head = colorize(
-      `n ${count} · min ${formatNumber(min)} · max ${formatNumber(max)}` +
-        (opts.showValue === false ? `` : ` · last ${formatNumber(last)}`) +
-        ` · `,
+      `${count} readings · `,
       theme.label,
       noColor
     );
@@ -122,7 +117,6 @@ export function sparkline(opts: SparklineOptions): ChartResult {
       lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
     }
     for (const row of buildStrip()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

@@ -33,7 +33,7 @@ function sparkStr(values: number[], color: string, width: number, noColor: boole
 /** Renders a chitra-standard TUI panel carrying the LOCKED S12 design language:
  *  dashed frame, eyebrow row, `│`/`+` y-guide, one accent + grey tone ramp
  *  (accent spent once on the peak bar), `+` x-tick row, and per-series
- *  MIN/MAX/AVG/LAST summary with compact sparkline. */
+ *  AVG/PEAK summary with compact sparkline. */
 export function bar(opts: BarChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
   const noColor = opts.noColor ?? false;
@@ -95,7 +95,7 @@ export function bar(opts: BarChartOptions): ChartResult {
   const nameW = Math.max(...seriesLabels.map((l) => l.length)) + 2;
   const minSummaryInner = Math.max(...series.map((sv, si) => {
     const s = seriesStats(sv);
-    return nameW + ` · min ${formatNumber(s.min)} · max ${formatNumber(s.max)} · avg ${formatNumber(s.avg)} · last ${formatNumber(s.last)}`.length;
+    return nameW + ` · avg ${formatNumber(s.avg)} · peak ${formatNumber(s.max)}`.length;
   }));
 
   // Reserve real room for the spark so it isn't silently starved to width 0 whenever the
@@ -190,12 +190,12 @@ export function bar(opts: BarChartOptions): ChartResult {
     return series.map((sv, si) => {
       const stats = seriesStats(sv);
       const color = toneOrder[si % toneOrder.length]!;
-      // Accent on the max label for the series that holds the global peak bar.
-      const maxPart = si === maxSi
-        ? colorize(`max ${formatNumber(stats.max)}`, acc, noColor)
-        : `max ${formatNumber(stats.max)}`;
+      // Accent on the peak fact for the series that holds the global peak bar.
+      const peakPart = si === maxSi
+        ? colorize(`peak ${formatNumber(stats.max)}`, acc, noColor)
+        : `peak ${formatNumber(stats.max)}`;
       const name = colorize(("■ " + seriesLabels[si]!).padEnd(nameW), color, noColor);
-      const left = `${name} · min ${formatNumber(stats.min)} · ${maxPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
+      const left = `${name} · avg ${formatNumber(stats.avg)} · ${peakPart}`;
       const room = innerWidth - visibleLength(left) - 2;
       const sparkW = room < SPARK_MIN ? 0 : Math.min(14, room);
       const rawSpark = sparkStr(sv, color, sparkW, noColor);
@@ -227,7 +227,6 @@ export function bar(opts: BarChartOptions): ChartResult {
     const xLabels = buildXLabels();
     if (xLabels) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, xLabels, theme.axis, noColor) : xLabels);
 
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       for (const row of buildSummary()) lines.push(useFrame ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
     }

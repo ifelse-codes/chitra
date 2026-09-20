@@ -186,13 +186,12 @@ export function area(opts: AreaChartOptions): ChartResult {
       lines.push(useFrame && !useCompact ? frameRow(width, rowStr, theme.axis, noColor) : rowStr);
     }
 
-    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
     if (!useCompact) {
       const last = series[0]![series[0]!.length - 1];
       const foot =
         (isMulti ? `${seriesLabels[0]} · ` : "series · ") +
-        colorize(`max ${formatNumber(dataMax)}`, acc, noColor) +
-        ` · min ${formatNumber(dataMin)} · last ${formatNumber(last)}`;
+        colorize(`highest ${formatNumber(dataMax)}`, acc, noColor) +
+        ` · lowest ${formatNumber(dataMin)} · last ${formatNumber(last)}`;
       lines.push(useFrame ? frameRow(width, foot, theme.axis, noColor) : foot);
     }
     if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));

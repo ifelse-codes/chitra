@@ -58,9 +58,9 @@ describe("boxplot chart — locked S27 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ data: DATA, labels: LABELS }).filter((l) => /^│ ╌+ │$/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("carries the SPREAD eyebrow row", () => {
@@ -108,23 +108,23 @@ describe("boxplot chart — locked S27 design", () => {
   });
 
   // ── Foot facts ────────────────────────────────────────────────
-  it("reports GROUPS · MED · PEAK facts, PEAK accented", () => {
+  it("reports groups · median · peak facts, peak accented", () => {
     const theme = resolveTheme("default");
     const raw = boxplot({ data: DATA, labels: LABELS }).toString();
-    const foot = raw.split("\n").find((l) => l.includes("PEAK "))!;
+    const foot = raw.split("\n").find((l) => l.includes("peak "))!;
     expect(foot).toBeDefined();
     expect(foot.includes(theme.accent!)).toBe(true);
     const text = stripAnsi(raw);
-    expect(text).toContain("GROUPS 3");
-    expect(text).toContain("PEAK C 16");
+    expect(text).toContain("3 groups");
+    expect(text).toContain("peak C (16)");
   });
 
   // ── Degenerate-safe ───────────────────────────────────────────
-  it("renders empty data as a framed GROUPS 0 · (no data) panel", () => {
+  it("renders empty data as a framed 0 groups · (no data) panel", () => {
     const b = boxplot({ data: [] });
     const text = b.toPlain();
     expect(text).toMatch(/^┌╌/);
-    expect(text).toContain("GROUPS 0 · (no data)");
+    expect(text).toContain("0 groups · (no data)");
     expect(text).not.toContain("NaN");
     const j = b.toJSON() as Record<string, unknown>;
     expect(j.stats).toBeNull();

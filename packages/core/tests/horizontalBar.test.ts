@@ -22,9 +22,9 @@ describe("horizontalBar chart — locked S19 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has frame rule separators (│ ╌)", () => {
+  it("has exactly one frame rule separator (│ ╌) — S29 B-diet+", () => {
     const plain = stripAnsi(horizontalBar({ data: [10, 20, 30] }).toString());
-    expect(plain).toMatch(/│ ╌/);
+    expect(plain.split("\n").filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
   });
 
   it("has eyebrow row (uppercase VALUES by default)", () => {
@@ -110,8 +110,7 @@ describe("horizontalBar chart — locked S19 design", () => {
 
   it("names the peak item in the summary row", () => {
     const plain = stripAnsi(horizontalBar({ data: [12, 47, 23], labels: ["a", "b", "c"] }).toString());
-    expect(plain).toContain("peak b");
-    expect(plain).toContain("max 47");
+    expect(plain).toContain("3 items · peak b (47)");
   });
 
   // ── Auto-scale + auto-width (criterion 5) ──────────────────────
@@ -138,7 +137,7 @@ describe("horizontalBar chart — locked S19 design", () => {
   // ── Degenerate input (criterion 6) ─────────────────────────────
   it("renders empty data safely (no crash, no NaN)", () => {
     const plain = stripAnsi(horizontalBar({ data: [] }).toString());
-    expect(plain).toContain("n 0");
+    expect(plain).toContain("0 items · (no data)");
     expect(plain).not.toContain("NaN");
     expect(plain.split("\n")[0]).toMatch(/^┌╌/);
   });

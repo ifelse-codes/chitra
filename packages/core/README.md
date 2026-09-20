@@ -746,6 +746,36 @@ data (the founder-approved v8 prototype). Rules that must not change:
   (null when there is no data) and `peak` (`{ index, value }`, null when
   there is no data). The public `SparklineOptions` shape is unchanged.
 
+### LOCKED: family-wide footer (B-diet+) — session 29 design
+
+The S21-deferred footer pass is closed, founder-picked B-diet+ from
+real-render ballots: **plain-words takeaway footers + one rule separator**,
+family-wide. Where an S09–S28 block above quotes a footer line or two rule
+separators, **this block supersedes those two lines** — the rest of each
+block (geometry, tones, accent rule, degenerate safety, agent surface)
+stands unchanged. Rules that must not change:
+
+- **One `│ ╌…╌ │` rule separator per panel** (below the eyebrow/legend).
+  The pre-footer rule is gone everywhere; panels read airier at a glance.
+- **Footers speak plain nouns and name the takeaway.** No `n`, `min/max`,
+  `span`, `MED`, `AVG`, `GROUPS`, `HI/LO` jargon; no range repeats (the
+  scale row already owns the range):
+  timeline `N events · longest L`; horizontalBar `N items · peak L (max)`;
+  sparkline `N readings · peak P`; gauge/progress `V of A..B · P%`;
+  histogram `N samples · peak M`; heatmap `R×C grid · peak (r, c)`; scatter
+  `N points · peak (x, y)`; treemap `N leaves · peak L`; bar per-series
+  `name · avg C · peak B`; line per-series `lowest/highest` (facts kept);
+  area `highest/lowest`; radar `average A · peak L (V)`; candlestick
+  `N candles · high H · low L · last X`; boxplot
+  `G groups · median M · peak L (V)`; pie/donut/waterfall/funnel/sankey
+  keep their already-plain text.
+- **The takeaway keeps the single accent hue** (ties-first rules
+  unchanged). Empty panels use the plain count noun
+  (`0 events/readings/samples/candles/groups/axes/cells/leaves/points/items
+  · (no data)`) with null JSON facts.
+- **Display-only change.** `toJSON()` facts, `toContent()`/compact paths,
+  and public option shapes are untouched.
+
 ## License
 
 MIT

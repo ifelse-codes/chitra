@@ -50,9 +50,9 @@ describe("progress chart — locked S23 design", () => {
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
   });
 
-  it("has two frame rule separators (│ ╌)", () => {
+  it("has one frame rule separator (│ ╌)", () => {
     const rules = plainLines({ value: 87 }).filter((l) => /^│ ╌/.test(l));
-    expect(rules.length).toBe(2);
+    expect(rules.length).toBe(1);
   });
 
   it("has the uppercase eyebrow row (PROGRESS; opts.label uppercases)", () => {
@@ -154,17 +154,17 @@ describe("progress chart — locked S23 design", () => {
   });
 
   // ── Summary footer ────────────────────────────────────────────
-  it("footer reports value · 0..max · pct with the reading accented", () => {
+  it("footer reports V of 0..max · pct with the reading accented", () => {
     const plain = stripAnsi(progress({ value: 87, max: 100 }).toString());
-    expect(plain).toMatch(/value 87 · 0\.\.100 · 87\.0%/);
+    expect(plain).toMatch(/87 of 0\.\.100 · 87\.0%/);
     const acc = resolveTheme(undefined).accent!;
     const raw = progress({ value: 87 }).toString();
-    expect(raw).toContain(`${acc}value 87`);
+    expect(raw).toContain(`${acc}87`);
   });
 
   it("showPercent: false drops the pct fact from the footer, keeps the rest", () => {
     const plain = stripAnsi(progress({ value: 87, showPercent: false }).toString());
-    expect(plain).toMatch(/value 87 · 0\.\.100/);
+    expect(plain).toMatch(/87 of 0\.\.100/);
     expect(plain).not.toMatch(/%/);
     // the agent surface still carries percent — additive, never removed
     const json = progress({ value: 87, showPercent: false }).toJSON() as Record<string, unknown>;
@@ -176,7 +176,7 @@ describe("progress chart — locked S23 design", () => {
     const c = accentCensus({ value: 140, max: 100 });
     expect(c.accent).toBe(1);
     const plain = stripAnsi(progress({ value: 140, max: 100 }).toString());
-    expect(plain).toMatch(/value 140 · 0\.\.100 · 140\.0%/); // honest percent, not a silent clamp
+    expect(plain).toMatch(/140 of 0\.\.100 · 140\.0%/); // honest percent, not a silent clamp
     const row = plain.split("\n").find((l) => RAMP.test(l))!;
     expect(row).not.toMatch(/[░▒▓█]─/); // no track left — the bar is full
   });
@@ -185,7 +185,7 @@ describe("progress chart — locked S23 design", () => {
     const out = progress({ value: -10, max: 100 }).toString();
     expect(out).toBeTruthy(); // no negative-repeat RangeError
     const plain = stripAnsi(out);
-    expect(plain).toMatch(/value -10 · 0\.\.100 · -10\.0%/);
+    expect(plain).toMatch(/-10 of 0\.\.100 · -10\.0%/);
     expect(plain.split("\n").some((l) => /^│ ─+ │$/.test(l))).toBe(true); // bar row = all dim track
   });
 
@@ -196,13 +196,13 @@ describe("progress chart — locked S23 design", () => {
     expect(accentCensus({ value: 50, max: 0 }).accent).toBe(1); // reading reaches max → full
     const empty = stripAnsi(progress({ value: -1, max: 0 }).toString());
     expect(empty).not.toMatch(/NaN|Infinity/);
-    expect(empty).toMatch(/value -1 · 0\.\.0 · 0\.0%/); // below the point → empty
+    expect(empty).toMatch(/-1 of 0\.\.0 · 0\.0%/); // below the point → empty
   });
 
-  it("a non-finite value renders a framed value n/a panel — never NaN", () => {
+  it("a non-finite value renders a framed n/a panel — never NaN", () => {
     const plain = stripAnsi(progress({ value: NaN, max: 100 }).toString());
     expect(plain).not.toMatch(/NaN|Infinity/);
-    expect(plain).toMatch(/value n\/a · 0\.\.100/);
+    expect(plain).toMatch(/n\/a of 0\.\.100/);
     expect(plain).toMatch(/^┌╌/m);
     expect(plain).toMatch(/^└╌/m);
   });

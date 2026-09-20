@@ -171,7 +171,6 @@ export function sankey(opts: SankeyOptions): ChartResult {
       }
       ranked.forEach((r, i) => lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, buildLedgerRow(r, i), theme.axis, noColor) : buildLedgerRow(r, i)));
     }
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

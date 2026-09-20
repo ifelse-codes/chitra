@@ -50,7 +50,6 @@ export function pie(opts: PieChartOptions): ChartResult {
     }
     for (const content of fitBodyLines(combined, opts.height)) lines.push(useFrame && !useCompact ? frameRow(width, content, theme.axis, noColor) : content);
 
-    if (useFrame && !useCompact) lines.push(frameRule(width, theme.axis, noColor));
     if (!useCompact) {
       const foot = `${slices.length} slices · total ${formatTotal(total)}`;
       lines.push(useFrame ? frameRow(width, foot, theme.axis, noColor) : foot);
