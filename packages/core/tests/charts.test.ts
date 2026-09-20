@@ -45,10 +45,10 @@ describe("area chart", () => {
   });
   it("auto-scales the y-range to the data and accents only the peak + footer max", () => {
     const out = area({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
-    expect(out).toContain("max 61");
-    expect(out).toContain("min 12");
+    expect(out).toContain("highest 61");
+    expect(out).toContain("lowest 12");
     const accent = "\x1b[38;2;139;124;246m";
-    expect(out).toContain(accent + "max 61");
+    expect(out).toContain(accent + "highest 61");
   });
 });
 
@@ -70,10 +70,10 @@ describe("line chart (LOCKED S09 language)", () => {
   });
   it("auto-scales the y-range to the data and accents only the peak + footer max", () => {
     const out = line({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
-    expect(out).toContain("max 61");
-    expect(out).toContain("min 12");
+    expect(out).toContain("highest 61");
+    expect(out).toContain("lowest 12");
     const accent = "\x1b[38;2;139;124;246m";
-    expect(out).toContain(accent + "max 61");
+    expect(out).toContain(accent + "highest 61");
   });
   it("spends the accent once — the curve itself stays on the tone ramp", () => {
     const out = line({ data: [12, 19, 15, 28, 34, 31, 42, 38, 52, 47, 61, 58] }).toString();
@@ -155,6 +155,10 @@ describe("donut chart", () => {
   it("renders the eyebrow caption uppercase", () => {
     const out = donut({ data: [30, 40, 30], eyebrow: "Distribution · Requests" }).toPlain();
     expect(out).toContain("DISTRIBUTION · REQUESTS");
+  });
+  it("donut carries exactly one rule separator — S29 B-diet+ (exempt: legend owns facts, no footer)", () => {
+    const lines = donut({ data: [30, 40, 30] }).toPlain().split("\n");
+    expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
   });
   it("pie renders the eyebrow caption and status row", () => {
     const out = pie({ data: [30, 40, 30], eyebrow: "Requests by env", status: "ok" }).toPlain();
