@@ -259,7 +259,6 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
       const stepLabels = buildStepLabels();
       if (stepLabels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, stepLabels, theme.axis, noColor) : stepLabels);
     }
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }
