@@ -21,8 +21,8 @@ const LEVEL_SHADES = ["░", "▒", "▓", "█"];
  *  bucket) carries the intensity through noColor, exactly like the LOCKED
  *  heatmap/timeline. The dim `─` track behind the fill IS the shared scale
  *  (axis colour); a `+╌…╌+` value-axis guide and a `min..max` scale row anchor
- *  it. Two `│ ╌…╌ │` rule separators and a `value <v> · min..max · pct` footer
- *  carry the reading in the accent hue. Out-of-range readings clip to the track
+ *  it. One `│ ╌…╌ │` rule separator and a `<v> of min..max · pct` footer
+ *  carrying the reading in the accent hue. Out-of-range readings clip to the track
  *  (footer still reports the true value/percent); the retired `┤`/`├` endcaps
  *  are glyphs outside the locked vocabulary. */
 export function gauge(opts: GaugeOptions): ChartResult {
@@ -35,7 +35,7 @@ export function gauge(opts: GaugeOptions): ChartResult {
   const acc = theme.accent!;
   const tones = theme.tones!;
 
-  // A non-finite reading renders an honest `value n/a` panel — never NaN.
+  // A non-finite reading renders an honest `n/a of min..max` panel — never NaN.
   const finite = Number.isFinite(value) && Number.isFinite(min) && Number.isFinite(max);
   // A collapsed range (min == max) must never divide by zero — the level reads
   // full when the reading reaches max, empty otherwise.
@@ -67,8 +67,8 @@ export function gauge(opts: GaugeOptions): ChartResult {
   const eyebrow = upperAnsi(opts.label ?? "LEVEL");
   const pct = finite ? (trueLevel * 100).toFixed(1) + "%" : "n/a";
   const summaryPlain = finite
-    ? `value ${formatNumber(value)} · ${formatNumber(min)}..${formatNumber(max)} · ${pct}`
-    : `value n/a · ${formatNumber(min)}..${formatNumber(max)}`;
+    ? `${formatNumber(value)} of ${formatNumber(min)}..${formatNumber(max)} · ${pct}`
+    : `n/a of ${formatNumber(min)}..${formatNumber(max)}`;
 
   // Auto-width: expand the panel so the eyebrow and the summary row are never
   // clipped by the frame — an explicit `width` is a floor, not a cap. `+4` is
@@ -112,11 +112,11 @@ export function gauge(opts: GaugeOptions): ChartResult {
   function buildSummary(): string {
     if (!finite) return colorize(summaryPlain, theme.label, noColor);
     const head = colorize(
-      ` · ${formatNumber(min)}..${formatNumber(max)} · ${pct}`,
+      ` of ${formatNumber(min)}..${formatNumber(max)} · ${pct}`,
       theme.label,
       noColor
     );
-    const reading = colorize(`value ${formatNumber(value)}`, acc, noColor);
+    const reading = colorize(`${formatNumber(value)}`, acc, noColor);
     return reading + head;
   }
 
@@ -134,7 +134,6 @@ export function gauge(opts: GaugeOptions): ChartResult {
     const gaugeBody = [buildBar()];
     if (opts.showAxes !== false) gaugeBody.push(buildGuide(), buildScale());
     for (const row of fitBodyLines(gaugeBody, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }

@@ -29,10 +29,10 @@ function percentile(sorted: number[], p: number): number {
  *  labels are INTEGER counts (counts are integers — the old decimal y-labels
  *  `36.56` were a lie the axis told); the baseline is the dashed `└╌…╌`
  *  vocabulary, bin-start labels sit under their columns in the label tone.
- *  Two `│ ╌…╌ │` rule separators and an `n · mode · p50 · p99` foot row with
- *  the `mode` fact in the accent hue (nearest-rank percentiles over the
+ *  One `│ ╌…╌ │` rule separator and a `N samples · peak` foot row with
+ *  the `peak` fact in the accent hue (nearest-rank mode over the
  *  sample). Degenerate input is safe: empty / all-non-finite data renders a
- *  framed `n 0 · (no data)` panel; a collapsed range (every value equal)
+ *  framed `0 samples · (no data)` panel; a collapsed range (every value equal)
  *  lands every sample in the first bin — never NaN. Panel width auto-expands
  *  so the eyebrow, x-labels, and summary are never clipped (an explicit
  *  `width` is a floor, not a cap). */
@@ -78,8 +78,8 @@ export function histogram(opts: HistogramOptions): ChartResult {
 
   const eyebrow = (opts.xLabel ?? "DISTRIBUTION").toUpperCase();
   const summaryPlain = hasData
-    ? `n ${values.length} · mode ${formatNumber(modeValue)} · p50 ${formatNumber(p50)} · p99 ${formatNumber(p99)}`
-    : "n 0 · (no data)";
+    ? `${values.length} samples · peak ${formatNumber(modeValue)}`
+    : "0 samples · (no data)";
 
   const yLabelW = Math.max(formatNumber(Math.max(0, yMax)).length, 1);
   const gutter = yLabelW + 1; // label chars + the axis guide char
@@ -166,10 +166,9 @@ export function histogram(opts: HistogramOptions): ChartResult {
 
   function buildSummary(): string {
     if (!hasData) return colorize(summaryPlain, theme.label, noColor);
-    const head = colorize(`n ${values.length} · `, theme.label, noColor);
-    const modeFact = colorize(`mode ${formatNumber(modeValue)}`, acc, noColor);
-    const tail = colorize(` · p50 ${formatNumber(p50)} · p99 ${formatNumber(p99)}`, theme.label, noColor);
-    return head + modeFact + tail;
+    const head = colorize(`${values.length} samples · `, theme.label, noColor);
+    const peakFact = colorize(`peak ${formatNumber(modeValue)}`, acc, noColor);
+    return head + peakFact;
   }
 
   function buildLines(): string[] {
@@ -190,7 +189,6 @@ export function histogram(opts: HistogramOptions): ChartResult {
     const binLabels = buildBinLabels();
     if (binLabels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, binLabels, theme.axis, noColor) : binLabels);
 
-    if (useFrame && !useCompact) lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     if (!useCompact) {
       lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
     }
