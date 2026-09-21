@@ -640,3 +640,82 @@ sankey({
     ),
   },
 ];
+
+// Hero rotation variants — FIXED outer dims (19 lines × 64 cols visible)
+// so the hero mac box + chart frame never move between swaps.
+// Verified by probe: every entry below measures exactly 19×64.
+// These feed src/data/hero-charts.json (never the catalog gallery).
+export const HERO_SPECS: Array<{ id: string; ansi: () => string }> = [
+  {
+    id: "line",
+    ansi: () =>
+      line({
+        data: [3, 5, 4, 8, 6, 9, 7, 11, 8, 10, 13, 12],
+        title: "Revenue Trend",
+        width: 64,
+        height: 13,
+      }).toString(),
+  },
+  {
+    id: "bar",
+    ansi: () =>
+      bar({
+        data: [42, 67, 38, 55, 72, 49],
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        title: "Monthly Sales",
+        width: 64,
+        height: 12,
+      }).toString(),
+  },
+  {
+    id: "area",
+    ansi: () =>
+      area({
+        data: [10, 20, 15, 35, 28, 45, 38, 52],
+        title: "Volume",
+        width: 64,
+        height: 16,
+      }).toString(),
+  },
+  {
+    id: "histogram",
+    ansi: () =>
+      histogram({
+        data: [1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 7, 8, 9],
+        title: "Latency",
+        width: 64,
+        height: 12,
+      }).toString(),
+  },
+  {
+    id: "candlestick",
+    ansi: () =>
+      candlestick({
+        data: [
+          { open: 10, high: 14, low: 8, close: 12, label: "A" },
+          { open: 12, high: 16, low: 11, close: 15, label: "B" },
+          { open: 15, high: 17, low: 13, close: 14, label: "C" },
+          { open: 14, high: 18, low: 12, close: 17, label: "D" },
+        ],
+        title: "OHLC",
+        width: 64,
+        height: 12,
+      }).toString(),
+  },
+  {
+    id: "scatter",
+    ansi: () =>
+      scatter({
+        data: [
+          { x: 1, y: 2 },
+          { x: 2, y: 5 },
+          { x: 3, y: 3 },
+          { x: 4, y: 8 },
+          { x: 5, y: 6 },
+        ],
+        title: "Correlation",
+        width: 64,
+        height: 14,
+      }).toString(),
+  },
+];

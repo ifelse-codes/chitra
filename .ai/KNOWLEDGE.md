@@ -103,6 +103,23 @@
 - `examples/basic.ts` — worked examples for all chart types.
 - `CONTRIBUTING.md`, `replit.md` (Replit agent notes), `darshan/SKILL.md` (output skill).
 
+## S31 extension — antra atoms + hero rotation + wall fix (2026-09-21)
+- Donor `antra/landing/index.html` (static single-file): violet tokens,
+  ◆ eyebrow, install-block copy, hairline 1px-gap grids, blur nav,
+  hairline footer, IO reveal, grid+glow background, mandala wisps.
+  Borrowed as namespaced `--antra-*` + last-source-order S31 CSS section
+  (beats the two theater `:root`/override layers without touching them).
+- Hero rotation: `HERO_SPECS` in `scripts/chart-specs.ts` →
+  `src/data/hero-charts.json` (drift-gated); every variant exactly
+  19 visible lines × 64 visible cols (`scripts/check-hero-dims.py`
+  pins it); 3s instant cut, hugging mac box, 8ch right buffer.
+- Wall fix (measured, not guessed): JetBrains Mono advances braille
+  14% wide (canvas `measureText`); `.terminal-body` leads Cascadia Mono
+  (uniform) + ligatures/kerning off. Pixel proof: 19/19 rows share the
+  right edge. Rule must live AFTER the theater font override (source
+  order wins ties).
+- Live deploy FROZEN by founder order (local-proven only).
+
 ## S30 extension — live hosting on Cloudflare Pages (2026-09-21)
 - **Site:** `https://chitra.iifelse.com` = `artifacts/chitra-docs` SPA.
   Pages project `chitra` (`chitra-5xh.pages.dev`, prod branch `main`,
