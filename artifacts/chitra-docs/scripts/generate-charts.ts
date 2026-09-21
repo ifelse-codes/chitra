@@ -10,13 +10,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { SPECS } from "./chart-specs.js";
+import { SPECS, HERO_SPECS } from "./chart-specs.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dataDir = resolve(here, "../src/data");
 const ANSI_JSON = resolve(dataDir, "ansi-charts.json");
 const SVG_JSON = resolve(dataDir, "svg-charts.json");
 const CHARTS_TS = resolve(dataDir, "charts.ts");
+const HERO_JSON = resolve(dataDir, "hero-charts.json");
 
 /** Escape a string for safe embedding inside a TS template literal. */
 function tl(s: string): string {
@@ -26,6 +27,12 @@ function tl(s: string): string {
 function buildAnsiJson(): string {
   const obj: Record<string, string> = {};
   for (const spec of SPECS) obj[spec.id] = spec.ansi();
+  return JSON.stringify(obj, null, 2) + "\n";
+}
+
+function buildHeroJson(): string {
+  const obj: Record<string, string> = {};
+  for (const spec of HERO_SPECS) obj[spec.id] = spec.ansi();
   return JSON.stringify(obj, null, 2) + "\n";
 }
 
@@ -76,6 +83,7 @@ const outputs = [
   { path: ANSI_JSON, label: "src/data/ansi-charts.json", content: buildAnsiJson() },
   { path: SVG_JSON, label: "src/data/svg-charts.json", content: buildSvgJson() },
   { path: CHARTS_TS, label: "src/data/charts.ts", content: buildChartsTs() },
+  { path: HERO_JSON, label: "src/data/hero-charts.json", content: buildHeroJson() },
 ];
 
 const check = process.argv.includes("--check");
