@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { CHARTS } from "./data/charts";
 import { ansiToHtml } from "./ansi";
 import ansiCharts from "./data/ansi-charts.json";
+import heroCharts from "./data/hero-charts.json";
 import svgCharts from "./data/svg-charts.json";
 import { CatalogPage } from "./components/CatalogPage";
 
 const ANSI = ansiCharts as Record<string, string>;
+const HERO_ANSI = heroCharts as Record<string, string>;
 
 // Use cases + key options per chart — "why would I use this?" context
 interface ChartMeta { uses: string[]; options: { name: string; desc: string }[] }
@@ -182,8 +184,8 @@ function CodeBlock({ code, lang = "typescript" }: { code: string; lang?: string 
   );
 }
 
-function Terminal({ id, plain }: { id?: string; plain?: string }) {
-  const html = id && ANSI[id] ? ansiToHtml(ANSI[id]) : null;
+function Terminal({ id, plain, ansiText }: { id?: string; plain?: string; ansiText?: string }) {
+  const html = ansiText ? ansiToHtml(ansiText) : id && ANSI[id] ? ansiToHtml(ANSI[id]) : null;
   return (
     <div className="terminal">
       <div className="terminal-bar">
@@ -218,6 +220,114 @@ function SvgChart({ id }: { id: string }) {
 
 function AccentChip({ accent }: { accent: string }) {
   return <span className={`accent-chip chip-${accent}`}>{accent}</span>;
+}
+
+/* ── Install strip: antra-borrow click-to-copy hero command ── */
+function InstallStrip() {
+  const [copied, setCopied] = useState(false);
+  const cmd = "pnpm add @chitra/core";
+  const copy = () => {
+    navigator.clipboard.writeText(cmd);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return (
+    <button className="install-strip" onClick={copy} title="Click to copy">
+      <code>{cmd}</code>
+      <span className="copy-hint">{copied ? "✓ copied!" : "copy"}</span>
+    </button>
+  );
+}
+
+/* ── Mandala field: antra-borrow wandering wisps (max 2, motion-safe) ── */
+const MANDALA_C = 200;
+const MANDALA_TAU = Math.PI * 2;
+function mandalaPt(r: number, ang: number): string {
+  return `${(MANDALA_C + r * Math.cos(ang)).toFixed(1)},${(MANDALA_C + r * Math.sin(ang)).toFixed(1)}`;
+}
+function mandalaPoly(n: number, r: number, rot: number): string {
+  const p: string[] = [];
+  for (let i = 0; i < n; i++) p.push(mandalaPt(r, rot + (i * MANDALA_TAU) / n));
+  return `<polygon points="${p.join(" ")}"/>`;
+}
+function mandalaSpokes(n: number, r0: number, r1: number, w: number): string {
+  let s = "";
+  for (let i = 0; i < n; i++) {
+    const a = (i * MANDALA_TAU) / n;
+    s += `<line x1="${(MANDALA_C + r0 * Math.cos(a)).toFixed(1)}" y1="${(MANDALA_C + r0 * Math.sin(a)).toFixed(1)}" x2="${(MANDALA_C + r1 * Math.cos(a)).toFixed(1)}" y2="${(MANDALA_C + r1 * Math.sin(a)).toFixed(1)}" stroke-width="${w}"/>`;
+  }
+  return s;
+}
+function mandalaRings(rs: number[]): string {
+  return rs.map((r) => `<circle cx="${MANDALA_C}" cy="${MANDALA_C}" r="${r}"/>`).join("");
+}
+function mandalaSvg(inner: string): string {
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#8B7CF6">${inner}</svg>`;
+}
+function mandalaDesign(): string {
+  const rand = (a: number, b: number) => a + Math.random() * (b - a);
+  const C = MANDALA_C;
+  const designs = [
+    () => mandalaSvg(`<g stroke-width="0.6" opacity="0.8">${mandalaRings([190, 155, 120, 85, 50])}</g><g stroke-width="0.35" opacity="0.7">${mandalaSpokes(8, 20, 190, 0.35)}</g><g stroke-width="0.45" opacity="0.75">${mandalaPoly(8, 155, Math.PI / 8)}</g>`),
+    () => mandalaSvg(`<g stroke-width="0.55" opacity="0.8">${mandalaRings([190, 100])}</g><circle cx="${C}" cy="${C}" r="140" stroke-width="0.4" opacity="0.7" stroke-dasharray="2 7"/><g stroke-width="0.35" opacity="0.65">${mandalaSpokes(12, 100, 190, 0.35)}</g><g stroke-width="0.45" opacity="0.75" transform="rotate(${Math.round(rand(0, 90))} ${C} ${C})">${mandalaPoly(4, 72, 0)}</g>`),
+    () => {
+      let dots = "";
+      for (let i = 0; i < 24; i++) {
+        const a = (i * MANDALA_TAU) / 24;
+        dots += `<circle cx="${(C + 150 * Math.cos(a)).toFixed(1)}" cy="${(C + 150 * Math.sin(a)).toFixed(1)}" r="2" fill="#8B7CF6" stroke="none"/>`;
+      }
+      return mandalaSvg(`<g stroke-width="0.55" opacity="0.8">${mandalaRings([185, 60])}</g><circle cx="${C}" cy="${C}" r="118" stroke-width="0.4" opacity="0.7" stroke-dasharray="1 6"/><g opacity="0.8">${dots}</g><g stroke-width="0.45" opacity="0.75">${mandalaPoly(6, 88, rand(0, MANDALA_TAU))}</g>`);
+    },
+    () => mandalaSvg(`<g stroke-width="0.5" opacity="0.8">${mandalaRings([185, 58])}</g><g stroke-width="0.45" opacity="0.75">${mandalaPoly(4, 132, 0)}${mandalaPoly(4, 132, Math.PI / 4)}</g><g stroke-width="0.3" opacity="0.6"><line x1="40" y1="40" x2="360" y2="360"/><line x1="360" y1="40" x2="40" y2="360"/></g><circle cx="${C}" cy="${C}" r="4" fill="#8B7CF6" stroke="none" opacity="0.8"/>`),
+  ];
+  return designs[Math.floor(Math.random() * designs.length)]();
+}
+function MandalaField() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const field = ref.current;
+    if (!field) return;
+    const rand = (a: number, b: number) => a + Math.random() * (b - a);
+    let alive = true;
+    let timer = 0;
+    const spawn = () => {
+      if (!alive || document.hidden || field.childElementCount >= 2) return;
+      const size = Math.round(rand(140, 420));
+      const el = document.createElement("div");
+      el.className = "wisp" + (Math.random() < 0.5 ? " rev" : "");
+      el.style.left = `${rand(6, 94).toFixed(1)}%`;
+      el.style.top = `${rand(6, 94).toFixed(1)}%`;
+      el.style.width = el.style.height = `${size}px`;
+      el.style.setProperty("--spin-dur", `${Math.round(rand(70, 150))}s`);
+      el.style.setProperty("--peak", rand(0.16, 0.3).toFixed(2));
+      el.innerHTML = mandalaDesign();
+      field.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
+      setTimeout(() => { el.classList.remove("on"); setTimeout(() => el.remove(), 2600); }, rand(5000, 10000));
+    };
+    spawn();
+    const loop = () => { spawn(); if (alive) timer = window.setTimeout(loop, rand(1500, 4500)); };
+    timer = window.setTimeout(loop, rand(1500, 4500));
+    return () => { alive = false; window.clearTimeout(timer); field.innerHTML = ""; };
+  }, []);
+  return <div id="mandala-field" ref={ref} aria-hidden="true" />;
+}
+
+/* ── Site footer: antra-borrow hairline footer ── */function SiteFooter({ onNav }: { onNav: (id: string) => void }) {
+  return (
+    <footer className="site-footer">
+      <div className="site-footer-inner">
+        <span className="site-footer-left">◆ chitra — terminal charts</span>
+        <div className="site-footer-links">
+          <button onClick={() => onNav("install")}>Install</button>
+          <button onClick={() => onNav("quickstart")}>Quickstart</button>
+          <button onClick={() => onNav("ai-output")}>AI Agents</button>
+          <a href="https://npmjs.com/package/@chitra/core" target="_blank" rel="noreferrer">npm</a>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 function RouteCard({
@@ -325,7 +435,20 @@ function ChartPage({ id }: { id: string }) {
 }
 
 /* ── Hero ───────────────────────────────────────────────────── */
+// Fixed-size hero variants (19 lines × 64 cols each) — mac box + chart
+// frame stay constant; only the chart content swaps.
+const HERO_CYCLE = ["line", "bar", "area", "histogram", "candlestick", "scatter"];
 function Hero({ onNav }: { onNav: (id: string) => void }) {
+  const [hi, setHi] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => {
+      if (!document.hidden) setHi((i) => (i + 1) % HERO_CYCLE.length);
+    }, 3000);
+    return () => window.clearInterval(t);
+  }, []);
+  // Rotation: instant cut between fixed-geometry frames — no fade, no
+  // movement, so the mac box + chart frame never flash; only glyphs change.
   return (
     <div className="hero">
       <div className="hero-inner">
@@ -368,14 +491,22 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
             Browse charts
           </button>
         </div>
+        <InstallStrip />
           </div>
 
           <div className="hero-terminal-wrap">
-            <Terminal id="line" />
+            <div className="hero-cycle-stack">
+              <Terminal ansiText={HERO_ANSI[HERO_CYCLE[hi]]} />
+            </div>
+            <div className="hero-cycle-dots" aria-hidden="true">
+              {HERO_CYCLE.map((id, i) => (
+                <button key={id} className={`hero-cycle-dot${i === hi ? " on" : ""}`} onClick={() => setHi(i)} tabIndex={-1} />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="route-grid">
+        <div className="route-grid reveal">
           <RouteCard
             title="Install"
             detail="Package managers, runtime expectations, and typed imports."
@@ -396,7 +527,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           />
         </div>
 
-        <div className="features-strip">
+        <div className="features-strip reveal">
           <div className="feature-item">
             <div className="feature-icon">⬡</div>
             <div className="feature-title">Braille renderer</div>
@@ -429,12 +560,12 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           </div>
         </div>
 
-        <div className="section-heading">
+        <div className="section-heading reveal">
           <span className="section-heading-text">20 chart types</span>
           <span className="section-heading-line" />
         </div>
 
-        <div className="chart-grid">
+        <div className="chart-grid reveal">
           {CHARTS.map((c) => {
             const accent = CHART_ACCENT[c.id] ?? "blue";
             return (
@@ -518,6 +649,24 @@ export default function App() {
     }
   }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Antra-borrow reveal on scroll: observe .reveal after every route render.
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".reveal:not(.visible)"));
+    if (els.length === 0) return;
+    if (typeof IntersectionObserver === "undefined") {
+      els.forEach((el) => el.classList.add("visible"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); }
+      }),
+      { threshold: 0.08 },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [location]);
+
   const nav = (id: string) => {
     navigate(hrefFor(id));
     setMobileOpen(false);
@@ -545,6 +694,7 @@ export default function App() {
 
   return (
     <div className="layout">
+      <MandalaField />
       <header className="topbar">
         <button className="logo" onClick={() => nav("home")}>
           <span className="logo-icon">◈</span>
@@ -648,6 +798,8 @@ export default function App() {
           {content()}
         </main>
       </div>
+
+      <SiteFooter onNav={nav} />
     </div>
   );
 }
