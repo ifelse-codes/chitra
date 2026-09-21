@@ -118,6 +118,21 @@
   (uniform) + ligatures/kerning off. Pixel proof: 19/19 rows share the
   right edge. Rule must live AFTER the theater font override (source
   order wins ties).
+- **Wall-stagger playbook (permanent learning):** when a rendered chart
+  frame's right wall staggers while its text measures column-uniform,
+  the renderer is rewidthing glyphs — work this chain: (1) refresh-flash
+  test — straight for a split second then distorted = webfont swap, the
+  fallback font is uniform and the loaded font is not; (2) canvas
+  `measureText` per codepoint per candidate family — JetBrains Mono drew
+  braille `⣿⠿` at 7.52px vs 6.6px base while Cascadia Mono held every
+  frame glyph (`╌ ─ │ ┌ ┐ └ ┘ ░ ▒ ▓ █ ⣿`) at 6.45px; (3) lead the
+  uniform family on the chart-text stack + `font-variant-ligatures: none;
+  font-kerning: none; letter-spacing: 0` (ligatures rewidth `╌` runs
+  too); place the rule AFTER any theme font override — equal
+  specificity loses by source order; (4) prove with pixels, not eyes:
+  screenshot the text body, group rows, assert one shared right edge
+  (19/19 @ x=1001, spread 0). Buffer (extra `ch` width) only hides
+  clipping — it never straightens a wall.
 - Live deploy FROZEN by founder order (local-proven only).
 
 ## S30 extension — live hosting on Cloudflare Pages (2026-09-21)
