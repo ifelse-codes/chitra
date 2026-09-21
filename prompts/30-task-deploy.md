@@ -24,3 +24,10 @@ Cloudflare; do it with the Cloudflare CLI (`wrangler`, already authed).
    `scripts/demo-session-30.sh` green (project, domain, deploy dir).
 6. **Proven live in a real browser.** The custom domain renders the docs
    home in an external browser; the `*.pages.dev` URL loads as control.
+
+## Crew mandate ladder
+
+- tech-lead: skipped — single ops-deploy session driven directly by the
+  founder in-chat (project create + deploy + domain attach, no design
+  decisions, no specialists to budget); fidelity is carried by the
+  independent cold review instead.
