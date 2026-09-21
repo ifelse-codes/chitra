@@ -1,19 +1,20 @@
 # Current Task Pointer
 
-## Session 30 — host docs on chitra.iifelse.com — DONE
+## Session 31 — antra design atoms into chitra-docs — DONE
 
-- **Branch:** `session-30-deploy` (close on branch; main untouched until PR merges)
-- **Contract:** `prompts/30-task-deploy.md` (6 numbered requirements;
-  founder in-chat direction, Cloudflare CLI).
-- **Delivery (3 atomic commits, all ≤3 files):** Pages project `chitra`
-  + deploy `2a690d58` + custom domain `active`/verified + `_redirects`
-  SPA fallback + verify 7/7 + demo exit 0 + contract + summary +
-  cold REJECT → hardened gates → cold ACCEPT 6/6 (attested
-  `d24ab07c…f78f0ba`, refreshed to final prompt at closeout).
-- Verify: `scripts/verify-session-30.sh` — 7/7 ALL GREEN.
-  Demo exit 0. Summary: `sessions/session-30-summary.md`.
+- **Branch:** `session-31-antra-design` (close on branch; main untouched until PR merges)
+- **Contract:** `prompts/31-task-antra-design.md` (12 numbered requirements;
+  founder in-chat direction + follow-ups).
+- **Delivery (atomic commits, all ≤3 files):** violet tokens + eyebrow +
+  hero accent + install strip + hairline grid + topbar/footer/reveal +
+  atmosphere + editor chrome + fixed-geometry hero rotation + wall fix;
+  verify 24/24 + demo exit 0 + contract + summary + cold ACCEPT 10/12
+  (attested `3d5293aa…2621d`, refreshed post req-2 fix).
+- Verify: `scripts/verify-session-31.sh` — 24/24 ALL GREEN.
+  Demo exit 0. Summary: `sessions/session-31-summary.md`.
+- **Live deploy frozen by founder order** — NOT redeployed this session.
 - **To go:** PR → merge → next session in a new chat.
 
-**Next session (S31 candidates):** `lineModelToSvg` parity; `v0.1.0`
-release; Playwright QA into CI; candle ties-first exclusivity test
-hardening. Open in a **new chat**.
+**Next session (S32 candidates):** `lineModelToSvg` parity; `v0.1.0`
+release; Playwright QA into CI; candle ties-first hardening; unfreeze +
+deploy S31 visuals. Open in a **new chat**.
