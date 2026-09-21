@@ -103,6 +103,25 @@
 - `examples/basic.ts` — worked examples for all chart types.
 - `CONTRIBUTING.md`, `replit.md` (Replit agent notes), `darshan/SKILL.md` (output skill).
 
+## S30 extension — live hosting on Cloudflare Pages (2026-09-21)
+- **Site:** `https://chitra.iifelse.com` = `artifacts/chitra-docs` SPA.
+  Pages project `chitra` (`chitra-5xh.pages.dev`, prod branch `main`,
+  direct-upload, no Git — same pattern as `antra`/`kreeda`).
+  Deploy: `wrangler pages deploy dist/public --project-name=chitra --branch=main`
+  (build needs `PORT` + `BASE_PATH=/`, see CI).
+- **SPA fallback:** `artifacts/chitra-docs/public/_redirects` with
+  `/* /index.html 200` — ships into `dist/public`; without it
+  `/chart/:id` deep links 404.
+- **Custom domains:** `wrangler pages project` has NO domain subcommand
+  (v4.100) — attach via API `POST /accounts/{id}/pages/projects/chitra/domains`
+  using `wrangler auth token`. Auto-CNAME does NOT happen with a
+  zone:read token — add `CNAME <name> → <project>.pages.dev` (proxied)
+  in the dashboard by hand; API then flips `initializing → pending →
+  active` (delete + re-add forces revalidation).
+- **Gotcha:** fresh subdomains can NXDOMAIN on local resolvers (negative
+  cache) while `nslookup @1.1.1.1` answers — bypass with device DNS
+  `1.1.1.1`, not router reboots.
+
 ## S28 extension — composability + dashboard (2026-09-18, committed on `session-28-sparkline`)
 - **Composability API (all 20 charts):** `BaseChartOptions.frame?` (default true),
   `compact?` (default false — body + axes only, no eyebrow/legend/summary),
