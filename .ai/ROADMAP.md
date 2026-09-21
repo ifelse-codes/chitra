@@ -10,10 +10,18 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 30 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
+- 🔜 **Next (Session 31 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI; harden the candle ties-first test to assert
   second-candle exclusivity (S27 review note — code already correct).
+- ✅ **Session 30 (S30) — docs site live on chitra.iifelse.com
+  (Cloudflare Pages, founder in-chat direction):** project `chitra`
+  (`chitra-5xh.pages.dev`, prod branch `main`, direct-upload) + deploy
+  `2a690d58` (success) + custom domain `active`/verified (CNAME proxied
+  → edge) + `public/_redirects` SPA fallback in `dist/`.
+  `verify-session-30.sh` 7/7 ALL GREEN (live deploy + domain API
+  checks), demo exit 0. Cold REJECT (gates asserted repo files only) →
+  hardened → cold ACCEPT 6/6. External-browser render confirmed.
 - ✅ **Session 29 (S29) — family-wide footer pass B-diet+ (founder ballot pick
   on real renders, closes the S21 deferral):** plain-words takeaway footers +
   one rule separator on all 20 charts (donut exempt by design: already
