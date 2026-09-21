@@ -10,10 +10,21 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 31 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
+- 🔜 **Next (Session 32 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
   locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
   the local Playwright QA into CI; harden the candle ties-first test to assert
-  second-candle exclusivity (S27 review note — code already correct).
+  second-candle exclusivity (S27 review note — code already correct); unfreeze
+  + deploy the S31 visuals to live.
+- ✅ **Session 31 (S31) — antra design atoms into chitra-docs
+  (founder in-chat direction + follow-ups):** `--antra-*` violet tokens,
+  ◆ eyebrow, solid hero accent, install strip, hairline route grid, mono
+  topbar, global footer, IO reveal, atmosphere (grid/glow/mandalas),
+  editor chrome, 6 fixed-geometry hero variants (`hero-charts.json`,
+  19×64, drift-gated, 3s instant cut), Cascadia-led terminal stack
+  (wall fix: JetBrains braille 14% wide → pixel-straight, proven).
+  `verify-session-31.sh` 24/24 ALL GREEN, demo exit 0. Cold ACCEPT
+  10/12 (req 2 tracking one-liner fixed post-pass; req 8 frozen-deploy
+  PARTIAL, disclosed). Live deploy FROZEN by founder order.
 - ✅ **Session 30 (S30) — docs site live on chitra.iifelse.com
   (Cloudflare Pages, founder in-chat direction):** project `chitra`
   (`chitra-5xh.pages.dev`, prod branch `main`, direct-upload) + deploy
