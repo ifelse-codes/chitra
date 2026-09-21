@@ -1,6 +1,26 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S29 done, 2026-09-20.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S30 done, 2026-09-21.)
+
+## Active Branch
+`session-30-deploy` — S30 delivery complete on branch: Pages project +
+deploy + custom domain + SPA fallback (3 atomic commits) + verify 7/7 +
+demo exit 0 + cold ACCEPT 6/6 (attested). PR to `main` to go.
+
+## What Currently Works (observed, not claimed)
+- **Live site (S30)**: `https://chitra.iifelse.com` serves the docs SPA
+  (Browserling Chrome render confirmed; `pages.dev` control loads).
+  Pages project `chitra` (`chitra-5xh.pages.dev`, prod branch `main`,
+  direct-upload, no Git). Deploy `2a690d58` success. Domain `active` +
+  verification `active` (Google CA); DNS `CNAME chitra →
+  chitra-5xh.pages.dev` proxied → edge `.200`/`.134`.
+  `public/_redirects` (`/* /index.html 200`) ships in `dist/public` —
+  `/chart/:id` deep links return 200.
+- `scripts/verify-session-30.sh` — **ALL GREEN (7 pass, 0 fail)**
+  (redirects ×3, docs-build, pages-project, live deploy-success +
+  domain-active API checks); `scripts/demo-session-30.sh` — exit 0.
+- S29 state carried forward: **`@chitra/core` library**: 20 charts (all
+  LOCKED, S09–S28) wearing S29 B-diet+ footers; 444/444 green.
 
 ## Active Branch
 `session-29-footer` — S29 delivery complete on branch: B-diet+ footers +
@@ -39,7 +59,7 @@ cold ACCEPT 8/8 (attested). PR to `main` to go.
   PreToolUse guards (commit / publish / session) wired.
 
 ## What Is Broken / Incomplete
-- S29 PR + merge still to go (this session).
+- S30 PR + merge still to go (this session).
 - The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
 - `artifacts/api-server` exposes only `/healthz`.
 - First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN`).
@@ -72,8 +92,8 @@ cold ACCEPT 8/8 (attested). PR to `main` to go.
   closes the S21 deferral; cold REJECT 4/8 → fixed → cold ACCEPT 8/8, attested).
 
 ## What Is In Progress
-- S29: PR `session-29-footer` → `main` → next session in a new chat.
-  **Next (S30 candidates):** `lineModelToSvg` parity; real `v0.1.0`
+- S30: PR `session-30-deploy` → `main` → next session in a new chat.
+  **Next (S31 candidates):** `lineModelToSvg` parity; real `v0.1.0`
   release; Playwright QA into CI; candle ties-first exclusivity test
   hardening. See [[roadmap]].
 
@@ -81,7 +101,7 @@ cold ACCEPT 8/8 (attested). PR to `main` to go.
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
   billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S28:
   single ZCode chats (boot + plan + execute + verify + demo in one conversation each),
-  one cold-review subagent dispatched post-commit per session; dispatches kept narrow.
+   one cold-review subagent dispatched post-commit per session; dispatches kept narrow.
   S25 additionally needed a closer chat after the build chat hit its token limit
   (state recovery + founder commits + closeout). S26 ran five stories in
   one session by explicit founder direction (waiver of the 1-story rule, disclosed);
@@ -89,4 +109,6 @@ cold ACCEPT 8/8 (attested). PR to `main` to go.
   exploration (mudra gallery + pie/sparkline prototypes in tmp, lib untouched
   until the founder said "lock"). S29 ran 3 build subagents (batches A/B/C) +
   2 cold-review passes (REJECT→fixes→ACCEPT) in one chat; commits by founder
-  approval token. Kept tight.
+   approval token. Kept tight. S30 ran zero build subagents (ops deploy,
+   founder driving in-chat) + 2 cold-review passes (REJECT→gates
+   hardened→ACCEPT) in one chat; DNS CNAME + publish by founder hand.
