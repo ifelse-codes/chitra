@@ -20,8 +20,8 @@ Founder-waived multi-story session (S26/S27/S33 precedent, disclosed).
 5. **Fix the docs-hero pills** (`artifacts/chitra-docs/src/App.tsx`): honest
    version status; `134` → `452` tests.
 6. **Correct `.ai/KNOWLEDGE.md`** stale facts: test count (one number = 452), test
-   files (23), CI Node (26), `main` range (S00–S36), dist-built claim, dead
-   `/tmp/ring-lab` path.
+   files (23), CI Node (26), `main` range (S00–S34, S36 pending PR), dist-built
+   claim, dead `/tmp/ring-lab` path.
 7. **Sync `.ai/` bookkeeping**: `STATE.md`, `SESSION-BOOT.md`, `TASK.md`,
    `ROADMAP.md`, `.ai/SESSION` → 36.
 8. **Close the S05 closeout-integrity debt**: backfill S17/S32 session records and
@@ -31,8 +31,10 @@ Founder-waived multi-story session (S26/S27/S33 precedent, disclosed).
 10. **Make "No code in Ground Truth" true** — an enforcing hook + a closeout check
     (the AGENTS.md claim was previously unbacked).
 11. **Honest cost tracking** in `STATE.md` (a number or an explicit "unmeasured").
-12. **S36 artifacts**: verify + demo scripts (exit 0), summary, cold fidelity
-    review (ACCEPT), closeout.
+12. **S36 artifacts**: verify + demo scripts (exit 0) and the session summary. (The
+    cold fidelity review and the closeout are the session-loop gates — AGENTS.md
+    steps 7–8 — validated by `scripts/verify-closeout.sh`; they are not judged by
+    the cold review itself, which is the artifact that step produces.)
 
 ## Out of scope
 - No MCP server implementation (roadmap item only, requirement in roadmap).
