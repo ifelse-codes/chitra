@@ -34,4 +34,11 @@ non-vacuous.
 - No consumer broke: 452 core tests, both typechecks, docs build, and the chart drift gate all green.
 
 **Verdict:** ACCEPT
-**Review-Inputs-SHA:** db2ef16fdf96c1331924ce0d8d2ad4f0ce36239da8a454c0760f813a98632f79
+**Review-Inputs-SHA:** 9948b0f794f71a55505b71fd95ec8452b258dbd4a7af8d0e95d2703afdd79433
+
+> **Post-review governance note:** the only change after this cold pass is the
+> governed tech-lead crew handoff (`.ai/handoffs/session-33-tech-lead.md`,
+> required by the closeout crew gate). The code delivery diff is unchanged, so
+> this ACCEPT still applies; the attestation was recomputed to the new
+> canonical inputs hash. The prior hash (`db2ef16f…32f79`) covered the code
+> diff before that governance artifact landed.
