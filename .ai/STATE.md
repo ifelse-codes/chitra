@@ -1,65 +1,51 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S31 done, 2026-09-21.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S33 done, 2026-09-23.)
 
 ## Active Branch
-`session-31-antra-design` — S31 delivery complete on branch: antra atoms
-+ hero rotation + wall fix + verify 24/24 + demo exit 0 + cold ACCEPT
-10/12 (attested). PR to `main` to go. **Live deploy frozen.**
+`session-33-release-readiness` — S33 delivery complete on branch: CI browser QA
++ candle exclusivity + SVG parity + AI-data manual; verify 17/17 + demo exit 0
++ cold ACCEPT 5/5 (mutation-tested, attested `db2ef16f…32f79`). PR to `main` to
+go. **Live deploy still frozen (S31 order).**
 
 ## What Currently Works (observed, not claimed)
-- **Antra atoms (S31, local-proven):** `--antra-*` violet tokens, ◆
-  eyebrow, solid hero accent, install strip, hairline route grid, mono
-  topbar, global footer, IO reveal, atmosphere (grid/glow/mandalas),
-  editor chrome, 6 fixed hero variants (19×64, drift-gated, instant
-  cut), Cascadia-led terminal stack (wall pixel-straight).
-- `scripts/verify-session-31.sh` — **ALL GREEN (24 pass, 0 fail)**;
-  `scripts/demo-session-31.sh` — exit 0.
-- Live site still serves pre-S31 visuals (freeze); `chitra.iifelse.com`
-  healthy on deploy `4107a968`.
-
-## Active Branch
-`session-29-footer` — S29 delivery complete on branch: B-diet+ footers +
-1 rule on all 20 charts (18 atomic commits) + verify 12/12 + demo 4/4 +
-cold ACCEPT 8/8 (attested). PR to `main` to go.
-
-## What Currently Works (observed, not claimed)
-- **B-diet+ footers (S29)**: plain-words takeaway feet on all 20 charts
-  (`N events · longest L`, `N items · peak L (max)`,
-  `N readings · peak P`, `V of A..B · P%`, `N samples · peak M`,
-  `R×C grid · peak (r,c)`, `N points · peak (x,y)`,
-  `N leaves · peak L`, bar `name · avg C · peak B`, line/area
-  `lowest/highest`, radar `average A · peak L (V)`,
-  `N candles · high H · low L · last X`,
-  `G groups · median M · peak L (V)`; pie/donut/waterfall/funnel/sankey
-  already plain). One `│ ╌…╌ │` rule per panel (donut was already
-  single-rule, no footer — exempt by design, test-locked). Accent still
-  once on the takeaway; ties-first unchanged; plain-noun empties with
-  null facts; `toJSON()`/`toContent()`/compact untouched.
-- `scripts/verify-session-29.sh` — **ALL GREEN (12 pass, 0 fail)**;
-  `scripts/demo-session-29.sh` — exit 0, **4/4 PASS**.
-- `pnpm --filter @chitra/core run test` — **444/444 green**;
-  `typecheck` — exit 0; docs drift gate green; `dist/` rebuilt (gitignored).
-- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult` output
-  surface. LOCKED families: circular (S09), area (S09), line (S10), bar (S12),
-  scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20), timeline (S21),
-  gauge (S22), progress (S23), histogram (S25), waterfall + funnel + sankey +
-  radar (S26), candlestick + boxplot (S27), sparkline (S28) — all wearing the
-  S29 B-diet+ footer/chrome.
-- **Docs catalog + browser QA (S13–S15, S24)**: Darpan-parity chrome, `/chart/:id`
-  routes, boot-scoped editor persistence, grouped sidebar with collapse/persist,
-  Playwright QA across all 20 pages. S29 previews regenerated (drift gate
-  green; footer-only diff). Docs app serves at `PORT=5174 BASE_PATH=/`
+- **CI browser QA (S33):** `.github/workflows/ci.yml` `browser-qa` job builds
+  lib decls + core dist, installs Playwright Chromium, runs
+  `scripts/qa-catalog.mjs` over all 20 chart pages + doc pages (incl. `ai-data`)
+  + home, failing on any console/page error.
+- **SVG parity (S33):** `createLineChartModel` owns canonical colours
+  (`seriesColors`/`strokeSteps`/`style`/`noColor`/`grid`/`eyebrow`); the
+  terminal renderer and `lineModelToSvg` read the same values. SVG is
+  theme-aware (truecolor + xterm named → CSS), draws markers every 2nd point,
+  dash textures, `grid`-gated gridlines, legend/eyebrow/summary captions, and
+  spends accent once on the peak. `tests/line-svg.test.ts` (7) is the drift
+  guard. Terminal line output byte-identical (21 option sets diffed empty).
+- **AI-data manual (S33):** `ai-data` route (`AiDataPage`) documents feed
+  choice, per-chart `toJSON()` shapes, null-on-empty + clamp-true-value, and
+  the MCP untrusted-input guardrail; linked from AI Agents + `packages/core/README.md`.
+- `scripts/verify-session-33.sh` — **ALL GREEN (17 pass, 0 fail)**;
+  `scripts/demo-session-33.sh` — exit 0.
+- `pnpm --filter @chitra/core run test` — **452/452 green**; core + docs
+  typecheck exit 0; docs build green; chart drift gate green.
+- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`
+  output surface. LOCKED families: circular (S09), area (S09), line (S10), bar
+  (S12), scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20),
+  timeline (S21), gauge (S22), progress (S23), histogram (S25), waterfall +
+  funnel + sankey + radar (S26), candlestick + boxplot (S27), sparkline (S28)
+  — all wearing the S29 B-diet+ footer/chrome.
+- **Docs catalog + browser QA (S13–S15, S24, S31):** Darpan-parity chrome,
+  `/chart/:id` routes, boot-scoped editor persistence, grouped sidebar,
+  antra atoms + hero rotation. Docs app serves at `PORT=5174 BASE_PATH=/`
   (`pnpm --filter @workspace/chitra-docs run dev`).
-- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the `.ai/hooks/*`
-  PreToolUse guards (commit / publish / session) wired.
+- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the
+  `.ai/hooks/*` PreToolUse guards wired.
 
 ## What Is Broken / Incomplete
-- S31 PR + merge still to go (this session). Live deploy frozen.
-- The SVG `lineModelToSvg` does not yet mirror the terminal 1:1.
+- S33 PR + merge still to go (this session). Live deploy frozen.
+- First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN` —
+  founder-only secret).
 - `artifacts/api-server` exposes only `/healthz`.
-- First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN`).
-- QA is local-only; not yet wired into CI.
+- GTM proof pack (benchmarks / token-savings) and pricing story still to build.
 - **S05 ground-truth remediation debt** still open.
 
 ## Milestones done
@@ -68,46 +54,29 @@ cold ACCEPT 8/8 (attested). PR to `main` to go.
   **S09** circular + area LOCKED · **S10** line LOCKED · **S11** catalog two-panel ·
   **S12** bar LOCKED · **S13** Darpan-parity chrome · **S14** URL routes + persistence ·
   **S15** scripted browser QA · **S17** scatter LOCKED · **S18** heatmap LOCKED ·
-  **S19** horizontalBar LOCKED (Vajra S144 full-loop dogfood) · **S20** treemap LOCKED
-  (recovered: pi + Command Code + closer chat) · **S21** timeline LOCKED (single-chat,
-  plan-review cross-checked) · **S22** gauge LOCKED (single-chat, shade-texture ruling
-  carried) · **S23** progress LOCKED (single-chat, trio complete) · **S24** grouped
-  chart nav, badges out per founder order (single-chat, live glyph tuning) ·
-  **S25** histogram LOCKED (single-chat, resumed from a z-code token stop; commits +
-  review + closeout completed in the closer chat) ·
-  **S26** waterfall + funnel + sankey + radar LOCKED (five stories by founder
-  direction; funnel centered by founder order on research record; radar from a
-  founder reference image — cold ACCEPT 18/19, row 15 PARTIAL disclosed) ·
-  **S27** candlestick + boxplot LOCKED (two stories by founder direction; no audit
-  mockups — family language by analogy, waterfall outline precedent; adaptive price
-  precision approved at PLAN — cold ACCEPT 13/13, attested) ·
-  **S28** sparkline LOCKED (v8 shape+shade prototype approved in-chat; no audit
-  mockup — family language by analogy, heatmap-strip + histogram-peak playbooks;
-  cold ACCEPT 9/9, attested) ·
-  **S29** family-wide footer pass B-diet+ (founder ballot pick on real renders;
-  closes the S21 deferral; cold REJECT 4/8 → fixed → cold ACCEPT 8/8, attested).
+  **S19** horizontalBar LOCKED · **S20** treemap LOCKED · **S21** timeline LOCKED ·
+  **S22** gauge LOCKED · **S23** progress LOCKED · **S24** grouped chart nav ·
+  **S25** histogram LOCKED · **S26** waterfall + funnel + sankey + radar LOCKED ·
+  **S27** candlestick + boxplot LOCKED · **S28** sparkline LOCKED ·
+  **S29** family-wide footer pass B-diet+ · **S30** docs site live on
+  chitra.iifelse.com · **S31** antra design atoms + hero rotation + wall fix ·
+  **S32** bank wall-stagger playbook (KNOWLEDGE) ·
+  **S33** release readiness (CI browser QA + candle exclusivity + SVG parity +
+  AI-data manual).
 
 ## What Is In Progress
-- S31: PR `session-31-antra-design` → `main` → next session in a new chat.
-  **Next (S32 candidates):** `lineModelToSvg` parity; real `v0.1.0`
-  release; Playwright QA into CI; candle ties-first exclusivity test
-  hardening. See [[roadmap]].
+- S33: PR `session-33-release-readiness` → `main` → next session in a new chat.
+  **Next (S34 candidates):** real `v0.1.0` release (`NODE_AUTH_TOKEN`); unfreeze
+  + deploy current visuals to live; GTM growth (audience, proof, pricing).
+  See [[roadmap]].
 
 ## Cost Tracking
 - Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
   billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S28:
-  single ZCode chats (boot + plan + execute + verify + demo in one conversation each),
-   one cold-review subagent dispatched post-commit per session; dispatches kept narrow.
-  S25 additionally needed a closer chat after the build chat hit its token limit
-  (state recovery + founder commits + closeout). S26 ran five stories in
-  one session by explicit founder direction (waiver of the 1-story rule, disclosed);
-  S27 ran two stories the same way. S28 was preceded by a fossil throwaway
-  exploration (mudra gallery + pie/sparkline prototypes in tmp, lib untouched
-  until the founder said "lock"). S29 ran 3 build subagents (batches A/B/C) +
-  2 cold-review passes (REJECT→fixes→ACCEPT) in one chat; commits by founder
-   approval token. Kept tight. S30 ran zero build subagents (ops deploy,
-   founder driving in-chat) + 2 cold-review passes (REJECT→gates
-   hardened→ACCEPT) in one chat; DNS CNAME + publish by founder hand.
-   S31 ran one recon subagent + 2 cold-review passes (ACCEPT 10/12 with
-   2 disclosed PARTIALs; req-2 one-liner fixed post-pass) in one chat
-   (same-chat continuation waived by founder direction, disclosed).
+  single ZCode chats, one cold-review subagent dispatched post-commit per session.
+  S25 needed a closer chat after a token stop; S26 ran five stories and S27 two by
+  explicit founder direction (waiver of the 1-story rule, disclosed). S28 preceded by
+  a throwaway prototype. S29 ran 3 build subagents + 2 cold reviews. S30 zero build
+  subagents (ops deploy) + 2 cold reviews. S31 one recon subagent + 2 cold reviews.
+  S32 knowledge-only. S33 ran one opencode session: four stories, one cold-review
+  subagent (mutation-tested) dispatched post-commit; commits approval-token gated.
