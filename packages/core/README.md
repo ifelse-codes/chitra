@@ -73,6 +73,10 @@ const json = chart.toJSON();
 // { type: "bar", title: "Quarterly Revenue", data: [42, 67, 38], plain: "..." }
 ```
 
+> **Full reference:** every chart's `toJSON()` shape, the `toContent()` vs
+> `toPlain()` choice, empty/clamp behaviour, and the MCP untrusted-input
+> guardrail live at [chitra.iifelse.com/ai-data](https://chitra.iifelse.com/ai-data).
+
 ## Renderers
 
 Chitra supports three rendering modes:
