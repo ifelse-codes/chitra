@@ -12,6 +12,9 @@ ok()     { printf "${GREEN}✓ %s${RESET}\n" "$1"; }
 bad()    { printf "${RED}✗ %s${RESET}\n" "$1"; }
 dim()    { printf "${DIM}%s${RESET}\n" "$1"; }
 
+APP=artifacts/chitra-docs/src/App.tsx
+KNOW=.ai/KNOWLEDGE.md
+
 header "Session 36 Demo — close the S35 ground-truth gaps + ship v0.1.0"
 
 label "1 · @chitra/core package publish-ready (live publish deferred to S37)"
@@ -30,18 +33,29 @@ else
 fi
 
 label "3 · docs-hero pills (was 'v0.1.0 — stable', '134')"
-ok "App.tsx → v0.1.0 / 452"
+if grep -q '>452<' "$APP" && ! grep -q 'v0.1.0 — stable' "$APP" && ! grep -q '>134<' "$APP"; then
+  ok "App.tsx → v0.1.0 / 452"
+else bad "pills not fixed"; fi
 
 label "4 · KNOWLEDGE canonical facts (was 142/163/442, 7 files, dist, main≤S08)"
-ok "452 tests · 23 files · Node 26 · main S00–S36 · dist-built"
+if grep -q '452' "$KNOW" && ! grep -qE '142 tests|163 core tests|442 tests' "$KNOW" && grep -q '23 files' "$KNOW"; then
+  ok "452 tests · 23 files · Node 26 · main S00–S36 · dist-built"
+else bad "KNOWLEDGE facts not corrected"; fi
 
 label "5 · ground-truth teeth (findings used to have none)"
-ok ".ai/GT-REMEDIATIONS.md + check_gt_remediations"
-ok "check_session_coverage (merged session ≥S17 must have a summary)"
-ok "check_ground_truth_no_code + .ai/hooks/hook-ground-truth-guard.sh"
+if [ -f .ai/GT-REMEDIATIONS.md ] && grep -q 'check_gt_remediations' scripts/verify-closeout.sh \
+   && grep -q 'check_session_coverage' scripts/verify-closeout.sh \
+   && [ -x .ai/hooks/hook-ground-truth-guard.sh ]; then
+  ok ".ai/GT-REMEDIATIONS.md + check_gt_remediations"
+  ok "check_session_coverage (merged session ≥S17 must have a summary)"
+  ok "check_ground_truth_no_code + .ai/hooks/hook-ground-truth-guard.sh"
+else bad "governance teeth missing"; fi
 
 label "6 · S05 closeout debt closed"
-ok "S17 + S32 session records backfilled (PR #19 / #38)"
+if [ -f sessions/session-17-summary.md ] && [ -f sessions/session-32-summary.md ] \
+   && [ -f prompts/17-task-scatter-lock.md ] && [ -f prompts/32-task-wall-playbook.md ]; then
+  ok "S17 + S32 session records backfilled (PR #19 / #38)"
+else bad "backfill missing"; fi
 
 label "7 · live deploy unfrozen (S31 order lifted)"
 dim "  wrangler pages deploy dist/public --project-name=chitra --branch=main"
