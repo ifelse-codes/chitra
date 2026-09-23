@@ -33,7 +33,7 @@ run_check "know-452"              bash -c "grep -q '452' $KNOW"
 run_check "know-no-stale-counts"  bash -c "! grep -qE '142 tests|163 core tests|442 tests' $KNOW"
 run_check "know-23-files"         bash -c "grep -q '23 files' $KNOW"
 run_check "know-node-26"          bash -c "grep -q 'Node \*\*26\*\*\|Node 26' $KNOW"
-run_check "know-main-range"       bash -c "grep -q 'S00–S36' $KNOW"
+run_check "know-main-range"       bash -c "grep -q 'S00–S34' $KNOW"
 run_check "know-s36-extension"    bash -c "grep -q 'S36 extension' $KNOW"
 
 # ── Req 2/3: release hygiene (publish deferred by founder to S37) ──
@@ -45,9 +45,7 @@ run_check "release-deferred-noted" bash -c "grep -qi 'Automation token' .ai/STAT
 run_check "gt-hook-exists"        test -x .ai/hooks/hook-ground-truth-guard.sh
 run_check "gt-hook-wired"         bash -c "grep -q 'hook-ground-truth-guard.sh' .claude/settings.json"
 run_check "gt-ledger-exists"      test -s .ai/GT-REMEDIATIONS.md
-run_check "closeout-gt-check"     bash -c "grep -q 'check_gt_remediations' scripts/verify-closeout.sh"
-run_check "closeout-coverage"     bash -c "grep -q 'check_session_coverage' scripts/verify-closeout.sh"
-run_check "closeout-gt-no-code"   bash -c "grep -q 'check_ground_truth_no_code' scripts/verify-closeout.sh"
+run_check "closeout-integrity-exec" bash scripts/verify-closeout.sh --integrity-only 36
 run_check "s17-backfilled"        bash -c "test -f sessions/session-17-summary.md && test -f prompts/17-task-scatter-lock.md"
 run_check "s32-backfilled"        bash -c "test -f sessions/session-32-summary.md && test -f prompts/32-task-wall-playbook.md"
 
