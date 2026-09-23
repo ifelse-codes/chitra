@@ -34,11 +34,35 @@ non-vacuous.
 - No consumer broke: 452 core tests, both typechecks, docs build, and the chart drift gate all green.
 
 **Verdict:** ACCEPT
-**Review-Inputs-SHA:** 9948b0f794f71a55505b71fd95ec8452b258dbd4a7af8d0e95d2703afdd79433
+**Review-Inputs-SHA:** 47fcf4abcaea1280560cfde9796e9c2838fc34e22513ace227ba894dd5c6369e
 
-> **Post-review governance note:** the only change after this cold pass is the
-> governed tech-lead crew handoff (`.ai/handoffs/session-33-tech-lead.md`,
-> required by the closeout crew gate). The code delivery diff is unchanged, so
-> this ACCEPT still applies; the attestation was recomputed to the new
-> canonical inputs hash. The prior hash (`db2ef16f…32f79`) covered the code
-> diff before that governance artifact landed.
+> **Post-review governance note:** the code delivery diff is unchanged from the
+> cold pass except (a) the governed tech-lead crew handoff
+> (`.ai/handoffs/session-33-tech-lead.md`, required by the closeout crew gate)
+> and (b) the CI robustness fix below. Both were re-reviewed; the attestation
+> was recomputed to the current canonical inputs hash. Prior hashes:
+> `db2ef16f…32f79` (original code diff), `9948b0f7…79433` (after the handoff).
+
+## Post-review delta — CI browser-QA readiness fix (ACCEPT)
+
+The first CI run of the new `browser-qa` job failed with `Server startup
+timeout`: `startPreview()` waited for the literal stdout string `"Local:"`,
+which did not appear in time on the runner. Fix (commit `357f9db`):
+`startPreview()` now polls the HTTP endpoint (`waitForServer(BASE_URL, 60000)`,
+500 ms interval) instead of parsing stdout, and forwards server output for
+debugging.
+
+| Check | Evidence | Verdict |
+|---|---|---|
+| Removes stdout-string wait, polls correct URL | `"Local:"` listener deleted; `waitForServer(BASE_URL, 60000)`, `BASE_URL=http://localhost:5174` | SHIPPED |
+| Does not mask real failures | `status<500` accepts a 404 at `/` as ready, but chart visits still require `.term-output` text (`hasOutput`) and FAIL otherwise; a 500 keeps polling | SHIPPED |
+| Still fails on a broken page | `node scripts/qa-catalog.mjs` → 26/26 PASS, persistence PASS, exit 0; summary FAILs on `errors.length>0` or missing chart output | SHIPPED |
+| Header doc-page count = 5 | comment updated; `DOC_PAGES` has 5 entries | SHIPPED |
+| CI green | `gh pr checks 39`: core/docs/drift pass, **qa · browser QA pass (1m59s)** | SHIPPED |
+
+Weakness (pre-existing, not introduced): `waitForServer` accepts any `<500`
+response at `/`, and home/doc pages assert only "no console errors" with no
+content check — a broken `/` could pass home/doc, though chart-page output
+assertions still catch a genuinely broken deploy.
+
+**Delta Verdict:** ACCEPT
