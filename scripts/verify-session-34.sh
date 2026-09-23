@@ -26,7 +26,7 @@ TSX=packages/core/node_modules/.bin/tsx
 # ── Req 1: root README exists with the GTM spine ────────────────
 run_check "root-readme-exists"   test -f "$README"
 run_check "positioning-line"     bash -c "grep -q 'Terminal charts for CLIs and agents.' $README"
-run_check "hero-badges"          bash -c "grep -q 'img.shields.io' $README"
+run_check "hero-badges"          bash -c "grep -q 'badge/npm' $README && grep -q 'license-MIT' $README && grep -q 'dependencies-0' $README && grep -q 'tests-452' $README"
 for s in "Why chitra" "Install" "Quickstart" "Built for AI agents" "Built for terminals" "Chart gallery" "Documentation" "License"; do
   run_check "section-$(echo "$s" | tr ' ' '-')" bash -c "grep -q '## $s' $README"
 done
