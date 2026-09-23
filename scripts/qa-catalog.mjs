@@ -20,7 +20,7 @@ const CHART_IDS = [
   "treemap", "sankey"
 ];
 
-const DOC_PAGES = ["install", "quickstart", "fluent-api", "ai-output"];
+const DOC_PAGES = ["install", "quickstart", "fluent-api", "ai-output", "ai-data"];
 
 const HEADED = process.argv.includes("--headed");
 const BASE_URL = "http://localhost:5174";
