@@ -10,11 +10,20 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 32 candidates):** bring `lineModelToSvg` to terminal parity (SVG mirrors the
-  locked terminal 1:1); exercise a real `v0.1.0` release (`NODE_AUTH_TOKEN`); wire
-  the local Playwright QA into CI; harden the candle ties-first test to assert
-  second-candle exclusivity (S27 review note — code already correct); unfreeze
-  + deploy the S31 visuals to live.
+- 🔜 **Next (Session 34 candidates):** exercise a real `v0.1.0` release
+  (`NODE_AUTH_TOKEN` — founder-only secret); unfreeze + deploy the current
+  visuals to live `chitra.iifelse.com`; then GTM growth — confirm the audience
+  (AI builders first, terminal devs second), build the proof pack
+  (benchmarks / token-savings / before-after), and tell the pricing story.
+- ✅ **Session 33 (S33) — release readiness (founder-waived multi-story):**
+  Playwright browser QA wired into CI; candle ties-first exclusivity test
+  (second tied candle proven un-accented); `lineModelToSvg` brought to
+  terminal parity (canonical colours moved into the model; theme tones,
+  markers every 2nd point, dash textures, `grid`-gated gridlines,
+  legend/eyebrow/summary captions, accent-once) + `line-svg.test.ts` drift
+  guard; new `ai-data` AI-data manual page + README link. `verify-session-33.sh`
+  17/17 ALL GREEN, demo exit 0. Cold ACCEPT 5/5 (mutation-tested). Terminal
+  line output byte-identical; 452 core tests green; drift gate green.
 - ✅ **Session 31 (S31) — antra design atoms into chitra-docs
   (founder in-chat direction + follow-ups):** `--antra-*` violet tokens,
   ◆ eyebrow, solid hero accent, install strip, hairline route grid, mono
