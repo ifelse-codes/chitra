@@ -86,6 +86,7 @@ run_check "no-false-stable-claim" bash -c "! grep -q 'v0.1.0 — stable' $README
 run_check "license-exists"        test -f LICENSE
 run_check "license-is-mit"        bash -c "grep -q 'MIT License' LICENSE && grep -q 'Permission is hereby granted' LICENSE"
 run_check "readme-links-license"  bash -c "grep -q '(LICENSE)' $README"
+run_check "package-license-ships" bash -c "test -f packages/core/LICENSE && grep -q 'MIT License' packages/core/LICENSE && grep -q '\"LICENSE\"' $CORE_PKG"
 
 # ── Local links resolve ─────────────────────────────────────────
 run_check "link-core-readme"      test -f packages/core/README.md

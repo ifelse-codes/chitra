@@ -68,11 +68,12 @@ printf '  %-22s %s (want 0)\n' "stale '134' claim" "$stale"
 rc=0; { [ "$charts" = 20 ] && [ "$themes" = 7 ] && [ "$tests" = 452 ] && [ "$deps" = 0 ] && [ "$stale" = 0 ]; } || rc=1
 record "facts match source (20/7/452/0)" "$rc"
 
-header "5 · MIT LICENSE is now real"
+header "5 · MIT LICENSE is now real (repo root + the published package)"
 grep -m1 'MIT License' LICENSE | sed 's/^/  /'
 grep -m1 'Copyright' LICENSE | sed 's/^/  /'
-rc=0; { grep -q 'MIT License' LICENSE && grep -q 'Permission is hereby granted' LICENSE; } || rc=1
-record "MIT LICENSE present + linked" "$rc"
+printf "  packages/core/LICENSE  %s\n" "$(test -f packages/core/LICENSE && echo present || echo MISSING)  (ships via files:[\"LICENSE\"])"
+rc=0; { grep -q 'MIT License' LICENSE && grep -q 'Permission is hereby granted' LICENSE && test -f packages/core/LICENSE; } || rc=1
+record "MIT LICENSE present (root + package)" "$rc"
 
 header "Summary"
 printf '%-36s %s\n' "ITEM" "RESULT"
