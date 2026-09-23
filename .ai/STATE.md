@@ -1,87 +1,81 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S34 done, 2026-09-23.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S36 done, 2026-09-23.)
 
 ## Active Branch
-`session-34-gtm-readme` — S34 delivery complete on branch: root GTM README +
-MIT LICENSE (root + package); verify 39/39 + demo exit 0 + cold ACCEPT 6/6
-(attested `60627a87…d231067`). PR **#40** to `main` to go. **Live deploy still
-frozen (S31 order).**
+`session-36-close-audit-gaps` — S36 delivery on branch: closed the S35
+ground-truth gaps + unfroze the live deploy. npm publish **founder-deferred to
+S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
 
 ## What Currently Works (observed, not claimed)
-- **Root GTM README (S34):** `README.md` (214 lines) — positioning line
-  *"Terminal charts for CLIs and agents."*, badge row (npm · MIT · 0 deps ·
-  452 tests · 20 charts), install (npm + from-source), quickstart, AI-builder
-  lane first (`toContent()/toPlain()/toJSON()`, MCP handler, AI-data link),
-  terminal lane second (renderers, themes, fluent API), 20-chart gallery, docs
-  links. Three real library renders embedded.
-- **README drift guard (S34):** `scripts/verify-session-34.sh` regenerates each
-  embedded chart from `packages/core/src/index.ts` and byte-compares the whole
-  block — a renderer change fails the gate. Facts (20/3/7/0/452) are
-  cross-checked against source; stale-claim guards (`134`, `v0.1.0 — stable`).
-- **LICENSE (S34):** MIT at repo root **and** `packages/core/LICENSE` (the
-  package's `files: ["LICENSE"]` publish path is now resolved).
-- `scripts/verify-session-34.sh` — **ALL GREEN (39 pass, 0 fail)**;
-  `scripts/demo-session-34.sh` — exit 0 (computed summary).
-- `pnpm --filter @chitra/core run test` — **452/452 green**; core typecheck
-  exit 0. Docs build + chart drift gate green (S33 baseline).
-- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`
-  output surface. LOCKED families: circular (S09), area (S09), line (S10), bar
-  (S12), scatter (S17), heatmap (S18), horizontalBar (S19), treemap (S20),
-  timeline (S21), gauge (S22), progress (S23), histogram (S25), waterfall +
-  funnel + sankey + radar (S26), candlestick + boxplot (S27), sparkline (S28)
-  — all wearing the S29 B-diet+ footer/chrome.
-- **Docs catalog + browser QA (S13–S15, S24, S31, S33):** Darpan-parity chrome,
-  `/chart/:id` routes, boot-scoped editor persistence, grouped sidebar, antra
-  atoms + hero rotation, CI `browser-qa` job. Docs app serves at
-  `PORT=5174 BASE_PATH=/` (`pnpm --filter @workspace/chitra-docs run dev`).
-- Enforcement belt: `.githooks/pre-commit` + `.githooks/pre-push` and the
-  `.ai/hooks/*` PreToolUse guards wired.
+- **Live docs site (S36, unfrozen):** `chitra.iifelse.com` redeployed via
+  `wrangler pages deploy dist/public --project-name=chitra --branch=main`.
+  Verified: prod 200, the new bundle `assets/index-Cu2gqnLT.js` serves, hero
+  shows `v0.1.0` + `452`, and `/ai-data` (S33 page) returns 200 — the S34 README
+  link is live.
+- **Docs-hero pills honest (S36):** `App.tsx` → `v0.1.0` (dropped "— stable"),
+  `134` → `452`.
+- **`@chitra/core` publish-ready (S36):** dry-run green — `@chitra/core@0.1.0`,
+  38 files, 94.2 kB, dist ESM+CJS+`.d.ts` + README + LICENSE. **Not on npm yet**
+  (publish deferred — see Broken).
+- **Release workflow idempotent (S36):** `release.yml` skips the publish when the
+  version already exists, so a re-pushed `v*` tag stays green.
+- **Tag hygiene (S36):** the stale local `v0.1.0` tag (2026-07-29 commit) was
+  **deleted**; no `v*` tag exists now.
+- **Ground-truth teeth (S36):** `.ai/GT-REMEDIATIONS.md` ledger +
+  `verify-closeout.sh#check_gt_remediations` (rows must be DONE/WAIVED/DEFERRED);
+  `#check_session_coverage` (a merged `session-NN-*` branch ≥ S17 must have a
+  summary); `#check_ground_truth_no_code`; `.ai/hooks/hook-ground-truth-guard.sh`
+  wired into `.claude/settings.json`.
+- **S05 closeout debt closed (S36):** S17 + S32 session records backfilled
+  (`sessions/session-17-summary.md`, `session-32-summary.md` + their prompts).
+- **KNOWLEDGE.md corrected (S36):** one canonical test count (**452**), 23 test
+  files, CI Node 26, `main` = S00–S36, dist-built, north-star wording.
+- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`.
+  LOCKED families S09–S28. `pnpm --filter @chitra/core run test` — **452/452**;
+  typecheck exit 0.
+- `scripts/verify-session-36.sh` + `scripts/demo-session-36.sh` (S36 gates).
 
 ## What Is Broken / Incomplete
-- S34 PR #40 + merge still to go (this session). Live deploy frozen.
-- **`@chitra/core` is not on npm** (404) — README Install discloses this.
-- **Live docs-hero pills are stale** (`v0.1.0 — stable`, `134 Tests passing`) —
-  deferred GTM-consistency fix (disclosed in the S34 contract).
-- First real release (tag `v0.1.0`) not yet exercised (`NODE_AUTH_TOKEN` —
-  founder-only secret).
+- **npm publish DEFERRED to S37 (founder):** `@chitra/core` is not on npm. The
+  npm **Publish** token returns `E403 … 2FA or granular token with bypass 2fa
+  required`; a **Classic Automation token** (or Granular with Bypass 2FA) is
+  needed. Then: publish, re-cut `v0.1.0` on `main`, push the tag.
+- `v0.1.0` tag does not exist (deleted as stale; re-cut with the publish).
+- **S34 README install line** still says "not on npm yet" — true until S37.
 - `artifacts/api-server` exposes only `/healthz`.
+- No MCP server ships (README advertises the handler; roadmap item added).
 - GTM proof pack (benchmarks / token-savings) and pricing story still to build.
-- **S05 ground-truth remediation debt** still open.
+- `pnpm run lint` unrunnable — eslint not installed (pre-existing).
 
 ## Milestones done
-- **S01–S04** docs generator / examples / polish / README · **S05** NO-CODE ground-truth ·
-  **S06** publishable dist · **S07** CI workflows · **S08** release.yml + line/SVG ·
-  **S09** circular + area LOCKED · **S10** line LOCKED · **S11** catalog two-panel ·
-  **S12** bar LOCKED · **S13** Darpan-parity chrome · **S14** URL routes + persistence ·
-  **S15** scripted browser QA · **S17** scatter LOCKED · **S18** heatmap LOCKED ·
-  **S19** horizontalBar LOCKED · **S20** treemap LOCKED · **S21** timeline LOCKED ·
-  **S22** gauge LOCKED · **S23** progress LOCKED · **S24** grouped chart nav ·
-  **S25** histogram LOCKED · **S26** waterfall + funnel + sankey + radar LOCKED ·
-  **S27** candlestick + boxplot LOCKED · **S28** sparkline LOCKED ·
-  **S29** family-wide footer pass B-diet+ · **S30** docs site live on
-  chitra.iifelse.com · **S31** antra design atoms + hero rotation + wall fix ·
-  **S32** bank wall-stagger playbook (KNOWLEDGE) · **S33** release readiness
-  (CI browser QA + candle exclusivity + SVG parity + AI-data manual) ·
-  **S34** GTM root README + MIT LICENSE (root + package) + render drift guard.
+- **S01–S04** docs/examples/polish/README · **S05** NO-CODE ground-truth ·
+  **S06** publishable dist · **S07** CI · **S08** release.yml + line/SVG ·
+  **S09** circular+area LOCKED · **S10** line · **S11** catalog two-panel ·
+  **S12** bar · **S13** Darpan-parity chrome · **S14** URL routes+persistence ·
+  **S15** scripted browser QA · **S17** scatter · **S18** heatmap ·
+  **S19** horizontalBar · **S20** treemap · **S21** timeline · **S22** gauge ·
+  **S23** progress · **S24** grouped nav · **S25** histogram ·
+  **S26** waterfall+funnel+sankey+radar · **S27** candlestick+boxplot ·
+  **S28** sparkline · **S29** family-wide footer B-diet+ · **S30** docs live ·
+  **S31** antra atoms + hero rotation + wall fix · **S32** wall playbook ·
+  **S33** release readiness · **S34** GTM README + MIT LICENSE ·
+  **S35** NO-CODE ground-truth · **S36** S35 gaps closed + deploy unfrozen
+  (npm publish deferred).
 
 ## What Is In Progress
-- S34: PR #40 `session-34-gtm-readme` → `main` → next session in a new chat.
-  **Next (S35):** **NO-CODE ground-truth** (`N % 5 == 0`) — audit vision +
-  roadmap + rules + constitution + state + cost. Then: real `v0.1.0` release;
-  unfreeze + deploy current visuals to live; docs-hero stale-stat fix; GTM proof
-  pack. See [[roadmap]].
+- S36: commit + PR `session-36-close-audit-gaps` → `main`. Then closeout.
+  **Next (S37):** publish `@chitra/core@0.1.0` (Classic Automation token),
+  re-cut + push `v0.1.0`; then MCP server, GTM proof pack, api-server.
+  See [[roadmap]].
 
 ## Cost Tracking
-- Cumulative: chitra sessions ~$0 (S06 dist + S07 CI + S08 built via Vajra dogfood runs,
-  billed to Vajra; S09–S19 in-repo). S20 ran on the founder's $20/mo plan. S21–S28:
-  single ZCode chats, one cold-review subagent dispatched post-commit per session.
-  S25 needed a closer chat after a token stop; S26 ran five stories and S27 two by
-  explicit founder direction (waiver of the 1-story rule, disclosed). S28 preceded by
-  a throwaway prototype. S29 ran 3 build subagents + 2 cold reviews. S30 zero build
-  subagents (ops deploy) + 2 cold reviews. S31 one recon subagent + 2 cold reviews.
-  S32 knowledge-only. S33 ran one opencode session: four stories, one cold-review
-  subagent (mutation-tested) dispatched post-commit. S34 ran one opencode session:
-  one story, **four** cold-review subagent passes (each fix re-reviewed against the
-  frozen diff; the third pass REJECTed the root-only LICENSE and forced
-  `packages/core/LICENSE`), commits approval-token gated.
+- S36 measured: one opencode session — docs honesty (1 file), KNOWLEDGE/ROADMAP/
+  STATE sync, 1 new hook + 3 closeout gates, S17/S32 backfill (4 files), S36
+  prompt/verify/demo/summary/review, one **live Cloudflare Pages deploy**, and
+  release hardening. Token/`$` cost **unmeasured** (billed to the founder's
+  opencode plan). npm publish deferred, so no registry cost this session.
+- Prior: S20 founder $20/mo plan; S21–S28 single ZCode chats; S29 3 build + 2
+  cold reviews; S30 ops deploy + 2 cold reviews; S31 1 recon + 2 cold reviews;
+  S32 knowledge-only; S33 four stories + 1 cold review; S34 one story + 4 cold
+  reviews, approval-token gated.
