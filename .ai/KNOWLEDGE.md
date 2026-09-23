@@ -18,20 +18,21 @@
   - `lib/db/` — drizzle-orm schema.
 
 ## Stack & tooling
-- pnpm workspaces (pnpm 9.12). Node 26 local (README claims Node 24; CI targets 20/22/24).
+- pnpm workspaces (pnpm 9.12). CI uses Node **26** (`.github/workflows/ci.yml` +
+  `release.yml`); the README requires Node 18+.
   TypeScript 5.9. ESM throughout.
 - **pnpm only** — root `preinstall` hard-fails any other package manager and deletes
   `package-lock.json`/`yarn.lock`.
 - Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `lib/*`, `lib/integrations/*`,
   `packages/*`, `scripts`. Internal packages are named `@workspace/*`; the shippable one is
   `@chitra/core`.
-- Testing: **Vitest** (`packages/core/tests/`, 7 files).
+- Testing: **Vitest** (`packages/core/tests/`, 23 files, **452 tests**).
 
 ## Commands (verified working)
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @chitra/core run test` | 142 tests |
+| `pnpm --filter @chitra/core run test` | 452 tests (23 files) |
 | `pnpm --filter @chitra/core run test:coverage` | tests + coverage |
 | `pnpm --filter @chitra/core run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
@@ -75,20 +76,22 @@
     `max` in accent). Auto-scale y-range; empty cells are spaces; panel width auto-expands
     to fit summary rows. See "LOCKED: bar chart — session 12 design" in
     `packages/core/README.md`.
-  - Live design preview: `/tmp/ring-lab/index.html`; handoff for LLM polish:
-    `scripts/ring-polish-handoff.mjs`.
-- **163 core tests stay green.** Never leave the suite red.
-- North-star (founder): *"the best chart lib ever created."*
+  - Handoff for LLM polish: `scripts/ring-polish-handoff.mjs` (the old `/tmp/ring-lab/`
+    live preview is ephemeral — gone).
+- **452 core tests stay green.** Never leave the suite red.
+- North-star (founder): *"the best terminal chart lib ever created — zero-dep,
+  AI-first, delightful."*
 
 ## Environment quirks / gotchas
 - ESM **NodeNext**: imports use `.js` extensions on `.ts` files → run via `tsx`, not `node`
   directly. `tsx` is at `packages/core/node_modules/.bin/tsx`.
 - Core `tsconfig.json` uses `noEmit: true`, no `rootDir`, so tests live in sibling `tests/`.
-  The published build path (`dist/index.js` per package.json `exports`) is **not produced by
-  the current `build` script** (`tsc --noEmit`) — real dist bundling is unbuilt.
+  The published build is real (S06): `build` runs `node build.mjs` (esbuild → `dist/index.js`
+  ESM + `dist/index.cjs`) then `tsc -p tsconfig.build.json` for `.d.ts`. `typecheck` remains
+  `tsc --noEmit`.
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S08.
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S36.
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -182,9 +185,30 @@
   centering (needs a centering wrapper); per-tile font shrink loops backfire —
   fixed type + exact line budgets won. Legends are the density floor (donut/pie
   need 6 rows for 6 services; heatmap header + N).
-- **Suite is 442 tests** (`tests/composability.test.ts` +7 covers the contract).
+- **Suite is 452 tests** (`tests/composability.test.ts` +7 covers the contract).
   `pnpm run lint` unrunnable — eslint binary not installed (pre-existing).
 - **Research spikes (no code):** TUI landscape — Ratatui's measure/render split
   + constraint layout (Length/Min/Max/Ratio/Fill, kasuari) is the model to
   steal; `ansi-to-tui` (official, truecolor) bridges Chitra ANSI → Ratatui
   `Paragraph` via a Node sidecar today.
+
+## S36 extension — first real release, deploy unfreeze, GT teeth (2026-09-23)
+- **`@chitra/core@0.1.0` is published to npm** (`npm publish --access public`,
+  org `chitra` owned by npm user `ifelse.codes`). 38 files, 94.2 kB tarball, dist
+  ESM+CJS+`.d.ts` + README + LICENSE. The S08 `release.yml` now **skips the publish
+  when the version already exists** — a re-pushed tag stays green (idempotent).
+- **Tag hygiene:** the old local `v0.1.0` tag (pointing at a 2026-07-29 commit) was
+  deleted; `v0.1.0` is re-cut on the release commit. Never `git push --tags` while a
+  stale `v*` exists — `release.yml` publishes on any `v*` push.
+- **Live deploy unfrozen (S31 order lifted):** `wrangler pages deploy dist/public
+  --project-name=chitra --branch=main`; this makes the S33 `/ai-data` page live.
+- **Docs-hero pills are truthful now:** `v0.1.0` (no "— stable") and `452` tests
+  (`artifacts/chitra-docs/src/App.tsx`).
+- **Ground-truth teeth:** `.ai/GT-REMEDIATIONS.md` ledger +
+  `verify-closeout.sh#check_gt_remediations` (every row DONE/WAIVED);
+  `#check_session_coverage` (a merged `session-NN-*` branch ≥ S17 must have a
+  summary); `#check_ground_truth_no_code` (a GT session's diff touches no code).
+  `.ai/hooks/hook-ground-truth-guard.sh` enforces no-code-in-GT in the Claude
+  harness; opencode relies on the closeout backstop.
+- **One canonical test count: 452.** If a session changes it, update it in one
+  place and let `verify-session-34.sh#test-count-matches` guard the README badge.
