@@ -612,12 +612,99 @@ check_required_crew() {
   fi
 }
 
+# --- Session artifact-coverage gate (S36 — closes the S17/S32 hole) -----------
+# check_session_pair only iterates summaries that EXIST, so a session that shipped
+# and merged with NO summary at all (S17 PR #19, S32 PR #38) is invisible to it.
+# This scans the merge history of `main` for every merged `session-NN-*` branch and
+# requires a `sessions/session-NN-summary.md`. Legacy sessions below the prompt-file
+# convention (NN < 17) are exempt; NN >= 17 must carry a record.
+check_session_coverage() {
+  local NAME="merged-sessions-have-records"; local LOG="$ARTIFACTS/${NAME}.log"
+  : > "$LOG"
+  if ! git rev-parse --verify main >/dev/null 2>&1; then
+    echo "N/A: no main ref to scan." >> "$LOG"; ok "$NAME"; return
+  fi
+  local missing=0 seen=0 n
+  while IFS= read -r n; do
+    [ -n "$n" ] || continue
+    n=$((10#$n)); [ "$n" -ge 17 ] || continue
+    seen=$((seen+1))
+    if [ -f "sessions/session-$(printf '%02d' "$n")-summary.md" ]; then
+      echo "OK: S$n has a summary" >> "$LOG"
+    else
+      echo "MISSING: S$n merged but sessions/session-$(printf '%02d' "$n")-summary.md absent" >> "$LOG"
+      missing=$((missing+1))
+    fi
+  done < <(git log --merges --format='%s' main 2>/dev/null \
+             | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p' | sort -n -u)
+  echo "scanned $seen merged session branch(es) >= S17" >> "$LOG"
+  if [ "$missing" -eq 0 ]; then ok "$NAME"; else bad "$NAME"; fi
+}
+
+# --- Ground-truth NO-CODE gate (S36 — backs the AGENTS.md claim) --------------
+# AGENTS.md says "No code in Ground Truth — Hook-enforced"; the Claude harness hook
+# (.ai/hooks/hook-ground-truth-guard.sh) enforces it at write time, but opencode does
+# not run those hooks. This is the harness-agnostic backstop: for a GT session
+# (N % 5 == 0), the committed diff vs the branch point must touch NO code — only
+# sessions/, prompts/, .ai/, and markdown.
+check_ground_truth_no_code() {
+  local NAME="ground-truth-no-code"; local LOG="$ARTIFACTS/${NAME}.log"
+  if [ -z "$N" ]; then echo "BLOCK: N unresolved" > "$LOG"; bad "$NAME"; return; fi
+  if [ "$((N % 5))" -ne 0 ]; then
+    echo "N/A: session $N is not a ground truth." >> "$LOG"; ok "$NAME"; return
+  fi
+  : > "$LOG"
+  local base; base="$(git merge-base main HEAD 2>/dev/null || true)"
+  if [ -z "$base" ]; then echo "N/A: no merge-base with main (cannot diff)." >> "$LOG"; ok "$NAME"; return; fi
+  local offenders
+  offenders="$(git diff --name-only --no-color "$base" HEAD -- . \
+                 ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
+               | grep -vE '\.(md|txt)$' || true)"
+  if [ -z "$offenders" ]; then
+    echo "OK: no code changes in ground-truth session $N." >> "$LOG"; ok "$NAME"; return
+  fi
+  printf '%s\n' "$offenders" >> "$LOG"
+  echo "BLOCK: ground-truth session $N changed code files (above)." >> "$LOG"
+  bad "$NAME"
+}
+
+# --- Ground-truth remediation ledger (S36 — gives GT findings teeth) ----------
+# Ground-truth findings historically had no closure mechanism (S05's debt sat open
+# 30 sessions). .ai/GT-REMEDIATIONS.md carries every GT session's remediations and
+# each row's Status must be DONE, WAIVED, or DEFERRED (founder-deferred, reason in
+# the Evidence column); anything else BLOCKS closeout.
+check_gt_remediations() {
+  local NAME="gt-remediations-dispositioned"; local LOG="$ARTIFACTS/${NAME}.log"
+  local F=".ai/GT-REMEDIATIONS.md"
+  if [ ! -f "$F" ]; then
+    echo "MISSING: $F — ground-truth remediations must be tracked." > "$LOG"; bad "$NAME"; return
+  fi
+  : > "$LOG"
+  local bad_rows
+  bad_rows="$(awk -F'|' '
+    /^\|/ {
+      n=split($0, a, "|")
+      if (n < 5) next
+      id=a[2]; st=a[4]
+      gsub(/^[ \t]+|[ \t]+$/, "", id); gsub(/^[ \t]+|[ \t]+$/, "", st)
+      if (id == "#" || id ~ /^-+$/) next
+      if (st != "DONE" && st != "WAIVED" && st != "DEFERRED") print "  [" st "] " id
+    }' "$F")"
+  if [ -z "$bad_rows" ]; then
+    echo "OK: every remediation row is DONE/WAIVED." >> "$LOG"; ok "$NAME"; return
+  fi
+  printf '%s\n' "$bad_rows" >> "$LOG"
+  echo "BLOCK: undispositioned ground-truth remediation(s) above." >> "$LOG"
+  bad "$NAME"
+}
+
 check_session_file
 check_required_files
 check_session_boot
 check_task_ref
 check_state_sections
 check_session_pair
+check_session_coverage
 check_roadmap_current
 check_cost_tracking
 check_execution_shas
@@ -625,6 +712,8 @@ check_verify_demo_scripts
 check_fidelity_review
 check_review_attestation
 check_required_crew
+check_ground_truth_no_code
+check_gt_remediations
 
 ( cd ".ai/verify/closeout" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
