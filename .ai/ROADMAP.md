@@ -24,8 +24,8 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   deferred to S37** (needs a Classic Automation token — the Publish token
   returns npm E403 2FA).
 - 🔜 **Next (Session 37 candidates):** **publish `@chitra/core@0.1.0`**
-  (Classic Automation token), then re-cut + push `v0.1.0`; ship an **MCP
-  server** (the vision is AI-first and the README already advertises a
+  (Classic Automation token), then re-cut + push `v0.1.0`; ship an **MCP server**
+  (the vision is AI-first and the README already advertises a
   `server.tool("render_chart", …)` handler — nothing ships it yet); a GTM proof
   pack (benchmarks / token-savings / before-after); flesh out
   `artifacts/api-server` beyond `/healthz`.
