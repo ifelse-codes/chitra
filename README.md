@@ -7,7 +7,7 @@
 Beautiful, zero-dependency charts rendered as text — for your terminal, your CI
 logs, and the language models reading them.
 
-[![version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/ifelse-codes/chitra)
+[![npm](https://img.shields.io/badge/npm-%40chitra%2Fcore-blue)](https://www.npmjs.com/package/@chitra/core)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)](packages/core/package.json)
 [![charts: 20](https://img.shields.io/badge/charts-20-blue)](packages/core/README.md)
