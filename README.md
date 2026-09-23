@@ -51,6 +51,9 @@ line({
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 ```
 
+> Chart output in this README is shown without ANSI colour; a real terminal
+> renders the same glyphs in full colour.
+
 ## Why chitra
 
 | | |
