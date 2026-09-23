@@ -538,7 +538,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="hero-copy">
         <div className="hero-eyebrow">
           <span className="hero-kicker"><span className="hero-kicker-dot" />A clear view of your data</span>
-          <span className="pill"><span className="pill-dot" />v0.1.0 — stable</span>
+          <span className="pill"><span className="pill-dot" />v0.1.0</span>
           <span className="pill">MIT License</span>
           <span className="pill">Zero runtime deps</span>
           <span className="pill">TypeScript-first</span>
@@ -558,7 +558,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="stat"><span className="stat-num">20</span><span className="stat-label">Chart types</span></div>
           <div className="stat"><span className="stat-num">3</span><span className="stat-label">Renderers</span></div>
           <div className="stat"><span className="stat-num">7</span><span className="stat-label">Themes</span></div>
-          <div className="stat"><span className="stat-num">134</span><span className="stat-label">Tests passing</span></div>
+          <div className="stat"><span className="stat-num">452</span><span className="stat-label">Tests passing</span></div>
           <div className="stat"><span className="stat-num">0</span><span className="stat-label">Dependencies</span></div>
         </div>
 
