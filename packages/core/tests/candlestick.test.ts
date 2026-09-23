@@ -135,6 +135,54 @@ describe("candlestick chart — locked S27 design", () => {
     expect(raw.split("\n").filter((l) => l.includes(theme.accent!)).length).toBeGreaterThan(0);
   });
 
+  it("ties go to the first candle — the SECOND tied candle is never accented", () => {
+    const tied = [
+      { open: 10, high: 12, low: 9, close: 11, label: "A" },
+      { open: 9, high: 12, low: 8, close: 11, label: "B" },
+    ];
+    const theme = resolveTheme("default");
+    const raw = candlestick({ data: tied }).toString();
+    const plainLines = stripAnsi(raw).split("\n");
+
+    // Period-label row carries both labels; locate each candle's body column.
+    const labelRow = plainLines.find((l) => l.includes("A") && l.includes("B"))!;
+    expect(labelRow).toBeTruthy();
+    const aCol = labelRow.indexOf("A");
+    const bCol = labelRow.indexOf("B");
+    expect(bCol).toBeGreaterThan(aCol);
+    const candleW = bCol - aCol - 1;
+
+    // Walk each raw line tracking visible columns; collect accent-coloured `█`
+    // body cells (accent is spent exactly once, on the peak body).
+    const accentCols = new Set<number>();
+    const TOKEN = /\x1b\[[0-9;]*m|[^\x1b]+/g;
+    for (const line of raw.split("\n")) {
+      let col = 0;
+      let active = "";
+      for (const tok of line.match(TOKEN) ?? []) {
+        if (tok.startsWith("\x1b[")) {
+          active = tok === "\x1b[0m" ? "" : tok;
+          continue;
+        }
+        if (active === theme.accent && /^█+$/.test(tok)) {
+          for (let i = 0; i < tok.length; i++) accentCols.add(col + i);
+        }
+        col += tok.length;
+      }
+    }
+
+    expect(accentCols.size).toBeGreaterThan(0);
+    // Every accent block sits inside candle A's body span; the second tied
+    // candle B stays entirely on the grey ramp (no accent anywhere in its span).
+    for (const col of accentCols) {
+      expect(col).toBeGreaterThanOrEqual(aCol);
+      expect(col).toBeLessThan(aCol + candleW);
+    }
+    for (const col of [bCol, bCol + candleW - 1]) {
+      expect(accentCols.has(col)).toBe(false);
+    }
+  });
+
   // ── Adaptive price labels (the S27 precision rule) ───────────
   it("prints integer y-labels when the range spans 100+", () => {
     const wide = [
