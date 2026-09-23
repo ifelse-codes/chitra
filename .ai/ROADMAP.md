@@ -10,11 +10,29 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
-- 🔜 **Next (Session 34 candidates):** exercise a real `v0.1.0` release
+- 🔜 **Next (Session 35):** **NO-CODE ground-truth** (`N % 5 == 0`) — audit
+  vision + roadmap + rules + constitution + state + cost. No code, no commits,
+  no PRs. Output `sessions/session-35-ground-truth.md`.
+- 🔜 **Then (Session 36 candidates):** exercise a real `v0.1.0` release
   (`NODE_AUTH_TOKEN` — founder-only secret); unfreeze + deploy the current
-  visuals to live `chitra.iifelse.com`; then GTM growth — confirm the audience
-  (AI builders first, terminal devs second), build the proof pack
-  (benchmarks / token-savings / before-after), and tell the pricing story.
+  visuals to live `chitra.iifelse.com`; fix the stale docs-hero pills
+  (`v0.1.0 — stable`, `134 tests`); then GTM growth — build the proof pack
+  (benchmarks / token-savings / before-after) and tell the pricing story.
+- ✅ **Session 34 (S34) — GTM README (the GitHub front door):** the repo had
+  **no root README**; added `README.md` (214 lines) — positioning line
+  *"Terminal charts for CLIs and agents."*, badge row (npm · MIT · 0 deps ·
+  452 tests · 20 charts), install + quickstart with **three real library
+  renders** (line, horizontalBar, sparkline), AI-builder lane first
+  (`toContent()/toPlain()/toJSON()`, MCP handler, AI-data link), terminal lane
+  second, a 20-chart gallery, and docs links. Added the MIT `LICENSE` at repo
+  root **and** `packages/core/LICENSE` (fixing the package's unresolved
+  `files: ["LICENSE"]` publish path). `verify-session-34.sh` 39/39 ALL GREEN —
+  embedded renders regenerated from source and **byte-compared whole-block**
+  (drift guard), facts (20/3/7/0/452) cross-checked against source, stale-claim
+  guards; demo exit 0. Cold review ACCEPT **6/6** after three rounds (footer-only
+  drift check → whole-block; missing npm badge → added; root-only LICENSE →
+  package LICENSE), attested `60627a87…d231067`. Disclosed: `@chitra/core` is not
+  on npm yet (README says so). PR #40.
 - ✅ **Session 33 (S33) — release readiness (founder-waived multi-story):**
   Playwright browser QA wired into CI; candle ties-first exclusivity test
   (second tied candle proven un-accented); `lineModelToSvg` brought to
