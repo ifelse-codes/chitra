@@ -153,19 +153,12 @@ export function line(opts: LineChartOptions): ChartResult {
 
   const model = createLineChartModel(opts);
   const innerWidth = width - 4; // minus "│ " ... " │"
-  const acc = theme.accent!;
-  const tones = theme.tones!;
-  // Same "one hue + tone ramp" language as the LOCKED pie/donut/area charts.
-  // A lone line keeps the LOCKED grey body with the accent spent once on its
-  // peak. With several series the primary becomes the accent hero (like the
-  // pie's largest slice) and the extras recede onto the shared grey ramp —
-  // identity among the greys comes from the glyph markers (`* ○ + × □`), never
-  // from separate bright hues.
-  const multiSeries = model.series.length > 1;
-  const toneOrder = [tones[2], tones[0], tones[3] ?? tones[1], tones[1]].filter(Boolean) as string[];
-  const seriesColors = model.series.map((_, i) =>
-    i === 0 && multiSeries ? acc : toneOrder[i % toneOrder.length]!
-  );
+  // The "one hue + tone ramp" language (a lone line keeps the grey ramp with
+  // the accent spent once on its peak; several series make the primary the
+  // accent hero and the extras recede onto the shared grey ramp) now lives in
+  // the model, so the terminal and SVG renderers read the SAME colours.
+  const acc = model.style.accent;
+  const seriesColors = model.seriesColors;
 
   const yAxisW =
     Math.max(
@@ -406,7 +399,7 @@ export function line(opts: LineChartOptions): ChartResult {
     const lines: string[] = [];
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
-    const eyebrow = (opts.eyebrow ?? "TREND").toUpperCase();
+    const eyebrow = model.eyebrow;
 
     if (useFrame && !useCompact) {
       lines.push(frameTop(width, opts.title ?? "LINE", opts.timestamp, theme.axis, theme.title, noColor, true));
