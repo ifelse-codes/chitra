@@ -45,15 +45,15 @@ Founder-waived multi-story session (S26/S27/S33 precedent, disclosed).
 - Release/deploy are founder-authorized this session.
 
 ## Execution
-- step 1 — done: <sha>
-- step 2 — done: <sha>
-- step 3 — done: <sha>
-- step 4 — done: <sha>
-- step 5 — done: <sha>
-- step 6 — done: <sha>
-- step 7 — done: <sha>
-- step 8 — done: <sha>
-- step 9 — done: <sha>
-- step 10 — done: <sha>
-- step 11 — done: <sha>
-- step 12 — done: <sha>
+- step 1 — deferred: npm publish → S37 (needs Classic Automation token)
+- step 2 — done: tag deleted (git op); re-cut deferred with step 1
+- step 3 — done: 71507f6
+- step 4 — done: ops deploy (no sha; wrangler pages deploy)
+- step 5 — done: 88be3fd
+- step 6 — done: 90758e3
+- step 7 — done: 3fd131f, 4abbd47
+- step 8 — done: 442032a, 18be7e7
+- step 9 — done: 4759cd2
+- step 10 — done: 28277ad
+- step 11 — done: 3fd131f
+- step 12 — done: 31b1338, e9aee50
