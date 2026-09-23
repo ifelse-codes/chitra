@@ -32,16 +32,25 @@ for s in "Why chitra" "Install" "Quickstart" "Built for AI agents" "Built for te
 done
 
 # ── Req 2: real renders, drift-checked against the library ──────
-# Generate each chart from source, take its summary footer line, and assert the
-# README embeds that EXACT line. If the renderer changes, the README must too.
+# Generate each chart from source and require the README to embed the EXACT
+# contiguous block, byte-for-byte — not just its footer caption. A fabricated
+# chart body with a copied caption fails.
 check_render() {
-  local NAME="$1" EXPR="$2" footer
+  local NAME="$1" EXPR="$2" out first n start block
   local LOG="$ARTIFACTS/${NAME}.log"
-  footer="$("$TSX" -e "$EXPR" 2>/dev/null | tail -2 | head -1)"
-  if [ -n "$footer" ] && grep -qF "$footer" "$README"; then
+  out="$("$TSX" -e "$EXPR" 2>/dev/null)"
+  first="$(printf '%s\n' "$out" | head -1)"
+  n="$(printf '%s\n' "$out" | grep -c .)"
+  start="$(grep -nF -- "$first" "$README" | head -1 | cut -d: -f1)"
+  if [ -z "$start" ]; then
+    echo "block start not found in README: [$first]" > "$LOG"
+    RESULTS+=("$(printf '%-32s %s' "$NAME" FAIL)"); FAIL=$((FAIL+1)); return
+  fi
+  block="$(sed -n "${start},$((start+n-1))p" "$README")"
+  if diff <(printf '%s\n' "$out") <(printf '%s\n' "$block") > "$LOG" 2>&1; then
     RESULTS+=("$(printf '%-32s %s' "$NAME" PASS)"); PASS=$((PASS+1))
   else
-    { echo "generated footer: [$footer]"; echo "not found in README"; } > "$LOG"
+    { echo "README block ($n lines from $start) differs from generated render:"; cat "$LOG"; } > "$LOG"
     RESULTS+=("$(printf '%-32s %s' "$NAME" FAIL)"); FAIL=$((FAIL+1))
   fi
 }
@@ -67,6 +76,7 @@ run_check "zero-deps"             bash -c "! grep -q '\"dependencies\"' $CORE_PK
 run_check "readme-says-20-charts" bash -c "grep -q 'charts: 20' $README && grep -q '20 chart types' $README"
 run_check "readme-says-7-themes"  bash -c "grep -q '7 themes' $README"
 run_check "readme-says-3-renders" bash -c "grep -q '3 renderers' $README"
+run_check "renderer-source-3"     bash -c "test -f packages/core/src/renderers/braille.ts && test -f packages/core/src/renderers/blocks.ts && test -f packages/core/src/renderers/ascii.ts"
 run_check "test-count-matches"    bash -c "out=\$(pnpm --filter @chitra/core run test 2>&1); echo \"\$out\" | grep -qE 'Tests +452 passed' && grep -q 'tests: 452 passing' $README"
 run_check "core-typecheck"        pnpm --filter @chitra/core run typecheck
 run_check "no-stale-test-count"   bash -c "! grep -qiE '134 (tests|passing)' $README"
