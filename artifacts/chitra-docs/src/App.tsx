@@ -106,7 +106,7 @@ const CHART_ACCENT: Record<string, string> = {
 
 const NAV_SECTIONS = [
   { label: "Start Here", items: ["install", "quickstart", "fluent-api"] },
-  { label: "Agent Output", items: ["ai-output"] },
+  { label: "Agent Output", items: ["ai-output", "ai-data"] },
 ];
 
 // Six semantic chart categories (S24 grouped nav). Stable, reader-facing —
@@ -410,7 +410,7 @@ function FluentPage() {
 }
 
 /* ── Page: AI Agents ────────────────────────────────────────── */
-function AiPage() {
+function AiPage({ onNav }: { onNav: (id: string) => void }) {
   return (
     <div className="page">
       <div className="page-header">
@@ -423,6 +423,88 @@ function AiPage() {
       <CodeBlock code={`import { bar } from "@chitra/core";\n\nconst chart = bar({\n  data: [42, 67, 38],\n  labels: ["Q1", "Q2", "Q3"],\n  title: "Quarterly Revenue",\n  noColor: true,          // skip ANSI at generation time\n});\n\n// Pass directly to any LLM or agent:\nconst text = chart.toPlain();\nconst json  = chart.toJSON();\n// { type: "bar", title: "Quarterly Revenue",\n//   data: [42, 67, 38], labels: [...], plain: "..." }`} />
       <h2>MCP tool handler</h2>
       <CodeBlock code={`import { plot } from "@chitra/core";\n\nserver.tool("render_chart", async ({ type, data, labels, title }) => {\n  const builder = plot(data)\n    .title(title)\n    .labels(labels)\n    .noColor();\n\n  const result =\n    type === "bar"  ? builder.bar()  :\n    type === "line" ? builder.line() :\n    type === "pie"  ? builder.pie()  : builder.bar();\n\n  return {\n    content: [{ type: "text", text: result.toPlain() }]\n  };\n});`} />
+      <p>Looking for the exact JSON every chart emits? Jump to the <button className="btn-secondary" onClick={() => onNav("ai-data")}>AI Data Reference →</button></p>
+    </div>
+  );
+}
+
+/* ── Page: AI Data Reference — the single toJSON()/toContent() manual ── */
+const AI_FEEDS: Array<[string, string, string]> = [
+  ["toContent()", "string", "RECOMMENDED for LLM context — frame-less, compact render (smallest token footprint)."],
+  ["toPlain()", "string", "Full plain render including frame + footer facts. Good for CI logs and Markdown."],
+  ["toJSON()", "object", "Structured facts plus the plain render. Use for MCP structured content and programmatic agents."],
+  ["toMarkdown()", "string", "Fenced code block around toPlain(). For docs and chat replies."],
+  ["toString()", "string", "ANSI escape codes. Terminals only — never send to a model."],
+];
+
+const AI_SHAPES: Array<[string, string]> = [
+  ["line", "type, data, labels, title, plain, model { series[], stats, seriesColors, style }"],
+  ["area", "type, data, title, plain"],
+  ["bar", "type, data, labels, title, plain"],
+  ["sparkline", "type, data, label, count, min, max, last, peak { index, value } | null"],
+  ["histogram", "type, data, bins, binCounts, title, mode, p50, p99, count, plain"],
+  ["scatter", "type, data, title, plain"],
+  ["pie", "type, data, labels, total, percentages, plain"],
+  ["donut", "type, data, labels, total, percentages, plain"],
+  ["heatmap", "type, data, xLabels, yLabels, min, max, peak { row, col } | null, plain"],
+  ["progress", "type, value, max, percent, bucket, plain"],
+  ["gauge", "type, value, min, max, percent, bucket, plain"],
+  ["horizontalBar", "type, data, labels, plain"],
+  ["timeline", "type, events, min, max, peak { index, label, span } | null, plain"],
+  ["radar", "type, data, labels, max { value, axis } | null, avg | null, plain"],
+  ["boxplot", "type, data, labels, stats | null, peakGroup { label, index, median } | null, plain"],
+  ["waterfall", "type, data, labels, total, steps [{ label, delta, start, end, kind }], plain"],
+  ["funnel", "type, data, labels, conversionRates, conversion, biggestDrop { label, pct } | null, plain"],
+  ["candlestick", "type, data, plain, count, high, low, last"],
+  ["treemap", "type, data, n, min, max, peak { label, value } | null, plain"],
+  ["sankey", "type, nodes, links, peakFlow { source, target, value } | null, plain"],
+];
+
+function AiDataPage() {
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div className="page-eyebrow">Reference</div>
+        <h1>AI Data Reference</h1>
+        <p className="lead">The exact data every chart hands to an agent — which feed to use, and what <code>toJSON()</code> returns per chart.</p>
+      </div>
+
+      <h2>Which feed to use</h2>
+      <div className="options-table">
+        {AI_FEEDS.map(([name, returns, desc]) => (
+          <div className="option-row" key={name}>
+            <code className="option-name">{name}</code>
+            <span className="option-desc">{desc} <em>Returns {returns}.</em></span>
+          </div>
+        ))}
+      </div>
+
+      <h2>The ChartResult surface</h2>
+      <CodeBlock code={`import { line } from "@chitra/core";
+
+const chart = line({ data: [10, 20, 15, 30], noColor: true });
+
+chart.toContent();   // compact, frame-less — best for LLM context
+chart.toPlain();     // full plain text
+chart.toJSON();      // { type, data, labels, ..., plain }
+chart.toMarkdown();  // \`\`\` fenced plain text \`\`\``} />
+
+      <h2>Empty and clamp behaviour</h2>
+      <p>Facts that cannot be computed are <code>null</code>, never <code>NaN</code>: sparkline <code>min/max/last/peak</code>, histogram <code>mode/p50/p99</code>, heatmap <code>peak</code>, radar <code>max/avg</code>, boxplot <code>stats/peakGroup</code>, timeline <code>peak</code>, treemap <code>peak</code>, sankey <code>peakFlow</code>, and candlestick <code>high/low/last</code> all report <code>null</code> on empty input.</p>
+      <p><strong>Clamps tell the truth.</strong> When a visual track is clamped (progress/gauge), <code>toJSON()</code> still reports the <strong>true</strong> <code>value</code> and the <strong>true</strong> <code>percent</code> — never the visually clamped number.</p>
+
+      <h2>toJSON() shape by chart</h2>
+      <div className="options-table">
+        {AI_SHAPES.map(([id, fields]) => (
+          <div className="option-row" key={id}>
+            <code className="option-name">{id}</code>
+            <span className="option-desc"><code>{fields}</code></span>
+          </div>
+        ))}
+      </div>
+
+      <h2>MCP guardrail: treat chart input as untrusted</h2>
+      <p>Labels, node names, and series text pass through to <code>toJSON()</code> and <code>toContent()</code> verbatim. When you feed that output back into a model, keep it in a data channel — never template it into a system prompt, never treat it as instructions, and strip control characters before display. Prefer <code>toContent()</code> for context and <code>toJSON()</code> when the agent needs to branch on structured facts; only keep <code>toString()</code> for real terminals.</p>
     </div>
   );
 }
@@ -676,7 +758,7 @@ export default function App() {
   const labelFor = (id: string) => {
     const map: Record<string, string> = {
       install: "Installation", quickstart: "Quickstart",
-      "fluent-api": "Fluent API", "ai-output": "AI Agents",
+      "fluent-api": "Fluent API", "ai-output": "AI Agents", "ai-data": "AI Data Reference",
     };
     return map[id] ?? CHARTS.find((c) => c.id === id)?.name ?? id;
   };
@@ -686,7 +768,8 @@ export default function App() {
     if (active === "install")    return <InstallPage />;
     if (active === "quickstart") return <QuickstartPage />;
     if (active === "fluent-api") return <FluentPage />;
-    if (active === "ai-output")  return <AiPage />;
+    if (active === "ai-output")  return <AiPage onNav={nav} />;
+    if (active === "ai-data")    return <AiDataPage />;
     // A /chart/<unknown-id> URL falls back to the catalog home rather than a blank pane.
     if (chartId)                 return <ChartPage key={chartId} id={chartId} />;
     return <Hero onNav={nav} />;

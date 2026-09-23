@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // qa-catalog.mjs — Playwright-driven QA for chitra catalog pages
-// Visits all 20 chart pages + 4 doc pages + home, asserts rendering works.
+// Visits all 20 chart pages + 5 doc pages + home, asserts rendering works.
 
 import { chromium } from "playwright";
 import { promises as fs } from "fs";
@@ -20,7 +20,7 @@ const CHART_IDS = [
   "treemap", "sankey"
 ];
 
-const DOC_PAGES = ["install", "quickstart", "fluent-api", "ai-output"];
+const DOC_PAGES = ["install", "quickstart", "fluent-api", "ai-output", "ai-data"];
 
 const HEADED = process.argv.includes("--headed");
 const BASE_URL = "http://localhost:5174";
@@ -50,21 +50,33 @@ async function startPreview() {
     env: { ...process.env, PORT: "5174", BASE_PATH: "/" },
   });
 
-  // Wait for server to be ready
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 30000);
-    server.stdout?.on("data", (data) => {
-      if (data.toString().includes("Local:")) {
-        clearTimeout(timeout);
-        resolve();
-      }
-    });
-    server.stderr?.on("data", (data) => {
-      console.error("Server stderr:", data.toString());
-    });
-  });
+  // Forward server output for CI debugging.
+  server.stdout?.on("data", (data) => process.stdout.write(data));
+  server.stderr?.on("data", (data) => process.stderr.write(data));
+
+  // Poll the HTTP endpoint until it answers. This is output-agnostic — waiting
+  // for a specific stdout string ("Local:") proved brittle on CI, where the
+  // preview banner can be buffered or reworded by the pnpm/vite wrapper.
+  await waitForServer(BASE_URL, 60000);
 
   return server;
+}
+
+async function waitForServer(url, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let lastErr = null;
+  while (Date.now() < deadline) {
+    try {
+      const res = await fetch(url, { redirect: "manual" });
+      if (res.status < 500) return;
+    } catch (err) {
+      lastErr = err;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error(
+    `Server did not respond at ${url} within ${timeoutMs}ms${lastErr ? ` (last error: ${lastErr.message})` : ""}`
+  );
 }
 
 async function runQA() {

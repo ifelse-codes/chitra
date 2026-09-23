@@ -89,3 +89,33 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Chart generation drift check
         run: pnpm --filter @workspace/chitra-docs run gen:charts:check
+
+  browser-qa:
+    name: qa · browser QA (all catalog pages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      # qa-catalog.mjs builds the docs app itself; it resolves @chitra/core
+      # through dist/ (gitignored) and the lib declarations, so build both first.
+      - name: Build lib type declarations
+        run: pnpm run typecheck:libs
+      - name: Build @chitra/core (docs imports it)
+        run: pnpm --filter @chitra/core run build
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      # Visits all 20 chart pages + docs pages + home; fails on any console or
+      # page error, missing terminal output, or broken persistence/run shortcut.
+      - name: Browser QA (charts + docs, zero console errors)
+        run: node scripts/qa-catalog.mjs
+        env:
+          PORT: "5174"
+          BASE_PATH: "/"
