@@ -1,20 +1,22 @@
 # Current Task Pointer
 
-## Session 33 — release readiness — DONE
+## Session 34 — GTM README (the GitHub front door) — DONE
 
-- **Branch:** `session-33-release-readiness` (close on branch; main untouched until PR merges)
-- **Contract:** `prompts/33-task-release-readiness.md` (5 numbered requirements;
-  from `jev-readiness-plan.md` items 1–4). Founder-waived multi-story session.
-- **Delivery (atomic commits, all ≤3 files):** CI `browser-qa` job; candle
-  ties-first exclusivity test; `lineModelToSvg` terminal parity + drift test +
-  regenerated `svg-charts.json`; `ai-data` AI-data manual page + README link +
-  QA doc list. Verify 17/17 ALL GREEN; demo exit 0; cold ACCEPT 5/5
-  (mutation-tested, attested `db2ef16f…32f79`).
-- Verify: `scripts/verify-session-33.sh` — 17/17 ALL GREEN.
-  Demo exit 0. Summary: `sessions/session-33-summary.md`.
-- **Live deploy still frozen by founder order** — NOT redeployed this session.
-- **To go:** PR → merge → next session in a new chat.
+- **Branch:** `session-34-gtm-readme` (close on branch; main untouched until PR #40 merges)
+- **Contract:** `prompts/34-task-gtm-readme.md` (6 numbered requirements).
+  Founder in-chat direction: the repo had no root README — design one good root
+  README as a GTM asset. One story.
+- **Delivery (atomic commits, all ≤3 files):** new root `README.md` (positioning
+  line, badges, real library renders, AI-builder lane first, gallery + docs
+  links); `LICENSE` (MIT) at root **and** `packages/core/LICENSE`; verify + demo
+  gates. Verify **39/39 ALL GREEN**; demo exit 0; cold ACCEPT **6/6** after three
+  review rounds (attested `60627a87…d231067`).
+- Verify: `scripts/verify-session-34.sh`. Demo: `scripts/demo-session-34.sh`.
+  Summary: `sessions/session-34-summary.md`; review: `sessions/session-34-review.md`.
+- **Open:** live docs-hero pills stale (`v0.1.0 — stable`, `134 tests`) — deferred
+  GTM-consistency fix. `@chitra/core` not on npm yet (README discloses).
+- **To go:** PR #40 → merge.
 
-**Next session (S34 candidates):** real `v0.1.0` release (`NODE_AUTH_TOKEN`,
-founder-only); unfreeze + deploy current visuals to live; GTM growth (audience
-decision, proof pack, pricing story). Open in a **new chat**.
+**Next session (S35):** **NO-CODE ground-truth** (`N % 5 == 0`) — audit vision +
+roadmap + rules + constitution + state + cost; no code, no commits, no PRs;
+output `sessions/session-35-ground-truth.md`. Open in a **new chat**.
