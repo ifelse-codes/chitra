@@ -14,7 +14,9 @@
 - **Req 1 — CI browser QA.** New `browser-qa` job in `.github/workflows/ci.yml`:
   builds lib declarations + core dist, installs Playwright Chromium, runs
   `scripts/qa-catalog.mjs` (all 20 chart pages + docs + home, zero console/page
-  errors). Wiring only — the suite already passed locally.
+  errors). First CI run exposed a brittle `"Local:"` stdout wait in
+  `startPreview()`; fixed to poll the HTTP endpoint (commit `357f9db`) — CI
+  now green (qa job 1m59s).
 - **Req 2 — candle ties-first exclusivity.** New test in
   `tests/candlestick.test.ts` walks the raw ANSI by visible column and proves
   every accent `█` sits inside the FIRST tied candle's body span and none in the
