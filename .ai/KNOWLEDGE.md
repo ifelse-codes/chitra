@@ -92,8 +92,8 @@
   `tsc --noEmit`.
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S36
-  (latest merge PR #42, `085425f`); S37 (`session-37-publish-v0.1.0`) is pending merge.
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S37
+  (latest merge PR #43, `fd8a96e`); the `v0.1.0` tag is on `main` HEAD.
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
