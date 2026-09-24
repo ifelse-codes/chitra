@@ -225,7 +225,7 @@ function AccentChip({ accent }: { accent: string }) {
 /* ── Install strip: antra-borrow click-to-copy hero command ── */
 function InstallStrip() {
   const [copied, setCopied] = useState(false);
-  const cmd = "pnpm add @chitra/core";
+  const cmd = "pnpm add @ifelse.codes/core";
   const copy = () => {
     navigator.clipboard.writeText(cmd);
     setCopied(true);
@@ -323,7 +323,7 @@ function MandalaField() {
           <button onClick={() => onNav("install")}>Install</button>
           <button onClick={() => onNav("quickstart")}>Quickstart</button>
           <button onClick={() => onNav("ai-output")}>AI Agents</button>
-          <a href="https://npmjs.com/package/@chitra/core" target="_blank" rel="noreferrer">npm</a>
+          <a href="https://npmjs.com/package/@ifelse.codes/core" target="_blank" rel="noreferrer">npm</a>
         </div>
       </div>
     </footer>
@@ -360,7 +360,7 @@ function InstallPage() {
         <p className="lead">Install the TypeScript terminal chart library with no runtime dependency chain.</p>
       </div>
       <h2>Package managers</h2>
-      <CodeBlock lang="bash" code={`npm install @chitra/core\npnpm add @chitra/core\nyarn add @chitra/core`} />
+      <CodeBlock lang="bash" code={`npm install @ifelse.codes/core\npnpm add @ifelse.codes/core\nyarn add @ifelse.codes/core`} />
       <h2>Requirements</h2>
       <ul>
         <li>Node.js 18 or later</li>
@@ -369,7 +369,7 @@ function InstallPage() {
       </ul>
       <h2>Module format</h2>
       <p>Typed ESM imports are the primary path. Full TypeScript types are included, with no <code>@types/</code> package needed.</p>
-      <CodeBlock code={`import { bar } from "@chitra/core";\n// Full type inference — no @types/chitra needed\nbar({ data: [1, 2, 3] }).render();`} />
+      <CodeBlock code={`import { bar } from "@ifelse.codes/core";\n// Full type inference — no @types/chitra needed\nbar({ data: [1, 2, 3] }).render();`} />
     </div>
   );
 }
@@ -383,7 +383,7 @@ function QuickstartPage() {
         <h1>Quickstart</h1>
         <p className="lead">Render a chart, choose a renderer, then reuse the same result in terminals, Markdown, logs, and agents.</p>
       </div>
-      <CodeBlock code={`import { bar, line, sparkline } from "@chitra/core";\n\n// Vertical bar chart\nbar({\n  data: [42, 67, 38, 55, 72],\n  labels: ["Jan", "Feb", "Mar", "Apr", "May"],\n  title: "Monthly Deployments",\n  theme: "tokyo-night",\n}).render();\n\n// Braille line chart — sub-character precision\nline({\n  data: [10, 20, 15, 35, 28, 45, 38, 52],\n  title: "Revenue",\n  renderer: "braille",\n}).render();\n\n// Inline sparkline — perfect for dashboards\nsparkline({\n  data: [1, 4, 2, 7, 3, 9, 5, 11, 8],\n  label: "CPU",\n  showValue: true,\n}).render();`} />
+      <CodeBlock code={`import { bar, line, sparkline } from "@ifelse.codes/core";\n\n// Vertical bar chart\nbar({\n  data: [42, 67, 38, 55, 72],\n  labels: ["Jan", "Feb", "Mar", "Apr", "May"],\n  title: "Monthly Deployments",\n  theme: "tokyo-night",\n}).render();\n\n// Braille line chart — sub-character precision\nline({\n  data: [10, 20, 15, 35, 28, 45, 38, 52],\n  title: "Revenue",\n  renderer: "braille",\n}).render();\n\n// Inline sparkline — perfect for dashboards\nsparkline({\n  data: [1, 4, 2, 7, 3, 9, 5, 11, 8],\n  label: "CPU",\n  showValue: true,\n}).render();`} />
       <h2>ChartResult interface</h2>
       <p>Every chart function returns a <code>ChartResult</code> — five output methods for any context:</p>
       <CodeBlock code={`const chart = bar({ data: [1, 2, 3] });\n\nchart.render();       // → stdout with ANSI colors\nchart.toString();     // → ANSI string\nchart.toPlain();      // → plain text, no escape codes\nchart.toMarkdown();   // → fenced code block\nchart.toJSON();       // → { type, data, plain, ... }`} />
@@ -402,7 +402,7 @@ function FluentPage() {
         <h1>Fluent API</h1>
         <p className="lead"><code>plot(data)</code> keeps shared options together, then renders the final chart type at the end of the chain.</p>
       </div>
-      <CodeBlock code={`import { plot } from "@chitra/core";\n\n// Chain options, call chart type last\nplot([18, 32, 27, 48, 39, 61, 52, 74])\n  .title("Revenue Growth")\n  .theme("tokyo-night")\n  .width(60)\n  .height(14)\n  .renderer("braille")\n  .line()\n  .render();\n\nplot([42, 67, 38, 55, 72])\n  .labels(["Jan", "Feb", "Mar", "Apr", "May"])\n  .title("Deploys")\n  .bar()\n  .render();`} />
+      <CodeBlock code={`import { plot } from "@ifelse.codes/core";\n\n// Chain options, call chart type last\nplot([18, 32, 27, 48, 39, 61, 52, 74])\n  .title("Revenue Growth")\n  .theme("tokyo-night")\n  .width(60)\n  .height(14)\n  .renderer("braille")\n  .line()\n  .render();\n\nplot([42, 67, 38, 55, 72])\n  .labels(["Jan", "Feb", "Mar", "Apr", "May"])\n  .title("Deploys")\n  .bar()\n  .render();`} />
       <h2>All builder methods</h2>
       <CodeBlock code={`plot(data)\n  // Metadata\n  .title(string)\n  .labels(string[])\n  .label(string)          // sparkline label\n\n  // Appearance\n  .theme("default" | "nord" | "dracula" | "github-dark" | "tokyo-night" | "solarized" | "monochrome")\n  .renderer("braille" | "blocks" | "ascii")\n  .width(number)\n  .height(number)\n  .noColor()              // strip ANSI — for LLMs / CI logs\n\n  // Chart type (call last)\n  .line()        .bar()         .area()        .sparkline()\n  .histogram()   .scatter()     .pie()         .donut()\n  .heatmap()     .progress()    .gauge()       .horizontalBar()\n  .timeline()    .radar()       .boxplot()     .waterfall()\n  .funnel()      .candlestick() .treemap()     .sankey()`} />
     </div>
@@ -420,9 +420,9 @@ function AiPage({ onNav }: { onNav: (id: string) => void }) {
       </div>
       <p>ANSI escape codes are great for terminals and noisy for language models. Chitra's <code>noColor</code>, <code>toPlain()</code>, and <code>toJSON()</code> paths keep agent output readable without a post-processing step.</p>
       <h2>noColor + toPlain</h2>
-      <CodeBlock code={`import { bar } from "@chitra/core";\n\nconst chart = bar({\n  data: [42, 67, 38],\n  labels: ["Q1", "Q2", "Q3"],\n  title: "Quarterly Revenue",\n  noColor: true,          // skip ANSI at generation time\n});\n\n// Pass directly to any LLM or agent:\nconst text = chart.toPlain();\nconst json  = chart.toJSON();\n// { type: "bar", title: "Quarterly Revenue",\n//   data: [42, 67, 38], labels: [...], plain: "..." }`} />
+      <CodeBlock code={`import { bar } from "@ifelse.codes/core";\n\nconst chart = bar({\n  data: [42, 67, 38],\n  labels: ["Q1", "Q2", "Q3"],\n  title: "Quarterly Revenue",\n  noColor: true,          // skip ANSI at generation time\n});\n\n// Pass directly to any LLM or agent:\nconst text = chart.toPlain();\nconst json  = chart.toJSON();\n// { type: "bar", title: "Quarterly Revenue",\n//   data: [42, 67, 38], labels: [...], plain: "..." }`} />
       <h2>MCP tool handler</h2>
-      <CodeBlock code={`import { plot } from "@chitra/core";\n\nserver.tool("render_chart", async ({ type, data, labels, title }) => {\n  const builder = plot(data)\n    .title(title)\n    .labels(labels)\n    .noColor();\n\n  const result =\n    type === "bar"  ? builder.bar()  :\n    type === "line" ? builder.line() :\n    type === "pie"  ? builder.pie()  : builder.bar();\n\n  return {\n    content: [{ type: "text", text: result.toPlain() }]\n  };\n});`} />
+      <CodeBlock code={`import { plot } from "@ifelse.codes/core";\n\nserver.tool("render_chart", async ({ type, data, labels, title }) => {\n  const builder = plot(data)\n    .title(title)\n    .labels(labels)\n    .noColor();\n\n  const result =\n    type === "bar"  ? builder.bar()  :\n    type === "line" ? builder.line() :\n    type === "pie"  ? builder.pie()  : builder.bar();\n\n  return {\n    content: [{ type: "text", text: result.toPlain() }]\n  };\n});`} />
       <p>Looking for the exact JSON every chart emits? Jump to the <button className="btn-secondary" onClick={() => onNav("ai-data")}>AI Data Reference →</button></p>
     </div>
   );
@@ -480,7 +480,7 @@ function AiDataPage() {
       </div>
 
       <h2>The ChartResult surface</h2>
-      <CodeBlock code={`import { line } from "@chitra/core";
+      <CodeBlock code={`import { line } from "@ifelse.codes/core";
 
 const chart = line({ data: [10, 20, 15, 30], noColor: true });
 
@@ -538,7 +538,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="hero-copy">
         <div className="hero-eyebrow">
           <span className="hero-kicker"><span className="hero-kicker-dot" />A clear view of your data</span>
-          <span className="pill"><span className="pill-dot" />v0.1.0</span>
+          <span className="pill"><span className="pill-dot" />v0.1.0 · npm</span>
           <span className="pill">MIT License</span>
           <span className="pill">Zero runtime deps</span>
           <span className="pill">TypeScript-first</span>
@@ -794,8 +794,8 @@ export default function App() {
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
             </svg>
           </a>
-          <a className="topbar-cta" href="https://npmjs.com/package/@chitra/core" target="_blank" rel="noreferrer">
-            npm install @chitra/core
+          <a className="topbar-cta" href="https://npmjs.com/package/@ifelse.codes/core" target="_blank" rel="noreferrer">
+            npm install @ifelse.codes/core
           </a>
         </div>
         <button className="mobile-menu-btn" onClick={() => setMobileOpen(!mobileOpen)}>☰</button>

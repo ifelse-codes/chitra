@@ -7,7 +7,7 @@
 Beautiful, zero-dependency charts rendered as text — for your terminal, your CI
 logs, and the language models reading them.
 
-[![npm](https://img.shields.io/badge/npm-%40chitra%2Fcore-blue)](https://www.npmjs.com/package/@chitra/core)
+[![npm](https://img.shields.io/badge/npm-%40ifelse.codes%2Fcore-blue)](https://www.npmjs.com/package/@ifelse.codes/core)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)](packages/core/package.json)
 [![charts: 20](https://img.shields.io/badge/charts-20-blue)](packages/core/README.md)
@@ -20,7 +20,7 @@ logs, and the language models reading them.
 ---
 
 ```ts
-import { line } from "@chitra/core";
+import { line } from "@ifelse.codes/core";
 
 line({
   data: [12, 19, 14, 27, 22, 34, 29, 41],
@@ -67,17 +67,13 @@ line({
 
 ## Install
 
-> **Status:** `@chitra/core` `v0.1.0` is not on npm yet — the publish is in
-> progress. Install from source today; `pnpm add @chitra/core` works the moment
-> the tag lands.
-
 ```bash
-# From npm (v0.1.0 — publishing)
-pnpm add @chitra/core
+# From npm
+pnpm add @ifelse.codes/core
 
-# From source (works today)
+# From source
 git clone https://github.com/ifelse-codes/chitra.git
-cd chitra && pnpm install && pnpm --filter @chitra/core build
+cd chitra && pnpm install && pnpm --filter @ifelse.codes/core build
 ```
 
 Requires Node.js 18+ and any Unicode-capable terminal.
@@ -85,7 +81,7 @@ Requires Node.js 18+ and any Unicode-capable terminal.
 ## Quickstart
 
 ```ts
-import { horizontalBar } from "@chitra/core";
+import { horizontalBar } from "@ifelse.codes/core";
 
 horizontalBar({
   data: [82, 64, 51, 37, 22],
@@ -129,7 +125,7 @@ methods give an agent the chart without the escape codes — and a structured
 shape it can branch on.
 
 ```ts
-import { bar } from "@chitra/core";
+import { bar } from "@ifelse.codes/core";
 
 const chart = bar({
   data: [42, 67, 38],
@@ -145,7 +141,7 @@ chart.toJSON();    // { type: "bar", data: [42, 67, 38], labels: [...], plain: "
 MCP tool handler:
 
 ```ts
-import { plot } from "@chitra/core";
+import { plot } from "@ifelse.codes/core";
 
 server.tool("render_chart", async ({ type, data, labels, title }) => {
   const builder = plot(data).title(title).labels(labels).noColor();
@@ -163,7 +159,7 @@ and the untrusted-input guardrail live in the **[AI data reference](https://chit
 ## Built for terminals
 
 ```ts
-import { sparkline, plot } from "@chitra/core";
+import { sparkline, plot } from "@ifelse.codes/core";
 
 // Inline sparkline for a live dashboard
 sparkline({ data: [3, 5, 4, 8, 6, 11, 9, 13, 12, 15], label: "p99 latency" }).render();
