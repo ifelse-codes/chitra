@@ -212,7 +212,7 @@ async function runQA() {
 
     // Test persistence: edit -> navigate away -> back -> buffer kept
     console.log("Testing persistence on /chart/line...");
-    await runPage.fill(".vim-ta", "// edited by QA\nimport { line } from \"@chitra/core\";\nline({ data: [1,2,3] }).render();");
+    await runPage.fill(".vim-ta", "// edited by QA\nimport { line } from \"@ifelse.codes/core\";\nline({ data: [1,2,3] }).render();");
     await runPage.waitForTimeout(500);
 
     // Navigate away and back
