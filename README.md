@@ -67,15 +67,11 @@ line({
 
 ## Install
 
-> **Status:** `@ifelse.codes/core` `v0.1.0` is not on npm yet — the publish is in
-> progress. Install from source today; `pnpm add @ifelse.codes/core` works the moment
-> the tag lands.
-
 ```bash
-# From npm (v0.1.0 — publishing)
+# From npm
 pnpm add @ifelse.codes/core
 
-# From source (works today)
+# From source
 git clone https://github.com/ifelse-codes/chitra.git
 cd chitra && pnpm install && pnpm --filter @ifelse.codes/core build
 ```

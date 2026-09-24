@@ -538,7 +538,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="hero-copy">
         <div className="hero-eyebrow">
           <span className="hero-kicker"><span className="hero-kicker-dot" />A clear view of your data</span>
-          <span className="pill"><span className="pill-dot" />v0.1.0</span>
+          <span className="pill"><span className="pill-dot" />v0.1.0 · npm</span>
           <span className="pill">MIT License</span>
           <span className="pill">Zero runtime deps</span>
           <span className="pill">TypeScript-first</span>
