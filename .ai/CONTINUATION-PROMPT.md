@@ -21,7 +21,7 @@ live deploy. Full detail: `sessions/session-36-summary.md` +
 
 ## The one open item (S37)
 
-**Publish `@chitra/core@0.1.0` to npm.** S36's attempt failed with
+**Publish `@ifelse.codes/core@0.1.0` to npm.** S36's attempt failed with
 `E403 … 2FA or granular token with bypass 2fa required` — the supplied token was a
 *Publish* token. npm needs a **Classic Automation token** (or Granular with
 **Bypass 2FA** ON). Then:
@@ -29,7 +29,7 @@ live deploy. Full detail: `sessions/session-36-summary.md` +
 ```bash
 cd packages/core && npm publish --access public --no-git-checks
 gh secret set NODE_AUTH_TOKEN --repo ifelse-codes/chitra   # for tag-driven releases
-npm view @chitra/core@0.1.0 version                        # -> 0.1.0
+npm view @ifelse.codes/core@0.1.0 version                        # -> 0.1.0
 # re-cut + push v0.1.0 on main; release.yml skips the already-published version
 ```
 
@@ -52,5 +52,5 @@ contract restates this.
 ## Housekeeping
 
 - Rotate the npm token pasted in the S36 chat.
-- `pnpm --filter @chitra/core run test` → 452 green; `scripts/verify-session-36.sh`
+- `pnpm --filter @ifelse.codes/core run test` → 452 green; `scripts/verify-session-36.sh`
   → ALL GREEN.

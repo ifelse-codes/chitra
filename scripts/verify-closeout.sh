@@ -668,11 +668,14 @@ check_ground_truth_no_code() {
   bad "$NAME"
 }
 
-# --- Ground-truth remediation ledger (S36 — gives GT findings teeth) ----------
+# --- Ground-truth remediation ledger (S36, hardened S37 — gives GT findings teeth) ---
 # Ground-truth findings historically had no closure mechanism (S05's debt sat open
 # 30 sessions). .ai/GT-REMEDIATIONS.md carries every GT session's remediations and
-# each row's Status must be DONE, WAIVED, or DEFERRED (founder-deferred, reason in
-# the Evidence column); anything else BLOCKS closeout.
+# each row's Status must be DONE, WAIVED, or DEFERRED; anything else BLOCKS closeout.
+# S37 hardening (S36-review weakness): a bare `DEFERRED` was a rot hatch — accepted
+# with no reason/expiry, mirroring the S05 failure the ledger claims to close. A
+# DEFERRED row now ALSO needs `reason` AND an `expiry` (a `MM-DD`/`YYYY-MM-DD` date
+# or the word "expiry") in its Evidence cell, so a deferral cannot rot silently.
 check_gt_remediations() {
   local NAME="gt-remediations-dispositioned"; local LOG="$ARTIFACTS/${NAME}.log"
   local F=".ai/GT-REMEDIATIONS.md"
@@ -685,13 +688,19 @@ check_gt_remediations() {
     /^\|/ {
       n=split($0, a, "|")
       if (n < 5) next
-      id=a[2]; st=a[4]
+      id=a[2]; st=a[4]; ev=a[5]
       gsub(/^[ \t]+|[ \t]+$/, "", id); gsub(/^[ \t]+|[ \t]+$/, "", st)
       if (id == "#" || id ~ /^-+$/) next
-      if (st != "DONE" && st != "WAIVED" && st != "DEFERRED") print "  [" st "] " id
+      if (st != "DONE" && st != "WAIVED" && st != "DEFERRED") { print "  [" st "] " id; next }
+      if (st == "DEFERRED") {
+        evl=tolower(ev)
+        has_reason=(evl ~ /reason/)
+        has_expiry=(evl ~ /expiry/ || evl ~ /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/)
+        if (!has_reason || !has_expiry) print "  [DEFERRED missing reason/expiry] " id
+      }
     }' "$F")"
   if [ -z "$bad_rows" ]; then
-    echo "OK: every remediation row is DONE/WAIVED." >> "$LOG"; ok "$NAME"; return
+    echo "OK: every remediation row is DONE/WAIVED, and every DEFERRED carries reason+expiry." >> "$LOG"; ok "$NAME"; return
   fi
   printf '%s\n' "$bad_rows" >> "$LOG"
   echo "BLOCK: undispositioned ground-truth remediation(s) above." >> "$LOG"
@@ -712,6 +721,22 @@ if [ "${1:-}" = "--integrity-only" ]; then
   cat "$ARTIFACTS/ground-truth-no-code.log" 2>/dev/null || true
   cat "$ARTIFACTS/gt-remediations-dispositioned.log" 2>/dev/null || true
   if [ "$FAIL" -eq 0 ]; then echo "INTEGRITY: PASS"; exit 0; else echo "INTEGRITY: FAIL"; exit 1; fi
+fi
+
+# Focused entry point: run ONLY the ground-truth no-code gate for an explicit N (S37).
+# Lets a CODE session EXERCISE the offender path: evaluate a synthetic GT N (a multiple
+# of 5) against a branch that DOES contain code changes, so the gate must BLOCK. The S36
+# review found `--integrity-only 36` only ever reached the `N/A: not a ground truth`
+# early-return, so the offender-detection path was never actually exercised.
+# `--gt-no-code-only [N]` — exit 1 (as designed) is the PROOF the path works.
+if [ "${1:-}" = "--gt-no-code-only" ]; then
+  if [ -n "${2:-}" ]; then N="$((10#$2))"; else check_session_file; fi
+  check_ground_truth_no_code
+  echo ""
+  echo "=== GT no-code gate (N=${N:-?}) ==="
+  for r in "${RESULTS[@]}"; do echo "$r"; done
+  cat "$ARTIFACTS/ground-truth-no-code.log" 2>/dev/null || true
+  if [ "$FAIL" -eq 0 ]; then echo "GT-NO-CODE: PASS"; exit 0; else echo "GT-NO-CODE: FAIL"; exit 1; fi
 fi
 
 check_session_file

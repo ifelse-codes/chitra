@@ -49,7 +49,7 @@ fi
 
 # Step 3: Verify core (should be unchanged)
 echo "Step 3: Verifying core invariants..."
-if pnpm --filter @chitra/core run test | grep -q "163 passed"; then
+if pnpm --filter @ifelse.codes/core run test | grep -q "163 passed"; then
   echo "✓ 163/163 core tests green"
 else
   echo "✗ core tests failed"
