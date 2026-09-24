@@ -1,4 +1,4 @@
-// Regenerates the docs-site chart gallery data from @chitra/core.
+// Regenerates the docs-site chart gallery data from @ifelse.codes/core.
 //
 //   tsx scripts/generate-charts.ts          # write files
 //   tsx scripts/generate-charts.ts --check  # verify on-disk files are current
