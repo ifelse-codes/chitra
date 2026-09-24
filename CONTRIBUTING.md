@@ -11,13 +11,13 @@ cd chitra
 pnpm install
 
 # Run tests
-pnpm --filter @chitra/core run test
+pnpm --filter @ifelse.codes/core run test
 
 # Run tests with coverage
-pnpm --filter @chitra/core run test:coverage
+pnpm --filter @ifelse.codes/core run test:coverage
 
 # Typecheck
-pnpm --filter @chitra/core run typecheck
+pnpm --filter @ifelse.codes/core run typecheck
 
 # Run examples
 node --experimental-specifier-resolution=node examples/basic.ts
@@ -122,13 +122,13 @@ Also add `"my-theme"` to the `ThemeName` type in `types.ts`.
 
 ```bash
 # Run all tests
-pnpm --filter @chitra/core run test
+pnpm --filter @ifelse.codes/core run test
 
 # Run tests in watch mode
-pnpm --filter @chitra/core run test:watch
+pnpm --filter @ifelse.codes/core run test:watch
 
 # Coverage report
-pnpm --filter @chitra/core run test:coverage
+pnpm --filter @ifelse.codes/core run test:coverage
 ```
 
 ## Pull Request Process
@@ -136,8 +136,8 @@ pnpm --filter @chitra/core run test:coverage
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-chart`
 3. Write code and tests
-4. Ensure all tests pass: `pnpm --filter @chitra/core run test`
-5. Ensure typecheck passes: `pnpm --filter @chitra/core run typecheck`
+4. Ensure all tests pass: `pnpm --filter @ifelse.codes/core run test`
+5. Ensure typecheck passes: `pnpm --filter @ifelse.codes/core run typecheck`
 6. Open a PR against `main`
 
 ## Commit Convention
