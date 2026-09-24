@@ -3,7 +3,7 @@
 **Permanent facts only. Reloaded every session.** (Seeded S00 brownfield onboarding, 2026-07-02.)
 
 ## What chitra is
-- **`@chitra/core`** (`packages/core/`, v0.1.0, MIT) — the product: a zero-runtime-dependency
+- **`@ifelse.codes/core`** (`packages/core/`, v0.1.0, MIT) — the product: a zero-runtime-dependency
   TypeScript terminal charting library. "Beautiful visualizations for terminals, agents, and
   modern developer workflows." 20 chart types, 3 renderers (braille/blocks/ascii), 7 themes.
 - Around the lib sits a **Replit-scaffolded full-stack** (all in-scope per founder):
@@ -25,21 +25,21 @@
   `package-lock.json`/`yarn.lock`.
 - Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `lib/*`, `lib/integrations/*`,
   `packages/*`, `scripts`. Internal packages are named `@workspace/*`; the shippable one is
-  `@chitra/core`.
+  `@ifelse.codes/core`.
 - Testing: **Vitest** (`packages/core/tests/`, 23 files, **452 tests**).
 
 ## Commands (verified working)
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @chitra/core run test` | 452 tests (23 files) |
-| `pnpm --filter @chitra/core run test:coverage` | tests + coverage |
-| `pnpm --filter @chitra/core run typecheck` | `tsc --noEmit` on the lib |
+| `pnpm --filter @ifelse.codes/core run test` | 452 tests (23 files) |
+| `pnpm --filter @ifelse.codes/core run test:coverage` | tests + coverage |
+| `pnpm --filter @ifelse.codes/core run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
 | `pnpm run build` | typecheck + `pnpm -r run build` |
 
 ## Conventions & invariants (must never break)
-- **Zero runtime dependencies** in `@chitra/core` — ANSI, braille math, rendering are all
+- **Zero runtime dependencies** in `@ifelse.codes/core` — ANSI, braille math, rendering are all
   self-contained. Never add a runtime dep.
 - **AI-agent output is core**: every chart returns a `ChartResult`
   (`{ render, toString, toPlain, toMarkdown, toJSON }`). `toPlain()` / `toJSON()` +
@@ -194,7 +194,7 @@
   `Paragraph` via a Node sidecar today.
 
 ## S36 extension — deploy unfreeze, GT teeth, release hardened (2026-09-23)
-- **`@chitra/core@0.1.0` is publish-ready but NOT yet on npm.** The publish was
+- **`@ifelse.codes/core@0.1.0` is publish-ready but NOT yet on npm.** The publish was
   attempted and returned `E403 … 2FA or granular token with bypass 2fa required`
   (the supplied token was a *Publish* token, not a *Classic Automation* token).
   Founder **deferred the publish to S37**. Dry-run is green: 38 files, 94.2 kB,
