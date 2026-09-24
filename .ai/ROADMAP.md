@@ -10,6 +10,15 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
+- ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
+  `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
+  so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
+  files and **published**: `@ifelse.codes/core@0.1.0` (38 files / 94.2 kB, tag
+  `latest`); a clean consumer `npm install` verified. Publishing needed npm's
+  **web/passkey 2FA** flow, which npm runs only on a TTY — done inside `tmux`. README
+  install + docs-hero pill made honest; `.ai/GT-REMEDIATIONS.md` row 2 → `DONE`;
+  closeout gates hardened (a `DEFERRED` row needs reason+expiry; the GT no-code
+  offender path is exercised). `v0.1.0` re-cut + tag pushed on the post-merge `main`.
 - ✅ **Session 36 (S36) — close the S35 ground-truth gaps + unfreeze deploy
   (founder-waived multi-story):** **unfroze the live deploy** (S31 order lifted)
   and redeployed the docs site so the S33 `/ai-data` page is live; deleted the
@@ -20,15 +29,14 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   (`.ai/GT-REMEDIATIONS.md` + `check_gt_remediations`, `check_session_coverage`,
   `check_ground_truth_no_code`, and `.ai/hooks/hook-ground-truth-guard.sh`);
   backfilled the S17/S32 session records; made cost tracking carry a measured
-  line. **`@ifelse.codes/core@0.1.0` is publish-ready but the npm publish was
-  deferred to S37** (needs a Classic Automation token — the Publish token
-  returns npm E403 2FA).
-- 🔜 **Next (Session 37 candidates):** **publish `@ifelse.codes/core@0.1.0`**
-  (Classic Automation token), then re-cut + push `v0.1.0`; ship an **MCP server**
-  (the vision is AI-first and the README already advertises a
-  `server.tool("render_chart", …)` handler — nothing ships it yet); a GTM proof
-  pack (benchmarks / token-savings / before-after); flesh out
-  `artifacts/api-server` beyond `/healthz`.
+  line. **`@ifelse.codes/core@0.1.0` publish was deferred to S37** — now **done in
+  S37**.
+- 🔜 **Next (Session 38 candidates):** ship an **MCP server** (the vision is
+  AI-first and the README already advertises a `server.tool("render_chart", …)`
+  handler — nothing ships it yet); a GTM proof pack (benchmarks / token-savings /
+  before-after); flesh out `artifacts/api-server` beyond `/healthz`. Note: the
+  tag-driven CI publish now needs npm **Trusted Publishing (OIDC)** — bypass-2FA
+  tokens are being deprecated.
 - ✅ **Session 35 (S35) — NO-CODE ground-truth (`N % 5 == 0`):** audited vision,
   roadmap, state, knowledge, constraints, constitution, cost. Overall 🟡 —
   direction sound, distribution blocked, governance claims unbacked. Found the
@@ -303,8 +311,8 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   SV-grade upgrade, shared `LineChartModel` + `toSVG()` web renderer, docs SVG
   output, and the terminal dashboard panel (`timestamp`/`status`/`summary`).
 - Flesh out `artifacts/api-server` beyond `/healthz` if the hosted API is pursued.
-- 🔜 Real release **pending (S37)**: `@ifelse.codes/core@0.1.0` is publish-ready; npm
-  publish deferred (needs a Classic Automation token); re-cut + push `v0.1.0` then.
+- ✅ Real release **done (S37)**: `@ifelse.codes/core@0.1.0` is **live on npm**
+  (renamed from the unowned `@chitra` scope); `v0.1.0` tag cut on post-merge `main`.
 - ✅ S05 ground-truth remediation **closed (S36)**: S17/S32 records backfilled;
   closeout-integrity gates added (`check_session_coverage`,
   `check_ground_truth_no_code`, `check_gt_remediations`). S04/S06 (pre-convention)
