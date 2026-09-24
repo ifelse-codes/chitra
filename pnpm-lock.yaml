@@ -138,7 +138,7 @@ importers:
 
   artifacts/chitra-docs:
     dependencies:
-      '@chitra/core':
+      '@ifelse.codes/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
