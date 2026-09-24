@@ -91,7 +91,8 @@
   `tsc --noEmit`.
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S36.
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S36
+  (S36 merged via PR #41, `57a0b13`).
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -192,11 +193,13 @@
   steal; `ansi-to-tui` (official, truecolor) bridges Chitra ANSI → Ratatui
   `Paragraph` via a Node sidecar today.
 
-## S36 extension — first real release, deploy unfreeze, GT teeth (2026-09-23)
-- **`@chitra/core@0.1.0` is published to npm** (`npm publish --access public`,
-  org `chitra` owned by npm user `ifelse.codes`). 38 files, 94.2 kB tarball, dist
-  ESM+CJS+`.d.ts` + README + LICENSE. The S08 `release.yml` now **skips the publish
-  when the version already exists** — a re-pushed tag stays green (idempotent).
+## S36 extension — deploy unfreeze, GT teeth, release hardened (2026-09-23)
+- **`@chitra/core@0.1.0` is publish-ready but NOT yet on npm.** The publish was
+  attempted and returned `E403 … 2FA or granular token with bypass 2fa required`
+  (the supplied token was a *Publish* token, not a *Classic Automation* token).
+  Founder **deferred the publish to S37**. Dry-run is green: 38 files, 94.2 kB,
+  org `chitra` owned by npm user `ifelse.codes`. Then: `npm publish --access
+  public` in `packages/core`, re-cut `v0.1.0` on `main`, push the tag.
 - **Tag hygiene:** the old local `v0.1.0` tag (pointing at a 2026-07-29 commit) was
   deleted; `v0.1.0` is re-cut on the release commit. Never `git push --tags` while a
   stale `v*` exists — `release.yml` publishes on any `v*` push.

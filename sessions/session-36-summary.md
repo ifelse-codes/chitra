@@ -10,7 +10,7 @@ waived (S36 ran in the S35 chat), both recorded in the S36 contract.
 | # | Requirement | Result |
 |---|---|---|
 | 1 | Publish `@chitra/core@0.1.0` to npm | **DEFERRED → S37** (npm E403: needs a Classic Automation token; package publish-ready, dry-run green) |
-| 2 | Resolve the stale `v0.1.0` tag | **SHIPPED** — stale tag deleted (`git tag -d v0.1.0`); re-cut travels with the publish |
+| 2 | Resolve the stale `v0.1.0` tag | **PARTIAL** — stale tag deleted (`git tag -d v0.1.0`); re-cut + push deferred with the publish (req 1) |
 | 3 | Harden `release.yml` (idempotent) | **SHIPPED** — skips publish when the version exists |
 | 4 | Unfreeze + deploy docs | **SHIPPED** — `chitra.iifelse.com` redeployed; 200 + new bundle + `/ai-data` 200 |
 | 5 | Docs-hero pills | **SHIPPED** — `v0.1.0` / `452` (verified in the live bundle) |
@@ -20,9 +20,19 @@ waived (S36 ran in the S35 chat), both recorded in the S36 contract.
 | 9 | Bind GT findings | **SHIPPED** — `.ai/GT-REMEDIATIONS.md` + `check_gt_remediations` |
 | 10 | Make "No code in GT" true | **SHIPPED** — hook + `check_ground_truth_no_code` |
 | 11 | Honest cost tracking | **SHIPPED** — measured line in STATE (cost unmeasured, disclosed) |
-| 12 | S36 artifacts | **SHIPPED** — prompt, verify, demo, summary, review, closeout |
+| 12 | S36 artifacts | **SHIPPED** — prompt, verify, demo, summary (review + closeout are the session-loop gates) |
 
-**11 SHIPPED · 1 DEFERRED (founder) · 0 NOT-BUILT.**
+**10 SHIPPED · 1 PARTIAL (req 2 — re-cut deferred with req 1) · 1 DEFERRED (req 1, founder) · 0 NOT-BUILT.**
+
+## Limits (disclosed)
+
+- Reqs 8–10 add real checks, but the closeout gates are **not wired into CI**
+  (the S35-identified hole persists) and the GT no-code **hook only fires in the
+  Claude harness**; S36 ran in opencode, so the closeout backstop is what applies.
+  `verify-closeout.sh --integrity-only 36` is executed by `verify-session-36.sh`
+  so the gates are shown to run, not merely to exist.
+- `no-stale-v0.1.0-tag` passing means "no dangerous stale tag", **not** that the
+  v0.1.0 tag exists (it doesn't yet — that travels with req 1).
 
 ## Evidence
 
