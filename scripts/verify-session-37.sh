@@ -40,6 +40,7 @@ LEDGER=.ai/GT-REMEDIATIONS.md
 run_check "core-pkg-renamed"       bash -c "grep -q '\"name\": \"@ifelse.codes/core\"' $CORE_PKG"
 run_check "docs-dep-renamed"       bash -c "grep -q '\"@ifelse.codes/core\": \"workspace:\\*\"' $DOCS_PKG"
 run_check "release-uses-new-name"  bash -c "grep -q '@ifelse.codes/core' $REL"
+run_check "release-builds-core"    bash -c "grep -q 'Build @ifelse.codes/core (docs imports it)' $REL"
 run_check "no-stale-pkg-name"      bash -c "! rg -q '@chitra/core' $CORE_PKG $DOCS_PKG pnpm-lock.yaml \
       artifacts/chitra-docs/src artifacts/chitra-docs/scripts .github/workflows $README"
 run_check "npm-published-0.1.0"    bash -c "[ \"\$(npm view @ifelse.codes/core@0.1.0 version 2>/dev/null)\" = '0.1.0' ]"

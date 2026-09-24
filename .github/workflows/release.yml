@@ -56,6 +56,10 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build lib type declarations
         run: pnpm run typecheck:libs
+      # docs imports @ifelse.codes/core, which resolves through dist/ (gitignored);
+      # without this a fresh clone fails typecheck with TS2307 (mirrors ci.yml).
+      - name: Build @ifelse.codes/core (docs imports it)
+        run: pnpm --filter @ifelse.codes/core run build
       - name: Typecheck
         run: pnpm --filter @workspace/chitra-docs run typecheck
       - name: Build
