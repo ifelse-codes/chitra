@@ -20,10 +20,10 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   (`.ai/GT-REMEDIATIONS.md` + `check_gt_remediations`, `check_session_coverage`,
   `check_ground_truth_no_code`, and `.ai/hooks/hook-ground-truth-guard.sh`);
   backfilled the S17/S32 session records; made cost tracking carry a measured
-  line. **`@chitra/core@0.1.0` is publish-ready but the npm publish was
+  line. **`@ifelse.codes/core@0.1.0` is publish-ready but the npm publish was
   deferred to S37** (needs a Classic Automation token — the Publish token
   returns npm E403 2FA).
-- 🔜 **Next (Session 37 candidates):** **publish `@chitra/core@0.1.0`**
+- 🔜 **Next (Session 37 candidates):** **publish `@ifelse.codes/core@0.1.0`**
   (Classic Automation token), then re-cut + push `v0.1.0`; ship an **MCP server**
   (the vision is AI-first and the README already advertises a
   `server.tool("render_chart", …)` handler — nothing ships it yet); a GTM proof
@@ -50,7 +50,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   (drift guard), facts (20/3/7/0/452) cross-checked against source, stale-claim
   guards; demo exit 0. Cold review ACCEPT **6/6** after three rounds (footer-only
   drift check → whole-block; missing npm badge → added; root-only LICENSE →
-  package LICENSE), attested `60627a87…d231067`. Disclosed: `@chitra/core` is not
+  package LICENSE), attested `60627a87…d231067`. Disclosed: `@ifelse.codes/core` is not
   on npm yet (README says so). PR #40.
 - ✅ **Session 33 (S33) — release readiness (founder-waived multi-story):**
   Playwright browser QA wired into CI; candle ties-first exclusivity test
@@ -296,14 +296,14 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   accent only on the peak). Docs site updated (Cascadia Mono font stack for
   braille), handoff file at `scripts/ring-polish-handoff.mjs`, live preview at
   `/tmp/ring-lab/index.html`.
-- ✅ **S06** — Real publishable `dist/` build for `@chitra/core` (ESM + CJS + `.d.ts`, zero deps).
+- ✅ **S06** — Real publishable `dist/` build for `@ifelse.codes/core` (ESM + CJS + `.d.ts`, zero deps).
 - ✅ **S07** — CI workflows (`.github/workflows/ci.yml`: core · docs · chart-drift gates, pinned toolchain).
 - ✅ **Session 08 (S08)** — release.yml publish workflow. v* tag push → re-runs S07
   gates → `pnpm publish --access public` with `NODE_AUTH_TOKEN`. Plus line-chart
   SV-grade upgrade, shared `LineChartModel` + `toSVG()` web renderer, docs SVG
   output, and the terminal dashboard panel (`timestamp`/`status`/`summary`).
 - Flesh out `artifacts/api-server` beyond `/healthz` if the hosted API is pursued.
-- 🔜 Real release **pending (S37)**: `@chitra/core@0.1.0` is publish-ready; npm
+- 🔜 Real release **pending (S37)**: `@ifelse.codes/core@0.1.0` is publish-ready; npm
   publish deferred (needs a Classic Automation token); re-cut + push `v0.1.0` then.
 - ✅ S05 ground-truth remediation **closed (S36)**: S17/S32 records backfilled;
   closeout-integrity gates added (`check_session_coverage`,

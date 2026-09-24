@@ -15,7 +15,7 @@ S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
   link is live.
 - **Docs-hero pills honest (S36):** `App.tsx` → `v0.1.0` (dropped "— stable"),
   `134` → `452`.
-- **`@chitra/core` publish-ready (S36):** dry-run green — `@chitra/core@0.1.0`,
+- **`@ifelse.codes/core` publish-ready (S36):** dry-run green — `@ifelse.codes/core@0.1.0`,
   38 files, 94.2 kB, dist ESM+CJS+`.d.ts` + README + LICENSE. **Not on npm yet**
   (publish deferred — see Broken).
 - **Release workflow idempotent (S36):** `release.yml` skips the publish when the
@@ -31,13 +31,13 @@ S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
   (`sessions/session-17-summary.md`, `session-32-summary.md` + their prompts).
 - **KNOWLEDGE.md corrected (S36):** one canonical test count (**452**), 23 test
   files, CI Node 26, `main` = S00–S36, dist-built, north-star wording.
-- **`@chitra/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`.
-  LOCKED families S09–S28. `pnpm --filter @chitra/core run test` — **452/452**;
+- **`@ifelse.codes/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`.
+  LOCKED families S09–S28. `pnpm --filter @ifelse.codes/core run test` — **452/452**;
   typecheck exit 0.
 - `scripts/verify-session-36.sh` + `scripts/demo-session-36.sh` (S36 gates).
 
 ## What Is Broken / Incomplete
-- **npm publish DEFERRED to S37 (founder):** `@chitra/core` is not on npm. The
+- **npm publish DEFERRED to S37 (founder):** `@ifelse.codes/core` is not on npm. The
   npm **Publish** token returns `E403 … 2FA or granular token with bypass 2fa
   required`; a **Classic Automation token** (or Granular with Bypass 2FA) is
   needed. Then: publish, re-cut `v0.1.0` on `main`, push the tag.
@@ -65,7 +65,7 @@ S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
 
 ## What Is In Progress
 - S36: commit + PR `session-36-close-audit-gaps` → `main`. Then closeout.
-  **Next (S37):** publish `@chitra/core@0.1.0` (Classic Automation token),
+  **Next (S37):** publish `@ifelse.codes/core@0.1.0` (Classic Automation token),
   re-cut + push `v0.1.0`; then MCP server, GTM proof pack, api-server.
   See [[roadmap]].
 
