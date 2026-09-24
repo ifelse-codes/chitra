@@ -42,11 +42,11 @@ Atomic commits ≤3 files; branch `session-37-*`; PR to `main`; founder approval
 token before commits. **Push the branch before merging the PR** (S36 miss).
 
 ## Execution
-- step 1 — done: <sha>
-- step 2 — done: <sha>
-- step 3 — done: <sha>
-- step 4 — done: <sha>
-- step 5 — done: <sha>
-- step 6 — done: <sha>
-- step 7 — done: <sha>
-- step 8 — done: <sha>
+- step 1 — done: published `@ifelse.codes/core@0.1.0` (package renamed from `@chitra/core` at the founder's direction; see `sessions/session-37-summary.md`)
+- step 2 — deferred: npm is deprecating bypass-2FA tokens for direct publishing; a future CI publish needs **Trusted Publishing (OIDC)**
+- step 3 — done: `npm view @ifelse.codes/core@0.1.0` → `0.1.0`
+- step 4 — pending: re-cut + push `v0.1.0` on the post-merge `main` HEAD
+- step 5 — done: commit `230e90c` (README install + hero pill)
+- step 6 — done: commit `e7c2857` (ledger row 2 DONE + `.ai/` sync → 37)
+- step 7 — done: commit `0555a23` (DEFERRED reason+expiry; GT offender path exercised)
+- step 8 — done: verify/demo/summary + cold review (this session)
