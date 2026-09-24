@@ -1,23 +1,22 @@
 # Current Task Pointer
 
-## Session 36 — close the S35 ground-truth gaps + unfreeze deploy — DONE (npm deferred)
+## Session 37 — publish `@ifelse.codes/core@0.1.0` — DONE (tag/PR to go)
 
-- **Branch:** `session-36-close-audit-gaps` (close on branch; PR to `main` to go)
-- **Contract:** `prompts/36-task-close-audit-gaps.md` (12 numbered requirements).
-  Founder in-chat direction: "target session 36 and fill all the issues" from the
-  S35 ground-truth audit; run the real release + unfreeze. Founder waived
-  one-session-per-chat (S36 runs in the S35 chat).
-- **Delivery:** docs-hero pills honest (`v0.1.0` / `452`); KNOWLEDGE facts fixed;
-  ROADMAP S35/S36 + MCP item + S05 debt closed; GT ledger + 3 closeout gates +
-  no-code-in-GT hook; S17/S32 records backfilled; `release.yml` idempotent; live
-  deploy **unfrozen** and verified (`chitra.iifelse.com` 200, `/ai-data` 200).
-- **Deferred:** npm publish of `@ifelse.codes/core@0.1.0` → **S37** (needs a Classic
-  Automation token; the Publish token returns E403 2FA). Stale `v0.1.0` tag
-  deleted; re-cut with the publish.
-- Verify: `scripts/verify-session-36.sh`. Demo: `scripts/demo-session-36.sh`.
-  Summary: `sessions/session-36-summary.md`; review: `sessions/session-36-review.md`.
-- **To go:** commit + PR to `main`; then S37 release.
+- **Branch:** `session-37-publish-v0.1.0` (close on branch; PR to `main` to go).
+- **Contract:** `prompts/37-task-publish-v0.1.0.md`. Founder in-chat direction:
+  close the S36-deferred npm publish.
+- **Delivery:** renamed `@chitra/core` → `@ifelse.codes/core` across 26 live files
+  (frozen `sessions/` + old `prompts/` untouched); **published
+  `@ifelse.codes/core@0.1.0`** to npm (web/passkey 2FA via `tmux`); consumer install
+  verified; README install line + hero pill honest; `GT-REMEDIATIONS` row 2 → `DONE`;
+  closeout gates hardened (a `DEFERRED` row needs reason+expiry; the GT no-code
+  offender path is exercised).
+- **Root cause:** the token needed the web/passkey TTY flow, and `@chitra` was an npm
+  org the account does not own — hence the rename to the `@ifelse.codes` scope.
+- Verify: `scripts/verify-session-37.sh`. Demo: `scripts/demo-session-37.sh`.
+  Summary: `sessions/session-37-summary.md`; review: `sessions/session-37-review.md`.
+- **To go:** commit + PR to `main`; then re-cut + push `v0.1.0` on the post-merge
+  `main` HEAD.
 
-**Next session (S37):** publish `@ifelse.codes/core@0.1.0` (Classic Automation token),
-re-cut + push `v0.1.0`; then MCP server / GTM proof pack / api-server. Open in a
+**Next session (S38):** MCP server / GTM proof pack / `artifacts/api-server`. Open in a
 **new chat**.
