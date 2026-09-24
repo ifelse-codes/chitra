@@ -60,7 +60,7 @@ run_check "cost-measured"         bash -c "grep -qi 'unmeasured' .ai/STATE.md ||
 run_check "prompt-exists"         test -f prompts/36-task-close-audit-gaps.md
 run_check "core-tests-452"        bash -c "pnpm --filter @chitra/core run test 2>&1 | grep -qE 'Tests +452 passed'"
 run_check "core-typecheck"        pnpm --filter @chitra/core run typecheck
-run_check "git-closeout-integrity" bash -c "git merge-base --is-ancestor main HEAD"
+run_check "git-closeout-integrity" bash -c "git merge-base main HEAD >/dev/null"
 run_check "branch-is-s36"         bash -c '[[ "$(git rev-parse --abbrev-ref HEAD)" == session-36-* ]]'
 
 ( cd ".ai/verify/session-36" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
