@@ -1,4 +1,4 @@
-// Build the publishable dist/ for @chitra/core.
+// Build the publishable dist/ for @ifelse.codes/core.
 // Emits single-file ESM + CJS bundles via esbuild; declarations come from tsc
 // (see the build script in package.json). The library has zero runtime deps,
 // so bundling is fully self-contained.
