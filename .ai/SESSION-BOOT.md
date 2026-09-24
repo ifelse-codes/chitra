@@ -9,15 +9,16 @@
 
 ## Repo State Snapshot
 - `.ai/SESSION` = 36.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S34 (PR #40 merged,
-  `5b1d13d`). S36 is on its branch pending PR.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S36 (PR #41 merged,
+  `57a0b13`).
 - **S36 delivery**: docs-hero pills honest (`v0.1.0` / `452`); `.ai/KNOWLEDGE.md`
   facts corrected; `.ai/ROADMAP.md` S35+S36 + MCP item + S05 debt closed;
   `.ai/GT-REMEDIATIONS.md` ledger + `verify-closeout.sh` gates
   (`check_gt_remediations`, `check_session_coverage`, `check_ground_truth_no_code`);
   new `.ai/hooks/hook-ground-truth-guard.sh` wired into `.claude/settings.json`;
-  S17/S32 session records backfilled; `release.yml` made idempotent.
-  `scripts/verify-session-36.sh` + `demo-session-36.sh` added.
+  S17/S32 session records backfilled; `release.yml` made idempotent;
+  `scripts/verify-session-36.sh` + `demo-session-36.sh` added; cold fidelity
+  review **ACCEPT** (round 3, attested) + closeout 16/16 green (crew waived).
 - **Live deploy UNFROZEN** (S31 order lifted): `chitra.iifelse.com` redeployed;
   verified 200, new bundle, `/ai-data` 200.
 - **npm publish DEFERRED to S37 (founder):** the npm Publish token returns

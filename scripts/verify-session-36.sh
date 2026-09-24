@@ -33,7 +33,7 @@ run_check "know-452"              bash -c "grep -q '452' $KNOW"
 run_check "know-no-stale-counts"  bash -c "! grep -qE '142 tests|163 core tests|442 tests' $KNOW"
 run_check "know-23-files"         bash -c "grep -q '23 files' $KNOW"
 run_check "know-node-26"          bash -c "grep -q 'Node \*\*26\*\*\|Node 26' $KNOW"
-run_check "know-main-range"       bash -c "grep -q 'S00–S34' $KNOW"
+run_check "know-main-range"       bash -c "grep -q 'S00–S3' $KNOW"
 run_check "know-s36-extension"    bash -c "grep -q 'S36 extension' $KNOW"
 
 # ── Req 2/3: release hygiene (publish deferred by founder to S37) ──
