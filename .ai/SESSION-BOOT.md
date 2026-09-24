@@ -26,6 +26,6 @@
   `v0.1.0` tag was deleted; no `v*` tag exists. Package is publish-ready.
 
 ## Next Session
-- **Number:** 37 — publish `@chitra/core@0.1.0` (Classic Automation token),
+- **Number:** 37 — publish `@ifelse.codes/core@0.1.0` (Classic Automation token),
   re-cut + push `v0.1.0`; then MCP server / GTM proof pack / api-server.
 - Open in a **new chat** (one session per chat).

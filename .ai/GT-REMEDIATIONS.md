@@ -12,7 +12,7 @@
 | # | Finding (S35) | Status | Evidence |
 |---|---|---|---|
 | 1 | Stale local `v0.1.0` tag on the 2026-07-29 commit; push would publish July code | DONE | stale tag deleted (`git tag -d v0.1.0`); `release.yml` made idempotent. Re-cut of `v0.1.0` travels with the publish (item 2) |
-| 2 | `@chitra/core` not on npm (E404); distribution stalled | DEFERRED | founder deferred the publish to S37 (needs a **Classic Automation token** or Granular-with-Bypass-2FA; the Publish token given returns npm E403 "2FA … required"). Package is publish-ready: dry-run green, 38 files / 94.2 kB |
+| 2 | `@ifelse.codes/core` not on npm (E404); distribution stalled | DEFERRED | founder deferred the publish to S37 (needs a **Classic Automation token** or Granular-with-Bypass-2FA; the Publish token given returns npm E403 "2FA … required"). Package is publish-ready: dry-run green, 38 files / 94.2 kB |
 | 3 | Docs-hero pills stale (`v0.1.0 — stable`, `134`) | DONE | `App.tsx` → `v0.1.0` / `452`; site redeployed and verified in the live bundle |
 | 4 | KNOWLEDGE.md false facts (142/163/442, 7 files, dist, CI, main range) | DONE | `.ai/KNOWLEDGE.md` corrected; one canonical count (452) |
 | 5 | STATE/SESSION-BOOT/TASK a merge behind (S34 PR #40) | DONE | `.ai/` synced to S36 |
