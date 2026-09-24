@@ -6,6 +6,7 @@
 - **`@ifelse.codes/core`** (`packages/core/`, v0.1.0, MIT) — the product: a zero-runtime-dependency
   TypeScript terminal charting library. "Beautiful visualizations for terminals, agents, and
   modern developer workflows." 20 chart types, 3 renderers (braille/blocks/ascii), 7 themes.
+  **Published on npm as `@ifelse.codes/core@0.1.0` (S37, tag `latest`).**
 - Around the lib sits a **Replit-scaffolded full-stack** (all in-scope per founder):
   - `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4 + shadcn/ui docs/marketing site
     (renders chitra output; `src/data/charts.ts`, `src/data/ansi-charts.json`).
@@ -92,7 +93,7 @@
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
 - Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S36
-  (S36 merged via PR #41, `57a0b13`).
+  (latest merge PR #42, `085425f`); S37 (`session-37-publish-v0.1.0`) is pending merge.
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -194,12 +195,12 @@
   `Paragraph` via a Node sidecar today.
 
 ## S36 extension — deploy unfreeze, GT teeth, release hardened (2026-09-23)
-- **`@ifelse.codes/core@0.1.0` is publish-ready but NOT yet on npm.** The publish was
-  attempted and returned `E403 … 2FA or granular token with bypass 2fa required`
-  (the supplied token was a *Publish* token, not a *Classic Automation* token).
-  Founder **deferred the publish to S37**. Dry-run is green: 38 files, 94.2 kB,
-  org `chitra` owned by npm user `ifelse.codes`. Then: `npm publish --access
-  public` in `packages/core`, re-cut `v0.1.0` on `main`, push the tag.
+- **`@ifelse.codes/core@0.1.0` is publish-ready but was NOT on npm in S36.** The publish
+  was attempted and returned `E403 … 2FA … required` (the supplied token was not a
+  bypass-2FA token). Founder **deferred the publish to S37** (completed there — see the
+  S37 extension). Dry-run green: 38 files, 94.2 kB. **[Corrected in S37: the `@chitra`
+  scope is NOT owned by npm user `ifelse.codes`; the package was renamed to
+  `@ifelse.codes/core` and published.]**
 - **Tag hygiene:** the old local `v0.1.0` tag (pointing at a 2026-07-29 commit) was
   deleted; `v0.1.0` is re-cut on the release commit. Never `git push --tags` while a
   stale `v*` exists — `release.yml` publishes on any `v*` push.
@@ -215,3 +216,23 @@
   harness; opencode relies on the closeout backstop.
 - **One canonical test count: 452.** If a session changes it, update it in one
   place and let `verify-session-34.sh#test-count-matches` guard the README badge.
+
+## S37 extension — package published to npm (2026-09-24)
+- **`@ifelse.codes/core@0.1.0` is LIVE on npm** (38 files / 94.2 kB, dist-tag `latest`;
+  clean consumer `npm install` verified). The package was **renamed** from `@chitra/core`
+  because the `@chitra` npm **org is not owned by the account** (`npm org ls chitra` →
+  403; unscoped `chitra` was taken). `@ifelse.codes` is the founder's user scope (free).
+  26 live files renamed; frozen `sessions/` + old `prompts/` left as history.
+- **Publishing needs a TTY + passkey.** npm's `otplease` only runs the web-2FA flow when
+  `process.stdin.isTTY && process.stdout.isTTY` (`npm/lib/utils/auth.js`); a non-TTY shell
+  gets `EOTP` with a MASKED url. Run `npm publish` inside `tmux`, press Enter, approve the
+  passkey. (Passkey 2FA cannot produce a 6-digit OTP.)
+- **Bypass-2FA tokens are being deprecated** by npm for direct publishing — a future
+  tag-driven CI publish needs npm **Trusted Publishing (OIDC)**, not `NODE_AUTH_TOKEN`.
+  `release.yml` is idempotent, so the publish job skips when the version already exists.
+- **Publish propagation lag:** the registry `PUT` returned 200 and the tarball was live
+  immediately, but the packument (metadata) 404'd for ~6 minutes; the search index had it
+  first. Re-query — do not re-publish.
+- **Closeout gates hardened (S37):** `check_gt_remediations` requires a `DEFERRED` row's
+  Evidence to carry a reason AND an expiry; `verify-closeout.sh --gt-no-code-only N`
+  exercises the GT no-code offender path (S36-review weakness).

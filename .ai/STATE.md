@@ -1,51 +1,49 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S36 done, 2026-09-23.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S37 done, 2026-09-24.)
 
 ## Active Branch
-`session-36-close-audit-gaps` — S36 delivery on branch: closed the S35
-ground-truth gaps + unfroze the live deploy. npm publish **founder-deferred to
-S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
+`session-37-publish-v0.1.0` — S37 delivery on branch: the S36-deferred npm publish is
+**done** — the package was renamed to the founder's scope and published. PR to `main`
+to go. **Live deploy remains UNFROZEN (S31 order lifted).**
 
 ## What Currently Works (observed, not claimed)
-- **Live docs site (S36, unfrozen):** `chitra.iifelse.com` redeployed via
-  `wrangler pages deploy dist/public --project-name=chitra --branch=main`.
-  Verified: prod 200, the new bundle `assets/index-Cu2gqnLT.js` serves, hero
-  shows `v0.1.0` + `452`, and `/ai-data` (S33 page) returns 200 — the S34 README
-  link is live.
-- **Docs-hero pills honest (S36):** `App.tsx` → `v0.1.0` (dropped "— stable"),
-  `134` → `452`.
-- **`@ifelse.codes/core` publish-ready (S36):** dry-run green — `@ifelse.codes/core@0.1.0`,
-  38 files, 94.2 kB, dist ESM+CJS+`.d.ts` + README + LICENSE. **Not on npm yet**
-  (publish deferred — see Broken).
-- **Release workflow idempotent (S36):** `release.yml` skips the publish when the
-  version already exists, so a re-pushed `v*` tag stays green.
-- **Tag hygiene (S36):** the stale local `v0.1.0` tag (2026-07-29 commit) was
-  **deleted**; no `v*` tag exists now.
-- **Ground-truth teeth (S36):** `.ai/GT-REMEDIATIONS.md` ledger +
-  `verify-closeout.sh#check_gt_remediations` (rows must be DONE/WAIVED/DEFERRED);
-  `#check_session_coverage` (a merged `session-NN-*` branch ≥ S17 must have a
-  summary); `#check_ground_truth_no_code`; `.ai/hooks/hook-ground-truth-guard.sh`
-  wired into `.claude/settings.json`.
-- **S05 closeout debt closed (S36):** S17 + S32 session records backfilled
-  (`sessions/session-17-summary.md`, `session-32-summary.md` + their prompts).
-- **KNOWLEDGE.md corrected (S36):** one canonical test count (**452**), 23 test
-  files, CI Node 26, `main` = S00–S36, dist-built, north-star wording.
-- **`@ifelse.codes/core` library**: 20 charts, 3 renderers, 7 themes, `ChartResult`.
-  LOCKED families S09–S28. `pnpm --filter @ifelse.codes/core run test` — **452/452**;
-  typecheck exit 0.
-- `scripts/verify-session-36.sh` + `scripts/demo-session-36.sh` (S36 gates).
+- **`@ifelse.codes/core` is LIVE on npm (S37):** `@ifelse.codes/core@0.1.0`, 38 files /
+  94.2 kB, dist-tag `latest`. Verified independently: `npm view @ifelse.codes/core
+  version` → `0.1.0`; a clean `npm install @ifelse.codes/core@0.1.0` in `/tmp` added the
+  package; registry packument `200`; tarball `200`. The S36 `DEFERRED` item is closed.
+- **Package renamed (S37):** `@chitra/core` → `@ifelse.codes/core` across 26 live files
+  (pkg identity, workspace deps + lockfile, docs imports/scripts, CI workflows, README/
+  CONTRIBUTING/replit, tooling scripts, `.ai/`). Frozen `sessions/` + old `prompts/` are
+  left as history. Post-rename: core **452/452**, typecheck, build, docs typecheck,
+  `gen:charts:check` all green.
+- **Publish unblock mechanism (S37, reusable):** publishing needed npm's web/passkey
+  2FA flow, which `npm` only runs when stdin+stdout are TTYs — run `npm publish` inside
+  `tmux`, press Enter, approve the passkey. (A plain non-TTY shell gets `EOTP` with a
+  masked URL.)
+- **Docs honest (S37):** README install section is a real install (no "not on npm yet");
+  docs-hero pill reads `v0.1.0 · npm`.
+- **Ground-truth teeth hardened (S37, per S36 review):** `check_gt_remediations` now
+  requires a `DEFERRED` row's Evidence to carry a reason **and** an expiry (date or the
+  word "expiry"); `verify-closeout.sh --gt-no-code-only N` exercises the GT no-code
+  **offender path** (proven: on this branch it blocks with the code-file list).
+- **Live docs site:** `chitra.iifelse.com` (S36 redeployed; `/ai-data` live).
+- **`@ifelse.codes/core` library:** 20 charts, 3 renderers, 7 themes, `ChartResult`;
+  LOCKED families S09–S28. `pnpm --filter @ifelse.codes/core run test` — **452/452**.
+- **Release workflow** `release.yml` idempotent (publish job skips when the version
+  exists); **no `v*` tag exists yet** (re-cut `v0.1.0` with the post-merge main).
 
 ## What Is Broken / Incomplete
-- **npm publish DEFERRED to S37 (founder):** `@ifelse.codes/core` is not on npm. The
-  npm **Publish** token returns `E403 … 2FA or granular token with bypass 2fa
-  required`; a **Classic Automation token** (or Granular with Bypass 2FA) is
-  needed. Then: publish, re-cut `v0.1.0` on `main`, push the tag.
-- `v0.1.0` tag does not exist (deleted as stale; re-cut with the publish).
-- **S34 README install line** still says "not on npm yet" — true until S37.
+- **`v0.1.0` tag not cut** — re-cut on the post-merge `main` HEAD, then push (release.yml
+  is idempotent, so the publish job skips and stays green).
+- **CI publishing needs a new mechanism:** npm is **deprecating bypass-2FA tokens** for
+  direct publishing; a *future* version's tag-driven publish needs npm **Trusted
+  Publishing (OIDC)**, not a long-lived `NODE_AUTH_TOKEN`.
+- **No MCP server ships** (README advertises the handler; roadmap item).
 - `artifacts/api-server` exposes only `/healthz`.
-- No MCP server ships (README advertises the handler; roadmap item added).
 - GTM proof pack (benchmarks / token-savings) and pricing story still to build.
+- Frozen `sessions/` + old `prompts/` + old `scripts/verify-session-*.sh` still name
+  `@chitra/core` (history; not re-run).
 - `pnpm run lint` unrunnable — eslint not installed (pre-existing).
 
 ## Milestones done
@@ -60,22 +58,19 @@ S37**. PR to `main` to go. **Live deploy is UNFROZEN (S31 order lifted).**
   **S28** sparkline · **S29** family-wide footer B-diet+ · **S30** docs live ·
   **S31** antra atoms + hero rotation + wall fix · **S32** wall playbook ·
   **S33** release readiness · **S34** GTM README + MIT LICENSE ·
-  **S35** NO-CODE ground-truth · **S36** S35 gaps closed + deploy unfrozen
-  (npm publish deferred).
+  **S35** NO-CODE ground-truth · **S36** S35 gaps closed + deploy unfrozen ·
+  **S37** package renamed + **published to npm**.
 
 ## What Is In Progress
-- S36: commit + PR `session-36-close-audit-gaps` → `main`. Then closeout.
-  **Next (S37):** publish `@ifelse.codes/core@0.1.0` (Classic Automation token),
-  re-cut + push `v0.1.0`; then MCP server, GTM proof pack, api-server.
-  See [[roadmap]].
+- S37: commit + PR `session-37-publish-v0.1.0` → `main`; then re-cut + push `v0.1.0`.
+  **Next (S38):** MCP server, GTM proof pack, api-server. See [[roadmap]].
 
 ## Cost Tracking
-- S36 measured: one opencode session — docs honesty (1 file), KNOWLEDGE/ROADMAP/
-  STATE sync, 1 new hook + 3 closeout gates, S17/S32 backfill (4 files), S36
-  prompt/verify/demo/summary/review, one **live Cloudflare Pages deploy**, and
-  release hardening. Token/`$` cost **unmeasured** (billed to the founder's
-  opencode plan). npm publish deferred, so no registry cost this session.
-- Prior: S20 founder $20/mo plan; S21–S28 single ZCode chats; S29 3 build + 2
-  cold reviews; S30 ops deploy + 2 cold reviews; S31 1 recon + 2 cold reviews;
-  S32 knowledge-only; S33 four stories + 1 cold review; S34 one story + 4 cold
-  reviews, approval-token gated.
+- S37 measured: one opencode session — a 26-file rename (10 atomic commits), one **real
+  npm publish** (web/passkey via tmux), README/hero honesty, ledger row 2 → DONE, two
+  closeout-gate hardenings, and S37 artifacts. Token/`$` cost **unmeasured** (billed to
+  the founder's opencode plan). npm publish cost: $0 (public package).
+- Prior: S20 founder $20/mo plan; S21–S28 single ZCode chats; S29 3 build + 2 cold
+  reviews; S30 ops deploy + 2 cold reviews; S31 1 recon + 2 cold reviews; S32
+  knowledge-only; S33 four stories + 1 cold review; S34 one story + 4 cold reviews,
+  approval-token gated; S35 NO-CODE audit; S36 docs/gates + live deploy (npm deferred).
