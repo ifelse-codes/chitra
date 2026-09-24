@@ -20,6 +20,10 @@
           {
             "command": "bash \"$CLAUDE_PROJECT_DIR/.ai/hooks/hook-copilot-loader.sh\"",
             "type": "command"
+          },
+          {
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.ai/hooks/hook-ground-truth-guard.sh\"",
+            "type": "command"
           }
         ],
         "matcher": "Edit|Write|MultiEdit"

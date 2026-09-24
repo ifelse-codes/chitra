@@ -1,29 +1,30 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 34 — DONE (code + verify green + cold ACCEPT 6/6 + closeout)
-- **Type:** CODE — GTM README (one story: the GitHub front door)
-- **Branch:** `session-34-gtm-readme` (close on branch; main untouched until PR #40 merges)
+- **Number:** 36 — DONE (code + deploy + verify green; npm publish deferred)
+- **Type:** CODE — close the S35 ground-truth gaps + unfreeze the live deploy
+  (founder-waived multi-story; one-session-per-chat waived in-chat)
+- **Branch:** `session-36-close-audit-gaps` (close on branch; PR to `main` to go)
 - **Date last updated:** 2026-09-23
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 34.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S33 (PR #39 merged
-  S33 release readiness). PR **#40** carries S34.
-- **S34 delivery**: new root `README.md` (214 lines) — positioning line,
-  badges, real library renders, AI-builder lane first, terminal lane second,
-  gallery + docs links; `LICENSE` (MIT) at root **and** `packages/core/LICENSE`
-  (fixes the package's unresolved `files: ["LICENSE"]` publish path).
-  `scripts/verify-session-34.sh` 39/39 ALL GREEN (embedded renders regenerated
-  and byte-compared whole-block — drift guard); `scripts/demo-session-34.sh`
-  exit 0. Cold ACCEPT 6/6 after three review rounds (footer-only check →
-  whole-block; missing npm badge → added; root-only LICENSE → package LICENSE);
-  attested `60627a87…d231067`. Live deploy still FROZEN (S31 order).
-- **`@chitra/core` is NOT on npm** (404) — the README Install section carries a
-  visible "not on npm yet — publishing" status line.
+- `.ai/SESSION` = 36.
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S34 (PR #40 merged,
+  `5b1d13d`). S36 is on its branch pending PR.
+- **S36 delivery**: docs-hero pills honest (`v0.1.0` / `452`); `.ai/KNOWLEDGE.md`
+  facts corrected; `.ai/ROADMAP.md` S35+S36 + MCP item + S05 debt closed;
+  `.ai/GT-REMEDIATIONS.md` ledger + `verify-closeout.sh` gates
+  (`check_gt_remediations`, `check_session_coverage`, `check_ground_truth_no_code`);
+  new `.ai/hooks/hook-ground-truth-guard.sh` wired into `.claude/settings.json`;
+  S17/S32 session records backfilled; `release.yml` made idempotent.
+  `scripts/verify-session-36.sh` + `demo-session-36.sh` added.
+- **Live deploy UNFROZEN** (S31 order lifted): `chitra.iifelse.com` redeployed;
+  verified 200, new bundle, `/ai-data` 200.
+- **npm publish DEFERRED to S37 (founder):** the npm Publish token returns
+  `E403 … 2FA required`; a **Classic Automation token** is needed. The stale
+  `v0.1.0` tag was deleted; no `v*` tag exists. Package is publish-ready.
 
 ## Next Session
-- **Number:** 35 — **NO-CODE ground-truth** (`N % 5 == 0`): audit vision +
-  roadmap + rules + constitution + state + cost. No code, no commits, no PRs.
-  Output: `sessions/session-35-ground-truth.md`.
+- **Number:** 37 — publish `@chitra/core@0.1.0` (Classic Automation token),
+  re-cut + push `v0.1.0`; then MCP server / GTM proof pack / api-server.
 - Open in a **new chat** (one session per chat).
