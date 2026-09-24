@@ -1,15 +1,15 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 37 — DONE (published `@ifelse.codes/core@0.1.0`; tag + PR to go)
+- **Number:** 37 — DONE (published `@ifelse.codes/core@0.1.0`; merged)
 - **Type:** CODE — publish the S36-deferred npm package under a scope the account owns
-- **Branch:** `session-37-publish-v0.1.0` (close on branch; PR to `main` to go)
+- **Branch:** `session-37-publish-v0.1.0` (merged via PR #43)
 - **Date last updated:** 2026-09-24
 
 ## Repo State Snapshot
 - `.ai/SESSION` = 37.
-- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S36 (PR #42 merged,
-  `085425f`).
+- Remote: `github.com/ifelse-codes/chitra`. `main` has S00–S37 (PR #43 merged,
+  `fd8a96e`); the `v0.1.0` tag sits on `main` HEAD and the Release workflow is green.
 - **S37 delivery**: renamed `@chitra/core` → `@ifelse.codes/core` across 26 live
   files (frozen `sessions/` + old `prompts/` left as history) and **published to
   npm**: `@ifelse.codes/core@0.1.0`, 38 files / 94.2 kB, dist-tag `latest`;
