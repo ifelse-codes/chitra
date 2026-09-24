@@ -698,6 +698,22 @@ check_gt_remediations() {
   bad "$NAME"
 }
 
+# Focused entry point: run ONLY the S36 integrity gates (coverage + GT no-code +
+# GT remediations). `--integrity-only [N]`. Proves the gates EXECUTE, not just exist.
+if [ "${1:-}" = "--integrity-only" ]; then
+  if [ -n "${2:-}" ]; then N="$((10#$2))"; else check_session_file; fi
+  check_session_coverage
+  check_ground_truth_no_code
+  check_gt_remediations
+  echo ""
+  echo "=== S36 integrity gates (N=${N:-?}) ==="
+  for r in "${RESULTS[@]}"; do echo "$r"; done
+  cat "$ARTIFACTS/merged-sessions-have-records.log" 2>/dev/null || true
+  cat "$ARTIFACTS/ground-truth-no-code.log" 2>/dev/null || true
+  cat "$ARTIFACTS/gt-remediations-dispositioned.log" 2>/dev/null || true
+  if [ "$FAIL" -eq 0 ]; then echo "INTEGRITY: PASS"; exit 0; else echo "INTEGRITY: FAIL"; exit 1; fi
+fi
+
 check_session_file
 check_required_files
 check_session_boot
