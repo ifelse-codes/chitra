@@ -1,7 +1,7 @@
 name: CI
 
 # Session 07 — the gates that must stay green (see .ai/ROADMAP.md guardrails):
-#   core:  @chitra/core test (116) + typecheck + dist build (ESM + CJS + .d.ts)
+#   core:  @ifelse.codes/core test (116) + typecheck + dist build (ESM + CJS + .d.ts)
 #   docs:  @workspace/chitra-docs typecheck + build
 #   drift: generated chart previews match the spec source (gen:charts:check)
 # Toolchain is pinned to the versions proven green locally (Node 26, pnpm 9.12.3,
@@ -36,11 +36,11 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
       - name: Test
-        run: pnpm --filter @chitra/core run test
+        run: pnpm --filter @ifelse.codes/core run test
       - name: Typecheck
-        run: pnpm --filter @chitra/core run typecheck
+        run: pnpm --filter @ifelse.codes/core run typecheck
       - name: Build dist (ESM + CJS + .d.ts)
-        run: pnpm --filter @chitra/core run build
+        run: pnpm --filter @ifelse.codes/core run build
 
   docs:
     name: docs · typecheck + build
@@ -60,11 +60,11 @@ jobs:
       # in git; build them first or a fresh clone fails typecheck.
       - name: Build lib type declarations
         run: pnpm run typecheck:libs
-      # S11: the docs app imports @chitra/core at runtime, and core resolves through
+      # S11: the docs app imports @ifelse.codes/core at runtime, and core resolves through
       # dist/ (gitignored). Without this the docs typecheck fails on a fresh clone
       # with TS2307 while passing on any machine that happens to have a built dist.
-      - name: Build @chitra/core (docs imports it)
-        run: pnpm --filter @chitra/core run build
+      - name: Build @ifelse.codes/core (docs imports it)
+        run: pnpm --filter @ifelse.codes/core run build
       - name: Typecheck
         run: pnpm --filter @workspace/chitra-docs run typecheck
       - name: Build
@@ -104,12 +104,12 @@ jobs:
           cache: pnpm
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
-      # qa-catalog.mjs builds the docs app itself; it resolves @chitra/core
+      # qa-catalog.mjs builds the docs app itself; it resolves @ifelse.codes/core
       # through dist/ (gitignored) and the lib declarations, so build both first.
       - name: Build lib type declarations
         run: pnpm run typecheck:libs
-      - name: Build @chitra/core (docs imports it)
-        run: pnpm --filter @chitra/core run build
+      - name: Build @ifelse.codes/core (docs imports it)
+        run: pnpm --filter @ifelse.codes/core run build
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
       # Visits all 20 chart pages + docs pages + home; fails on any console or
