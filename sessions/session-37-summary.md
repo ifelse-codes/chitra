@@ -41,6 +41,9 @@ history. Post-rename: core **452/452**, typecheck, build, docs typecheck, chart-
   workflow has not run for S37.
 - Frozen `sessions/`, old `prompts/`, and old `scripts/verify-session-*.sh` still name
   `@chitra/core` (history, not re-run). The live build surface is clean.
+- `scripts/workflows/15-qacheck.sh` was renamed cosmetically but is a **frozen session-15
+  artifact** (hardcodes `session-15-*`, `163 passed`, "core unchanged from main") — it is
+  not a live gate and cannot pass against the current suite; disclosed, not rewritten.
 - Publish propagation lag (~6 min): the `PUT` returned 200 and the tarball was live
   immediately, but the packument 404'd briefly — no re-publish was needed.
 
