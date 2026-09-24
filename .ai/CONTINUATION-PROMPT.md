@@ -1,56 +1,43 @@
-# chitra — Continuation Handoff (after S36)
+# chitra — Continuation Handoff (after S37)
 
-**Resume S37 in a NEW chat from `prompts/37-task-publish-v0.1.0.md`.**
-`main` = S00–S36 (`57a0b13`). `.ai/SESSION` = 36.
+**Resume in a NEW chat (S38).** `main` = S00–S37 (`9bfb0da`); `.ai/SESSION` = 37;
+`v0.1.0` tag on `main` HEAD; **`@ifelse.codes/core@0.1.0` is LIVE on npm**.
 
 ## Where we are
 
-S36 (PR #41) closed every S35 ground-truth finding except one, and unfroze the
-live deploy. Full detail: `sessions/session-36-summary.md` +
-`sessions/session-36-review.md` (cold ACCEPT) + `.ai/STATE.md`.
+S37 (PRs **#43** publish + **#44** sync) closed the S36-deferred npm publish. Full
+detail: `sessions/session-37-summary.md` + `sessions/session-37-review.md` (cold
+**ACCEPT**) + `.ai/STATE.md`.
 
-| Done in S36 | State |
+| Delivered in S37 | State |
 |---|---|
-| Live docs deploy (S31 freeze lifted) | `chitra.iifelse.com` live, `/ai-data` 200 |
-| Docs-hero pills honest | `v0.1.0` / `452` |
-| KNOWLEDGE.md facts | corrected (452 / 23 files / Node 26 / main S00–S36) |
-| S05 closeout debt | S17/S32 backfilled + `check_session_coverage` |
-| GT teeth | `.ai/GT-REMEDIATIONS.md` + `check_gt_remediations` + hook |
-| `release.yml` | idempotent (skip if version exists) |
-| stale `v0.1.0` tag | deleted |
+| npm publish | `@ifelse.codes/core@0.1.0` live (`latest`); clean install verified |
+| Rename | `@chitra/core` → `@ifelse.codes/core` (the `@chitra` org isn't ours) |
+| `v0.1.0` tag | on `main` HEAD; Release workflow **green** (publish skipped, idempotent) |
+| Docs | README install real; hero pill `v0.1.0 · npm` |
+| GT ledger | row 2 → `DONE`; gates hardened (DEFERRED reason+expiry; GT offender path) |
+| `release.yml` | latent docs-job bug fixed (it had never run — no `v*` tag before) |
 
-## The one open item (S37)
+## S38 candidates (founder picks the goal + writes the contract)
 
-**Publish `@ifelse.codes/core@0.1.0` to npm.** S36's attempt failed with
-`E403 … 2FA or granular token with bypass 2fa required` — the supplied token was a
-*Publish* token. npm needs a **Classic Automation token** (or Granular with
-**Bypass 2FA** ON). Then:
+1. **MCP server** — README advertises a `server.tool("render_chart", …)` handler;
+   nothing ships it. Highest-leverage for the AI-first vision.
+2. **GTM proof pack** — benchmarks / token-savings / before-after.
+3. **`artifacts/api-server`** — flesh out beyond `/healthz`.
 
-```bash
-cd packages/core && npm publish --access public --no-git-checks
-gh secret set NODE_AUTH_TOKEN --repo ifelse-codes/chitra   # for tag-driven releases
-npm view @ifelse.codes/core@0.1.0 version                        # -> 0.1.0
-# re-cut + push v0.1.0 on main; release.yml skips the already-published version
-```
+## Notes / gotchas
 
-The package is publish-ready (dry-run: 38 files / 94.2 kB / public). Update
-`.ai/GT-REMEDIATIONS.md` row 2 → `DONE` when done.
-
-## S36 process miss (disclosed)
-
-PR #41 was **merged before the branch was re-pushed**, so main initially landed
-without the round-1/round-2 review fixes and the cold-review file. A follow-up PR
-carries them. **Lesson: `git push` the branch before `gh pr merge`.** S37's
-contract restates this.
-
-## S37 follow-ups (from the S36 review)
-
-- Exercise `check_ground_truth_no_code`'s offender path (S36 only hit its N/A branch).
-- Require `DEFERRED` ledger rows to carry a reason/expiry.
-- Then S38 candidates: MCP server, GTM proof pack, api-server beyond `/healthz`.
+- **CI publishing:** npm is deprecating bypass-2FA tokens. A *future* version's
+  tag-driven publish needs npm **Trusted Publishing (OIDC)**, not `NODE_AUTH_TOKEN`
+  (req 2 of S37 was honestly NOT-BUILT).
+- **Local publishing needs a TTY + passkey** — run `npm publish` inside `tmux`,
+  press Enter, approve the passkey. A non-TTY shell only returns `EOTP`.
+- Frozen `sessions/`, old `prompts/`, and old `scripts/verify-session-*.sh` still
+  name `@chitra/core` (history). `scripts/workflows/15-qacheck.sh` is a frozen
+  session-15 artifact and cannot pass — ignore it.
+- **Rotate the npm token pasted in the S37 chat** (`npm_xToANF…`).
 
 ## Housekeeping
 
-- Rotate the npm token pasted in the S36 chat.
-- `pnpm --filter @ifelse.codes/core run test` → 452 green; `scripts/verify-session-36.sh`
-  → ALL GREEN.
+- `pnpm --filter @ifelse.codes/core run test` → 452 green;
+  `scripts/verify-session-37.sh` → ALL GREEN; `scripts/verify-closeout.sh` → 16/16.
