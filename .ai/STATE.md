@@ -3,9 +3,9 @@
 **Snapshot, not log.** Overwritten in full at every closeout. (S37 done, 2026-09-24.)
 
 ## Active Branch
-`session-37-publish-v0.1.0` — S37 delivery on branch: the S36-deferred npm publish is
-**done** — the package was renamed to the founder's scope and published. PR to `main`
-to go. **Live deploy remains UNFROZEN (S31 order lifted).**
+`main` — S37 merged (PR #43, `fd8a96e`). The S36-deferred npm publish is **done**: the
+package was renamed to the founder's scope and published; `v0.1.0` sits on `main` HEAD,
+Release green. **Live deploy remains UNFROZEN (S31 order lifted).**
 
 ## What Currently Works (observed, not claimed)
 - **`@ifelse.codes/core` is LIVE on npm (S37):** `@ifelse.codes/core@0.1.0`, 38 files /
@@ -34,8 +34,8 @@ to go. **Live deploy remains UNFROZEN (S31 order lifted).**
   exists); **no `v*` tag exists yet** (re-cut `v0.1.0` with the post-merge main).
 
 ## What Is Broken / Incomplete
-- **`v0.1.0` tag not cut** — re-cut on the post-merge `main` HEAD, then push (release.yml
-  is idempotent, so the publish job skips and stays green).
+- **`v0.1.0` tag** sits on `main` HEAD (`fd8a96e`); the Release workflow is green
+  (publish job skipped — version already exists, idempotent).
 - **CI publishing needs a new mechanism:** npm is **deprecating bypass-2FA tokens** for
   direct publishing; a *future* version's tag-driven publish needs npm **Trusted
   Publishing (OIDC)**, not a long-lived `NODE_AUTH_TOKEN`.
@@ -62,7 +62,7 @@ to go. **Live deploy remains UNFROZEN (S31 order lifted).**
   **S37** package renamed + **published to npm**.
 
 ## What Is In Progress
-- S37: commit + PR `session-37-publish-v0.1.0` → `main`; then re-cut + push `v0.1.0`.
+- S37 **complete** — merged (PR #43, `fd8a96e`); `v0.1.0` on `main` HEAD, Release green.
   **Next (S38):** MCP server, GTM proof pack, api-server. See [[roadmap]].
 
 ## Cost Tracking
