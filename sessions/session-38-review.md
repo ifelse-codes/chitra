@@ -122,7 +122,13 @@ Fixed in this closeout rather than argued away:
 - Corrected `.ai/ROADMAP.md`, which still listed the MCP server as the next deliverable and
   repeated the stale README claim the rider had just corrected.
 - Downgraded requirement 5 in the summary from PARTIAL to **NOT-BUILT**, and promoted the
-  now-unblocked revocation to a top next-option.
+  now-unblocked revocation to a top next-option. *(Post-review: the founder then revoked
+  `npm_xToANF…` on npmjs.com, so requirement 5 is now genuinely done — recorded as
+  founder-attested, since nothing observable from this repo can prove it. The review's
+  NOT-BUILT verdict was correct as of the diff it audited.)*
+- The founder's closing direction for S38 was to stop hardening and ship: the
+  publish-policy lockdown and the provenance gap are both explicitly deferred on a
+  "release, watch adoption, harden later" basis. Recorded rather than quietly dropped.
 
 Accepted as standing limits, not fixed: the trusted publisher's existence is inferred from
 outcome (npm's trusted-publisher API needs a session token), and
@@ -138,4 +144,4 @@ pnpm→npm bug the contract flagged as a blocker was real and is genuinely fixed
 above disputes the shipped product. What was accepted is a release that works, not a
 verification layer that worked — hence the counterfactual-driven hardening above.
 
-**Review-Inputs-SHA:** 519bfeae3dfd527775435a8516464f4b447a3ef3c5429300655dcb192f2b57ab
+**Review-Inputs-SHA:** 33e5194a3aabe5c9451d6d1ee91e4679df43a4d1f9cd75f93b7a1b4abe836450

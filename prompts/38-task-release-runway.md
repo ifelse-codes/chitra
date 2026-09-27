@@ -77,6 +77,14 @@ npm does **not** validate the trusted publisher on save. Errors surface only on 
    publisher first → verify it works → then restrict token access. **There is no CI
    secret to remove** (finding 3) — this is the founder's npm account, and it is not
    assertable from CI.
+
+   **DONE — founder-confirmed 2026-09-27, after the `0.2.0` release was proven.** The
+   founder deleted `npm_xToANF…` on npmjs.com. This is exactly the confirmation the
+   guardrail required before the claim could be made. It is recorded as
+   **founder-attested, not repo-verified**: nothing observable from this repo can prove
+   it, so no check asserts it and none should. The companion step (*Publishing access →
+   require 2FA and disallow tokens*) is deliberately **deferred** at the founder's
+   direction — the stated intent is to release and watch for adoption first.
 6. **Rider (hygiene, ≤1 line):** the README's `server.tool("render_chart", …)` snippet
    advertises an MCP handler that does not ship and now will not until demand. Mark it
    as roadmap so the deferral leaves no dangling promise.
@@ -122,7 +130,9 @@ log would record. Left to the founder rather than self-granted.
 - step 3 — done: core `0.1.0` → `0.2.0`; lockfile unaffected (`workspace:*`, verified
   with `pnpm install --frozen-lockfile`); tag still to be cut from merged `main`
 - step 4 — pending: needs the tag (3 verify checks legitimately red until then)
-- step 5 — pending: founder-only, npmjs.com Access Tokens
+- step 5 — **done (founder-confirmed 2026-09-27):** `npm_xToANF…` deleted on npmjs.com
+  after the release proved out. Publish-policy lockdown deferred at the founder's
+  direction (release first, watch adoption, harden later).
 - step 6 — done: README `render_chart` handler marked **not shipped yet** → ROADMAP
 - step 7 — in progress: verify `26 pass / 3 fail` (all 3 = the un-cut tag), demo runs,
   summary + cold review + closeout to follow
