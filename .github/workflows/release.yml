@@ -1,6 +1,11 @@
 name: Release
 
 # Session 08 — publish @ifelse.codes/core to npm on a v* tag push.
+# Session 38 — the publish job now uses npm Trusted Publishing (OIDC), not a
+#   long-lived NODE_AUTH_TOKEN. It needs NO npm secret at all: GitHub mints an
+#   OIDC token (`id-token: write`) and npm exchanges it for a short-lived publish
+#   token. Requires npm >= 11.5.1 / Node >= 22.14.0, and the `core` job's
+#   pnpm pin stays only for install/build/test (pnpm cannot do OIDC).
 # Depends on the same three CI gates from ci.yml (core · docs · chart-drift).
 # The publish job runs only after all three gates pass.
 # Toolchain versions must stay in sync with ci.yml (Node 26, pnpm 9.12.3).
@@ -90,6 +95,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [core, docs, chart-drift]
     permissions:
+      # S38 — Trusted Publishing (OIDC). `id-token: write` lets GitHub mint the OIDC
+      # token npm exchanges for a short-lived publish token; this job therefore needs
+      # NO long-lived npm secret. Provenance is NOT produced: the GitHub repo is
+      # private, and npm does not generate provenance for private repos even under
+      # trusted publishing (a known npm limitation). Making the repo public would turn
+      # provenance on — a founder decision, not a workflow one.
+      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4
@@ -99,19 +111,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+          # S38 — no pnpm store cache in the release job (the `cache:` key is omitted
+          # entirely, as in npm's own Trusted Publishing example: "never use caching in
+          # release builds"). The store is restored into the very tree we publish from,
+          # so this job rebuilds dist from a clean store. The test jobs keep their cache.
           registry-url: "https://registry.npmjs.org"
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
       - name: Build dist (ESM + CJS + .d.ts)
         run: pnpm --filter @ifelse.codes/core run build
-      - name: Publish to npm (skip if this version already exists)
+      - name: Publish to npm via Trusted Publishing (OIDC) — skip if version exists
         run: |
           VERSION="$(node -p "require('./packages/core/package.json').version")"
           if npm view "@ifelse.codes/core@${VERSION}" version >/dev/null 2>&1; then
             echo "::notice title=already published::@ifelse.codes/core@${VERSION} is already on npm — skipping publish (idempotent tag push)."
             exit 0
           fi
-          pnpm --filter @ifelse.codes/core publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          # S38 — `npm publish`, NOT `pnpm publish`. pnpm is pinned at 9.12.3, which
+          # predates npm Trusted Publishing and only supports token auth (_authToken /
+          # _auth / tokenHelper); it cannot exchange an OIDC token. npm >= 11.5.1 can.
+          # pnpm still does install/build/test here; only the publish step uses npm.
+          cd packages/core
+          npm publish --access public
