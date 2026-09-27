@@ -144,4 +144,4 @@ pnpm→npm bug the contract flagged as a blocker was real and is genuinely fixed
 above disputes the shipped product. What was accepted is a release that works, not a
 verification layer that worked — hence the counterfactual-driven hardening above.
 
-**Review-Inputs-SHA:** 519bfeae3dfd527775435a8516464f4b447a3ef3c5429300655dcb192f2b57ab
+**Review-Inputs-SHA:** 33e5194a3aabe5c9451d6d1ee91e4679df43a4d1f9cd75f93b7a1b4abe836450
