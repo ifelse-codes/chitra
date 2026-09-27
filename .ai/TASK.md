@@ -1,21 +1,32 @@
 # Current Task Pointer
 
-## Session 37 — publish `@ifelse.codes/core@0.1.0` — DONE (merged)
+## Session 38 — release runway (npm Trusted Publishing / OIDC) — DONE (merged)
 
-- **Branch:** `session-37-publish-v0.1.0` (merged via PR #43).
-- **Contract:** `prompts/37-task-publish-v0.1.0.md`. Founder in-chat direction:
-  close the S36-deferred npm publish.
-- **Delivery:** renamed `@chitra/core` → `@ifelse.codes/core` across 26 live files
-  (frozen `sessions/` + old `prompts/` untouched); **published
-  `@ifelse.codes/core@0.1.0`** to npm (web/passkey 2FA via `tmux`); consumer install
-  verified; README install line + hero pill honest; `GT-REMEDIATIONS` row 2 → `DONE`;
-  closeout gates hardened (a `DEFERRED` row needs reason+expiry; the GT no-code
-  offender path is exercised).
-- **Root cause:** the token needed the web/passkey TTY flow, and `@chitra` was an npm
-  org the account does not own — hence the rename to the `@ifelse.codes` scope.
-- Verify: `scripts/verify-session-37.sh`. Demo: `scripts/demo-session-37.sh`.
-  Summary: `sessions/session-37-summary.md`; review: `sessions/session-37-review.md`.
-- **Merged:** PR #43 (`fd8a96e`); `v0.1.0` tag on `main` HEAD; Release green.
+- **Branch:** `session-38-release-runway` (merged via PR #46) + `…-closeout`.
+- **Contract:** `prompts/38-task-release-runway.md`. Founder in-chat direction: releases
+  must be **fully automated, no manual step**; the **MCP server is deferred** (demand-led).
+- **Delivery:** `release.yml#publish` switched to npm **Trusted Publishing (OIDC)** —
+  `id-token: write` + `contents: read`, the `NODE_AUTH_TOKEN` `env:` block deleted, and
+  **`pnpm publish` → `npm publish`**. `@ifelse.codes/core@0.2.0` was **published by CI**
+  from tag `v0.2.0` on merged `main` with no human, no tmux, no passkey (run
+  `36321392874`, 4/4 green). README's `render_chart` marked **not shipped yet**;
+  `.ai/ROADMAP.md` corrected to record the MCP deferral instead of still listing the MCP
+  server as the next deliverable.
+- **Root cause (not the obvious one):** pnpm is pinned at **9.12.3**, which predates npm
+  Trusted Publishing and supports only token auth — it cannot exchange an OIDC token. The
+  `id-token: write` change alone would have shipped a red release.
+- **Verified:** `scripts/verify-session-38.sh` → **32/32 green**, including
+  `published-after-run-start` (npm `time["0.2.0"]` 13:11:11Z ≥ run `createdAt` 13:09:02Z),
+  the discriminator that makes "unattended" falsifiable.
+- **Review:** `sessions/session-38-review.md` — cold, **ACCEPT**, and it caught real
+  falseness: the original pnpm guard was hollow (8/8 green with the bug reverted), and
+  "unattended" was unfalsifiable. Both fixed; the counterfactuals are in the script
+  comments.
+- **Merged:** PR #46 (`76d21f3`); `v0.2.0` tag on `main` HEAD; Release green.
+- **Still open:** the npm **account** token from the S37 chat (`npm_xToANF…`) is still
+  valid — founder-owned, unassertable from CI, and now unblocked. Repo visibility
+  (private ⇒ no provenance) is an open founder decision.
 
-**Next session (S38):** MCP server / GTM proof pack / `artifacts/api-server`. Open in a
-**new chat**.
+**Next session (S39):** GTM proof pack (benchmarks / token-savings / before-after), now
+that `0.2.0` is real and installable; and/or the npm token revocation + publish policy.
+Open in a **new chat**.

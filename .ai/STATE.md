@@ -1,47 +1,61 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S37 done, 2026-09-24.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S38 done, 2026-09-27.)
 
 ## Active Branch
-`main` — S37 merged (PR #43, `fd8a96e`). The S36-deferred npm publish is **done**: the
-package was renamed to the founder's scope and published; `v0.1.0` sits on `main` HEAD,
-Release green. **Live deploy remains UNFROZEN (S31 order lifted).**
+`main` — S38 merged (PR #46, `76d21f3`). The release path is **automated**: npm
+**Trusted Publishing (OIDC)** replaced the long-lived token, and `v0.2.0` was published
+by CI with no human in the loop. **Live deploy remains UNFROZEN (S31 order lifted).**
 
 ## What Currently Works (observed, not claimed)
-- **`@ifelse.codes/core` is LIVE on npm (S37):** `@ifelse.codes/core@0.1.0`, 38 files /
-  94.2 kB, dist-tag `latest`. Verified independently: `npm view @ifelse.codes/core
-  version` → `0.1.0`; a clean `npm install @ifelse.codes/core@0.1.0` in `/tmp` added the
-  package; registry packument `200`; tarball `200`. The S36 `DEFERRED` item is closed.
-- **Package renamed (S37):** `@chitra/core` → `@ifelse.codes/core` across 26 live files
-  (pkg identity, workspace deps + lockfile, docs imports/scripts, CI workflows, README/
-  CONTRIBUTING/replit, tooling scripts, `.ai/`). Frozen `sessions/` + old `prompts/` are
-  left as history. Post-rename: core **452/452**, typecheck, build, docs typecheck,
-  `gen:charts:check` all green.
-- **Publish unblock mechanism (S37, reusable):** publishing needed npm's web/passkey
-  2FA flow, which `npm` only runs when stdin+stdout are TTYs — run `npm publish` inside
-  `tmux`, press Enter, approve the passkey. (A plain non-TTY shell gets `EOTP` with a
-  masked URL.)
-- **Docs honest (S37):** README install section is a real install (no "not on npm yet");
-  docs-hero pill reads `v0.1.0 · npm`.
-- **Ground-truth teeth hardened (S37, per S36 review):** `check_gt_remediations` now
-  requires a `DEFERRED` row's Evidence to carry a reason **and** an expiry (date or the
-  word "expiry"); `verify-closeout.sh --gt-no-code-only N` exercises the GT no-code
-  **offender path** (proven: on this branch it blocks with the code-file list).
-- **Live docs site:** `chitra.iifelse.com` (S36 redeployed; `/ai-data` live).
+- **Releases are unattended (S38):** `release.yml#publish` holds `id-token: write` +
+  `contents: read` and references **no npm secret at all**. Pushing `v0.2.0` produced
+  `@ifelse.codes/core@0.2.0` on npm with no tmux, no passkey, no manual step.
+  Release run `36321392874`: 4/4 jobs green.
+- **The publish-time ordering is proven, not assumed (S38):** npm's authoritative
+  `time["0.2.0"]` = `13:11:11Z`; the Release run's `createdAt` = `13:09:02Z`. The
+  publish is *no earlier* than the run, so CI published it — a human publishing locally
+  first would show the reverse. Asserted by `published-after-run-start`.
+- **Zero npm credentials in CI (S38, verified three ways):** `gh secret list --repo` → `[]`;
+  org secrets → 404; no GitHub environments configured. A credential-less publish would
+  fail `ENEEDAUTH`; it succeeded.
+- **The OIDC blocker was pnpm, not a config flag (S38):** pnpm is pinned at **9.12.3**,
+  which predates npm Trusted Publishing and is token-only (`_authToken` / `_auth` /
+  `tokenHelper`) — it cannot exchange an OIDC token. The publish step now runs
+  `npm publish` (npm ≥ 11.5.1; local 11.12.1, CI Node 26). pnpm still does
+  install/build/test.
+- **`0.2.0` consumer-verified:** clean `npm install @ifelse.codes/core@0.2.0` in a temp
+  dir → 38 files / 446,486 B unpacked, `dist.signatures` present, and a real chart renders
+  via the installed ESM entry. `dist-tags` → `latest: 0.2.0`.
+- **S37 (still true):** `@ifelse.codes/core@0.1.0` was the S36-deferred publish, under the
+  founder's `@ifelse.codes` scope (the `@chitra` npm org is not ours); local publishing
+  needs npm's web/passkey flow, which only runs on a real TTY (use `tmux`).
+- **Live docs site:** `chitra.iifelse.com` (`/ai-data` live).
 - **`@ifelse.codes/core` library:** 20 charts, 3 renderers, 7 themes, `ChartResult`;
   LOCKED families S09–S28. `pnpm --filter @ifelse.codes/core run test` — **452/452**.
-- **Release workflow** `release.yml` idempotent (publish job skips when the version
-  exists); **no `v*` tag exists yet** (re-cut `v0.1.0` with the post-merge main).
 
 ## What Is Broken / Incomplete
-- **`v0.1.0` tag** sits on `main` HEAD (`fd8a96e`); the Release workflow is green
-  (publish job skipped — version already exists, idempotent).
-- **CI publishing needs a new mechanism:** npm is **deprecating bypass-2FA tokens** for
-  direct publishing; a *future* version's tag-driven publish needs npm **Trusted
-  Publishing (OIDC)**, not a long-lived `NODE_AUTH_TOKEN`.
-- **No MCP server ships** (README advertises the handler; roadmap item).
-- `artifacts/api-server` exposes only `/healthz`.
-- GTM proof pack (benchmarks / token-savings) and pricing story still to build.
+- 🔴 **The npm account token from the S37 chat (`npm_xToANF…`) is still valid.** It is
+  founder-owned, not observable from CI, so nothing can assert it. npm's own order is
+  *publisher → verify → restrict*, and **the first two steps are now done**, so this is
+  unblocked: revoke at npmjs.com → Access Tokens, then set Publishing access to
+  *require 2FA and disallow tokens*.
+- 🟠 **No npm provenance.** The GitHub repo is **private**, and npm does not generate
+  provenance attestations for private repos even under trusted publishing. Confirmed:
+  `0.2.0` has `dist.signatures` but `attestations: null`. Publishing is unaffected. Making
+  the repo public would fix it and suits an MIT package — **founder's open decision**.
+  If visibility flips, `release.yml`'s comment must change with it or it becomes a lie.
+- **MCP server: founder-DEFERRED (S38).** Not built, not stubbed. Gate: a release exists
+  **and** someone demands it **and** it is judged worth building. The README snippet is
+  labelled *not shipped yet* and ROADMAP records the deferral.
+- **The trusted publisher's existence is inferred, not asserted.** npm's
+  trusted-publisher API needs a session token, so no check can read it; the evidence is
+  the outcome (a tokenless publish succeeded).
+- `ci-no-auth-token-secret` covers **repo** secrets only — not org or environment secrets.
+  None exist today and no environments are configured.
+- GTM proof pack (benchmarks / token-savings) still to build — now unblocked, there is a
+  real `0.2.0` to measure. `artifacts/api-server` remains the undecided "if the hosted API
+  is pursued" bet. Pricing story still open.
 - Frozen `sessions/` + old `prompts/` + old `scripts/verify-session-*.sh` still name
   `@chitra/core` (history; not re-run).
 - `pnpm run lint` unrunnable — eslint not installed (pre-existing).
@@ -59,18 +73,21 @@ Release green. **Live deploy remains UNFROZEN (S31 order lifted).**
   **S31** antra atoms + hero rotation + wall fix · **S32** wall playbook ·
   **S33** release readiness · **S34** GTM README + MIT LICENSE ·
   **S35** NO-CODE ground-truth · **S36** S35 gaps closed + deploy unfrozen ·
-  **S37** package renamed + **published to npm**.
+  **S37** package renamed + published · **S38** OIDC release runway, `0.2.0` unattended.
 
 ## What Is In Progress
-- S37 **complete** — merged (PR #43, `fd8a96e`); `v0.1.0` on `main` HEAD, Release green.
-  **Next (S38):** MCP server, GTM proof pack, api-server. See [[roadmap]].
+- S38 **complete** — merged (PR #46, `76d21f3`); `v0.2.0` on `main` HEAD; Release green;
+  `0.2.0` live on npm, CI-published. **Next (S39):** GTM proof pack, or the npm token
+  revocation. See [[roadmap]].
 
 ## Cost Tracking
-- S37 measured: one opencode session — a 26-file rename (10 atomic commits), one **real
-  npm publish** (web/passkey via tmux), README/hero honesty, ledger row 2 → DONE, two
-  closeout-gate hardenings, and S37 artifacts. Token/`$` cost **unmeasured** (billed to
-  the founder's opencode plan). npm publish cost: $0 (public package).
+- S38 measured: one opencode session — an OIDC release-path rewrite, the pnpm→npm OIDC
+  blocker caught before it shipped a red release, `0.2.0` published unattended, a README
+  honesty rider, a ROADMAP correction, verify hardening driven by an adversarial cold
+  review, and S38 artifacts. Token/`$` cost **unmeasured** (billed to the founder's
+  opencode plan). npm publish cost: $0. Release-runner minutes: ~2.
 - Prior: S20 founder $20/mo plan; S21–S28 single ZCode chats; S29 3 build + 2 cold
   reviews; S30 ops deploy + 2 cold reviews; S31 1 recon + 2 cold reviews; S32
   knowledge-only; S33 four stories + 1 cold review; S34 one story + 4 cold reviews,
-  approval-token gated; S35 NO-CODE audit; S36 docs/gates + live deploy (npm deferred).
+  approval-token gated; S35 NO-CODE audit; S36 docs/gates + live deploy; S37 rename +
+  real npm publish via tmux.

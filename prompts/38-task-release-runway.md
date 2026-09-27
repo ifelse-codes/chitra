@@ -95,6 +95,25 @@ Atomic commits ≤3 files; branch `session-38-*`; PR to `main`; founder approval
 before commits. Tag only from merged `main`. Do not claim the npm account token is
 revoked until the founder confirms it (it is not observable from this repo).
 
+## Crew dispatch — tech-lead: skipped (disclosed, not waived)
+
+tech-lead: skipped — no tech-lead was dispatched for S38, and this is disclosed rather
+than papered over. The mandatory Session Loop in `.ai/AGENTS.md` has no crew/tech-lead
+step (its steps are BOOT, BRANCH, PLAN, EXECUTE, VERIFY+DEMO, PR, SUMMARY+REVIEW,
+CLOSEOUT, CLOSE), so the gate is enforced by a layer the load order never surfaces — a
+constitution-vs-gates gap, not an S38 failure. The documented dispatch
+`vajra next --role tech-lead --from <findings>` could not be run as written either:
+`--from` takes a findings *file* (`failed to read findings file`), while a session's
+findings are a *directory* of verify logs (`.ai/verify/session-38/<TS>/`). S37, the
+immediately preceding CODE session, also recorded no tech-lead handoff (`.ai/handoffs/`
+has S19, S20, S28, S29, S33, S34 — no S37), so this is a standing gap. A retroactively
+authored handoff would be a fabricated governance artifact: a tech-lead picks the crew and
+budgets *before* the work, and writing one afterwards to satisfy a gate is the "honesty
+theater" tell `reviewer/SKILL.md` exists to catch.
+
+The founder may instead waive this gate with `VAJRA_CLOSEOUT_WAIVER=38`, which the close
+log would record. Left to the founder rather than self-granted.
+
 ## Execution
 
 - step 1 — **PENDING (founder, browser)**: trusted publisher not yet confirmed created

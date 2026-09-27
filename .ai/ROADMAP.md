@@ -31,12 +31,23 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   backfilled the S17/S32 session records; made cost tracking carry a measured
   line. **`@ifelse.codes/core@0.1.0` publish was deferred to S37** — now **done in
   S37**.
-- 🔜 **Next (Session 38 candidates):** ship an **MCP server** (the vision is
-  AI-first and the README already advertises a `server.tool("render_chart", …)`
-  handler — nothing ships it yet); a GTM proof pack (benchmarks / token-savings /
-  before-after); flesh out `artifacts/api-server` beyond `/healthz`. Note: the
-  tag-driven CI publish now needs npm **Trusted Publishing (OIDC)** — bypass-2FA
-  tokens are being deprecated.
+- ✅ **Session 38 (S38) — release runway:** npm **Trusted Publishing (OIDC)** wired into
+  `release.yml#publish`; the long-lived `NODE_AUTH_TOKEN` path is gone and
+  **`@ifelse.codes/core@0.2.0` was published by CI unattended** (tag `v0.2.0` on merged
+  `main`; no human, no tmux, no passkey). The blocker was subtler than a config flag:
+  **pnpm 9.x cannot exchange an OIDC token**, so the publish step had to move to
+  `npm publish`. Repo is private, so npm generates **no provenance** — surfaced, not
+  decided. The exposed npm *account* token is still open (founder-owned).
+- ⏸️ **MCP server — DEFERRED by founder decision (S38).** Not built, not stubbed. The
+  gate is explicit: build it only after a release exists **and** someone actually
+  demands it **and** it is judged worth building. The README's
+  `server.tool("render_chart", …)` snippet is labelled *not shipped yet* and points
+  here, so the deferral leaves no dangling promise. (It previously advertised a
+  handler that does not exist — that claim is now corrected in both places.)
+- 🔜 **Next (S39 candidates):** a **GTM proof pack** (benchmarks / token-savings /
+  before-after) — now unblocked, there is a real `0.2.0` to install, measure and point
+  at; then `artifacts/api-server` beyond `/healthz`, which is still the undecided
+  "if the hosted API is pursued" bet, not a task.
 - ✅ **Session 35 (S35) — NO-CODE ground-truth (`N % 5 == 0`):** audited vision,
   roadmap, state, knowledge, constraints, constitution, cost. Overall 🟡 —
   direction sound, distribution blocked, governance claims unbacked. Found the
