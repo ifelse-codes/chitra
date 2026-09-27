@@ -17,7 +17,7 @@ by CI with no long-lived token anywhere in the repo.
 | 2 | `release.yml` publishes via OIDC | SHIPPED | `id-token: write` + `contents: read`; token `env:` block deleted |
 | 3 | `0.2.0` published by CI, unattended | SHIPPED | tag `v0.2.0` → Release run `36321392874` → `+ @ifelse.codes/core@0.2.0` |
 | 4 | Independently verified | SHIPPED | `npm view` → `0.2.0`; clean install in a temp dir renders a chart |
-| 5 | Revoke the exposed npm token | **NOT-BUILT — founder-owned, now unblocked** | no CI secret ever existed; the npm *account* token is not assertable from CI. The cold review ruled PARTIAL itself a soft dodge (PARTIAL implies a deliverable exists; none does) and this is its verdict |
+| 5 | Revoke the exposed npm token | **SHIPPED (founder-attested)** | `npm_xToANF…` deleted on npmjs.com, confirmed by the founder 2026-09-27 after the release proved out. Not repo-verifiable, and no check claims to. The cold review first ruled this NOT-BUILT; it is now genuinely done, and the *publish-policy* lockdown is deferred at the founder's direction |
 | 6 | README honest about deferred MCP | SHIPPED *(after closeout fix)* | `render_chart` marked "not shipped yet" → `.ai/ROADMAP.md`; ROADMAP itself corrected — it had still listed the MCP server as the *next* deliverable and repeated the stale "README already advertises" claim, so the README was pointing at a doc that contradicted it |
 | 7 | Verify / demo / review / closeout | SHIPPED | `verify-session-38.sh` **32/32**; `demo-session-38.sh` runs; cold review ACCEPT |
 
@@ -151,15 +151,19 @@ npm publish cost: $0 (public package). Release-runner minutes: ~2.
 
 ## Next options
 
-1. **Revoke the exposed npm account token + set the package publish policy** — the last
-   piece of the S37 security debt, and the cold review's top live risk. npm's own order is
-   *publisher first → verify it works → then restrict token access*, and **both earlier
-   steps are now done**, so this is unblocked. `npmjs.com` → Access Tokens → revoke
-   `npm_xToANF…`; then Publishing access → *require 2FA and disallow tokens*.
-2. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked: there is a
-   real `0.2.0` with an installable tarball to measure and point at.
-3. **Decide repo visibility** — public would turn on npm provenance and expose the source
-   of an MIT package. A product/trust decision, not a task. Note that
-   `.github/workflows/release.yml` says in a comment that provenance is off *because* the
-   repo is private, so flipping visibility without editing that comment leaves a lie in
-   the file.
+The founder's direction on closing S38: **stop hardening, ship, and watch for adoption.**
+The publish-policy lockdown and the provenance gap are both explicitly deferred on that
+basis. So the ranked list is now about *demand*, not defence.
+
+1. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked: there is a
+   real `0.2.0` with an installable tarball to measure and point at. This is the one item
+   that both produces evidence *and* creates the surface people can find.
+2. **Watch adoption before hardening further** — the founder's stated plan. Decide on a
+   trigger (first real install, first external issue) rather than a date, so "nobody is
+   asking" stays a measurement instead of an assumption. When it fires: set *Publishing
+   access → require 2FA and disallow tokens*, and decide repo visibility (public would
+   turn on npm provenance and expose an MIT package's source).
+3. **Fix the `required-crew` gate at the root** — it demands a tech-lead handoff that
+   `.ai/AGENTS.md`'s Session Loop never asks for, and S37 failed it too. Either surface
+   the crew step in the constitution or drop the gate. Right now it is a tax that only
+   ever fires as red.
