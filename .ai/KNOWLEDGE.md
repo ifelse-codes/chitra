@@ -236,3 +236,36 @@
 - **Closeout gates hardened (S37):** `check_gt_remediations` requires a `DEFERRED` row's
   Evidence to carry a reason AND an expiry; `verify-closeout.sh --gt-no-code-only N`
   exercises the GT no-code offender path (S36-review weakness).
+- **pnpm 9.x cannot do npm Trusted Publishing (OIDC).** pnpm predates the feature: its
+  auth surface is token-only (`_authToken` / `_auth` / `tokenHelper`) and it has no OIDC
+  exchange. Under OIDC with no token present, `pnpm publish` fails with an error that
+  reads like a config typo, not a missing capability. Use `npm publish` (npm ≥ 11.5.1,
+  Node ≥ 22.14.0) for the publish step; pnpm may still install/build/test. **Reusable
+  constraint for every release session.**
+- **npm trusted-publisher configs created after 2026-09-03 default to `npm stage publish`
+  only** — direct `npm publish` is denied unless explicitly opted in when creating the
+  publisher. npm does **not** validate the config on save; the failure surfaces only at
+  publish time. Always tell the founder to tick "allow `npm publish`".
+- **A private GitHub repo gets no npm provenance.** npm does not generate provenance
+  attestations for private repositories even under trusted publishing (documented
+  limitation). Publishing works; the attestation does not. `dist.signatures` (ECDSA) is
+  present regardless — do not read signatures as proof of provenance; check
+  `dist.attestations`.
+- **To prove CI published a version (not a human), compare timestamps.** npm's
+  authoritative publish time is `time[<version>]` in the packument; the workflow's start
+  is `gh run list --createdAt`. Require publish ≥ run-start. Public data, no npm auth.
+  Beware: `npm view pkg time.0.2.0` does **not** work — npm parses the dots as nested
+  field paths; read the whole map (`npm view pkg time --json`) and index the version key.
+- **A credential-less publish is itself evidence.** If repo, org and environment secrets
+  are all empty and a publish still succeeds, the OIDC exchange worked — the trusted
+  publisher must exist. This is inference, not assertion: npm's trusted-publisher API
+  needs a session token, so no CI check can read the config directly.
+- **Verify-script authoring traps (both cost real debugging time this session):**
+  (a) an `awk` range `/^  publish:/,/^  [a-z-]+:$/` collapses to ONE line, because the
+  start line also matches the end pattern — use `sed -n '/start/,$p'`; (b) `run_check`
+  style helpers that shell out via `bash -c` need BOTH the function and every variable it
+  reads `export -f`/`export`ed, or they silently see an empty path.
+- **A verify check over workflow TEXT proves the text, not the behaviour.** Substring
+  greps stay green when the executed command is reverted behind an unreachable branch.
+  Scope such checks to the step's `run:` block, anchor patterns to line start, and always
+  construct the counterfactual before citing a check as a regression guard.

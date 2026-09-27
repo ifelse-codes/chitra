@@ -31,22 +31,36 @@ LEDGER=.ai/GT-REMEDIATIONS.md
 # line. sed is the honest tool here.
 publish_body()      { sed -n '/^  publish:/,$p' .github/workflows/release.yml; }
 publish_code()      { publish_body | grep -vE '^[[:space:]]*#'; }   # comments stripped
+# The `run:` block of the publish step itself — the only block that executes a
+# publish. The S38 cold review proved that grepping the whole publish job is
+# hollow: an `if [ "${DRY_RUN:-0}" = 1 ]` branch holding a dead `npm publish`
+# makes "uses-npm" pass while the real command is `pnpm … publish`, which is
+# exactly the pnpm-can't-do-OIDC bug. Scope the assertion to executed lines.
+publish_step()      { publish_code | sed -n '/name: Publish to npm via Trusted Publishing/,$p'; }
+wf_code()           { grep -vE '^[[:space:]]*#' .github/workflows/release.yml; }
 # run_check shells out via `bash -c`, so both the function AND any variable it
-# reads must be exported. The path is hardcoded above for that reason.
-export -f publish_body publish_code
+# reads must be exported. The paths are hardcoded above for that reason.
+export -f publish_body publish_code publish_step wf_code
 
 # ── Req 2: release.yml speaks OIDC ───────────────────────────────
 run_check "oidc-id-token-write"     bash -c "publish_code | grep -qE 'id-token: write'"
 run_check "oidc-keeps-contents-read" bash -c "publish_code | grep -q 'contents: read'"
-run_check "no-node-auth-token"      bash -c "! publish_code | grep -qE 'NODE_AUTH_TOKEN|secrets\.'"
+# Whole-file, not just the publish job: a workflow-level `env:` block sits ABOVE
+# `  publish:`, so scoping to the job let a reintroduced token hide in plain sight.
+run_check "no-node-auth-token"      bash -c "! wf_code | grep -qE 'NODE_AUTH_TOKEN|secrets\.'"
 # Regression guard for the real S38 bug: pnpm 9.x predates Trusted Publishing and
-# cannot exchange an OIDC token, so the publish step must NOT shell out to pnpm.
-run_check "publish-uses-npm"        bash -c "publish_code | grep -q 'npm publish --access public'"
-run_check "publish-not-pnpm"        bash -c "! publish_code | grep -qE 'pnpm .*publish'"
+# cannot exchange an OIDC token, so the publish step must not shell out to pnpm.
+# Now scoped to the publish step and matched at the start of a line, so `pnpx`,
+# a leading indent, and a `pub` abbreviation are all caught — the three escapes
+# the cold review demonstrated against the previous, broader version.
+run_check "publish-uses-npm"        bash -c "publish_step | grep -qE '^[[:space:]]*npm publish([[:space:]]|\\$)'"
+run_check "publish-no-pnpm-at-all"  bash -c "! publish_step | grep -qE '^[[:space:]]*(pnpm|pnpx|npx pnpm)'"
+run_check "publish-exactly-one-cmd" bash -c "[ \"\$(publish_step | grep -cE '^[[:space:]]*(npm publish|pnpm .*publish)')\" -eq 1 ]"
 run_check "registry-url-kept"       bash -c "publish_code | grep -q 'registry-url: \"https://registry.npmjs.org\"'"
 run_check "idempotency-kept"        bash -c "publish_code | grep -q 'is already on npm — skipping publish'"
-# npm's own example says never use caching in release builds.
-run_check "no-cache-in-publish"     bash -c "! publish_code | grep -qE 'cache: pnpm'"
+# npm's own example says never use caching in release builds. Quoted `cache: 'pnpm'`
+# is the same thing, so the quotes must not defeat the match.
+run_check "no-cache-in-publish"     bash -c "! publish_code | grep -qE \"cache:[[:space:]]*['\\\"]?pnpm\""
 
 # ── Req 1/3 prereqs npm enforces (repo-side) ─────────────────────
 # npm requires package.json `repository.url` to match the GitHub repo exactly,
@@ -78,7 +92,35 @@ run_check "v0.2.0-tag-pushed"       bash -c "git ls-remote --tags origin 'refs/t
 # asserted here — see prompts/38-task-release-runway.md step 5.
 run_check "gh-secret-list-works"    bash -c "gh secret list --repo ifelse-codes/chitra --json name >/dev/null 2>&1"
 run_check "ci-no-auth-token-secret" bash -c "! gh secret list --repo ifelse-codes/chitra --json name --jq '.[].name' 2>/dev/null | grep -q NODE_AUTH_TOKEN"
-run_check "repo-visibility-known"   bash -c "gh repo view ifelse-codes/chitra --json visibility --jq .visibility | grep -qE 'PUBLIC|PRIVATE'"
+# The S38 cold review's sharpest finding: the three checks above all pass
+# identically whether CI published 0.2.0 or a human ran `npm publish` locally two
+# minutes earlier with the S37 account token. npm records the authoritative
+# publish timestamp, and the Release run records when it started — so assert
+# ORDER. This is the only check that separates "unattended" from "looks unattended".
+# It needs no npm auth: `npm view … time` is public packument data.
+# NB: `time.0.2.0` does NOT work — npm parses the dots as nested field paths, so
+# read the whole map and index the version key.
+# npm_epoch <iso8601> -> epoch seconds. BSD date (macOS) has no `-d`, GNU does, so
+# try BSD's -f first. `${1%%.*}` drops the fractional seconds AND the trailing Z,
+# hence the format string carries no literal Z.
+npm_epoch() {
+  local t="${1%%.*}"
+  date -j -u -f "%Y-%m-%dT%H:%M:%S" "$t" +%s 2>/dev/null \
+    || date -u -d "${1%Z}" +%s 2>/dev/null \
+    || echo ""
+}
+export -f npm_epoch   # run_check uses `bash -c`; unexported functions are invisible there
+run_check "published-after-run-start" bash -c '
+  NPM_T="$(npm view @ifelse.codes/core time --json 2>/dev/null | node -e "let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(JSON.parse(s)[\"0.2.0\"]||\"\")}catch(e){}})")"
+  RUN_T="$(gh run list --repo ifelse-codes/chitra --workflow release.yml --limit 30 --json headBranch,createdAt \
+            --jq ".[] | select(.headBranch==\"v0.2.0\") | .createdAt" | head -1)"
+  [ -n "$NPM_T" ] && [ -n "$RUN_T" ] || exit 1
+  N="$(npm_epoch "$NPM_T")"; R="$(npm_epoch "$RUN_T")"
+  [ -n "$N" ] && [ -n "$R" ] || exit 1
+  [ "$N" -ge "$R" ]'
+# A human publishing BEFORE the tag would also leave the version present, so the
+# ordering check above is the load-bearing one; this guards the reverse mistake.
+run_check "run-actually-succeeded"    bash -c "gh run list --repo ifelse-codes/chitra --workflow release.yml --limit 30 --json headBranch,conclusion --jq '.[] | select(.headBranch==\"v0.2.0\") | .conclusion' | grep -q success"
 
 # ── Req 7: session invariants ────────────────────────────────────
 run_check "prompt-exists"           test -f prompts/38-task-release-runway.md
@@ -88,7 +130,19 @@ run_check "core-build"              pnpm --filter @ifelse.codes/core run build
 run_check "docs-typecheck"          pnpm --filter @workspace/chitra-docs run typecheck
 run_check "chart-drift"             pnpm --filter @workspace/chitra-docs run gen:charts:check
 run_check "mcp-not-built"           bash -c "! ls packages | grep -qi mcp"
-run_check "branch-is-s38"           bash -c '[[ "$(git rev-parse --abbrev-ref HEAD)" == session-38-* ]]'
+# S38 fix: the old form of this check asserted `HEAD == session-38-*`, which cannot
+# pass when verify runs against merged `main` — and running against merged main is
+# exactly what proves the release. The rule it guards is "this work happened on a
+# session branch and reached main via PR, never a direct commit to main". Assert
+# THAT instead: a merged PR exists whose head branch is a `session-38-*` branch.
+# Derived, not hardcoded to a PR number (the cold review flagged a hardcoded `46`
+# as rot), and squash-merge deliberately makes the branch tip a non-ancestor, so
+# ancestry is the wrong test.
+run_check "pr-from-session-branch"  bash -c "[ -n \"\$(gh pr list --repo ifelse-codes/chitra --state merged --limit 50 --json headRefName --jq '.[] | select(.headRefName | startswith(\"session-38-\")) | .headRefName' | head -1)\" ]"
+# Replaces the old `not-on-squashed-main`, which was green on any commit containing
+# the phrase "S38: release runway" — including an empty no-op or a revert. Assert
+# the squash commit on main actually TOUCHED the workflow.
+run_check "main-squash-touched-release" bash -c "git log origin/main -1 --name-only --format= | grep -qx '.github/workflows/release.yml'"
 
 ( cd ".ai/verify/session-38" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
