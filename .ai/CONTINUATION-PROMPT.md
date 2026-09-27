@@ -1,7 +1,11 @@
 # chitra — Continuation Handoff (after S38)
 
-**Resume in a NEW chat (S39).** `main` = S00–S38 (`3835c1f`); `.ai/SESSION` = 38;
+**Resume in a NEW chat (S39).** `main` = S00–S38 (`0405efc`); `.ai/SESSION` = 38;
 `v0.2.0` tag on `main` HEAD; **`@ifelse.codes/core@0.2.0` is LIVE on npm** (`latest`).
+
+> **S39's goal is already decided: rename the package to `@ifelse.codes/chitra`.**
+> Founder-approved 2026-09-27. Read the S39 section below first — the name is verified
+> free, the scope was never the problem, and the work is roughly one session.
 
 ## Where we are
 
@@ -19,18 +23,59 @@ path fully automated. Full detail: `sessions/session-38-summary.md` +
 | MCP server | **founder-DEFERRED** — README labelled "not shipped yet"; ROADMAP records it |
 | Verify hardening | 4 hollow checks the cold review proved hollow, rebuilt + counterfactuals |
 
-## S39 candidates (founder picks the goal + writes the contract)
+## S39 goal (founder-approved 2026-09-27) — rename to `@ifelse.codes/chitra`
 
-1. **GTM proof pack** — benchmarks / token-savings / before-after. **Unblocked:** there is
-   a real `0.2.0` with an installable tarball to measure. Also the one item that both
-   produces evidence *and* gives people a surface to find.
+The npm page currently reads `@ifelse.codes/core`, which buries the product name in
+every install command. **The scope was never the problem — the part after the slash is.**
+`@ifelse.codes` is a namespace the account owns; the package name inside it is a free
+choice. Founder decision: **`@ifelse.codes/chitra`**.
+
+Availability re-verified on 2026-09-27:
+
+| Name | Status |
+|---|---|
+| `chitra` (bare) | taken — `chitranga123`, an unrelated Angular sample lib, v0.1.14 |
+| `@chitra/core` | 404 — the `@chitra` npm org exists but is not ours (S37: `npm org ls` → 403) |
+| **`@ifelse.codes/chitra`** | **free (404)** |
+
+Shape of the work (S39, one story):
+
+1. Rename `@ifelse.codes/core` → `@ifelse.codes/chitra` across the live files. S37 already
+   did exactly this rename (26 live files, 10 atomic commits) and left the frozen
+   `sessions/` + old `prompts/` as history — repeat that boundary.
+2. Publish **`@ifelse.codes/chitra@0.1.0`** through the OIDC path S38 built. This is also
+   the first real test of that pipeline on a **brand-new package name**, so the
+   trusted-publisher config must match the new name on npmjs.com (one trusted publisher
+   per package; `0.2.0`'s config does not carry over).
+3. `npm deprecate @ifelse.codes/core "renamed to @ifelse.codes/chitra"`. npm cannot rename,
+   so the old package stays on the registry — deprecating makes its page read *"use
+   @ifelse.codes/chitra instead"*, which beats a silent 404. Note `0.1.0`/`0.2.0` were
+   published >72h / today respectively, so only today's version is unpublishable, and
+   deprecation is the better move anyway.
+4. Two one-line honesty fixes while in `package.json`: **drop `mcp` from the keywords**
+   (nothing ships it — it is founder-deferred, and a keyword is a promise in a search
+   index) and lead the `description` with the name.
+5. Update every live reference: workspace deps + lockfile, docs imports/scripts, CI
+   workflows, README/CONTRIBUTING/replit, tooling scripts, `.ai/`.
+
+**Adoption is ~104 downloads, all within the last week** — essentially the founder's own
+verification installs. There is nothing to break, which is why this is worth doing now
+rather than after real users exist.
+
+## Later candidates (founder ranks after S39)
+
+1. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked: a real
+   installable tarball now exists to measure. Best done *after* the rename, so the
+   measured install command is the final name.
 2. **Adoption watching** — decide a *trigger* (first real install, first external issue)
    rather than a date, so "nobody is asking" stays a measurement. When it fires: set
    *Publishing access → require 2FA and disallow tokens*.
 3. **Fix the `required-crew` gate at the root** — it demands a tech-lead handoff that
-   `.ai/AGENTS.md`'s Session Loop never asks for, and **S37 failed it too**. It is
-   currently a tax that only ever fires red. Either surface the crew step in the
-   constitution or drop the gate.
+   `.ai/AGENTS.md`'s Session Loop never asks for, and **S37 failed it too**. Either surface
+   the crew step in the constitution or drop the gate. **This is why S38 needed a founder
+   waiver, and S39 will need one too unless it is fixed first.**
+4. **MCP server stays deferred** — until a release exists *and* someone demands it.
+   `@ifelse.codes/core@0.2.0` counts as a release; demand is the missing half.
 
 ## Notes / gotchas
 
