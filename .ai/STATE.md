@@ -35,16 +35,17 @@ by CI with no human in the loop. **Live deploy remains UNFROZEN (S31 order lifte
   LOCKED families S09–S28. `pnpm --filter @ifelse.codes/core run test` — **452/452**.
 
 ## What Is Broken / Incomplete
-- 🔴 **The npm account token from the S37 chat (`npm_xToANF…`) is still valid.** It is
-  founder-owned, not observable from CI, so nothing can assert it. npm's own order is
-  *publisher → verify → restrict*, and **the first two steps are now done**, so this is
-  unblocked: revoke at npmjs.com → Access Tokens, then set Publishing access to
-  *require 2FA and disallow tokens*.
+- ✅ **The S37 npm account token is revoked** (founder-confirmed 2026-09-27, after the
+  `0.2.0` release proved out). Recorded as founder-attested, not repo-verified — nothing
+  observable from CI can prove it, and no check asserts it. The *publish-policy* lockdown
+  (*Publishing access → require 2FA and disallow tokens*) is deliberately **deferred** at
+  the founder's direction: release first, watch adoption, harden later.
 - 🟠 **No npm provenance.** The GitHub repo is **private**, and npm does not generate
   provenance attestations for private repos even under trusted publishing. Confirmed:
   `0.2.0` has `dist.signatures` but `attestations: null`. Publishing is unaffected. Making
   the repo public would fix it and suits an MIT package — **founder's open decision**.
   If visibility flips, `release.yml`'s comment must change with it or it becomes a lie.
+  Also deferred by the same "ship first, harden later" direction.
 - **MCP server: founder-DEFERRED (S38).** Not built, not stubbed. Gate: a release exists
   **and** someone demands it **and** it is judged worth building. The README snippet is
   labelled *not shipped yet* and ROADMAP records the deferral.
