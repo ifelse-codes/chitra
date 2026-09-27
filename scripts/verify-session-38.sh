@@ -139,10 +139,16 @@ run_check "mcp-not-built"           bash -c "! ls packages | grep -qi mcp"
 # as rot), and squash-merge deliberately makes the branch tip a non-ancestor, so
 # ancestry is the wrong test.
 run_check "pr-from-session-branch"  bash -c "[ -n \"\$(gh pr list --repo ifelse-codes/chitra --state merged --limit 50 --json headRefName --jq '.[] | select(.headRefName | startswith(\"session-38-\")) | .headRefName' | head -1)\" ]"
-# Replaces the old `not-on-squashed-main`, which was green on any commit containing
-# the phrase "S38: release runway" — including an empty no-op or a revert. Assert
-# the squash commit on main actually TOUCHED the workflow.
-run_check "main-squash-touched-release" bash -c "git log origin/main -1 --name-only --format= | grep -qx '.github/workflows/release.yml'"
+# Replaces two earlier versions that were both too narrow:
+#  - `not-on-squashed-main` was green on any commit containing the phrase
+#    "S38: release runway", including an empty no-op and a `Revert`.
+#  - `main-squash-touched-release` asserted the *tip* of main touched
+#    release.yml, which broke the moment the closeout PR landed on top.
+# What actually matters is that the committed main carries the OIDC change, so
+# read the file AT main rather than trusting any particular commit's position.
+run_check "main-carries-oidc"       bash -c "git show origin/main:.github/workflows/release.yml | grep -q 'id-token: write'"
+run_check "main-has-no-auth-secret" bash -c "! git show origin/main:.github/workflows/release.yml | grep -vE '^[[:space:]]*#' | grep -qE 'NODE_AUTH_TOKEN|secrets\.'"
+run_check "main-version-is-0.2.0"   bash -c "[ \"\$(git show origin/main:packages/core/package.json | node -p 'JSON.parse(require(\"fs\").readFileSync(0,\"utf8\")).version')\" = '0.2.0' ]"
 
 ( cd ".ai/verify/session-38" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
