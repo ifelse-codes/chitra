@@ -18,7 +18,7 @@
   tarball built correctly, then `PUT …/@ifelse.codes%2fchitra` → 404 "could not be found or you
   do not have permission". A human published once; the founder then created the trusted
   publisher; the retry took the idempotency skip path and the run went 4/4 green.
-- **Verified:** `scripts/verify-session-39.sh` → **42/42 green**, including
+- **Verified:** `scripts/verify-session-39.sh` → **43/43 green**, including
   `ci-attempt1-publish-failed` / `ci-attempt2-publish-skipped` / `publish-not-from-ci`, which
   together assert **CI published `0.3.0` zero times** — the discriminator that makes
   "unattended" falsifiable. Ten counterfactuals constructed; every one bit.

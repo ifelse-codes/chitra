@@ -24,7 +24,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 | Who actually published | **a human**, 13:30:46Z. CI published **zero** times — asserted, not narrated |
 | Idempotency guard | proven **behaviourally** (attempt 2 skipped), not by grep |
 | Deprecation | **dropped** by founder — no public release, nobody to redirect |
-| Verify | `verify-session-39.sh` **42/42**, 14 counterfactuals, all bit |
+| Verify | `verify-session-39.sh` **43/43**, 14 counterfactuals, all bit |
 
 ## S40 candidates (founder ranks these)
 
@@ -101,7 +101,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 ## Housekeeping
 
 - `pnpm --filter @ifelse.codes/chitra run test` → **452 green**
-- `scripts/verify-session-39.sh` → **42/42**
+- `scripts/verify-session-39.sh` → **43/43**
 - `scripts/demo-session-39.sh` → exit 0
 - `scripts/verify-closeout.sh 39` → **16/16 ALL GREEN** with `VAJRA_CLOSEOUT_WAIVER=39`
   (`required-crew` **WAIVED**, not passed — the reason is recorded in the close log)
