@@ -44,10 +44,30 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   `server.tool("render_chart", …)` snippet is labelled *not shipped yet* and points
   here, so the deferral leaves no dangling promise. (It previously advertised a
   handler that does not exist — that claim is now corrected in both places.)
-- 🔜 **Next (S39 candidates):** a **GTM proof pack** (benchmarks / token-savings /
-  before-after) — now unblocked, there is a real `0.2.0` to install, measure and point
-  at; then `artifacts/api-server` beyond `/healthz`, which is still the undecided
-  "if the hosted API is pursued" bet, not a task.
+- ✅ **Session 39 (S39) — rename the package to `@ifelse.codes/chitra`:** the npm page read
+  `@ifelse.codes/core`, which buried the product name in every install command. The scope was
+  never the problem — the part after the slash is. 27 files changed; `charts.ts` regenerated
+  (never hand-edited); `mcp` dropped from `keywords` (nothing ships it, and a keyword is a
+  promise in a search index); description now leads with the name.
+  **A brand-new package name cannot be published by CI** — npm keeps the trusted-publisher
+  config inside the package's own settings page, and a package that does not exist has no
+  settings page. The `v0.3.0` run proved it (publish job 404'd on a missing publisher), a
+  human published once, and the retry took the idempotency skip path → 4/4 green.
+  **CI published `0.3.0` zero times** — asserted by three attempt-level checks, because
+  S38's ordering check would have gone *falsely* green here. The founder also dropped the
+  planned `npm deprecate` (no public release, nobody to redirect), which forced the rename
+  notices to come out rather than stand as a claim about npm's registry. Three live lies fixed
+  in passing: the docs hero pill (`v0.1.0` while the manifest said `0.2.0`), the CHANGELOG's
+  "no public version published yet", and the contract's own deprecation sentence.
+  `verify-session-39.sh` 41/41; cold review REJECTed the first delivery (a narrowed honesty
+  guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
+- 🔜 **Next (S40 candidates):** a **GTM proof pack** (benchmarks / token-savings /
+  before-after) — unblocked, and it now measures the *final* install command; then a real
+  **`0.4.0` through CI**, which is the cheapest possible proof that the trusted publisher
+  works and turns a founder attestation into a demonstrated fact (nothing needs to change for
+  it); then **fix the `required-crew` gate**, which has now cost two founder waivers (S38, S39)
+  by demanding a tech-lead step `.ai/AGENTS.md` never asks for. `artifacts/api-server` beyond
+  `/healthz` remains the undecided "if the hosted API is pursued" bet, not a task.
 - ✅ **Session 35 (S35) — NO-CODE ground-truth (`N % 5 == 0`):** audited vision,
   roadmap, state, knowledge, constraints, constitution, cost. Overall 🟡 —
   direction sound, distribution blocked, governance claims unbacked. Found the
