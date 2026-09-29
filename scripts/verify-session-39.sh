@@ -83,7 +83,7 @@ run_check "description-leads-name"    bash -c 'node -p "require(\"./$PKG\").desc
 # still carrying the old name is a bug. Blanket "old name absent" would fail the
 # notices; blanket "old name allowed anywhere" would pass the bugs.
 run_check "old-name-gone-from-code"   bash -c '
-  hits="$(git ls-files "*.ts" "*.tsx" "*.mjs" "*.js" "*.json" "*.yml" "*.yaml" \
+  hits="$(git ls-files "*.ts" "*.tsx" "*.mjs" "*.js" "*.json" "*.yml" "*.yaml" "*.html" \
     | grep -vE "^(sessions|prompts/[0-3][0-8]-|scripts/verify-session-|scripts/demo-session-|scripts/workflows/)" \
     | xargs grep -l -- "$OLD" 2>/dev/null || true)"
   [ -z "$hits" ] || { echo "old name still in:"; echo "$hits"; exit 1; }'
@@ -178,7 +178,7 @@ run_check "no-false-deprecation-claim" bash -c '
   hits="$(grep -rniE "deprecat" \
       README.md CONTRIBUTING.md replit.md \
       packages/core/README.md packages/core/CHANGELOG.md packages/core/package.json \
-      artifacts/chitra-docs/src \
+      artifacts/chitra-docs/index.html artifacts/chitra-docs/src \
       2>/dev/null \
     | grep -E "@ifelse\.codes/core|@chitra/core" \
     | grep -viE "\b(not|never|no|non)\b[^.]{0,24}deprecat" \
@@ -196,9 +196,15 @@ run_check "no-false-deprecation-claim" bash -c '
 # release changed, not a notice to a user, and it must be able to say what the old
 # name was.
 run_check "no-rename-notice-shipped" bash -c '
+  # artifacts/chitra-docs/index.html is in scope for a reason a cold review pointed out:
+  # it is the Vite entry carrying the <title> and meta description a search engine
+  # actually indexes — the most reader-facing surface in the repo. A guard that stops
+  # at src/ while claiming "a reader-facing surface at all" is a comment lying about
+  # its own code, which is the exact defect class this session exists to remove.
   hits="$(grep -rnF -- "$OLD" \
       README.md CONTRIBUTING.md replit.md \
       packages/core/README.md \
+      artifacts/chitra-docs/index.html \
       artifacts/chitra-docs/src \
       2>/dev/null || true)"
   [ -z "$hits" ] || { echo "the old name is still in a reader-facing surface:"; echo "$hits"; exit 1; }'
