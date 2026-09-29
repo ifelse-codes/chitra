@@ -28,7 +28,11 @@ choice. Decision: **`@ifelse.codes/chitra`**.
    (`802ffc7`) and `v0.2.0` (`76d21f3`) already exist on the remote, so a fresh `v0.1.0`
    would mean force-moving a published tag. `0.3.0` keeps tags monotonic, needs no tag
    surgery, and carries the CHANGELOG forward. A new package whose first version is `0.3.0`
-   is explained by the deprecation notice on the old one.
+   is a deliberate choice, not an accident — `packages/core/CHANGELOG.md` records the whole
+   version lineage so the gap is self-explaining. *(Corrected: this line originally said the
+   gap "is explained by the deprecation notice on the old one". The founder later dropped the
+   deprecation, so that sentence described a registry state that does not exist — the exact
+   shape of claim requirement 7 exists to forbid, committed inside this very file.)*
 2. **`required-crew` is founder-WAIVED again** (`VAJRA_CLOSEOUT_WAIVER=39`), same as S38.
    The gate demands a tech-lead handoff that `.ai/AGENTS.md`'s Session Loop never asks for.
    Fixing the gate is handoff candidate #3 and its own session; folding it in here would

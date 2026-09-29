@@ -10,6 +10,14 @@
 
 ## S35 (`sessions/session-35-ground-truth.md`) → folded into S36
 
+> **Superseded in part by S39 (2026-09-29):** the shippable package is now
+> `@ifelse.codes/chitra@0.3.0` (`latest`). The rows below are a **ledger of what S35 found**,
+> so they keep the names that were true at the time — row 2 in particular records the S37
+> publish of `@ifelse.codes/core@0.1.0` and is not stale. Do not read this file for the
+> current package name; read `.ai/STATE.md` or the "What chitra is" section of `KNOWLEDGE.md`.
+> `@ifelse.codes/core` is **not** deprecated (founder decision — no public release, no
+> external user to redirect).
+
 | # | Finding (S35) | Status | Evidence |
 |---|---|---|---|
 | 1 | Stale local `v0.1.0` tag on the 2026-07-29 commit; push would publish July code | DONE | stale tag deleted (`git tag -d v0.1.0`); `release.yml` made idempotent. Re-cut of `v0.1.0` travels with the publish (item 2) |
