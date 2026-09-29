@@ -33,8 +33,10 @@ now **`@ifelse.codes/chitra@0.3.0`**, live on npm.
 - **`@ifelse.codes/core` is NOT deprecated** (founder decision). No public release, no external
   user, so a deprecation notice is ceremony for an audience of one. The old package stays at
   `0.2.0` and still resolves.
-- **Live docs site:** `chitra.iifelse.com` (`/ai-data` live). Hero pill `v0.3.0 · npm` — the S38
-  lie where it still read `v0.1.0` is fixed and the pill is now *derived* from the manifest.
+- **Live docs site:** `chitra.iifelse.com` (`/ai-data` live). Hero pill reads `v0.3.0 · npm` — the
+  S38 lie where it still read `v0.1.0` is fixed. The pill is still a JSX literal; what changed is
+  that `hero-pill-matches-version` now *derives* the expected value from the manifest, so the next
+  bump without a pill edit goes red instead of shipping. The pill itself is not generated.
 - **`@ifelse.codes/chitra` library:** 20 charts, 3 renderers, 7 themes, `ChartResult`;
   LOCKED families S09–S28. `pnpm --filter @ifelse.codes/chitra run test` — **452/452**.
 
@@ -87,7 +89,7 @@ now **`@ifelse.codes/chitra@0.3.0`**, live on npm.
 
 ## Cost Tracking
 - S39 measured: one opencode session (interrupted once by a server restart) — a package rename
-  across 21 files, the npm chicken-and-egg that makes a first publish necessarily human, one
+  across 27 files, the npm chicken-and-egg that makes a first publish necessarily human, one
   human bootstrap publish, a red release diagnosed rather than retried, **two hollow checks
   caught in my own verify script and one more caught by the cold review** (a narrowed honesty
   guard, a hardcoded version literal, and two fabricated `WORKS` rows in the demo), and S39
