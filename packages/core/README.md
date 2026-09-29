@@ -1,4 +1,8 @@
-# @ifelse.codes/core
+# @ifelse.codes/chitra
+
+> **Renamed.** This package shipped as `@ifelse.codes/core` through `0.2.0` (and
+> `@chitra/core` before that). Both are deprecated on npm. The code is unchanged since
+> `0.2.0` — only the name moved.
 
 A production-grade TypeScript terminal charting library. Beautiful visualizations for terminals, agents, and modern developer workflows.
 
@@ -14,17 +18,17 @@ A production-grade TypeScript terminal charting library. Beautiful visualization
 ## Installation
 
 ```bash
-npm install @ifelse.codes/core
+npm install @ifelse.codes/chitra
 # or
-pnpm add @ifelse.codes/core
+pnpm add @ifelse.codes/chitra
 # or
-yarn add @ifelse.codes/core
+yarn add @ifelse.codes/chitra
 ```
 
 ## Quickstart
 
 ```typescript
-import { bar, line, sparkline, plot } from "@ifelse.codes/core";
+import { bar, line, sparkline, plot } from "@ifelse.codes/chitra";
 
 // 1. Simple Bar Chart
 bar({
@@ -56,7 +60,7 @@ When writing MCP (Model Context Protocol) tools or building AI agents, you don't
 Every chart returns a `ChartResult` object with safe export methods:
 
 ```typescript
-import { bar } from "@ifelse.codes/core";
+import { bar } from "@ifelse.codes/chitra";
 
 const chart = bar({
   data: [42, 67, 38],

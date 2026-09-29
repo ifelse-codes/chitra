@@ -1,6 +1,6 @@
 // Single source of truth for the docs-site chart gallery.
 //
-// Each spec renders through the real @ifelse.codes/core library, so the previews
+// Each spec renders through the real @ifelse.codes/chitra library, so the previews
 // shipped in src/data/{charts.ts,ansi-charts.json} are GENERATED, never
 // hand-pasted. Edit a chart here; run `pnpm gen:charts` to refresh both files.
 //
@@ -78,7 +78,7 @@ export const SPECS: ChartSpec[] = [
     name: "Line Chart",
     description:
       "Continuous data over time, rendered with explicit ASCII line characters matching classical terminal monitoring.",
-    code: `import { line } from "@ifelse.codes/core";
+    code: `import { line } from "@ifelse.codes/chitra";
 
 line({
   data: [
@@ -126,7 +126,7 @@ line({
     name: "Bar Chart",
     description:
       "Vertical bars for comparing categorical values, with optional grouping and stacking.",
-    code: `import { bar } from "@ifelse.codes/core";
+    code: `import { bar } from "@ifelse.codes/chitra";
 
 bar({
   data: [42, 67, 38, 55, 72, 61],
@@ -149,7 +149,7 @@ bar({
     name: "Area Chart",
     description:
       "Like a line chart but with the area below filled in — great for volume/accumulation.",
-    code: `import { area } from "@ifelse.codes/core";
+    code: `import { area } from "@ifelse.codes/chitra";
 
 area({
   data: [10, 20, 15, 35, 28, 45, 38, 52],
@@ -172,7 +172,7 @@ area({
     name: "Sparkline",
     description:
       "Compact inline charts — perfect for dashboards, logs, and status readouts.",
-    code: `import { sparkline } from "@ifelse.codes/core";
+    code: `import { sparkline } from "@ifelse.codes/chitra";
 
 // Unicode blocks (default)
 sparkline({ data: [45, 52, 61, 58, 70, 65, 78, 72, 80, 82],
@@ -211,7 +211,7 @@ sparkline({ data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
     group: "Distribution & density",
     name: "Histogram",
     description: "Distribution of continuous data across configurable bins.",
-    code: `import { histogram } from "@ifelse.codes/core";
+    code: `import { histogram } from "@ifelse.codes/chitra";
 
 histogram({
   data: [1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,6,6,6,7,7,8],
@@ -236,7 +236,7 @@ histogram({
     name: "Scatter Plot",
     description:
       "Two-dimensional point data for spotting correlations and clusters.",
-    code: `import { scatter } from "@ifelse.codes/core";
+    code: `import { scatter } from "@ifelse.codes/chitra";
 
 scatter({
   data: [
@@ -271,7 +271,7 @@ scatter({
     name: "Pie Chart",
     description:
       "Circular proportional chart for showing part-to-whole relationships.",
-    code: `import { pie } from "@ifelse.codes/core";
+    code: `import { pie } from "@ifelse.codes/chitra";
 
 pie({
   data: [35, 25, 20, 12, 8],
@@ -290,7 +290,7 @@ pie({
     name: "Donut Chart",
     description:
       "Pie chart with a hollow centre — great for showing a primary metric.",
-    code: `import { donut } from "@ifelse.codes/core";
+    code: `import { donut } from "@ifelse.codes/chitra";
 
 donut({
   data: [30, 25, 22, 15, 8],
@@ -309,7 +309,7 @@ donut({
     name: "Heatmap",
     description:
       "2D grid whose intensity is a grey tone ramp, with the single peak cell marked in the accent hue.",
-    code: `import { heatmap } from "@ifelse.codes/core";
+    code: `import { heatmap } from "@ifelse.codes/chitra";
 
 heatmap({
   data: [
@@ -342,7 +342,7 @@ heatmap({
     name: "Progress Bar",
     description:
       "Single-value progress panel in the locked design language — grey-tone fill with an accented leading edge. Great for build steps, quotas, and budgets.",
-    code: `import { progress } from "@ifelse.codes/core";
+    code: `import { progress } from "@ifelse.codes/chitra";
 
 progress({ value: 87, label: "Build" }).render();
 progress({ value: 62, label: "Tests" }).render();
@@ -359,7 +359,7 @@ progress({ value: 34, label: "Coverage" }).render();`,
     name: "Gauge",
     description:
       "Single-value meter in the locked panel language — grey-tone fill with an accented reading edge. Great for KPIs, CPU usage, battery level.",
-    code: `import { gauge } from "@ifelse.codes/core";
+    code: `import { gauge } from "@ifelse.codes/chitra";
 
 gauge({
   value: 73,
@@ -378,7 +378,7 @@ gauge({
     name: "Horizontal Bar",
     description:
       "Bars running left-to-right — ideal for ranked lists and comparisons.",
-    code: `import { horizontalBar } from "@ifelse.codes/core";
+    code: `import { horizontalBar } from "@ifelse.codes/chitra";
 
 horizontalBar({
   data: [892, 645, 534, 421, 289],
@@ -397,7 +397,7 @@ horizontalBar({
     name: "Timeline / Gantt",
     description:
       "Gantt-style spans on a shared time scale — grey tone ramp by span length, with the single longest span marked in the accent hue.",
-    code: `import { timeline } from "@ifelse.codes/core";
+    code: `import { timeline } from "@ifelse.codes/chitra";
 
 timeline({
   events: [
@@ -428,7 +428,7 @@ timeline({
     name: "Radar Chart",
     description:
       "Spider/radar chart for multi-axis comparison of a single entity.",
-    code: `import { radar } from "@ifelse.codes/core";
+    code: `import { radar } from "@ifelse.codes/chitra";
 
 radar({
   data: [8, 6, 9, 7, 5, 8],
@@ -453,7 +453,7 @@ radar({
     name: "Box Plot",
     description:
       "Statistical summary showing median, quartiles, and whiskers.",
-    code: `import { boxplot } from "@ifelse.codes/core";
+    code: `import { boxplot } from "@ifelse.codes/chitra";
 
 boxplot({
   data: [
@@ -484,7 +484,7 @@ boxplot({
     name: "Waterfall",
     description:
       "Running total chart — shows cumulative effect of positive/negative values.",
-    code: `import { waterfall } from "@ifelse.codes/core";
+    code: `import { waterfall } from "@ifelse.codes/chitra";
 
 waterfall({
   data: [500, -120, 80, -60, 150],
@@ -509,7 +509,7 @@ waterfall({
     name: "Funnel Chart",
     description:
       "Conversion funnel — visualise drop-off across stages of a pipeline.",
-    code: `import { funnel } from "@ifelse.codes/core";
+    code: `import { funnel } from "@ifelse.codes/chitra";
 
 funnel({
   data: [10000, 6800, 3400, 1200, 340],
@@ -531,9 +531,9 @@ funnel({
     description:
       "OHLC financial chart — open, high, low, close per period. Solid = bullish (close >= open), dashed outline = bearish; one accent marks the peak close.",
     // NOTE: prior docs referenced theme "neon", which does not exist in
-    // @ifelse.codes/core (valid: default, nord, dracula, github-dark, tokyo-night,
+    // @ifelse.codes/chitra (valid: default, nord, dracula, github-dark, tokyo-night,
     // solarized, monochrome). Corrected to "dracula".
-    code: `import { candlestick } from "@ifelse.codes/core";
+    code: `import { candlestick } from "@ifelse.codes/chitra";
 
 candlestick({
   title: "CHRX — 10-Day Price Action",
@@ -580,7 +580,7 @@ candlestick({
     name: "Treemap",
     description:
       "Hierarchical area chart whose intensity is a grey tone ramp, with the single peak node marked in the accent hue.",
-    code: `import { treemap } from "@ifelse.codes/core";
+    code: `import { treemap } from "@ifelse.codes/chitra";
 
 treemap({
   data: [
@@ -614,7 +614,7 @@ treemap({
     group: "Flow & accumulation",
     name: "Sankey Diagram",
     description: "Flow diagram showing how quantities move between nodes.",
-    code: `import { sankey } from "@ifelse.codes/core";
+    code: `import { sankey } from "@ifelse.codes/chitra";
 
 sankey({
   nodes: ["Users", "Free", "Pro", "Enterprise", "Churned"],

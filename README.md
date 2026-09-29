@@ -7,7 +7,7 @@
 Beautiful, zero-dependency charts rendered as text — for your terminal, your CI
 logs, and the language models reading them.
 
-[![npm](https://img.shields.io/badge/npm-%40ifelse.codes%2Fcore-blue)](https://www.npmjs.com/package/@ifelse.codes/core)
+[![npm](https://img.shields.io/badge/npm-%40ifelse.codes%2Fchitra-blue)](https://www.npmjs.com/package/@ifelse.codes/chitra)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)](packages/core/package.json)
 [![charts: 20](https://img.shields.io/badge/charts-20-blue)](packages/core/README.md)
@@ -20,7 +20,7 @@ logs, and the language models reading them.
 ---
 
 ```ts
-import { line } from "@ifelse.codes/core";
+import { line } from "@ifelse.codes/chitra";
 
 line({
   data: [12, 19, 14, 27, 22, 34, 29, 41],
@@ -67,13 +67,17 @@ line({
 
 ## Install
 
+> **Renamed at `0.3.0`.** The package was `@ifelse.codes/core` through `0.2.0` (and
+> `@chitra/core` before that). Both are deprecated on npm — the code is unchanged, only the
+> name moved.
+
 ```bash
 # From npm
-pnpm add @ifelse.codes/core
+pnpm add @ifelse.codes/chitra
 
 # From source
 git clone https://github.com/ifelse-codes/chitra.git
-cd chitra && pnpm install && pnpm --filter @ifelse.codes/core build
+cd chitra && pnpm install && pnpm --filter @ifelse.codes/chitra build
 ```
 
 Requires Node.js 18+ and any Unicode-capable terminal.
@@ -81,7 +85,7 @@ Requires Node.js 18+ and any Unicode-capable terminal.
 ## Quickstart
 
 ```ts
-import { horizontalBar } from "@ifelse.codes/core";
+import { horizontalBar } from "@ifelse.codes/chitra";
 
 horizontalBar({
   data: [82, 64, 51, 37, 22],
@@ -125,7 +129,7 @@ methods give an agent the chart without the escape codes — and a structured
 shape it can branch on.
 
 ```ts
-import { bar } from "@ifelse.codes/core";
+import { bar } from "@ifelse.codes/chitra";
 
 const chart = bar({
   data: [42, 67, 38],
@@ -143,7 +147,7 @@ release exists and someone actually asks for it (tracked in `.ai/ROADMAP.md`). S
 here to document the intended shape, not to advertise a working feature:
 
 ```ts
-import { plot } from "@ifelse.codes/core";
+import { plot } from "@ifelse.codes/chitra";
 
 server.tool("render_chart", async ({ type, data, labels, title }) => {
   const builder = plot(data).title(title).labels(labels).noColor();
@@ -161,7 +165,7 @@ and the untrusted-input guardrail live in the **[AI data reference](https://chit
 ## Built for terminals
 
 ```ts
-import { sparkline, plot } from "@ifelse.codes/core";
+import { sparkline, plot } from "@ifelse.codes/chitra";
 
 // Inline sparkline for a live dashboard
 sparkline({ data: [3, 5, 4, 8, 6, 11, 9, 13, 12, 15], label: "p99 latency" }).render();

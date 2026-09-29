@@ -13,7 +13,7 @@
     "check:catalog": "tsx scripts/check-catalog-examples.ts"
   },
   "dependencies": {
-    "@ifelse.codes/core": "workspace:*"
+    "@ifelse.codes/chitra": "workspace:*"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

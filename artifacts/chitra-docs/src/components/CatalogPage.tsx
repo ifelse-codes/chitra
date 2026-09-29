@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ansiToHtml, wrapBraille } from "../ansi";
-import * as chitraCore from "@ifelse.codes/core";
+import * as chitraCore from "@ifelse.codes/chitra";
 import type { ChartDef } from "../data/charts";
 import {
   loadBufferOverride,
