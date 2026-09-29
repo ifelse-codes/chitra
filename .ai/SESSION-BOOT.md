@@ -1,46 +1,52 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 38 — DONE (OIDC release runway; `0.2.0` published unattended; merged)
-- **Type:** CODE — make the release path fully automated, with no long-lived npm token
-- **Branch:** `session-38-release-runway` (merged via PR #46) + `…-closeout`
-- **Date last updated:** 2026-09-27
+- **Number:** 39 — DONE (package renamed to `@ifelse.codes/chitra`; `0.3.0` live)
+- **Type:** CODE + one unavoidable founder publish
+- **Branch:** `session-39-rename-chitra` → `-claims-fix` → `-publish-record` → `-closeout`
+- **Date last updated:** 2026-09-29
 
 ## Repo State Snapshot
-- `.ai/SESSION` = 38.
-- Remote: `github.com/ifelse-codes/chitra` (**private**). `main` has S00–S38 (PR #46
-  merged, `76d21f3`); the `v0.2.0` tag sits on `main` HEAD and the Release workflow is
-  green.
-- **S38 delivery:** the `publish` job now authenticates with npm **Trusted Publishing
-  (OIDC)** — `id-token: write`, no npm secret — and **`@ifelse.codes/core@0.2.0` was
-  published by CI with no human, no tmux, no passkey.** Release run `36321392874`, 4/4
-  jobs green. `pnpm publish` → `npm publish`, because pnpm 9.12.3 cannot exchange an OIDC
-  token.
-- **The blocker was not the token, it was pnpm.** Adding `id-token: write` alone would
-  have looked finished and shipped a red release: pnpm predates npm trusted publishing and
-  is token-only. Only the publish step moved to npm; pnpm still installs, builds, tests.
-- **Proof of "unattended", not an assumption:** npm's `time["0.2.0"]` = `13:11:11Z` vs the
-  Release run's `createdAt` = `13:09:02Z`. The publish is no earlier than the run, so CI
-  did it. A human publishing first would invert that. Needs no npm auth.
-- **Zero npm credentials in CI, verified three ways:** repo secrets `[]`, org secrets
-  404, no environments. A credential-less publish would fail `ENEEDAUTH`; it succeeded.
-- **S37's "revoke the token" was based on a false premise.** `gh secret list` returns zero
-  secrets — S37's `gh secret set NODE_AUTH_TOKEN` was never run (its own contract logs
-  step 2 as deferred). There was never a CI secret to revoke. What *does* still exist is
-  the npm **account** token pasted in the S37 chat, which is founder-owned and unassertable
-  from CI.
-- **Correction carried into the cold review:** the S38 verify script's first guard for the
-  pnpm regression was hollow (substring grep over the job, satisfiable with the bug fully
-  reverted — 8/8 green). Replaced with checks scoped to the publish step's `run:` block,
-  and the reviewer verified the counterfactual no longer passes.
-- **No npm provenance:** the repo is private and npm does not attest private repos even
-  under trusted publishing. `0.2.0` has `dist.signatures` but `attestations: null`.
-  Founder's open decision.
+- `.ai/SESSION` = 39.
+- Remote: `github.com/ifelse-codes/chitra` (**private**). `main` has S00–S39 (PR #55,
+  `68d0b26`); tags `v0.1.0`/`v0.2.0`/`v0.3.0` are all on `main` HEAD and the Release workflow
+  is green.
+- **S39 delivery:** the package is **`@ifelse.codes/chitra@0.3.0`**, live on npm (38 files /
+  446,756 B, consumer-verified). 21 files, +680/−116, 3 PRs, 12 atomic commits.
+- **The finding that outlasts the rename:** **a brand-new package name can never be published
+  by CI.** npm configures a trusted publisher *inside the package's own settings page*, and a
+  package that does not exist has no settings page — so OIDC → publisher → package → a publish
+  only a human can make. **Renaming always costs one human publish**, and the unattended
+  property does not return until the *next* version.
+- **The `v0.3.0` release went red, and that was the proof.** Attempt 1's `publish` job failed
+  (`PUT …/@ifelse.codes%2fchitra` → 404 "could not be found or you do not have permission") at
+  09:07:31Z. A human published at 13:30:46Z. Attempt 2 took the idempotency skip path → 4/4
+  green. **CI published `0.3.0` zero times**, and that is asserted, not narrated.
+- **A green check that would have lied:** S38's `published-after-run-start` compares npm's
+  publish time to the run's start. For `0.3.0` it **passes** (13:30:46Z ≥ 09:06:11Z) and is
+  false — it cannot tell "CI published two minutes in" from "CI died and a human published
+  four hours later". Replaced by three attempt-level assertions: attempt 1 failed, attempt 2
+  skipped, and npm's publish time **precedes** attempt 2's start.
+- **The founder inverted requirement 7 mid-session:** *no* deprecation — no public release, no
+  external user to redirect. The rename notices that had already shipped the claim "deprecated
+  on npm" were removed, and a check now guards the **absence** of a deprecation claim.
+- **Two more live lies fixed in passing:** the docs hero pill still read `v0.1.0 · npm` while
+  the manifest said `0.2.0` (S38 bumped one and not the other); `packages/core/CHANGELOG.md`
+  claimed "no public version has been published to npm yet".
+- **The cold review REJECTED the first delivery** and named the fakest green: the honesty guard
+  grepped three files, none of them the shipped docs app, so a migration banner would have
+  shipped on a green board. Also caught a hardcoded version literal whose comment claimed it was
+  "pinned to the manifest", and two fabricated `WORKS` rows in the demo's summary table. All
+  three fixed and counterfactual-tested.
 
 ## Next Session
-- **Number:** 39 — GTM proof pack (benchmarks / token-savings / before-after), now that a
-  real `0.2.0` exists to install and measure; and/or the npm account token revocation +
-  publish policy, which npm's own order unblocked once the publisher was verified.
+- **Number:** 40. Candidates, founder-ranked:
+  1. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked, and it now
+     measures the final install command.
+  2. **A real `0.4.0` through CI** — the cheapest possible proof that the trusted publisher
+     works, converting a founder attestation into a demonstrated fact. Nothing needs to change.
+  3. **Fix the `required-crew` gate** — it has now cost two founder waivers (S38, S39).
 - `artifacts/api-server` stays an undecided "if the hosted API is pursued" bet, not a task.
-- **MCP server stays founder-deferred** until a release exists *and* someone demands it.
+- **MCP server stays founder-deferred** until someone demands it. `@ifelse.codes/chitra@0.3.0`
+  counts as a release; demand is the missing half.
 - Open in a **new chat** (one session per chat).
