@@ -4,9 +4,9 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 ## Run & Operate
 
-- `pnpm --filter @ifelse.codes/core run test` — run all tests (116 tests)
-- `pnpm --filter @ifelse.codes/core run test:coverage` — run tests with coverage report
-- `pnpm --filter @ifelse.codes/core run typecheck` — typecheck the library
+- `pnpm --filter @ifelse.codes/chitra run test` — run all tests (452 tests)
+- `pnpm --filter @ifelse.codes/chitra run test:coverage` — run tests with coverage report
+- `pnpm --filter @ifelse.codes/chitra run typecheck` — typecheck the library
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 
@@ -19,7 +19,7 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 ## Where things live
 
-- `packages/core/` — `@ifelse.codes/core` main library package
+- `packages/core/` — `@ifelse.codes/chitra` main library package
   - `src/types.ts` — all TypeScript interfaces and types
   - `src/ansi.ts` — ANSI color primitives (zero-dep)
   - `src/utils.ts` — math, formatting, grid utilities
@@ -43,7 +43,7 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 ## Product
 
-**@ifelse.codes/core** — A terminal charting library with 20 chart types (line, bar, area, sparkline, histogram, scatter, pie, donut, heatmap, progress, gauge, timeline, radar, boxplot, waterfall, funnel, candlestick, treemap, sankey, horizontal bar), 3 renderers (braille/blocks/ASCII), 7 themes, and first-class AI agent support via `toPlain()` / `toJSON()`.
+**@ifelse.codes/chitra** — A terminal charting library with 20 chart types (line, bar, area, sparkline, histogram, scatter, pie, donut, heatmap, progress, gauge, timeline, radar, boxplot, waterfall, funnel, candlestick, treemap, sankey, horizontal bar), 3 renderers (braille/blocks/ASCII), 7 themes, and first-class AI agent support via `toPlain()` / `toJSON()`.
 
 ## User preferences
 
@@ -54,7 +54,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 - TypeScript files use `.js` extensions in imports (ESM NodeNext convention) — run via `tsx` not `node` directly
 - `pnpm-workspace.yaml` now includes `packages/*` as a workspace glob alongside `lib/*`
 - `tsconfig.json` for the core package uses `noEmit: true` — no `rootDir` set so tests can be in a sibling `tests/` directory
-- tsx is a devDependency of `@ifelse.codes/core` — available at `packages/core/node_modules/.bin/tsx`
+- tsx is a devDependency of `@ifelse.codes/chitra` — available at `packages/core/node_modules/.bin/tsx`
 
 ## Pointers
 
