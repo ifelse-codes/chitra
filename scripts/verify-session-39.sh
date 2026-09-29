@@ -312,6 +312,33 @@ run_check "idempotency-guard-behaved"   bash -c '
     | grep -qF "@ifelse.codes/chitra@0.3.0 is already on npm"'
 
 # ── Req 9: session invariants ──────────────────────────────────────────
+# THE GAP THIS SESSION SHIPPED PAST, then found. The rename was merged and the
+# package was live on npm while the public front door still told users to run
+# `npm install @chitra/core` — the name from BEFORE S37, under an npm org S37
+# established the account does not own. Nothing failed: CI was green, verify was
+# green, the package was on npm. A deploy is a manual step, so the site simply
+# drifts, silently, until someone happens to look at it.
+#
+# So assert the deployed site actually carries the current name. Network-dependent
+# by nature, and it FAILS CLOSED: no network or no match is red, never green.
+run_check "live-site-serves-current-name" bash -c '
+  html="$(curl -s --max-time 30 "https://chitra.iifelse.com/?cb=$RANDOM" 2>/dev/null || true)"
+  asset="$(printf "%s" "$html" | grep -oE "/assets/index-[A-Za-z0-9_-]+\\.js" | head -1 || true)"
+  [ -n "$asset" ] || { echo "could not read the live docs shell (offline, or the bundle moved)"; exit 1; }
+  js="$(curl -s --max-time 30 "https://chitra.iifelse.com${asset}?cb=$RANDOM" 2>/dev/null || true)"
+  [ -n "$js" ] || { echo "could not read $asset"; exit 1; }
+  if printf "%s" "$js" | grep -qF -- "$NEW"; then :; else
+    echo "the live site does not serve $NEW — it is stale; redeploy:"
+    echo "  wrangler pages deploy dist/public --project-name=chitra --branch=main"
+    exit 1
+  fi
+  # And the old names must be GONE, not merely outnumbered. A stale bundle
+  # containing @chitra/core is exactly the failure this check exists to catch.
+  for stale in "@chitra/core" "$OLD"; do
+    printf "%s" "$js" | grep -qF -- "$stale" \
+      && { echo "the live site still advertises $stale"; exit 1; }
+  done
+  exit 0'
 run_check "prompt-exists"             test -f prompts/39-task-rename-chitra.md
 run_check "core-tests-452"            bash -c "pnpm --filter $NEW run test 2>&1 | grep -qE 'Tests +452 passed'"
 run_check "core-typecheck"            pnpm --filter @ifelse.codes/chitra run typecheck
