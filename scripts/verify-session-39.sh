@@ -121,7 +121,12 @@ run_check "filters-use-new-name"       bash -c '[ "$(wf_code | grep -c -- "filte
 # token, so the publish step must still shell out to npm.
 run_check "publish-uses-npm-not-pnpm" bash -c 'publish_step | grep -qE "^[[:space:]]*npm publish([[:space:]]|\$)"'
 run_check "oidc-permissions-intact"    bash -c 'publish_code | grep -q "id-token: write" && publish_code | grep -q "contents: read"'
-run_check "no-npm-secret-in-ci"        bash -c '! grep -vE "^[[:space:]]*#" .github/workflows/release.yml | grep -qE "NODE_AUTH_TOKEN|secrets\."'
+# Named "in CI" but read one file. A token reintroduced into ci.yml would have
+# passed. Both workflows are in scope; the point of the check is that NO npm
+# credential exists anywhere in the automation, not that one file is clean.
+run_check "no-npm-secret-in-ci"        bash -c '
+  hits="$(cat .github/workflows/*.yml | grep -vE "^[[:space:]]*#" | grep -nE "NODE_AUTH_TOKEN|secrets\." || true)"
+  [ -z "$hits" ] || { echo "an npm credential reappeared in CI:"; echo "$hits"; exit 1; }'
 
 # ── Req 4: the honesty fixes ───────────────────────────────────────────
 # S38 bumped the real version to 0.2.0 and never touched this pill — it still read
@@ -151,54 +156,70 @@ run_check "new-package-published"      bash -c '[ "$(npm view @ifelse.codes/chit
 # This IS publicly assertable — no npm auth needed — so it is a real gate, not a
 # founder attestation.
 # Founder decision 2026-09-29: do NOT deprecate the old package (no public release,
-# no external user to redirect). This check previously asserted the deprecation
-# WAS present — which would have gone permanently red against a decision that is
-# deliberate, i.e. it would have pressured a revert of a sound call.
+# no external user to redirect). An earlier version of this check asserted the
+# deprecation WAS present, which would have gone permanently red against a
+# deliberate decision — pressuring a revert of a sound call.
 #
-# What is worth guarding is the opposite direction: our OWN docs must not claim a
-# registry state we have not observed. The rename notices added earlier in this
-# session said "deprecated on npm"; the deprecate was then dropped, and those
-# sentences would have shipped as lies.
+# What is worth guarding: a reader-facing surface must not claim a registry state we
+# have not observed. The rename notices added earlier this session said "deprecated
+# on npm"; the deprecate was then dropped, and those sentences would have shipped.
 #
-# SCOPE — the first version of this check grepped only three files and was named as
-# if it covered the whole surface. That was the hollow one: a migration banner added
-# to the docs app (the file a user actually reads) would have sailed through on a
-# green board. The docs app, the contract, and the live .ai/ files are all in scope
-# now, because all of them can reach a reader.
+# SCOPE — reader-facing surfaces ONLY. A first cut also swept the contract and the
+# live `.ai/` files, and went red on sixteen lines, all of them legitimate: those
+# files are the *record of the decision not to deprecate*, and they have to be able
+# to say so. A claim in a record is not a lie; a claim on the npm page is. Silencing
+# the record to satisfy a check is how a check gets quietened until it guards nothing.
+# The internal record is covered by `no-rename-notice-shipped` instead, which
+# constrains what a reader is shown, not what we are allowed to write down.
 #
-# PATTERN — deliberately NOT a blanket "deprecat" grep. `.ai/KNOWLEDGE.md`
-# legitimately records npm deprecating bypass-2FA tokens; a broad pattern would
-# false-positive there, and a check that has to be quietened is a check that gets
-# narrowed back down to nothing. Match only lines that pair a deprecation claim with
-# OUR old package name — that is precisely the lie, and nothing else.
+# PATTERN — pair a deprecation word with OUR old package name, and drop negated
+# lines ("is NOT deprecated", "Do NOT deprecate") so the check does not fire on the
+# very documents that record the decision. `\b` guards stop "Note:" reading as "no".
 run_check "no-false-deprecation-claim" bash -c '
-  # Negation matters: the contract says "Do NOT deprecate @ifelse.codes/core" and
-  # STATE says "is NOT deprecated" — the OPPOSITE of the lie. A first cut of this
-  # pattern flagged all three, which is how a check teaches its owner to ignore it.
-  # Drop negated lines before asserting. `\\b` around the negation word so that
-  # "Note:" cannot masquerade as "no".
   hits="$(grep -rniE "deprecat" \
       README.md CONTRIBUTING.md replit.md \
       packages/core/README.md packages/core/CHANGELOG.md packages/core/package.json \
       artifacts/chitra-docs/src \
-      prompts/39-task-rename-chitra.md \
-      .ai/STATE.md .ai/KNOWLEDGE.md .ai/ROADMAP.md .ai/TASK.md .ai/SESSION-BOOT.md \
       2>/dev/null \
     | grep -E "@ifelse\.codes/core|@chitra/core" \
     | grep -viE "\b(not|never|no|non)\b[^.]{0,24}deprecat" \
     || true)"
-  [ -z "$hits" ] || { echo "these lines claim our old package is deprecated; it never was:"; echo "$hits"; exit 1; }'
-# The guard above only bites on a line that pairs the claim with the old name. A
-# bare migration banner ("this package moved, migrate now") names no old package
-# and would pass — so also assert no reader-facing surface carries ANY rename
-# notice at all, which is what the founder actually decided.
+  [ -z "$hits" ] || { echo "a reader-facing surface claims the old package is deprecated; it never was:"; echo "$hits"; exit 1; }'
+# The founder's decision was not "reword the notice", it was: *the docs point at
+# @ifelse.codes/chitra and nothing else*. So do not try to enumerate the phrasings a
+# migration banner might use — the first cut regexed for "renamed (at|to)|formerly|
+# was ...core" and a cold review showed it goes green on the three most natural
+# forms ("@ifelse.codes/core → @ifelse.codes/chitra", "is now", "Update your
+# imports"). Phrase-matching a rule this absolute is whack-a-mole. The rule IS the
+# absence: the old name must not appear in a reader-facing surface at all.
+#
+# packages/core/CHANGELOG.md is deliberately excluded — it is a record of what a
+# release changed, not a notice to a user, and it must be able to say what the old
+# name was.
 run_check "no-rename-notice-shipped" bash -c '
-  hits="$(grep -rniE "renamed (at|to)|formerly|was .*@ifelse\.codes/core" \
+  hits="$(grep -rnF -- "$OLD" \
       README.md CONTRIBUTING.md replit.md \
       packages/core/README.md \
       artifacts/chitra-docs/src \
       2>/dev/null || true)"
-  [ -z "$hits" ] || { echo "a rename notice is still shipping to readers:"; echo "$hits"; exit 1; }'
+  [ -z "$hits" ] || { echo "the old name is still in a reader-facing surface:"; echo "$hits"; exit 1; }'
+# The same idea for the live .ai/ snapshots — but NOT "never mention the old name".
+# That version was wrong: STATE.md is *supposed* to say the old package is not
+# deprecated, and to note that frozen files still name it. Zero-occurrence there
+# would force deleting true, useful statements — which is how a guard gets
+# quietened until it guards nothing. The rule is the opposite: each live file must
+# NAME THE NEW PACKAGE, so a reader landing there cannot come away thinking the old
+# name is current.
+run_check "live-ai-files-state-the-present" bash -c '
+  for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md; do
+    grep -qF -- "$NEW" "$f" \
+      || { echo "$f never names $NEW — a reader would take the old name as current"; exit 1; }
+  done'
+run_check "knowledge-header-is-current" bash -c '
+  grep -qF -- "$NEW" .ai/KNOWLEDGE.md \
+    || { echo "KNOWLEDGE.md never names $NEW in its permanent-facts header"; exit 1; }
+  head -12 .ai/KNOWLEDGE.md | grep -qF -- "$NEW" \
+    || { echo "KNOWLEDGE.md \"What chitra is\" still names the old package"; exit 1; }'
 # The old package still resolves, and that is the *only* registry fact about it we
 # assert. It is true, observable without auth, and worth pinning: if the old name ever
 # disappears, the story in CHANGELOG ("shipped as @ifelse.codes/core through 0.2.0")
@@ -279,7 +300,15 @@ run_check "docs-typecheck"            pnpm --filter @workspace/chitra-docs run t
 run_check "lockfile-frozen"           pnpm install --frozen-lockfile
 # The MCP server is founder-DEFERRED. A keyword claiming it ships is a promise
 # nobody kept, so assert the absence of the thing, not the presence of a note.
-run_check "mcp-server-still-not-built" bash -c "! ls packages | grep -qi mcp"
+# Named "mcp-server-still-not-built" but implemented as `ls packages`. A stub under
+# artifacts/ or lib/ would have passed. Scan the whole workspace for an MCP server
+# artefact by name, and keep the "nothing ships it" claim honest in both directions.
+run_check "mcp-server-still-not-built" bash -c '
+  hits="$(git ls-files | grep -iE "(^|/)mcp([-_.]|/|$)" || true)"
+  [ -z "$hits" ] || { echo "an MCP artefact exists in the tree:"; echo "$hits"; exit 1; }'
+# ...and the keyword must stay dropped, which is the promise a search index reads.
+run_check "mcp-not-advertised" bash -c \
+  '! node -p "JSON.stringify(require(\"./$PKG\").keywords)" | grep -qiw mcp' 
 # The rule this guards: the work happened on a session branch and reached main via
 # PR, never a direct commit. Derived, not hardcoded to a PR number (rot), and
 # squash-merge makes the branch tip a non-ancestor, so ancestry is the wrong test.
