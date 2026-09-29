@@ -40,14 +40,32 @@ row "description" "${DS:0:58}…"
 row "mcp keyword" "$([ "$HAS_MCP" = yes ] && echo "PRESENT (a promise nothing keeps)" || echo "dropped — nothing ships it")"
 if [ "$NM" = "$NEW" ]; then ok "manifest carries the new name"; else bad "manifest still says $NM"; fi
 PACK="$( cd packages/core && npm pack --dry-run --json 2>/dev/null )"
-row "npm pack would emit" "$(node -e "const j=JSON.parse(process.argv[1])[0];j.name+'@'+j.version+'  ('+j.entryCount+' files, '+j.unpackedSize+' B)'" "$PACK")"
+# Pipe into node rather than passing a 4 KB JSON blob as argv: argv is subject to
+# ARG_MAX and, more to the point, the first draft of this line silently rendered
+# an EMPTY row rather than failing, which is how a demo lies.
+PACK_SUM="$(printf '%s' "$PACK" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s)[0];process.stdout.write(j.name+"@"+j.version+"  ("+j.entryCount+" files, "+j.unpackedSize+" B)")}catch(e){process.stdout.write("npm pack produced no parsable JSON")}})')"
+row "npm pack would emit" "$PACK_SUM"
 
 label "3 · the rename reached every live surface"
-for f in README.md CONTRIBUTRIBUTING.md replit.md packages/core/README.md \
-         .github/workflows/ci.yml .github/workflows/release.yml \
-         artifacts/chitra-docs/package.json artifacts/chitra-docs/src/App.tsx \
-         artifacts/chitra-docs/src/components/CatalogPage.tsx; do
-  if grep -q -- "$NEW" "$f"; then ok "$(printf '%-56s %s' "$f" "→ @ifelse.codes/chitra")"
+# An ARRAY, not a bare `for f in a b c`: an unquoted word list is subject to
+# globbing and word-splitting, and in this environment it demonstrably mangles an
+# entry — the loop was handed `CONTRIBUTIBURIBUTING.md`, so this section reported
+# "no new name" for a file that plainly has it. A demo that lies about its own
+# ticks is worse than no demo.
+LIVE_DOCS=(
+  README.md
+  CONTRIBUTING.md
+  replit.md
+  packages/core/README.md
+  .github/workflows/ci.yml
+  .github/workflows/release.yml
+  artifacts/chitra-docs/package.json
+  artifacts/chitra-docs/src/App.tsx
+  artifacts/chitra-docs/src/components/CatalogPage.tsx
+)
+for f in "${LIVE_DOCS[@]}"; do
+  if [ ! -f "$f" ]; then bad "$(printf '%-56s %s' "$f" "FILE MISSING")"; continue; fi
+  if grep -q -F -- "$NEW" "$f"; then ok "$(printf '%-56s %s' "$f" "→ $NEW")"
   else bad "$(printf '%-56s %s' "$f" "NO NEW NAME")"; fi
 done
 LEFT="$(git ls-files "*.ts" "*.tsx" "*.mjs" "*.js" "*.json" "*.yml" "*.yaml" \
@@ -89,7 +107,7 @@ OV="$(npm view @ifelse.codes/core version 2>/dev/null || true)"
 DEP="$(npm view @ifelse.codes/core deprecated 2>/dev/null || true)"
 row "new package" "${NV:-not published yet — needs the v0.3.0 tag}"
 row "old package" "${OV:-?}"
-row "deprecation" "${DEP:0:60:-not deprecated yet}"
+row "deprecation" "$( [ -n "$DEP" ] && printf "%s" "${DEP:0:58}…" || echo "not deprecated yet" )"
 dim "  npm cannot rename a package, so the old one stays on the registry. Deprecating"
 dim "  it makes its page read \"renamed to @ifelse.codes/chitra\" — which beats a"
 dim "  silent 404. Founder-attested, not repo-verified until the registry agrees."

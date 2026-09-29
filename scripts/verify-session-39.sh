@@ -48,15 +48,24 @@ wf_code()       { grep -vE '^[[:space:]]*#' "$REL"; }
 main_name()     { git show "origin/main:$PKG" | node -p 'JSON.parse(require("fs").readFileSync(0,"utf8")).name'; }
 main_field()    { git show "origin/main:$PKG" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8'))[\"$1\"]"; }
 # run_check shells out via `bash -c`, so both the function AND any variable it
-# reads must be exported. Paths are hardcoded above for that reason.
+# reads must be exported — an unexported `$APP` expands to nothing inside the
+# subshell, and `grep -q PATTERN` with no file then reads stdin and fails. This
+# is the S38 authoring trap, hit again by the same author; export once, here.
+APP=artifacts/chitra-docs/src/App.tsx
 export -f publish_body publish_code publish_step wf_code main_name main_field
-export PKG REL OLD NEW
+export PKG REL OLD NEW APP
 
 # ── Req 1 + 2: the package identity, read from the committed file ─────────
 run_check "pkg-name-is-chitra"        bash -c 'node -p "require(\"./$PKG\").name" | grep -qx "$NEW"'
 run_check "pkg-version-is-0.3.0"      bash -c 'node -p "require(\"./$PKG\").version" | grep -qx 0.3.0'
-run_check "main-carries-new-name"     main_name
-run_check "main-version-is-0.3.0"     bash -c 'main_field version | grep -qx 0.3.0'
+# Reads the *committed* name out of origin/main, not the working tree: the claim
+# is that the rename reached main via a PR, not that it exists in my checkout.
+# NB: this must COMPARE. `run_check "…" main_name` alone is green on any value
+# the function can print — the function's exit status is `node`'s, not the
+# comparison's. That version shipped in the first draft of this script and
+# passed against a main that still said `@ifelse.codes/core`.
+run_check "main-carries-new-name"     bash -c 'got="$(main_name)"; [ "$got" = "$NEW" ] || { echo "origin/main says: $got  (expected $NEW)"; exit 1; }'
+run_check "main-version-is-0.3.0"     bash -c 'got="$(main_field version)"; [ "$got" = "0.3.0" ] || { echo "origin/main version: $got  (expected 0.3.0)"; exit 1; }'
 # The tarball npm would actually publish must carry the new name + version.
 # `npm pack` resolves the manifest the same way `npm publish` does, so this
 # catches a manifest edit that never reached the pack root.
@@ -81,11 +90,20 @@ run_check "old-name-gone-from-code"   bash -c '
 run_check "old-name-not-in-installs"  bash -c '
   ! grep -rE "(npm|pnpm|yarn) (install|add) $OLD|from \"$OLD\"|npmjs\.com/package/$OLD|--filter $OLD" \
       README.md packages/core/README.md CONTRIBUTING.md replit.md artifacts/chitra-docs/src 2>/dev/null'
+# An ARRAY, and an explicit existence test per entry. Two reasons, both learned
+# the hard way writing this session's demo: an unquoted `for f in a b c` word list
+# is subject to globbing/splitting and was demonstrably handed a mangled entry
+# (once reporting "no new name" for a file that plainly has it), and a MISSING
+# file makes grep exit 2 — which a bare `grep -q || exit 1` cannot tell apart
+# from "the name is absent". A check that cannot tell those apart reports
+# confidently and wrongly.
 run_check "new-name-in-every-live-doc" bash -c '
-  for f in README.md CONTRIBUTING.md replit.md packages/core/README.md \
-           .github/workflows/ci.yml .github/workflows/release.yml \
-           artifacts/chitra-docs/package.json; do
-    grep -q -- "$NEW" "$f" || { echo "MISSING new name in $f"; exit 1; }
+  LIVE=(README.md CONTRIBUTING.md replit.md packages/core/README.md
+        .github/workflows/ci.yml .github/workflows/release.yml
+        artifacts/chitra-docs/package.json)
+  for f in "${LIVE[@]}"; do
+    [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
+    grep -q -F -- "$NEW" "$f" || { echo "MISSING new name in $f"; exit 1; }
   done'
 
 # ── Req 3 (the load-bearing one): the release path must target the new package ──
@@ -106,7 +124,6 @@ run_check "oidc-permissions-intact"    bash -c 'publish_code | grep -q "id-token
 run_check "no-npm-secret-in-ci"        bash -c '! grep -vE "^[[:space:]]*#" .github/workflows/release.yml | grep -qE "NODE_AUTH_TOKEN|secrets\."'
 
 # ── Req 4: the honesty fixes ───────────────────────────────────────────
-APP=artifacts/chitra-docs/src/App.tsx
 # S38 bumped the real version to 0.2.0 and never touched this pill — it still read
 # `v0.1.0 · npm` on the live site. A version pill that lags the manifest is a lie
 # the founder's own front door shows, so the check pins it to the manifest.
