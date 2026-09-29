@@ -24,16 +24,20 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 | Who actually published | **a human**, 13:30:46Z. CI published **zero** times — asserted, not narrated |
 | Idempotency guard | proven **behaviourally** (attempt 2 skipped), not by grep |
 | Deprecation | **dropped** by founder — no public release, nobody to redirect |
-| Verify | `verify-session-39.sh` **41/41**, 14 counterfactuals, all bit |
+| Verify | `verify-session-39.sh` **42/42**, 14 counterfactuals, all bit |
 
 ## S40 candidates (founder ranks these)
 
-1. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked, and it now
+1. **A CI gate that the deployed docs match `main`.** S39's audit found the live site serving
+   `@chitra/core` — the pre-S37 name, in a scope we don't own — while CI, verify and npm were
+   all green. `verify-session-39.sh#live-site-serves-current-name` now guards it, but that check
+   only runs for S39. A deploy step in `ci.yml` (or a drift check in CI) is the real fix.
+2. **GTM proof pack** — benchmarks / token-savings / before-after. Unblocked, and it now
    measures the final install command.
-2. **A real `0.4.0` through CI** — the cheapest proof that the trusted publisher works, turning
+3. **A real `0.4.0` through CI** — the cheapest proof that the trusted publisher works, turning
    a founder attestation into a demonstrated fact. **Nothing needs to change for it**; the
    pipeline is already wired and the publisher already exists.
-3. **Fix the `required-crew` gate** — it demands a tech-lead handoff `.ai/AGENTS.md`'s Session
+4. **Fix the `required-crew` gate** — it demands a tech-lead handoff `.ai/AGENTS.md`'s Session
    Loop never asks for, and it has now cost two founder waivers (S38, S39). Either surface the
    crew step in the constitution or drop the gate.
 
@@ -97,7 +101,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 ## Housekeeping
 
 - `pnpm --filter @ifelse.codes/chitra run test` → **452 green**
-- `scripts/verify-session-39.sh` → **41/41**
+- `scripts/verify-session-39.sh` → **42/42**
 - `scripts/demo-session-39.sh` → exit 0
 - `scripts/verify-closeout.sh 39` → **16/16 ALL GREEN** with `VAJRA_CLOSEOUT_WAIVER=39`
   (`required-crew` **WAIVED**, not passed — the reason is recorded in the close log)
