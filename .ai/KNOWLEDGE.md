@@ -269,3 +269,40 @@
   greps stay green when the executed command is reverted behind an unreachable branch.
   Scope such checks to the step's `run:` block, anchor patterns to line start, and always
   construct the counterfactual before citing a check as a regression guard.
+
+## S39 extension — the rename, and why a new package can never be published unattended (2026-09-29)
+- **A brand-new package name CANNOT be published by CI. The first publish is necessarily
+  human.** npm configures a trusted publisher *per package, inside that package's settings
+  page* — and a package that does not exist has no settings page. So the chicken-and-egg is
+  structural: OIDC → needs a trusted publisher → needs the package → needs a publish that
+  only a human can make. (PyPI allows configuring OIDC for a not-yet-existing package; npm
+  does not.) **Renaming a package therefore always costs one human publish**, and the S38
+  "unattended" property does not survive a rename until the NEXT version. Order that works:
+  human `npm publish` once → create the trusted publisher (tick "allow `npm publish`") →
+  cut a new tag. The failure is `PUT .../@ifelse.codes%2fchitra` → **404 "could not be found
+  or you do not have permission"**; the tarball builds fine first, so the log looks healthy
+  right up to the auth line.
+- **"publish time ≥ run start" does NOT prove CI published — it is a hollow check.** It
+  passed for S39's `0.3.0` while being false: the publish job FAILED at 09:07:31Z and a human
+  published at 13:30:46Z. To actually discriminate, assert THREE things: (1) the first
+  attempt's publish job failed, (2) the retry's publish job took the *skip* path (log
+  contains "is already on npm — skipping publish" and does NOT contain "Publishing to"),
+  and (3) npm's publish time **precedes** the retry's publish-job `started_at`. Only (3)
+  is decisive, and it is falsifiable in both directions. Read per-attempt data with
+  `gh api repos/{o}/{r}/actions/runs/{id}/attempts/{n}/jobs` — `gh run view` only reports the
+  LATEST attempt, which silently erases a failed first one.
+- **Re-running a failed release is safe and is itself a proof.** `release.yml`'s idempotency
+  guard makes attempt 2 exit 0 with a `::notice` — which is the *behavioural* proof that the
+  guard aims at the renamed package. A grep over the workflow text could not show that.
+- **npm's `npm login --auth-type=web` needs ENTER.** It prints the URL then blocks on
+  "Press ENTER to open in the browser…". Opening the URL by hand without pressing ENTER lets
+  the CLI die with `npm error Exit handler never called!` and fall back to a Username prompt.
+  Press Enter (npm opens the browser, flow stays live), then the publish triggers a *second*
+  browser auth at `/auth/cli/<id>`.
+- **A stale revoked token in the global `~/.npmrc` will be sent to the registry and wins over
+  interactive auth.** Isolate a publish with `export npm_config_userconfig=<tmp>` rather than
+  editing or trusting the global config — then delete the tmp file; the web-login session
+  token dies with it and there is nothing to leak or revoke.
+- **Packument propagation lag, re-confirmed:** the human publish returned success and the
+  tarball was live immediately, but `npm view <pkg> version` 404'd for **~4 min**. Re-query;
+  never re-publish on a 404.

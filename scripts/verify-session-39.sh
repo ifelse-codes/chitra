@@ -164,21 +164,63 @@ npm_epoch() {
     || echo ""
 }
 export -f npm_epoch   # run_check uses `bash -c`; unexported functions are invisible there
-# "Unattended" is a claim about *who* published, so it needs a falsifier, not an
-# assumption. npm's authoritative publish time is `time[<version>]` in the
-# packument; the workflow's start is the run's `createdAt`. Require publish >=
-# run-start: a human publishing locally first would show the reverse.
-# (Read the whole time map and index the key — `npm view pkg time.0.3.0` parses
-# the dots as a nested field path and silently yields nothing. S38's lesson.)
-run_check "published-after-run-start"  bash -c '
-  NPM_T="$(npm view @ifelse.codes/chitra time --json 2>/dev/null | node -e "let s=\"\";process.stdin.on(\"data\",d=>s+=d).on(\"end\",()=>{try{process.stdout.write(JSON.parse(s)[\"0.3.0\"]||\"\")}catch(e){}})")"
-  RUN_T="$(gh run list --repo ifelse-codes/chitra --workflow release.yml --limit 30 --json headBranch,createdAt \
-            --jq ".[] | select(.headBranch==\"v0.3.0\") | .createdAt" | head -1)"
-  [ -n "$NPM_T" ] && [ -n "$RUN_T" ] || exit 1
-  N="$(npm_epoch "$NPM_T")"; R="$(npm_epoch "$RUN_T")"
-  [ -n "$N" ] && [ -n "$R" ] || exit 1
-  [ "$N" -ge "$R" ]'
-run_check "run-actually-succeeded"     bash -c "gh run list --repo ifelse-codes/chitra --workflow release.yml --limit 30 --json headBranch,conclusion --jq '.[] | select(.headBranch==\"v0.3.0\") | .conclusion' | grep -q success"
+# ── WHO published 0.3.0? The honest answer is "not CI", and that must be
+# ASSERTED rather than left to a check that quietly goes green.
+#
+# S38's `published-after-run-start` compared npm's publish time to the run's
+# start. For 0.3.0 that comparison PASSES — 13:30:46Z >= 09:06:11Z — while being
+# completely false: the publish job FAILED at 09:07:31Z and a human published
+# 13:30:46Z. The check cannot distinguish "CI published 2 min into the run" from
+# "CI died and a human published 4 h later". Keeping it would have been a falsely
+# green gate inside the very session whose review exists to kill that class.
+#
+# Three observable facts pin the truth instead, and all three must hold:
+#   (1) attempt 1's publish job FAILED  -> CI never published on the first pass
+#   (2) attempt 2's publish job SKIPPED -> CI never published on the retry
+#   (3) npm's publish time PRECEDES attempt 2's publish-job start
+#       -> the version was already on npm before CI's only successful attempt
+#          began, so neither attempt can have produced it
+# Falsifiable in both directions: if a future run really did publish 0.3.0, (1)
+# and (3) break and this goes red.
+RUN_ID=36546969338
+attempt_job() {  # attempt_job <n> -> "<conclusion> <started_at> <completed_at>"
+  gh api "repos/ifelse-codes/chitra/actions/runs/$RUN_ID/attempts/$1/jobs" \
+    --jq '.jobs[] | select(.name | startswith("publish")) | "\(.conclusion) \(.started_at) \(.completed_at)"' | head -1
+}
+npm_published_at() {
+  npm view @ifelse.codes/chitra time --json 2>/dev/null \
+    | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s)["0.3.0"]||"")}catch(e){}})'
+}
+export -f attempt_job npm_published_at npm_epoch
+export RUN_ID
+
+run_check "ci-attempt1-publish-failed"  bash -c '
+  set -- $(attempt_job 1); [ "$1" = "failure" ] \
+    || { echo "attempt 1 publish job: $1 (expected failure)"; exit 1; }'
+run_check "ci-attempt2-publish-skipped" bash -c '
+  set -- $(attempt_job 2); [ "$1" = "success" ] \
+    || { echo "attempt 2 publish job: $1 (expected success via skip)"; exit 1; }
+  log="$(gh run view $RUN_ID --repo ifelse-codes/chitra --log 2>/dev/null)"
+  echo "$log" | grep -qF "is already on npm — skipping publish" \
+    || { echo "no skip notice in the log — attempt 2 may have really published"; exit 1; }
+  echo "$log" | grep -qF "Publishing to https://registry.npmjs.org/" \
+    && { echo "attempt 2 DID publish — 0.3.0 would be a CI publish after all"; exit 1; }
+  exit 0'
+run_check "publish-not-from-ci"          bash -c '
+  set -- $(attempt_job 2); a2_started="$2"
+  pub="$(npm_published_at)"; [ -n "$pub" ] && [ -n "$a2_started" ] || exit 1
+  P="$(npm_epoch "$pub")"; A="$(npm_epoch "$a2_started")"
+  [ -n "$P" ] && [ -n "$A" ] || exit 1
+  [ "$P" -lt "$A" ] \
+    || { echo "publish=$pub is NOT before attempt-2 start=$a2_started — CI may have published"; exit 1; }'
+run_check "release-run-green"           bash -c "gh run view $RUN_ID --repo ifelse-codes/chitra --json conclusion --jq .conclusion | grep -qx success"
+# The idempotency guard is the load-bearing S39 release change: it had to be
+# repointed from the old package to the new one. Attempt 2 taking the skip path
+# is the behavioural proof that it aims at @ifelse.codes/chitra — a grep over
+# the workflow text would not survive a dead branch (S38's hollow-check class).
+run_check "idempotency-guard-behaved"   bash -c '
+  gh run view $RUN_ID --repo ifelse-codes/chitra --log 2>/dev/null \
+    | grep -qF "@ifelse.codes/chitra@0.3.0 is already on npm"'
 
 # ── Req 9: session invariants ──────────────────────────────────────────
 run_check "prompt-exists"             test -f prompts/39-task-rename-chitra.md
