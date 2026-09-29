@@ -1,14 +1,13 @@
 {
-  "name": "@ifelse.codes/core",
-  "version": "0.2.0",
-  "description": "Beautiful visualizations for terminals, agents, and modern developer workflows",
+  "name": "@ifelse.codes/chitra",
+  "version": "0.3.0",
+  "description": "chitra — beautiful, zero-dependency terminal charts for CLIs and agents. Braille-rendered text charts with toPlain()/toJSON() agent output.",
   "keywords": [
     "terminal",
     "charts",
     "visualization",
     "cli",
     "ai-agents",
-    "mcp",
     "unicode",
     "braille",
     "sparkline",

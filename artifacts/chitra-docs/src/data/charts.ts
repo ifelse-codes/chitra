@@ -40,7 +40,7 @@ export const CHARTS: ChartDef[] = [
 │        7D Ago 6D Ago  5D Ago 4D Ago  3D Ago 2D Ago  1D Ago   Now     │
 │ * Series 1 · lowest 23.9K · highest 24.9K · avg 24.4K · last 24.6K   │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { line } from "@ifelse.codes/core";
+    code: `import { line } from "@ifelse.codes/chitra";
 
 line({
   data: [
@@ -80,7 +80,7 @@ line({
 │    JaFeMaApMaJ                          │
 │ ■ Series 1 · avg 55.83 · peak 72 ▂▇▅█▆  │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { bar } from "@ifelse.codes/core";
+    code: `import { bar } from "@ifelse.codes/chitra";
 
 bar({
   data: [42, 67, 38, 55, 72, 61],
@@ -107,7 +107,7 @@ bar({
 │ 10│⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿   │
 │ series · highest 52 · lowest 10 · last 52        │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { area } from "@ifelse.codes/core";
+    code: `import { area } from "@ifelse.codes/chitra";
 
 area({
   data: [10, 20, 15, 35, 28, 45, 38, 52],
@@ -148,7 +148,7 @@ area({
 │ ▒▒░░▒▒░░▓▓▓▓██▓▓████  │
 │ 10 readings · peak 30 │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { sparkline } from "@ifelse.codes/core";
+    code: `import { sparkline } from "@ifelse.codes/chitra";
 
 // Unicode blocks (default)
 sparkline({ data: [45, 52, 61, 58, 70, 65, 78, 72, 80, 82],
@@ -184,7 +184,7 @@ sparkline({ data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
 │   1   2   3   4   5   5   6   7      │
 │ 21 samples · peak 4.50               │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { histogram } from "@ifelse.codes/core";
+    code: `import { histogram } from "@ifelse.codes/chitra";
 
 histogram({
   data: [1,2,2,3,3,3,4,4,4,4,5,5,5,5,5,6,6,6,7,7,8],
@@ -216,7 +216,7 @@ histogram({
 │  2│⡀                                           │
 │ 8 points · peak (10, 12)                       │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { scatter } from "@ifelse.codes/core";
+    code: `import { scatter } from "@ifelse.codes/chitra";
 
 scatter({
   data: [
@@ -254,7 +254,7 @@ scatter({
 │            ⠐⠑⠳⠳⠳⠳⠳⠳⠳⠑⠁                                    │
 │ 5 slices · total 100                                      │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { pie } from "@ifelse.codes/core";
+    code: `import { pie } from "@ifelse.codes/chitra";
 
 pie({
   data: [35, 25, 20, 12, 8],
@@ -287,7 +287,7 @@ pie({
 │        ⠐⠳⡷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡷⠳⠁                                   │
 │            ⠐⠑⠳⠳⠳⠳⠳⠳⠳⠑⠁                                       │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { donut } from "@ifelse.codes/core";
+    code: `import { donut } from "@ifelse.codes/chitra";
 
 donut({
   data: [30, 25, 22, 15, 8],
@@ -312,7 +312,7 @@ donut({
 │                                      │
 │ 4×5 grid · peak (3, 4)               │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { heatmap } from "@ifelse.codes/core";
+    code: `import { heatmap } from "@ifelse.codes/chitra";
 
 heatmap({
   data: [
@@ -355,7 +355,7 @@ heatmap({
 │ 0                            100 │
 │ 34 of 0..100 · 34.0%             │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { progress } from "@ifelse.codes/core";
+    code: `import { progress } from "@ifelse.codes/chitra";
 
 progress({ value: 87, label: "Build" }).render();
 progress({ value: 62, label: "Tests" }).render();
@@ -374,7 +374,7 @@ progress({ value: 34, label: "Coverage" }).render();`,
 │ 0                                100 │
 │ 73 of 0..100 · 73.0%                 │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { gauge } from "@ifelse.codes/core";
+    code: `import { gauge } from "@ifelse.codes/chitra";
 
 gauge({
   value: 73,
@@ -401,7 +401,7 @@ gauge({
 │            0             892     │
 │ 5 items · peak TypeScript (892)  │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { horizontalBar } from "@ifelse.codes/core";
+    code: `import { horizontalBar } from "@ifelse.codes/chitra";
 
 horizontalBar({
   data: [892, 645, 534, 421, 289],
@@ -424,7 +424,7 @@ horizontalBar({
 │        0                                       8 │
 │ 4 events · longest Build                         │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { timeline } from "@ifelse.codes/core";
+    code: `import { timeline } from "@ifelse.codes/chitra";
 
 timeline({
   events: [
@@ -476,7 +476,7 @@ timeline({
 │ ● ── Series 1                                                    │
 │ average 7.17 · peak UX (9)                                       │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { radar } from "@ifelse.codes/core";
+    code: `import { radar } from "@ifelse.codes/chitra";
 
 radar({
   data: [8, 6, 9, 7, 5, 8],
@@ -510,7 +510,7 @@ radar({
 │      Q1      Q2      Q3                        │
 │ 3 groups · median 22 · peak Q2 (25)            │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { boxplot } from "@ifelse.codes/core";
+    code: `import { boxplot } from "@ifelse.codes/chitra";
 
 boxplot({
   data: [
@@ -546,7 +546,7 @@ boxplot({
 │     Star COGS Rev  OpEx Sale Tota              │
 │ START 500 · Δ −120 +80 −60 +150 · TOTAL 550    │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { waterfall } from "@ifelse.codes/core";
+    code: `import { waterfall } from "@ifelse.codes/chitra";
 
 waterfall({
   data: [500, -120, 80, -60, 150],
@@ -571,7 +571,7 @@ waterfall({
 │ Enterprise                 ▓ 340 (3%)                     │
 │ IN 10.0K · OUT 340 · CONVERSION 3% · DROP Enterprise −72% │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { funnel } from "@ifelse.codes/core";
+    code: `import { funnel } from "@ifelse.codes/chitra";
 
 funnel({
   data: [10000, 6800, 3400, 1200, 340],
@@ -607,7 +607,7 @@ funnel({
 │       Jan 8 Jan 9 Jan10 Jan11 Jan12 Jan15 Jan16 Jan17 Jan18 Jan19    │
 │ 10 candles · high 215 · low 138 · last 210                           │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { candlestick } from "@ifelse.codes/core";
+    code: `import { candlestick } from "@ifelse.codes/chitra";
 
 candlestick({
   title: "CHRX — 10-Day Price Action",
@@ -648,7 +648,7 @@ candlestick({
 │ │████████████████████▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▒▒▒▒░░░░ │
 │ 5 leaves · peak TS                             │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { treemap } from "@ifelse.codes/core";
+    code: `import { treemap } from "@ifelse.codes/chitra";
 
 treemap({
   data: [
@@ -683,7 +683,7 @@ treemap({
 │   ■ Enterprise  in:10                       │
 │ NODES 5 · LINKS 4 · PEAK Users → Free 60    │
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘`,
-    code: `import { sankey } from "@ifelse.codes/core";
+    code: `import { sankey } from "@ifelse.codes/chitra";
 
 sankey({
   nodes: ["Users", "Free", "Pro", "Enterprise", "Churned"],
