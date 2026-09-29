@@ -59,7 +59,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   notices to come out rather than stand as a claim about npm's registry. Three live lies fixed
   in passing: the docs hero pill (`v0.1.0` while the manifest said `0.2.0`), the CHANGELOG's
   "no public version published yet", and the contract's own deprecation sentence.
-  `verify-session-39.sh` 41/41; cold review REJECTed the first delivery (a narrowed honesty
+  `verify-session-39.sh` 42/42; cold review REJECTed the first delivery (a narrowed honesty
   guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
 - 🔜 **Next (S40 candidates):** a **GTM proof pack** (benchmarks / token-savings /
   before-after) — unblocked, and it now measures the *final* install command; then a real
