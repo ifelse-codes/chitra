@@ -113,9 +113,21 @@ tech-lead picks the crew and budgets *before* the work. Founder waiver
 ## Execution
 
 - steps 1–4 — done
-- step 5 — **PENDING (founder, npmjs.com)**: trusted publisher for the new name
-- step 6 — pending: needs the tag (verify checks legitimately red until then)
+- step 5 — **done (founder, npmjs.com)**: trusted publisher created for `@ifelse.codes/chitra`
+  *after* the human bootstrap publish; the package-settings page only exists once the package
+  does. Foundationally unorderable the other way — see step 6.
+- step 6 — **done, but NOT unattended**: `v0.3.0` cut on merged `main` (run `36546969338`);
+  the three gate jobs passed and the tarball built correctly, then `publish` failed —
+  `PUT .../@ifelse.codes%2fchitra` → **404 "could not be found or you do not have permission"**.
+  **Root cause: npm configures a trusted publisher inside the package's own settings, and a
+  package that does not exist has no settings page — so a brand-new name cannot be OIDC-published
+  at all.** A human published `0.3.0` once (13:30:46Z) via `npm login --auth-type=web` + passkey
+  in an isolated `npm_config_userconfig`; the founder then created the trusted publisher. The
+  retry took the idempotency skip path and the run went 4/4 green. **The "unattended" property
+  is restored from `0.4.0` onward, not for `0.3.0`** — and the S38 ordering check, which would
+  have gone *falsely* green here, was replaced with three attempt-level assertions that pin the
+  truth (CI published it zero times).
 - step 7 — **DONE, inverted by founder decision 2026-09-29**: *no* deprecation. The
   rename notices that claimed one were removed, and a check now guards their absence.
-- step 8 — done: verify + demo shipped; guards counterfactual-tested
+- step 8 — done: verify + demo shipped; guards counterfactual-tested (10 counterfactuals)
 - step 9 — pending: cold review + closeout
