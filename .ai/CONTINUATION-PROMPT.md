@@ -1,7 +1,8 @@
 # chitra — Continuation Handoff (after S39)
 
 **Resume in a NEW chat (S40).** `main` = S00–S39 (`68d0b26`); `.ai/SESSION` = 39;
-tags `v0.1.0`/`v0.2.0`/`v0.3.0` on `main` HEAD; **`@ifelse.codes/chitra@0.3.0` is LIVE on npm**
+`v0.3.0` on `main` HEAD (`v0.1.0`/`v0.2.0` sit on their original commits, never moved);
+**`@ifelse.codes/chitra@0.3.0` is LIVE on npm**
 (`latest`).
 
 > **The one thing to carry forward:** a brand-new package name can never be published by CI.
@@ -17,13 +18,13 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 | Delivered in S39 | State |
 |---|---|
 | `@ifelse.codes/chitra@0.3.0` | **live**, 38 files / 446,756 B, consumer-verified |
-| Rename across 21 files | `charts.ts` regenerated, never hand-edited |
+| Rename across 27 changed files | `charts.ts` regenerated, never hand-edited |
 | `mcp` keyword | **dropped** — nothing ships it; a keyword is a promise |
 | The npm chicken-and-egg | `v0.3.0` publish job 404'd on a missing publisher — **proven, not assumed** |
 | Who actually published | **a human**, 13:30:46Z. CI published **zero** times — asserted, not narrated |
 | Idempotency guard | proven **behaviourally** (attempt 2 skipped), not by grep |
 | Deprecation | **dropped** by founder — no public release, nobody to redirect |
-| Verify | `verify-session-39.sh` **37/37**, 10 counterfactuals, all bit |
+| Verify | `verify-session-39.sh` **41/41**, 14 counterfactuals, all bit |
 
 ## S40 candidates (founder ranks these)
 
@@ -96,7 +97,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 ## Housekeeping
 
 - `pnpm --filter @ifelse.codes/chitra run test` → **452 green**
-- `scripts/verify-session-39.sh` → **37/37**
+- `scripts/verify-session-39.sh` → **41/41**
 - `scripts/demo-session-39.sh` → exit 0
 - `scripts/verify-closeout.sh 39` → needs `VAJRA_CLOSEOUT_WAIVER=39` (`required-crew`,
   founder-waived, recorded in the close log)
