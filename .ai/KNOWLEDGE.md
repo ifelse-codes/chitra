@@ -307,6 +307,23 @@
   interactive auth.** Isolate a publish with `export npm_config_userconfig=<tmp>` rather than
   editing or trusting the global config — then delete the tmp file; the web-login session
   token dies with it and there is nothing to leak or revoke.
+- **A deploy is a MANUAL step, so the public site drifts silently — and S37/S38/S39 all shipped
+  content nobody deployed.** The S39 gap audit found `chitra.iifelse.com` still serving
+  `npm install @chitra/core` — the name from *before* S37, under an npm org S37 established the
+  account does not own. CI was green, verify was green, the package was on npm. Nothing failed,
+  because nothing checks the deployed artefact against `main`. Three sessions of correct merges
+  produced a front door that would have 404'd any user who followed it. **`verify-session-39.sh`
+  now runs `live-site-serves-current-name`** (fails closed on no network): it fetches the live
+  shell, resolves the hashed bundle, and asserts the new name is present *and* both old names
+  are absent. Deploy on every docs-content change:
+  `wrangler pages deploy dist/public --project-name=chitra --branch=main` (build needs
+  `PORT=5000 BASE_PATH=/`). **The remaining systemic gap: this lives in a session verify script,
+  not in CI, so it only guards the session that adds it — a CI gate is the S40 fix.**
+- **Keep local `main` fast-forwarded.** It sat at the S38 head through all of S39 because every
+  branch was cut from `origin/main` and never merged back. That silently breaks
+  `verify-closeout.sh`'s canonical `--inputs-sha`, which hashes `git merge-base main HEAD` — the
+  attested hash moved when `main` caught up. An S40 branching from `main` would have started
+  without any of S39's work. `git checkout main && git merge --ff-only origin/main` at closeout.
 - **Packument propagation lag, re-confirmed:** the human publish returned success and the
   tarball was live immediately, but `npm view <pkg> version` 404'd for **~4 min**. Re-query;
   never re-publish on a 404.
