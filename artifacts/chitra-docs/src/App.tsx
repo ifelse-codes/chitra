@@ -422,6 +422,15 @@ function AiPage({ onNav }: { onNav: (id: string) => void }) {
       <h2>noColor + toPlain</h2>
       <CodeBlock code={`import { bar } from "@ifelse.codes/chitra";\n\nconst chart = bar({\n  data: [42, 67, 38],\n  labels: ["Q1", "Q2", "Q3"],\n  title: "Quarterly Revenue",\n  noColor: true,          // skip ANSI at generation time\n});\n\n// Pass directly to any LLM or agent:\nconst text = chart.toPlain();\nconst json  = chart.toJSON();\n// { type: "bar", title: "Quarterly Revenue",\n//   data: [42, 67, 38], labels: [...], plain: "..." }`} />
       <h2>MCP tool handler</h2>
+      {/* S38 applied this rider to the README; S39's gap audit found the docs site
+          never got it, so a visitor here read a working-looking MCP integration that does
+          not exist. Same rule, same place a reader actually lands. */}
+      <p className="lead">
+        <strong>Not shipped yet.</strong> There is no MCP server in this package. Deferred at
+        the founder's direction until a release exists <em>and</em> someone actually asks for
+        it (tracked in <code>.ai/ROADMAP.md</code>). Shown to document the intended shape, not to
+        advertise a working feature.
+      </p>
       <CodeBlock code={`import { plot } from "@ifelse.codes/chitra";\n\nserver.tool("render_chart", async ({ type, data, labels, title }) => {\n  const builder = plot(data)\n    .title(title)\n    .labels(labels)\n    .noColor();\n\n  const result =\n    type === "bar"  ? builder.bar()  :\n    type === "line" ? builder.line() :\n    type === "pie"  ? builder.pie()  : builder.bar();\n\n  return {\n    content: [{ type: "text", text: result.toPlain() }]\n  };\n});`} />
       <p>Looking for the exact JSON every chart emits? Jump to the <button className="btn-secondary" onClick={() => onNav("ai-data")}>AI Data Reference →</button></p>
     </div>
