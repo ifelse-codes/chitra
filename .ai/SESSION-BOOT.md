@@ -9,10 +9,10 @@
 ## Repo State Snapshot
 - `.ai/SESSION` = 39.
 - Remote: `github.com/ifelse-codes/chitra` (**private**). `main` has S00–S39 (PR #55,
-  `68d0b26`); tags `v0.1.0`/`v0.2.0`/`v0.3.0` are all on `main` HEAD and the Release workflow
+  `68d0b26`); only `v0.3.0` sits on `main` HEAD (`v0.1.0` is at `802ffc7`, `v0.2.0` at `76d21f3` — the old tags were never moved, which is why `0.3.0` was chosen), and the Release workflow
   is green.
 - **S39 delivery:** the package is **`@ifelse.codes/chitra@0.3.0`**, live on npm (38 files /
-  446,756 B, consumer-verified). 21 files, +680/−116, 3 PRs, 12 atomic commits.
+  446,756 B, consumer-verified). 27 files, +1039/−360, 4 PRs, 15 atomic commits.
 - **The finding that outlasts the rename:** **a brand-new package name can never be published
   by CI.** npm configures a trusted publisher *inside the package's own settings page*, and a
   package that does not exist has no settings page — so OIDC → publisher → package → a publish

@@ -46,7 +46,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   handler that does not exist — that claim is now corrected in both places.)
 - ✅ **Session 39 (S39) — rename the package to `@ifelse.codes/chitra`:** the npm page read
   `@ifelse.codes/core`, which buried the product name in every install command. The scope was
-  never the problem — the part after the slash is. 21 files renamed; `charts.ts` regenerated
+  never the problem — the part after the slash is. 27 files changed; `charts.ts` regenerated
   (never hand-edited); `mcp` dropped from `keywords` (nothing ships it, and a keyword is a
   promise in a search index); description now leads with the name.
   **A brand-new package name cannot be published by CI** — npm keeps the trusted-publisher
@@ -59,7 +59,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   notices to come out rather than stand as a claim about npm's registry. Three live lies fixed
   in passing: the docs hero pill (`v0.1.0` while the manifest said `0.2.0`), the CHANGELOG's
   "no public version published yet", and the contract's own deprecation sentence.
-  `verify-session-39.sh` 37/37; cold review REJECTed the first delivery (a narrowed honesty
+  `verify-session-39.sh` 41/41; cold review REJECTed the first delivery (a narrowed honesty
   guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
 - 🔜 **Next (S40 candidates):** a **GTM proof pack** (benchmarks / token-savings /
   before-after) — unblocked, and it now measures the *final* install command; then a real
