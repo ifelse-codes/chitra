@@ -139,7 +139,22 @@ run_check "new-package-published"      bash -c '[ "$(npm view @ifelse.codes/chit
 # The old package must still exist (npm cannot rename) AND point at the new one.
 # This IS publicly assertable — no npm auth needed — so it is a real gate, not a
 # founder attestation.
-run_check "old-package-deprecated"    bash -c 'npm view @ifelse.codes/core deprecated 2>/dev/null | grep -q "@ifelse.codes/chitra"'
+# Founder decision 2026-09-29: do NOT deprecate the old package (no public release,
+# no external user to redirect). This check previously asserted the deprecation
+# WAS present — which would have gone permanently red against a decision that is
+# deliberate, i.e. it would have pressured a revert of a sound call.
+#
+# What is actually worth guarding is the opposite direction: our OWN docs must not
+# claim a registry state we have not observed. The rename notices added earlier in
+# this session said "deprecated on npm"; the deprecate was then dropped, and those
+# sentences would have shipped as lies. So assert the ABSENCE of the claim.
+run_check "no-false-deprecation-claim" bash -c '
+  hits="$(grep -rniE "deprecat" README.md packages/core/README.md packages/core/CHANGELOG.md 2>/dev/null || true)"
+  [ -z "$hits" ] || { echo "docs claim a deprecation that was never performed:"; echo "$hits"; exit 1; }'
+# The old package still resolves, and that is the *only* registry fact about it we
+# assert. It is true, observable without auth, and worth pinning: if the old name ever
+# disappears, the story in CHANGELOG ("shipped as @ifelse.codes/core through 0.2.0")
+# becomes unfalsifiable.
 run_check "old-version-still-intact"   bash -c '[ "$(npm view @ifelse.codes/core@0.2.0 version 2>/dev/null)" = "0.2.0" ]'
 
 npm_epoch() {

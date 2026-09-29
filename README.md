@@ -67,10 +67,6 @@ line({
 
 ## Install
 
-> **Renamed at `0.3.0`.** The package was `@ifelse.codes/core` through `0.2.0` (and
-> `@chitra/core` before that). Both are deprecated on npm — the code is unchanged, only the
-> name moved.
-
 ```bash
 # From npm
 pnpm add @ifelse.codes/chitra

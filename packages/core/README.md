@@ -1,9 +1,5 @@
 # @ifelse.codes/chitra
 
-> **Renamed.** This package shipped as `@ifelse.codes/core` through `0.2.0` (and
-> `@chitra/core` before that). Both are deprecated on npm. The code is unchanged since
-> `0.2.0` — only the name moved.
-
 A production-grade TypeScript terminal charting library. Beautiful visualizations for terminals, agents, and modern developer workflows.
 
 ## Features
