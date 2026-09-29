@@ -99,5 +99,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 - `pnpm --filter @ifelse.codes/chitra run test` → **452 green**
 - `scripts/verify-session-39.sh` → **41/41**
 - `scripts/demo-session-39.sh` → exit 0
-- `scripts/verify-closeout.sh 39` → needs `VAJRA_CLOSEOUT_WAIVER=39` (`required-crew`,
-  founder-waived, recorded in the close log)
+- `scripts/verify-closeout.sh 39` → **16/16 ALL GREEN** with `VAJRA_CLOSEOUT_WAIVER=39`
+  (`required-crew` **WAIVED**, not passed — the reason is recorded in the close log)
+- cold review: `sessions/session-39-review.md` — four independent cold passes; REJECT, REJECT,
+  REJECT, **ACCEPT**. Every prior REJECT was upheld on real evidence and produced a real repair.
