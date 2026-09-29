@@ -3,10 +3,12 @@
 **Permanent facts only. Reloaded every session.** (Seeded S00 brownfield onboarding, 2026-07-02.)
 
 ## What chitra is
-- **`@ifelse.codes/core`** (`packages/core/`, v0.1.0, MIT) — the product: a zero-runtime-dependency
+- **`@ifelse.codes/chitra`** (`packages/core/`, v0.3.0, MIT) — the product: a zero-runtime-dependency
   TypeScript terminal charting library. "Beautiful visualizations for terminals, agents, and
   modern developer workflows." 20 chart types, 3 renderers (braille/blocks/ascii), 7 themes.
-  **Published on npm as `@ifelse.codes/core@0.1.0` (S37, tag `latest`).**
+  **Published on npm as `@ifelse.codes/chitra@0.3.0` (S39, tag `latest`).** Renamed from
+  `@ifelse.codes/core` on 2026-09-29; that name is **not** deprecated (no public release, no
+  external user) — the S36/S37/S38 sections below keep it because they are dated records.
 - Around the lib sits a **Replit-scaffolded full-stack** (all in-scope per founder):
   - `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4 + shadcn/ui docs/marketing site
     (renders chitra output; `src/data/charts.ts`, `src/data/ansi-charts.json`).
@@ -26,21 +28,21 @@
   `package-lock.json`/`yarn.lock`.
 - Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `lib/*`, `lib/integrations/*`,
   `packages/*`, `scripts`. Internal packages are named `@workspace/*`; the shippable one is
-  `@ifelse.codes/core`.
+  `@ifelse.codes/chitra` (the *directory* is still `packages/core/` — S39 kept the path).
 - Testing: **Vitest** (`packages/core/tests/`, 23 files, **452 tests**).
 
 ## Commands (verified working)
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @ifelse.codes/core run test` | 452 tests (23 files) |
-| `pnpm --filter @ifelse.codes/core run test:coverage` | tests + coverage |
-| `pnpm --filter @ifelse.codes/core run typecheck` | `tsc --noEmit` on the lib |
+| `pnpm --filter @ifelse.codes/chitra run test` | 452 tests (23 files) |
+| `pnpm --filter @ifelse.codes/chitra run test:coverage` | tests + coverage |
+| `pnpm --filter @ifelse.codes/chitra run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
 | `pnpm run build` | typecheck + `pnpm -r run build` |
 
 ## Conventions & invariants (must never break)
-- **Zero runtime dependencies** in `@ifelse.codes/core` — ANSI, braille math, rendering are all
+- **Zero runtime dependencies** in `@ifelse.codes/chitra` — ANSI, braille math, rendering are all
   self-contained. Never add a runtime dep.
 - **AI-agent output is core**: every chart returns a `ChartResult`
   (`{ render, toString, toPlain, toMarkdown, toJSON }`). `toPlain()` / `toJSON()` +
@@ -218,6 +220,8 @@
   place and let `verify-session-34.sh#test-count-matches` guard the README badge.
 
 ## S37 extension — package published to npm (2026-09-24)
+> Superseded by S39: the shippable name is now `@ifelse.codes/chitra` and `latest` is `0.3.0`.
+> Kept as a dated record; the "dist-tag `latest`" below was true only until 2026-09-29.
 - **`@ifelse.codes/core@0.1.0` is LIVE on npm** (38 files / 94.2 kB, dist-tag `latest`;
   clean consumer `npm install` verified). The package was **renamed** from `@chitra/core`
   because the `@chitra` npm **org is not owned by the account** (`npm org ls chitra` →
