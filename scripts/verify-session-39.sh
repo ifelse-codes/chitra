@@ -339,6 +339,18 @@ run_check "live-site-serves-current-name" bash -c '
       && { echo "the live site still advertises $stale"; exit 1; }
   done
   exit 0'
+# S38 put an "MCP tool handler — not shipped yet" rider on the README. S39's gap
+# audit found the DOCS SITE never got it: the AI Agent Support page rendered a
+# working-looking `server.tool("render_chart", …)` sample under a plain
+# "<h2>MCP tool handler</h2>" heading, to anyone who visited. The rider is a promise
+# that both surfaces keep, so assert both — a check on one file is a check that
+# drifts the moment the other is edited.
+run_check "mcp-rider-on-every-surface" bash -c '
+  for f in README.md artifacts/chitra-docs/src/App.tsx; do
+    [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
+    grep -qiE "not shipped yet" "$f" \
+      || { echo "$f shows an MCP handler with no \"not shipped yet\" rider — nothing ships it"; exit 1; }
+  done'
 run_check "prompt-exists"             test -f prompts/39-task-rename-chitra.md
 run_check "core-tests-452"            bash -c "pnpm --filter $NEW run test 2>&1 | grep -qE 'Tests +452 passed'"
 run_check "core-typecheck"            pnpm --filter @ifelse.codes/chitra run typecheck
