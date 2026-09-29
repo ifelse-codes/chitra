@@ -119,4 +119,18 @@ and the delivery's distinguishing feature is that it reports its own headline fa
 papering over it. The three prior REJECTs were each upheld on real evidence and each produced a
 genuine repair; nothing was dismissed.
 
-**Review-Inputs-SHA:** f26b07610d728fe5697bb5e83d086754a54ce6d59877685e4bbd31584d80b78f
+**Review-Inputs-SHA:** e586feeb1855e1c25fa630a8c46f2978a08ff09ff81b03a4327e484c5a83c6f8
+
+> **Attestation history, recorded rather than quietly replaced.** The hash above was
+> `f26b0761…0d80b78f` when this review was first written, because the gate computes
+> `git merge-base main HEAD` and local `main` was then five PRs stale (it still sat at
+> `46edac5`, the S38 head). That staleness was itself a defect found in the S39 gap audit: an
+> S40 branching from `main` would have started without any of S39's work. Local `main` was
+> fast-forwarded to `origin/main` (`c120c53`), which moved the merge-base and therefore the
+> canonical hash. Both values are recorded here; neither is concealed. The first attested the
+> full `46edac5..HEAD` delivery the auditor actually read, which is the binding the gate exists
+> to provide; the second is what the gate re-derives from the repaired tree.
+>
+> Note for S40: the `ai-docs-quote-real-score` guard exists because a number a human maintains
+> across files is a number that will be wrong — and it immediately caught its own author for
+> adding a check (41 → 42) without updating the count.
