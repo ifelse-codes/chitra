@@ -66,11 +66,19 @@ choice. Decision: **`@ifelse.codes/chitra`**.
    One trusted publisher **per package** — `0.2.0`'s config does **not** carry over.
 6. **Publish `@ifelse.codes/chitra@0.3.0` from merged `main`** via `v0.3.0`, unattended, and
    prove it the S38 way: npm `time["0.3.0"]` ≥ the Release run's `createdAt`.
-7. **`npm deprecate @ifelse.codes/core "renamed to @ifelse.codes/chitra"`.** npm cannot rename
-   a package, so the old one stays on the registry; deprecating beats a silent 404. This
-   **cannot** run from CI: OIDC mints a token scoped to the package being published, and the
-   founder's npm account token was revoked in S38 — so it is a founder browser action (or a
-   fresh token). Record it as founder-attested, never claim it repo-verified.
+7. **Do NOT deprecate `@ifelse.codes/core`.** — *founder decision, 2026-09-29, superseding
+   this contract's original step 7.* There is no public release and no external user, so
+   the rename carries nobody to redirect; `npm deprecate` would be ceremony for an audience
+   of one (the founder's own ~104 verification installs). The old package simply stays on
+   the registry, and the docs point at `@ifelse.codes/chitra` and nothing else.
+
+   **The consequence, which is the actual work here:** the rename notices added earlier in
+   this session *claimed* the old name was "deprecated on npm". Skipping the deprecate
+   turns those claims into lies, so they come out. A check now guards the *absence* of any
+   deprecation claim in the shipped docs — the guard is on our honesty, not on npm's
+   registry state. `packages/core/CHANGELOG.md` keeps a factual `0.3.0` record of the
+   rename (a changelog is a record of what a release changed, not a notice to a user;
+   deleting it would make `0.3.0` claim to have changed nothing).
 8. **`scripts/verify-session-39.sh` + `scripts/demo-session-39.sh`.** The verify script must
    assert **facts, not phrases** (S38's lesson: a check coupled to a string or a commit's
    position is not a guard) — e.g. read the *committed* name out of `main`'s
@@ -90,8 +98,9 @@ choice. Decision: **`@ifelse.codes/chitra`**.
 
 Atomic commits ≤3 files; branch `session-39-*`; PR to `main`; founder approval token before
 commits (`VAJRA_ALLOW_COMMIT=39`); push the branch before merging. Tag only from merged `main`.
-Never claim the deprecation happened until the founder confirms it. Keep the publish step on
-`npm publish` — pnpm 9.12.3 cannot exchange an OIDC token.
+Keep the publish step on `npm publish` — pnpm 9.12.3 cannot exchange an OIDC token. **Never
+let a doc claim a registry state we have not observed** (step 7: the notices asserted a
+deprecation that was then never performed; that is the shape of the lie to avoid).
 
 ## Crew dispatch — tech-lead: skipped (disclosed, not self-certified)
 
@@ -103,9 +112,10 @@ tech-lead picks the crew and budgets *before* the work. Founder waiver
 
 ## Execution
 
-- steps 1–4 — pending
+- steps 1–4 — done
 - step 5 — **PENDING (founder, npmjs.com)**: trusted publisher for the new name
 - step 6 — pending: needs the tag (verify checks legitimately red until then)
-- step 7 — **PENDING (founder)**: `npm deprecate @ifelse.codes/core`
-- step 8 — pending
-- step 9 — pending
+- step 7 — **DONE, inverted by founder decision 2026-09-29**: *no* deprecation. The
+  rename notices that claimed one were removed, and a check now guards their absence.
+- step 8 — done: verify + demo shipped; guards counterfactual-tested
+- step 9 — pending: cold review + closeout
