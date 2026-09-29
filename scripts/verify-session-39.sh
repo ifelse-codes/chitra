@@ -125,9 +125,20 @@ run_check "no-npm-secret-in-ci"        bash -c '! grep -vE "^[[:space:]]*#" .git
 
 # ── Req 4: the honesty fixes ───────────────────────────────────────────
 # S38 bumped the real version to 0.2.0 and never touched this pill — it still read
-# `v0.1.0 · npm` on the live site. A version pill that lags the manifest is a lie
-# the founder's own front door shows, so the check pins it to the manifest.
-run_check "hero-pill-matches-version"  bash -c 'grep -q "v0.3.0 · npm" $APP && ! grep -q "v0.1.0 · npm" $APP'
+# `v0.1.0 · npm` on the live site. A version pill that lags the manifest is a lie the
+# founder's own front door shows.
+#
+# The first version of this check grepped the literal "v0.3.0 · npm" while its own
+# comment claimed it "pins it to the manifest". It pinned it to nothing: bump the
+# manifest to 0.4.0, update everything else, forget the pill, and the check still
+# passed while the exact drift it exists to catch recurred. A comment that asserts a
+# property the code does not have is worse than no comment — so DERIVE the wanted
+# string from the manifest and assert the pill is the ONLY version pill present.
+run_check "hero-pill-matches-version" bash -c '
+  want="v$(node -p "require(\"./$PKG\").version") · npm"
+  found="$(grep -oE "v[0-9]+\.[0-9]+\.[0-9]+ · npm" "$APP" | sort -u | tr "\n" "," | sed "s/,$//")"
+  [ "$found" = "$want" ] \
+    || { echo "hero pill reads [$found]; manifest demands [$want]"; exit 1; }'
 run_check "no-stale-types-chitra-note" bash -c "! grep -q '@types/chitra' $APP"
 # Req 4 — `charts.ts` is GENERATED. Prove it with the real gate, not a grep: a
 # hand-edit that happens to contain the new name would pass any string check and
@@ -144,13 +155,50 @@ run_check "new-package-published"      bash -c '[ "$(npm view @ifelse.codes/chit
 # WAS present — which would have gone permanently red against a decision that is
 # deliberate, i.e. it would have pressured a revert of a sound call.
 #
-# What is actually worth guarding is the opposite direction: our OWN docs must not
-# claim a registry state we have not observed. The rename notices added earlier in
-# this session said "deprecated on npm"; the deprecate was then dropped, and those
-# sentences would have shipped as lies. So assert the ABSENCE of the claim.
+# What is worth guarding is the opposite direction: our OWN docs must not claim a
+# registry state we have not observed. The rename notices added earlier in this
+# session said "deprecated on npm"; the deprecate was then dropped, and those
+# sentences would have shipped as lies.
+#
+# SCOPE — the first version of this check grepped only three files and was named as
+# if it covered the whole surface. That was the hollow one: a migration banner added
+# to the docs app (the file a user actually reads) would have sailed through on a
+# green board. The docs app, the contract, and the live .ai/ files are all in scope
+# now, because all of them can reach a reader.
+#
+# PATTERN — deliberately NOT a blanket "deprecat" grep. `.ai/KNOWLEDGE.md`
+# legitimately records npm deprecating bypass-2FA tokens; a broad pattern would
+# false-positive there, and a check that has to be quietened is a check that gets
+# narrowed back down to nothing. Match only lines that pair a deprecation claim with
+# OUR old package name — that is precisely the lie, and nothing else.
 run_check "no-false-deprecation-claim" bash -c '
-  hits="$(grep -rniE "deprecat" README.md packages/core/README.md packages/core/CHANGELOG.md 2>/dev/null || true)"
-  [ -z "$hits" ] || { echo "docs claim a deprecation that was never performed:"; echo "$hits"; exit 1; }'
+  # Negation matters: the contract says "Do NOT deprecate @ifelse.codes/core" and
+  # STATE says "is NOT deprecated" — the OPPOSITE of the lie. A first cut of this
+  # pattern flagged all three, which is how a check teaches its owner to ignore it.
+  # Drop negated lines before asserting. `\\b` around the negation word so that
+  # "Note:" cannot masquerade as "no".
+  hits="$(grep -rniE "deprecat" \
+      README.md CONTRIBUTING.md replit.md \
+      packages/core/README.md packages/core/CHANGELOG.md packages/core/package.json \
+      artifacts/chitra-docs/src \
+      prompts/39-task-rename-chitra.md \
+      .ai/STATE.md .ai/KNOWLEDGE.md .ai/ROADMAP.md .ai/TASK.md .ai/SESSION-BOOT.md \
+      2>/dev/null \
+    | grep -E "@ifelse\.codes/core|@chitra/core" \
+    | grep -viE "\b(not|never|no|non)\b[^.]{0,24}deprecat" \
+    || true)"
+  [ -z "$hits" ] || { echo "these lines claim our old package is deprecated; it never was:"; echo "$hits"; exit 1; }'
+# The guard above only bites on a line that pairs the claim with the old name. A
+# bare migration banner ("this package moved, migrate now") names no old package
+# and would pass — so also assert no reader-facing surface carries ANY rename
+# notice at all, which is what the founder actually decided.
+run_check "no-rename-notice-shipped" bash -c '
+  hits="$(grep -rniE "renamed (at|to)|formerly|was .*@ifelse\.codes/core" \
+      README.md CONTRIBUTING.md replit.md \
+      packages/core/README.md \
+      artifacts/chitra-docs/src \
+      2>/dev/null || true)"
+  [ -z "$hits" ] || { echo "a rename notice is still shipping to readers:"; echo "$hits"; exit 1; }'
 # The old package still resolves, and that is the *only* registry fact about it we
 # assert. It is true, observable without auth, and worth pinning: if the old name ever
 # disappears, the story in CHANGELOG ("shipped as @ifelse.codes/core through 0.2.0")

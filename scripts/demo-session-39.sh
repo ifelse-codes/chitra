@@ -14,6 +14,8 @@ bad()    { printf "${RED}✗ %s${RESET}\n" "$1"; }
 dim()    { printf "${DIM}%s${RESET}\n" "$1"; }
 row()    { printf "  %-26s %s\n" "$1" "$2"; }
 
+DRIFT=fail
+OIDC_OK=fail
 OLD='@ifelse.codes/core'
 NEW='@ifelse.codes/chitra'
 
@@ -79,8 +81,8 @@ dim "  charts.ts is generated from chart-specs.ts. A hand-edit would survive eve
 dim "  grep and be silently reverted by the next gen:charts — so the gate is the"
 dim "  real generator check, not a string match:"
 if pnpm --filter @workspace/chitra-docs run gen:charts:check >/dev/null 2>&1; then
-  ok "gen:charts:check — charts.ts / ansi / svg / hero all up to date"
-else bad "gen:charts:check FAILED — the generated data drifted"; fi
+  DRIFT=ok; ok "gen:charts:check — charts.ts / ansi / svg / hero all up to date"
+else DRIFT=fail; bad "gen:charts:check FAILED — the generated data drifted"; fi
 
 label "5 · the release path survived a whole-file rewrite (S38, re-asserted)"
 PS="$(sed -n '/^  publish:/,$p' .github/workflows/release.yml | grep -vE '^[[:space:]]*#' \
@@ -91,8 +93,9 @@ echo "$PS" | grep -qE '^[[:space:]]*npm publish([[:space:]]|\$)' \
 echo "$PS" | grep -qF "npm view \"$NEW@\${VERSION}\"" \
   && ok "idempotency guard now checks the NEW package" \
   || bad "idempotency guard still points at the old package — it would never skip"
-grep -vE '^[[:space:]]*#' .github/workflows/release.yml | grep -q 'id-token: write' \
-  && ok "OIDC permissions intact (id-token: write)" || bad "id-token: write missing"
+if grep -vE '^[[:space:]]*#' .github/workflows/release.yml | grep -q 'id-token: write'; then
+  OIDC_OK=ok; ok "OIDC permissions intact (id-token: write)"
+else OIDC_OK=fail; bad "id-token: write missing"; fi
 grep -vE '^[[:space:]]*#' .github/workflows/release.yml | grep -qE 'NODE_AUTH_TOKEN|secrets\.' \
   && bad "an npm secret crept back into CI" || ok "still zero npm credentials in CI"
 
@@ -121,8 +124,12 @@ printf "  %-34s %s\n" "package renamed"                 "$([ "$NM" = "$NEW" ] &&
 printf "  %-34s %s\n" "version bumped to 0.3.0"        "$([ "$VR" = "0.3.0" ] && echo WORKS || echo BROKEN)"
 printf "  %-34s %s\n" "mcp keyword dropped"             "$([ "$HAS_MCP" = yes ] && echo BROKEN || echo WORKS)"
 printf "  %-34s %s\n" "old name gone from code"        "$([ -z "$LEFT" ] && echo WORKS || echo BROKEN)"
-printf "  %-34s %s\n" "charts.ts regenerated"          "WORKS"
-printf "  %-34s %s\n" "OIDC release path intact"       "WORKS"
+# These two rows were string constants in the first draft -- they printed WORKS even
+# when the check one screen above had printed a red cross. A summary table is the
+# last thing a reader looks at before believing the run; a fabricated tick there
+# undoes every honest line above it. So they are recomputed, not asserted.
+printf "  %-34s %s\n" "charts.ts regenerated"          "$([ "$DRIFT" = ok ] && echo WORKS || echo BROKEN)"
+printf "  %-34s %s\n" "OIDC release path intact"       "$([ "$OIDC_OK" = ok ] && echo WORKS || echo BROKEN)"
 printf "  %-34s %s\n" "core tests"                     "${T:-?}"
 printf "  %-34s %s\n" "new package on npm"             "$([ -n "$NV" ] && echo "$NV" || echo "pending tag")"
 printf "\n"
