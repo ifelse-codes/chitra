@@ -1,13 +1,31 @@
-# Changelog — @ifelse.codes/core
+# Changelog — @ifelse.codes/chitra
 
 All notable changes to this package follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-> Pre-release. No public version has been published to npm yet.
+> Nothing yet.
 
-## [0.1.0] — current working version (unpublished)
+## [0.3.0]
+
+### Changed
+- **The package is now `@ifelse.codes/chitra`.** It was `@ifelse.codes/core` through
+  `0.2.0` (and `@chitra/core` before that); the old names are deprecated on npm. The scope
+  was never the constraint — the part after the slash is what buried the product name in
+  every install command. The code is unchanged from `0.2.0`.
+- **Dropped `mcp` from `keywords`.** Nothing ships an MCP server; it is founder-deferred
+  until a release exists *and* someone demands it. A keyword is a promise in a search index.
+- `description` now leads with the name, so the npm page is identifiable at a glance.
+
+## [0.2.0]
+
+### Changed
+- Published by CI via npm **Trusted Publishing (OIDC)** — no npm token in CI. The publish
+  step uses `npm publish`, not `pnpm publish`: pnpm 9.x predates Trusted Publishing and is
+  token-only, so it cannot exchange an OIDC token.
+
+## [0.1.0] — first published version
 
 ### Added
 
