@@ -98,7 +98,7 @@ run_check "old-name-not-in-installs"  bash -c '
 # from "the name is absent". A check that cannot tell those apart reports
 # confidently and wrongly.
 run_check "new-name-in-every-live-doc" bash -c '
-  LIVE=(README.md CONTRIBUTING.md replit.md packages/core/README.md
+  LIVE=(README.md CONTRIBUTING.md replit.md packages/core/README.md packages/core/CHANGELOG.md
         .github/workflows/ci.yml .github/workflows/release.yml
         artifacts/chitra-docs/package.json)
   for f in "${LIVE[@]}"; do
@@ -148,7 +148,6 @@ run_check "no-stale-types-chitra-note" bash -c "! grep -q '@types/chitra' $APP"
 # Req 4 — `charts.ts` is GENERATED. Prove it with the real gate, not a grep: a
 # hand-edit that happens to contain the new name would pass any string check and
 # then be reverted by the next `gen:charts`.
-run_check "charts-generated-not-edited" pnpm --filter @workspace/chitra-docs run gen:charts:check
 
 # ── Req 6 + 7: the registry (red until the tag is cut — legitimately) ─────
 run_check "new-package-published"      bash -c '[ "$(npm view @ifelse.codes/chitra@0.3.0 version 2>/dev/null)" = "0.3.0" ]'
@@ -210,8 +209,23 @@ run_check "no-rename-notice-shipped" bash -c '
 # quietened until it guards nothing. The rule is the opposite: each live file must
 # NAME THE NEW PACKAGE, so a reader landing there cannot come away thinking the old
 # name is current.
+# `.ai/CONTINUATION-PROMPT.md` was left out of this list by a cold review: the contract
+# names seven .ai/ files and this one had no check, while `old-name-gone-from-code` globs
+# only code/config extensions and can never see a .md. It is in now.
+#
+# `.ai/GT-REMEDIATIONS.md` is deliberately EXCLUDED, and that is a decision rather than an
+# oversight. It is the ledger of what the S35 ground truth found — its row 2 records that
+# S37 published `@ifelse.codes/core@0.1.0`. A record has to be able to say what was true
+# then; making it name the current package would rewrite history to satisfy a check. Same
+# reasoning as no-rename-notice-shipped excluding the CHANGELOG. That is the third time
+# this pattern has bitten in one session, which is why it is written down here.
+#
+# [ -f ] first: a missing file is a different failure from a stale one, and an earlier
+# version of this very check recorded that lesson in its comment while omitting it.
 run_check "live-ai-files-state-the-present" bash -c '
-  for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md; do
+  for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md \
+           .ai/KNOWLEDGE.md .ai/CONTINUATION-PROMPT.md; do
+    [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
     grep -qF -- "$NEW" "$f" \
       || { echo "$f never names $NEW — a reader would take the old name as current"; exit 1; }
   done'
@@ -296,6 +310,12 @@ run_check "prompt-exists"             test -f prompts/39-task-rename-chitra.md
 run_check "core-tests-452"            bash -c "pnpm --filter $NEW run test 2>&1 | grep -qE 'Tests +452 passed'"
 run_check "core-typecheck"            pnpm --filter @ifelse.codes/chitra run typecheck
 run_check "core-build"                pnpm --filter @ifelse.codes/chitra run build
+
+# Must come AFTER core-build: gen:charts:check renders through the real library,
+# which resolves via packages/core/dist/ — gitignored, exactly as both workflows
+# document ("Build @ifelse.codes/chitra (docs imports it)"). A cold review caught
+# this running first, which made it go red on a fresh clone for the wrong reason.
+run_check "charts-generated-not-edited" pnpm --filter @workspace/chitra-docs run gen:charts:check
 run_check "docs-typecheck"            pnpm --filter @workspace/chitra-docs run typecheck
 run_check "lockfile-frozen"           pnpm install --frozen-lockfile
 # The MCP server is founder-DEFERRED. A keyword claiming it ships is a promise
@@ -304,14 +324,34 @@ run_check "lockfile-frozen"           pnpm install --frozen-lockfile
 # artifacts/ or lib/ would have passed. Scan the whole workspace for an MCP server
 # artefact by name, and keep the "nothing ships it" claim honest in both directions.
 run_check "mcp-server-still-not-built" bash -c '
-  hits="$(git ls-files | grep -iE "(^|/)mcp([-_.]|/|$)" || true)"
+  # `mcp` anywhere in a path segment, not just at a boundary: an earlier version
+  # used (^|/)mcp and a cold review showed `src/server-mcp.ts` walks straight past it.
+  hits="$(git ls-files | grep -iE "mcp" || true)"
   [ -z "$hits" ] || { echo "an MCP artefact exists in the tree:"; echo "$hits"; exit 1; }'
 # ...and the keyword must stay dropped, which is the promise a search index reads.
 run_check "mcp-not-advertised" bash -c \
   '! node -p "JSON.stringify(require(\"./$PKG\").keywords)" | grep -qiw mcp' 
-# The rule this guards: the work happened on a session branch and reached main via
-# PR, never a direct commit. Derived, not hardcoded to a PR number (rot), and
-# squash-merge makes the branch tip a non-ancestor, so ancestry is the wrong test.
+# What this ACTUALLY proves: a PR whose head branch matched session-39-* was merged.
+# What it does NOT prove, and a comment here once wrongly claimed: that the work
+# reached main *only* that way. A direct commit of the whole rename would satisfy
+# this check. Squash-merge also makes the branch tip a non-ancestor, so ancestry is
+# the wrong test — hence the headRefName query. Derived, never a hardcoded PR number.
+# The builder hand-typed "37/37" into five .ai/ documents; the script then grew to 40
+# checks and every one of those numbers went stale. That is the same defect as the
+# demo's hardcoded WORKS rows, committed as prose. A number a human maintains across
+# files is a number that will be wrong, so assert it instead of trusting it: any
+# "N/N" score quoted in a live .ai/ file must have N == the script's real check count.
+run_check "ai-docs-quote-real-score" bash -c '
+  want="$(grep -c "^run_check " scripts/verify-session-39.sh)"
+  for f in .ai/STATE.md .ai/TASK.md .ai/SESSION-BOOT.md .ai/ROADMAP.md .ai/CONTINUATION-PROMPT.md; do
+    [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
+    # Only scores on lines that name the script. "4/4" (release jobs) and "452/452"
+    # (tests) are real scores that have nothing to do with this gate, and a first cut
+    # that scanned every "N/N" in the file flagged both.
+    bad="$(grep -F "verify-session-39.sh" "$f" 2>/dev/null \
+             | grep -oE "[0-9]+/[0-9]+" | grep -vE "^$want/$want$" || true)"
+    [ -z "$bad" ] || { echo "$f quotes a verify score that is not $want/$want:"; echo "$bad"; exit 1; }
+  done'
 run_check "pr-from-session-branch"    bash -c "[ -n \"\$(gh pr list --repo ifelse-codes/chitra --state merged --limit 50 --json headRefName --jq '.[] | select(.headRefName | startswith(\"session-39-\")) | .headRefName' | head -1)\" ]"
 
 ( cd ".ai/verify/session-39" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
