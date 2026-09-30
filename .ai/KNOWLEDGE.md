@@ -94,8 +94,11 @@
   `tsc --noEmit`.
 - `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
   generated import paths).
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S37
-  (latest merge PR #43, `fd8a96e`); the `v0.1.0` tag is on `main` HEAD.
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S39
+  (latest merge PR #59, `ba6cf6f`). **Read `main`'s real range, don't copy it** — this line
+  has now been wrong twice: it said S00–S08 (S35), was corrected to S00–S34 in S36, and
+  drifted to S00–S37 by S40. No guard protects it. The newest tag is `v0.3.0` at `f4ff6ef9`
+  (S39); `v0.1.0` is at `802ffc7` and `v0.2.0` at `76d21f3`, all pushed, none stale.
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -208,8 +211,11 @@
   stale `v*` exists — `release.yml` publishes on any `v*` push.
 - **Live deploy unfrozen (S31 order lifted):** `wrangler pages deploy dist/public
   --project-name=chitra --branch=main`; this makes the S33 `/ai-data` page live.
-- **Docs-hero pills are truthful now:** `v0.1.0` (no "— stable") and `452` tests
-  (`artifacts/chitra-docs/src/App.tsx`).
+- **Docs-hero pills are truthful now:** `v0.3.0 · npm` (S39) and `452` tests
+  (`artifacts/chitra-docs/src/App.tsx` L550 / L570). S38 fixed the pill to `v0.1.0` while the
+  manifest said `0.2.0`; S39 corrected the text. `verify-session-39.sh#hero-pill-matches-version`
+  now *derives* the expected value from the manifest, so a bump without a pill edit goes red
+  — the pill is still a JSX literal, but it can no longer silently drift.
 - **Ground-truth teeth:** `.ai/GT-REMEDIATIONS.md` ledger +
   `verify-closeout.sh#check_gt_remediations` (every row DONE/WAIVED);
   `#check_session_coverage` (a merged `session-NN-*` branch ≥ S17 must have a

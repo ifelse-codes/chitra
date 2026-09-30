@@ -1,35 +1,51 @@
 # Current Task Pointer
 
-## Session 39 — rename the package to `@ifelse.codes/chitra` — DONE (merged)
+## Session 40 — NO-CODE ground-truth audit (`40 % 5 == 0`) — IN PROGRESS
 
-- **Branches:** `session-39-rename-chitra` (#53) → `session-39-claims-fix` (#54) →
-  `session-39-publish-record` (#55) → `session-39-closeout`.
-- **Contract:** `prompts/39-task-rename-chitra.md`. Founder in-chat decisions: version/tag
-  **`0.3.0`/`v0.3.0`** (not `0.1.0` — `v0.1.0`/`v0.2.0` already exist, and a fresh `v0.1.0`
-  meant force-moving a published tag); **no deprecation** of the old package; **no tech-lead
-  handoff**, crew gate waived.
-- **Delivery:** 27 files, +1039/−360, 15 atomic commits. `packages/core/package.json` →
-  `@ifelse.codes/chitra@0.3.0`, **`mcp` keyword dropped**, description leads with the name;
-  lockfile, both workflows, the docs app (`charts.ts` **regenerated**, never hand-edited),
-  root README / CONTRIBUTING / replit, tooling scripts, and `.ai/`.
-- **Root cause (not the obvious one):** **a brand-new package name can never be OIDC-published.**
-  npm puts the trusted-publisher config *inside the package's own settings page*, and a package
-  that does not exist has no settings page. The `v0.3.0` run proved it: three gate jobs green,
-  tarball built correctly, then `PUT …/@ifelse.codes%2fchitra` → 404 "could not be found or you
-  do not have permission". A human published once; the founder then created the trusted
-  publisher; the retry took the idempotency skip path and the run went 4/4 green.
-- **Verified:** `scripts/verify-session-39.sh` → **43/43 green**, including
-  `ci-attempt1-publish-failed` / `ci-attempt2-publish-skipped` / `publish-not-from-ci`, which
-  together assert **CI published `0.3.0` zero times** — the discriminator that makes
-  "unattended" falsifiable. Ten counterfactuals constructed; every one bit.
-- **Review:** `sessions/session-39-review.md` — cold, first pass **REJECT**. It named the
-  fakest green (an honesty guard scoped to three files, none of them the shipped docs app), a
-  version-pill check hardcoded to a literal while its comment claimed manifest coupling, and two
-  fabricated `WORKS` rows in the demo's summary table. All three fixed; re-reviewed.
-- **Merged:** PRs #53 / #54 / #55 (`68d0b26`); `v0.3.0` tag on `main`; Release green.
-- **Still open:** the trusted publisher is **founder-attested, not demonstrated** — no release
-  has gone through CI since it was created. Repo visibility (private ⇒ no npm provenance) is an
-  open founder decision. The `required-crew` gate remains structurally wrong.
+- **Branch:** `session-40-ground-truth`, from `main` `ba6cf6f` (== `origin/main`).
+- **Contract:** `prompts/40-task-ground-truth.md`. **Not committed** — NO-CODE sessions
+  commit nothing; the artifact and the ledger rows are folded in by S41.
+- **Why:** S39's handoff offered three *code-shaped* candidates and named no ground truth.
+  `CONSTRAINTS.yaml` sets `ground_truth_every_n_sessions: 5`, so `40 % 5 == 0` makes S40
+  NO-CODE: `hook-ground-truth-guard.sh` blocks every non-`.md` write and
+  `verify-closeout.sh` structurally requires `session-40-ground-truth.md`. Founder decision
+  at boot: run the audit, slide the three candidates to S41. **The cadence holds — the
+  handoffs had stopped naming it.**
+- **Delivered:** `sessions/session-40-ground-truth.md` — **49 probes**, 7 audits, 🔴 overall;
+  `sessions/session-40-review.md` — cold independent pass, **ACCEPT-with-conditions** (41
+  probes re-run, 38 byte-for-byte, **0 fabricated**; conditions C1–C7 all fixed in place);
+  **11 rows** in `.ai/GT-REMEDIATIONS.md` — **3 `DONE` in-session** (rows 3, 6, 7: the
+  `KNOWLEDGE.md` falsehoods fixed, the GT cadence put on the roadmap, and the cold review
+  delivered — the first draft wrongly deferred the first two on a *false* legality premise,
+  which the review caught), 8 `DEFERRED` to S41 with reason + expiry.
+  **Closeout: RED, 14 pass / 2 fail** — `required-crew` and `review-inputs-attested`, both
+  founder-waived at `VAJRA_CLOSEOUT_WAIVER=40` as structurally unsatisfiable in a NO-CODE
+  session (the attestation hash needs the contract *committed at HEAD*). Also this
+  pointer, `SESSION-BOOT.md`, `STATE.md` and `ROADMAP.md` synced against live facts so this
+  session's own `state_drift` finding cannot recur at S41.
+- **The finding only a real probe could produce:** **the adoption baseline is zero — and
+  that is the correct pre-launch reading** (founder: nothing has been released-and-marketed).
+  The finding is that **the number had never been read**: `@ifelse.codes/core`'s 304
+  downloads are 0 for the 9 days before its publish and 75/17/12/181/19 in the 5 days after —
+  all release-runner and founder shaped, never citable as traction — while
+  `@ifelse.codes/chitra` is **unindexed** by the npm downloads API (3 endpoints, all
+  "not found") and the registry answers 200. S40 is the first session to read this series.
+- **The second:** **the repo goes public after a code cleanup** (founder decision). Today's
+  404s (`README.md:75` `git clone`, npm `repository.url`, npm `homepage`) are known and
+  temporary. The real gap is that **the cleanup gating the public flip has no roadmap item,
+  no scope, and no owner** — which is why S41's recommendation is to scope it.
+- **Also found:** S16 vanished (no artifacts, one parked WIP commit, nothing on `main`, not
+  grandfathered, below `check_session_coverage`'s S17 floor); `KNOWLEDGE.md` L97–98 serves
+  three falsehoods that **S35's ledger row 4 already closed once**; `required-crew` needs a
+  second waiver; "Max 3 files" is `Hook-enforced` on the branch but false on `main` (all
+  large commits are GitHub squash merges); `one_session_per_chat` is wired but unfireable;
+  the GT artifact is still self-certified and still round-trips through the next session's
+  commit. **Product: 452/452, `verify-session-39.sh` 43/43 on `main` HEAD — nothing wrong
+  with the code.**
 
-**Next session (S40):** GTM proof pack, or a real `0.4.0` through CI to prove the OIDC path.
+**Next session (S41):** **scope the code cleanup that gates the public launch**, then the
+cheap unambiguous rows — fix the `KNOWLEDGE.md` `main` range, disposition S16, fix
+`required-crew`, put the GT cadence on the board. The three S39 candidates remain available:
+a real `0.4.0` through CI, then the GTM proof pack (more valuable after the flip, since it
+is the first measurement and must carry the zero as `t0`).
 Open in a **new chat**.

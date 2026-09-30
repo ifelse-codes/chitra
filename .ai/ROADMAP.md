@@ -61,13 +61,35 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   "no public version published yet", and the contract's own deprecation sentence.
   `verify-session-39.sh` 43/43; cold review REJECTed the first delivery (a narrowed honesty
   guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
-- 🔜 **Next (S40 candidates):** a **GTM proof pack** (benchmarks / token-savings /
-  before-after) — unblocked, and it now measures the *final* install command; then a real
-  **`0.4.0` through CI**, which is the cheapest possible proof that the trusted publisher
-  works and turns a founder attestation into a demonstrated fact (nothing needs to change for
-  it); then **fix the `required-crew` gate**, which has now cost two founder waivers (S38, S39)
-  by demanding a tech-lead step `.ai/AGENTS.md` never asks for. `artifacts/api-server` beyond
-  `/healthz` remains the undecided "if the hosted API is pursued" bet, not a task.
+- 🔜 **Next (S41 candidates):** the three S39 items stand unchanged, now pushed out one
+  session by S40's mandatory ground-truth audit — a **GTM proof pack** (benchmarks /
+  token-savings / before-after), a real **`0.4.0` through CI** (the cheapest proof that the
+  trusted publisher works; nothing needs to change for it), and **fixing the
+  `required-crew` gate** (two founder waivers, S38/S39, for a tech-lead step
+  `.ai/AGENTS.md` never asks for). `artifacts/api-server` beyond `/healthz` remains the
+  undecided "if the hosted API is pursued" bet, not a task.
+- 🔜 **Session 40 (S40) — NO-CODE ground-truth audit (`40 % 5 == 0`) — DONE, 🔴 overall.** The
+  **5-session cadence is now on the board**: it is constitutional and hook-enforced, yet it
+  appeared in **zero of the last four handoffs** — which is exactly how S40 arrived as a
+  surprise, since S39 offered three code-shaped candidates and named no audit.
+  **The vision verdict came back 🟡, not 🔴, after two founder corrections recorded in the
+  audit:** nothing has been released-and-marketed, so the **adoption baseline of zero is the
+  correct pre-launch reading** — the finding is that the number had *never been read*
+  (`@ifelse.codes/core`'s 304 downloads are 0 for the 9 days before its publish and all land
+  in the 5 days after, release-runner shaped; `@ifelse.codes/chitra` is unindexed by the npm
+  downloads API entirely). And **the repo goes public after a code cleanup** — so today's
+  404s (README's `git clone`, npm `repository.url`, npm `homepage`) are a known, sequenced
+  state, not a blocker. **Highest leverage, and newly named: the cleanup itself.** It gates
+  the public flip, it has no roadmap item, no scope and no owner, and the flip then resolves
+  all three links plus npm provenance in one move. Still 🔴 overall: **S16 vanished** with no
+  artifacts, nothing on `main`, no ledger row and a gate floor above it; `KNOWLEDGE.md`
+  re-serves a falsehood the S35 ledger already closed — **fixed in S40**, along with putting
+  this cadence on the board; and the one automated check policing a ground-truth session is
+  structurally blind in this harness (`check_ground_truth_no_code` diffs an empty range and
+  returns `OK`; proved by planting a `.ts` file). The S40 closeout is **RED, 14 pass / 2 fail**
+  — `required-crew` and `review-inputs-attested`, both structurally unsatisfiable in a
+  NO-CODE session and founder-waived. Eleven remediations in `.ai/GT-REMEDIATIONS.md`:
+  3 `DONE`, 8 `DEFERRED` to S41.
 - ✅ **Session 35 (S35) — NO-CODE ground-truth (`N % 5 == 0`):** audited vision,
   roadmap, state, knowledge, constraints, constitution, cost. Overall 🟡 —
   direction sound, distribution blocked, governance claims unbacked. Found the
