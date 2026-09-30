@@ -40,8 +40,8 @@
   second waiver; "Max 3 files" is `Hook-enforced` on the branch but false on `main` (all
   large commits are GitHub squash merges); `one_session_per_chat` is wired but unfireable;
   the GT artifact is still self-certified and still round-trips through the next session's
-  commit. **Product: 452/452, `verify-session-39.sh` 43/43 on `main` HEAD — nothing wrong
-  with the code.**
+  commit. **Nothing is wrong with the code:** the suite is 452/452, and
+  `verify-session-39.sh` is 43/43 on `main` HEAD.
 
 **Next session (S41):** **scope the code cleanup that gates the public launch**, then the
 cheap unambiguous rows — fix the `KNOWLEDGE.md` `main` range, disposition S16, fix
