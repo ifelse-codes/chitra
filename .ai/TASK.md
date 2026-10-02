@@ -7,13 +7,15 @@
   `review-inputs-attested` hashes. S40 failed that gate because a NO-CODE session cannot
   commit its contract; this one can, and did.
 - **Why:** S40 ground-truth row 2 — the founder's decision is that the repo goes public
-  *after* a code cleanup, and that cleanup had no roadmap item, no scope, no owner. Two
-  independent audits now set the scope: `code-cleanup-plan-session-41.md` and the blind
-  `independent-audit-RESULT.md`. Both are committed, so the reasoning is checkable.
-  The blind pass found 8 things the first missed, and one of them **inverts the first
-  pass's fix**: a fresh clone fails `pnpm run build` because the root script typechecks
-  the docs before core's gitignored `dist/` exists — not (only) because `PORT` /
-  `BASE_PATH` are unset. Both fixes are in scope.
+  *after* a code cleanup, and that cleanup had no roadmap item, no scope, no owner. The
+  npm package is **`@ifelse.codes/chitra@0.3.0`**, live and public-facing, so the repo
+  around it has to be true. Two independent audits now set the scope:
+  `code-cleanup-plan-session-41.md` and the blind `independent-audit-RESULT.md`. Both are
+  committed, so the reasoning is checkable. The blind pass found 8 things the first missed,
+  and one of them **inverts the first pass's fix**: a fresh clone fails `pnpm run build`
+  because the root script typechecks the docs before `@ifelse.codes/chitra`'s gitignored
+  `dist/` exists — not (only) because `PORT` / `BASE_PATH` are unset. Both fixes are in
+  scope.
 - **The story, in one line:** *a stranger who clones this repo reads nothing false, and
   `pnpm install && pnpm run build` succeeds with no environment variables set.*
 - **13 numbered requirements** in three groups: A what a visitor or consumer sees (1–9),
