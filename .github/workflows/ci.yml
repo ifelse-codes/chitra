@@ -35,6 +35,10 @@ jobs:
           cache: pnpm
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
+      # S41 req. 2: src/version.ts is generated from the manifest. This fails
+      # before anything is built if a version bump forgot to regenerate it.
+      - name: VERSION in src matches the manifest
+        run: node scripts/sync-version.mjs --check
       - name: Test
         run: pnpm --filter @ifelse.codes/chitra run test
       - name: Typecheck
