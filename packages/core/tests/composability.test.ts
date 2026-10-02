@@ -3,6 +3,7 @@ import {
   line, area, bar, horizontalBar, scatter, histogram, heatmap,
   funnel, pie, donut, radar, boxplot, waterfall, candlestick,
   treemap, sankey, timeline, sparkline, progress, gauge,
+  VERSION,
 } from "../src/index.js";
 import { stripAnsi } from "../src/ansi.js";
 
@@ -96,5 +97,16 @@ describe("composability — frame/compact/height/toContent/maxWidth", () => {
     expect(stripAnsi(line({ data: [1, 2, 3] }).toString())).toMatch(/^┌/m);
     expect(stripAnsi(gauge({ value: 50 }).toString())).toMatch(/^┌/m);
     expect(stripAnsi(horizontalBar({ data: hbData }).toString())).toMatch(/^┌/m);
+  });
+});
+
+// S41 requirement 2. VERSION is exported public API and once shipped to npm as
+// "0.1.0" while package.json said 0.3.0. src/version.ts is generated from the
+// manifest, so this compares the two directly — if the generator is ever skipped,
+// the suite fails here rather than the package quietly lying.
+describe("package metadata — VERSION cannot drift from the manifest", () => {
+  it("VERSION equals package.json's version", async () => {
+    const pkg = (await import("../package.json", { with: { type: "json" } })).default;
+    expect(VERSION).toBe(pkg.version);
   });
 });

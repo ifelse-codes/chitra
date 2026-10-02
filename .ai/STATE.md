@@ -1,130 +1,84 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S40 ground-truth audit in
-progress, 2026-09-30.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S41 — cleanup Batch 1,
+**complete**, 2026-10-02.)
 
 ## Active Branch
-`session-40-ground-truth`, branched from `main` `ba6cf6f` — which is **exactly** `origin/main`
-(`0 0`), verified at boot, so no merge-lag can be hiding in this snapshot. S39 is merged
-(PRs #53–#59); the package is **`@ifelse.codes/chitra@0.3.0`**, live on npm. S40 is a
-**NO-CODE** session (`40 % 5 == 0`): markdown only, no commits, no PRs.
+`session-41-repo-cleanup`, branched from `main` `ece61fc` (== `origin/main` at branch
+time). S40 is **merged** — PR #60 carried the audit, PR #61 carried a fix for a line of
+mine that had broken S39's own gate. The package is **`@ifelse.codes/chitra@0.3.0`**, live
+on npm, and the repo around it is being made fit to publish.
 
 ## What Currently Works (observed, not claimed)
-- **The rename is complete and consumer-verified.** `@ifelse.codes/chitra@0.3.0` (38 files /
-  446,756 B) installs clean into an empty dir, imports by package name (48 exported functions),
-  and renders real `line()` / `horizontalBar()` / `plot().line()` charts with working
-  `toJSON()` / ANSI-free `toPlain()`.
-- **The release path is automated — from `0.4.0`, not from `0.3.0`.** `release.yml#publish` holds
-  `id-token: write` + `contents: read`, references **no npm secret**, and runs `npm publish`
-  (pnpm 9.12.3 predates Trusted Publishing and cannot exchange an OIDC token).
-- **The trusted publisher for `@ifelse.codes/chitra` exists (founder-attested 2026-09-29).**
-  Not repo-verifiable — npm's trusted-publisher API needs a session token. The evidence is the
-  outcome, and **the outcome has not happened yet**: no release has gone through CI since it was
-  created. Treat unattended publishing as *configured, not demonstrated*.
-- **CI published `0.3.0` zero times — proven, not assumed.** The `v0.3.0` run's attempt 1
-  `publish` job **failed** (09:07:01→09:07:31Z, `PUT …/@ifelse.codes%2fchitra` → 404 "could not
-  be found or you do not have permission"). A human published at **13:30:46Z**. Attempt 2 took
-  the idempotency **skip** path and the run went **4/4 green**. npm's publish time *precedes*
-  attempt 2's start (13:40:18Z), so neither attempt could have produced the version.
-- **Root cause of that failure is structural, not a misconfiguration:** npm configures a trusted
-  publisher *per package, inside that package's settings page*, and a package that does not exist
-  has no settings page. **A brand-new package name can never be OIDC-published — its first
-  publish is necessarily human.** Renaming always costs one.
-- **The idempotency guard is proven behaviourally, not by grep.** Attempt 2 emitted
-  `@ifelse.codes/chitra@0.3.0 is already on npm — skipping publish`, which is only reachable from
-  the live `npm view` branch against the *new* package name.
-- **`@ifelse.codes/core` is NOT deprecated** (founder decision). No public release, no external
-  user, so a deprecation notice is ceremony for an audience of one. The old package stays at
-  `0.2.0` and still resolves.
-- **Live docs site:** `chitra.iifelse.com` (`/ai-data` live). Hero pill reads `v0.3.0 · npm` — the
-  S38 lie where it still read `v0.1.0` is fixed. The pill is still a JSX literal; what changed is
-  that `hero-pill-matches-version` now *derives* the expected value from the manifest, so the next
-  bump without a pill edit goes red instead of shipping. The pill itself is not generated.
-- **`@ifelse.codes/chitra` library:** 20 charts, 3 renderers, 7 themes, `ChartResult`;
-  LOCKED families S09–S28. `pnpm --filter @ifelse.codes/chitra run test` — **452/452**.
+- **A fresh clone builds, with no environment variables set.** `git clone` →
+  `pnpm install --frozen-lockfile` → `pnpm run build` is **exit 0** with `PORT` and
+  `BASE_PATH` unset. This has never been true before: the root `build` script typechecked
+  the docs app before `@ifelse.codes/chitra`'s gitignored `dist/` existed, so any machine
+  that had ever run a build reported green and every other machine got `TS2307`. The gate
+  is `scripts/verify-session-41.sh#fresh-clone-build-no-env`, and it runs the clone.
+- **`VERSION` can no longer lie.** It is exported public API; it shipped to npm as
+  `0.1.0` while the manifest said `0.3.0`. It is now generated from the manifest
+  (`scripts/sync-version.mjs` → `src/version.ts`), asserted by the suite, and gated twice
+  in CI — once before the build, once by executing the built bundle.
+- **The live docs site tells the truth.** `chitra.iifelse.com` was serving the Replit
+  scaffold placeholder — *"Chitra Docs — built on Replit. Update this description to
+  reflect the app."* — as its `description`, `og:description` and `twitter:description`.
+- **The npm README is a README.** `packages/core/README.md` is in `files`, so all 785
+  lines published: 19 `### LOCKED: … session NN design` sections and a renderer list
+  naming a `block` renderer that does not exist. Now 122 lines, three real renderers with
+  the per-chart defaults read from source.
+- **CONTRIBUTING can be followed.** Wrong clone org, a run command using a Node flag that
+  no longer exists, a chart template that omitted a required `ChartResult` member, a test
+  path that no longer matches the layout, and a coverage promise the repo did not satisfy.
+  All five corrected, and `pnpm example` now works.
+- **The release path is automated — from `0.4.0`, not from `0.3.0`.** `release.yml#publish`
+  holds `id-token: write` + `contents: read`, references **no npm secret**, and runs
+  `npm publish`. Its provenance comment is now true whether or not the repo is public.
+- **Product, re-observed:** **453/453** tests in 23 files (452 plus S41's version-drift
+  test); root typecheck exit 0; `test:coverage` exit 0; `verify-session-39.sh` 43/43;
+  `verify-session-41.sh` 23/23; 20 charts / 3 renderers / 7 themes / 0 runtime deps.
 
 ## What Is Broken / Incomplete
-
-> **The 🔴 rows are S40 ground-truth findings, each traced to a run probe** in
-> `sessions/session-40-ground-truth.md`; the 🟠 rows are inherited, still-true items, plus
-> two S40 rows the founder's corrections moved off 🔴.
-
-- 🟠 **The adoption baseline is zero, and that is the correct pre-launch reading** (founder:
-  nothing has been released-and-marketed). The finding is not the number — it is that **the
-  number had never been read before S40**: no trend, no comparison, no way to tell a
-  marketing effect from a release artifact later. `@ifelse.codes/core`'s 304 lifetime
-  downloads are **0 for the 9 days before its publish**, then 75 / 17 / 12 / 181 / 19 in the
-  5 days it existed — release-runner and founder-verification shaped, so they must **never be
-  cited as traction**. `@ifelse.codes/chitra` is **unindexed by the npm downloads API**
-  (three endpoints, all `"not found"`) while `registry.npmjs.org` answers 200. A GTM proof
-  pack must record this zero as its explicit `t0`.
-- 🟠 **The repo goes public after a code cleanup** (founder decision, 2026-09-30). Today's
-  404s — `README.md:75` `git clone`, npm `repository.url`, npm `homepage` — are a **known,
-  sequenced, temporary** state, and `chitra.iifelse.com` is the only public surface that
-  resolves. **The open item is the prerequisite, not the decision:** "clean up the code and
-  make it good" gates the public flip and has **no roadmap item, no scope, no owner**. The
-  flip then resolves all three links and adds npm provenance in one move.
-- 🔴 **S16 vanished and no gate can see it.** No prompt / verify / demo / summary / review;
-  its only commit is a parked WIP (`74b3c17`) and **nothing landed on `main`**. It is not in
-  the ROADMAP's grandfather list (only S04/S06 are), not in the S35 ledger, and it sits
-  **below** `check_session_coverage`'s S17 floor — so three ledgers all read complete.
-- 🔴 **`KNOWLEDGE.md` L97–98 serves three falsehoods** — "main hosts S00–S37 (PR #43
-  `fd8a96e`)" and "the `v0.1.0` tag is on `main` HEAD". Truth: `main` is `ba6cf6f` (#59);
-  `v0.1.0` is at `802ffc7` and the newest tag is `v0.3.0` at `f4ff6ef9`. **This is S35
-  ledger row 4's exact class, closed in S36 and drifted back — with no guard on the line.**
-- 🟠 **Unattended publishing is configured but unproven.** No release has traversed CI since the
-  trusted publisher was created. The cheapest close is a real `0.4.0` through the pipeline.
-- 🟠 **No npm provenance.** The GitHub repo is **private**, and npm does not generate provenance
-  for private repos even under trusted publishing. Confirmed on `0.2.0`: `dist.signatures` is
-  present, `attestations: null`. Publishing is unaffected. Making the repo public would fix it and
-  suits an MIT package — **founder's open decision**. If visibility flips, `release.yml`'s comment
-  must change with it or it becomes a lie.
-- **MCP server: founder-DEFERRED.** Not built, not stubbed. Gate: a release exists **and**
-  someone demands it **and** it is worth building. The `mcp` **keyword was dropped** in S39 —
-  a keyword is a promise in a search index, and nothing ships it.
-- 🟠 **The `required-crew` closeout gate is structurally wrong** and has now failed **three**
-  sessions: waived twice (S38, S39) and at S40 as `verdict: NOT READY` with **zero** `WAIVED`
-  lines. It demands a tech-lead handoff that `.ai/AGENTS.md`'s Session Loop never asks for — and
-  a **ground-truth session cannot dispatch one at all**, so it is unsatisfiable *by
-  construction* there. S40 closed it under `VAJRA_CLOSEOUT_WAIVER=40`. Fix or drop it.
-- 🟠 **The S40 closeout is RED and cannot be otherwise: 14 pass, 2 fail.** `required-crew`
-  (above) plus **`review-inputs-attested`**, whose `Review-Inputs-SHA` is *uncomputable*
-  because `canonical_inputs_sha` requires the contract **committed at HEAD** and a NO-CODE
-  session commits nothing (`git cat-file -e HEAD:prompts/40-…` → *exists on disk, but not in
-  HEAD*). Both waived by the founder at S40 close. **The trap:** the same no-commit condition
-  makes `check_ground_truth_no_code` **fail-open** (empty diff range → `OK`) while the
-  attestation gate fails closed — so "the gates passed" would have pointed a reader at the
-  wrong one. See ledger rows 5, 10, 11.
-- 🟠 **Two "Hook-enforced" / `true` declarations in `.ai/AGENTS.md` are false.** *Max 3 files
-  per atomic commit* holds on the branch, but 8 of the last 60 `main` commits exceed it —
-  every one a GitHub **squash merge**, which never runs a local hook. *`one_session_per_chat`*
-  is wired but **unfireable**: `hook-session-guard.sh` blocks only on a same-chat `N→N+1`
-  boundary, the repo's own convention is a new chat per session, and `.ai/.session-owner` is
-  **untracked** and pinned at `12` (28 sessions stale).
-- 🟠 **The GT artifact is self-certified and not durable.** No independent pass on the audit
-  itself (S35's meta-remediation, still open), and the file round-trips through the *next*
-  code session's commit (S35's arrived via S36's `c2cbcec`) instead of the `-closeout` branch
-  suffix `CONSTRAINTS.yaml` already exempts.
-- 🟠 **The GT no-code backstop is blind in the harness it exists for.** The write-time hook
-  is real and L3, but opencode does not run it — and `verify-closeout.sh#check_ground_truth_no_code`,
-  credited as the harness-agnostic substitute, diffs `merge-base..HEAD`, a range a GT session
-  **never commits into**. Proved by counterfactual at S40: a planted `packages/core/src/*.ts`
-  left it reading `OK: no code changes` / `INTEGRITY: PASS`. The honest NO-CODE evidence for
-  S40 is `git status` — six `.ai/*` files and two new markdown artifacts, zero tracked source.
-- 🟠 **The cost gate greps a heading.** `cost-tracking-present.log` passes on the string
-  "Cost Tracking"; any text passes, including a lie. The prose is honest ("unmeasured") — the
-  check verifies nothing. Unchanged from S35.
-- `ci-no-auth-token-secret` covers **repo** secrets only — not org or environment secrets. None
-  exist today and no environments are configured.
-- A **revoked** `npm_xToANF…` token still sits in the founder's global `~/.npmrc` (outside the
-  repo) and is sent to the registry on authenticated calls. S39's bootstrap publish used an
-  isolated `npm_config_userconfig` instead, which was deleted afterwards.
-- GTM proof pack (benchmarks / token-savings) still to build — now unblocked and now measuring
-  the *final* install command. `artifacts/api-server` remains the undecided "if the hosted API is
-  pursued" bet. Pricing story still open.
-- Frozen `sessions/` + old `prompts/` + old `scripts/verify-session-*.sh` still name
-  `@ifelse.codes/core` (history; not re-run).
-- `pnpm run lint` unrunnable — eslint not installed (pre-existing).
+- 🔴 **The public flip has no date and two unanswered founder decisions.** The repo is
+  still private: `README.md`'s `git clone` line, npm `repository.url` and npm `homepage`
+  all 404 anonymously. **D1** — how much internal process (`.ai/`, `sessions/`,
+  `prompts/`, `.claude/`, `reviewer/`, `darshan/`; ~146 files) goes public — and **D4** —
+  whether to scrub the `/Users/suman/…` paths in 5 tracked files. **D4 is irreversible
+  once published.** Options B and C for D1 break `check_session_coverage` /
+  `check_task_ref` unless the closeout gates are rewritten first.
+- 🟠 **Unattended publishing is configured but unproven.** No release has traversed CI
+  since the trusted publisher was created. The cheapest close is a real `0.4.0` through
+  the pipeline.
+- 🟠 **No npm provenance.** npm does not generate it for a private repo, even under
+  trusted publishing (verified on `0.2.0`/`0.3.0`: `dist.signatures` present,
+  `attestations: null`). Publishing is unaffected. The flip fixes it; the workflow comment
+  no longer has to be rewritten when it does.
+- 🟠 **Three cleanup batches are scoped and unowned by a session.** S42 (dead weight:
+  `mockup-sandbox`, `lib/`, `api-server`, `attached_assets`, 5 dead scripts), S43 (43
+  unused shadcn components, Prettier, the `lint` script that points at an eslint nobody
+  installed), S44 (OSS polish + decisions D1–D6). All in `.ai/ROADMAP.md` with gates.
+- 🟠 **The adoption baseline is zero, and that is the correct pre-launch reading.** The
+  304 lifetime downloads on `@ifelse.codes/core` are all inside a 5-day window starting on
+  the publish day and are release-runner and founder shaped — **never cite them as
+  traction**. `@ifelse.codes/chitra` is unindexed by the npm downloads API. A GTM proof
+  pack must record this zero as its `t0`.
+- 🟠 **Governance gates, from S40, still standing.** `required-crew` (third founder
+  waiver; demands a handoff the Session Loop never asks for); `check_ground_truth_no_code`
+  passing **vacuously** on a GT session because it diffs a range the session never commits
+  into; the cost gate passing on the string "Cost Tracking"; S16 invisible to every ledger.
+- 🟠 **Historical verify scripts are already unrunnable.** `verify-session-07.sh` (and 01,
+  34, 36, 37, 38) filter the pre-rename `@chitra/core` and assert old test counts. The
+  live pair is 39 and 41. Nothing re-runs the old ones.
+- `pnpm-workspace.yaml` still carries ~140 lines of `overrides` for packages (expo, ngrok)
+  that are not in the dependency graph — D5, needs a lockfile regen in its own commit.
+- `artifacts/api-server` remains the undecided "if the hosted API is pursued" bet. S42
+  deletes it; git history keeps it.
+- **MCP server: founder-DEFERRED.** Not built, not stubbed, and the `mcp` keyword was
+  dropped in S39 — a keyword is a promise in a search index, and nothing ships it.
+- A **revoked** npm token still sits in the founder's global `~/.npmrc` (outside the repo).
+- GTM proof pack (benchmarks / token-savings) still to build. Pricing story still open.
+- Frozen `sessions/` + old `prompts/` + old verify scripts still name
+  `@ifelse.codes/core` — history, on purpose.
 
 ## Milestones done
 - **S01–S04** docs/examples/polish/README · **S05** NO-CODE ground-truth ·
@@ -139,42 +93,41 @@ progress, 2026-09-30.)
   **S31** antra atoms + hero rotation + wall fix · **S32** wall playbook ·
   **S33** release readiness · **S34** GTM README + MIT LICENSE ·
   **S35** NO-CODE ground-truth · **S36** S35 gaps closed + deploy unfrozen ·
-  **S37** package renamed to `@ifelse.codes/core` + published ·
-  **S38** OIDC release runway, `0.2.0` unattended ·
-  **S39** renamed to `@ifelse.codes/chitra`, `0.3.0` live.
+  **S37** package published · **S38** OIDC release runway, `0.2.0` unattended ·
+  **S39** renamed to `@ifelse.codes/chitra`, `0.3.0` live ·
+  **S40** NO-CODE ground-truth audit, 🔴, 11 remediations (3 done, 8 deferred) ·
+  **S41** cleanup Batch 1 — the public face is honest and a fresh clone builds.
 
 ## What Is In Progress
-- **S40 — NO-CODE ground-truth audit** (`40 % 5 == 0`), on `session-40-ground-truth`. Overall
-  🔴, on `knowledge_staleness` and `constitution_review` — **not** on distribution, which is
-  correctly at its pre-launch baseline. The product is excellent (452/452,
-  `verify-session-39.sh` 43/43 on `main` HEAD); the governance carries mis-declared rules.
-  Delivered: `sessions/session-40-ground-truth.md` (**49 probes**, 7 audits),
-  `sessions/session-40-review.md` (cold, **ACCEPT-with-conditions**, 41 probes re-run, 0
-  fabricated), and **11 rows** in `.ai/GT-REMEDIATIONS.md` — **3 `DONE` in-session** (rows 3,
-  6, 7: the `KNOWLEDGE.md` falsehoods fixed, the GT cadence put on the roadmap, and the cold
-  review delivered), 8 `DEFERRED` to S41 with reason + expiry. **Closeout: RED, 14 pass /
-  2 fail** (`required-crew` + `review-inputs-attested`), both founder-waived at
-  `VAJRA_CLOSEOUT_WAIVER=40` as structurally unsatisfiable in a NO-CODE session.
-- S39 **complete** — merged (`ba6cf6f` via PRs #53–#59); `@ifelse.codes/chitra@0.3.0` live.
-  **Next (S41):** scope the code cleanup that gates the public launch; then a real `0.4.0`
-  through CI (cheapest close on the trusted-publisher claim), the GTM proof pack (first
-  measurement — carry the zero as `t0`), `required-crew`, and **disposition S16**, which no
-  gate can currently see. See [[roadmap]].
+- **Nothing.** S41 is **complete**: 13 requirements, 12 SHIPPED and 1 PARTIAL (req 8 —
+  `AGENTS.md`/`CLAUDE.md` still point into `.ai/`, which is founder decision **D1** that the
+  contract explicitly does not make). 32 commits, 34 tracked files, 0 files under the LOCKED
+  chart code. `verify-session-39.sh` is 43/43. The S41 gate is 24 checks, all green, and
+  the core suite is green at 453.
+  Fidelity map: `sessions/session-41-summary.md`. Independent verdict over **six** passes,
+  **ACCEPT**: `sessions/session-41-review.md` — it rejected the delivery twice, and the
+  findings (a check that provably could not fail, a guard scoped to its author's habits,
+  three fabricated numbers in the demo, a missing test the summary had called done) were all
+  fixed in place.
+- Next (S42): cleanup **Batch 2, dead weight** — `mockup-sandbox`, `lib/`, `api-server`,
+  `attached_assets`, 5 dead scripts, and the 6-file chain that references them. Then S43
+  (docs weight), then S44 (OSS polish + D1–D6), then the public flip. See [[roadmap]].
 
 ## Cost Tracking
-- S40 measured: one opencode session, one in-chat founder decision (the GT/code goal
-  conflict), 49 audit probes + 41 independent re-verifications by the cold review,
-  0 code changes, 0 commits, 0 PRs, 0 release minutes.
-  Token/`$` cost **unmeasured** (billed to the founder's plan). npm cost: $0. The audit added
-  no new recurring infrastructure.
-- S39 measured: one opencode session (interrupted once by a server restart) — a package rename
-  across 27 files, the npm chicken-and-egg that makes a first publish necessarily human, one
-  human bootstrap publish, a red release diagnosed rather than retried, **two hollow checks
-  caught in my own verify script and one more caught by the cold review** (a narrowed honesty
-  guard, a hardcoded version literal, and two fabricated `WORKS` rows in the demo), and S39
-  artifacts. Token/`$` cost **unmeasured** (billed to the founder's plan). npm publish cost: $0.
-  Release-runner minutes: ~4 (two attempts on `v0.3.0`).
-- Prior: S20 founder $20/mo plan; S21–S28 single ZCode chats; S29 3 build + 2 cold reviews;
-  S30 ops deploy + 2 cold reviews; S31 1 recon + 2 cold reviews; S32 knowledge-only; S33 four
-  stories + 1 cold review; S34 one story + 4 cold reviews, approval-token gated; S35 NO-CODE
-  audit; S36 docs/gates + live deploy; S37 rename + real npm publish via tmux; S38 OIDC runway.
+- S41 measured: one opencode session; **one** in-chat founder decision (the session goal:
+  cleanup Batch 1) and one unanswered (D1); **six** independent cold-review passes by a
+  separate subagent, all against the committed diff; 13 requirements across 34 tracked
+  files and 32 commits; **0** product-code changes under `src/charts/`, `src/renderers/` or
+  `src/themes/`; **1** new test (453 from 452); 2 new CI steps; 0 releases. One `pnpm
+  install` (adding `tsx` at the root) and one lockfile update. Roughly a dozen full
+  `verify-session-41.sh` runs at ~40 s each — each one performs a **real** `git clone` +
+  install + build — plus a fresh-clone build run three extra times, and ~15 targeted
+  counterfactuals. Two new session gates written from scratch (24 checks).
+  Token/`$` cost **unmeasured** (billed to the founder's plan). npm cost: $0. No new
+  recurring infrastructure.
+- The honest cost line: **the review was not overhead.** It rejected twice, and every
+  rejection was a real defect a green gate had passed — including one check that could not
+  fail at all.
+- S40 measured: 49 audit probes + 41 independent re-verifications, 0 code changes.
+  S39: a package rename across 27 files, one human bootstrap publish, a red release
+  diagnosed rather than retried.

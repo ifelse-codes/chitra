@@ -4,15 +4,16 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 ## Run & Operate
 
-- `pnpm --filter @ifelse.codes/chitra run test` — run all tests (452 tests)
+- `pnpm --filter @ifelse.codes/chitra run test` — run all tests (453 tests)
 - `pnpm --filter @ifelse.codes/chitra run test:coverage` — run tests with coverage report
 - `pnpm --filter @ifelse.codes/chitra run typecheck` — typecheck the library
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
+- `pnpm example` — render every chart type to your terminal
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
+- pnpm workspaces, Node.js 26, TypeScript 5.9
 - Zero runtime dependencies
 - Testing: Vitest
 - Rendering: Unicode Braille (⠀–⣿), Unicode Blocks (▁▂▃▄▅▆▇█), ASCII fallback
@@ -24,12 +25,13 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
   - `src/ansi.ts` — ANSI color primitives (zero-dep)
   - `src/utils.ts` — math, formatting, grid utilities
   - `src/plot.ts` — fluent `PlotBuilder` API
+  - `src/version.ts` — generated from `package.json`; regenerate with `node scripts/sync-version.mjs`
   - `src/themes/` — 7 built-in themes
   - `src/renderers/` — braille, blocks, ASCII engines
   - `src/charts/` — 20 chart implementations
-  - `tests/` — Vitest test suite
+  - `tests/` — Vitest test suite, one file per chart
 - `examples/basic.ts` — full working examples for all 20 chart types
-- `.github/workflows/ci.yml` — CI on Node 20/22/24
+- `.github/workflows/ci.yml` — CI on Node 26
 - `.github/workflows/release.yml` — NPM publish on git tag
 - `CONTRIBUTING.md` — contributor guide
 
@@ -37,9 +39,10 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 - Zero runtime dependencies — ANSI colors, braille math, and all rendering is self-contained
 - TypeScript ESM with `.js` extensions in imports (NodeNext module resolution)
-- `ChartResult` interface: every chart returns `{ render, toString, toPlain, toMarkdown, toJSON }` for AI agent compatibility
+- `ChartResult` interface: every chart returns `{ render, toString, toPlain, toContent, toMarkdown, toJSON }` (plus `toSVG()` where a browser-native renderer exists) for AI agent compatibility
 - `BaseChartOptions` carries shared fields (`labels`, `theme`, `renderer`, `noColor`, etc.) so specific chart types only declare their unique options
 - `PlotBuilder` fluent API wraps the same underlying chart functions — no code duplication
+- The version lives in `package.json` and nowhere else; `src/version.ts` is generated from it and CI fails if the two disagree
 
 ## Product
 
@@ -51,10 +54,11 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-- TypeScript files use `.js` extensions in imports (ESM NodeNext convention) — run via `tsx` not `node` directly
-- `pnpm-workspace.yaml` now includes `packages/*` as a workspace glob alongside `lib/*`
+- TypeScript files use `.js` extensions in imports (ESM NodeNext convention) — run via `tsx` (`pnpm example`) not `node` directly
+- `pnpm-workspace.yaml` globs `packages/*` and `lib/*`; `lib/` is Replit-era scaffolding for an API server that is not part of the product
 - `tsconfig.json` for the core package uses `noEmit: true` — no `rootDir` set so tests can be in a sibling `tests/` directory
-- tsx is a devDependency of `@ifelse.codes/chitra` — available at `packages/core/node_modules/.bin/tsx`
+- `PORT` / `BASE_PATH` are optional now — the vite configs default them (`5000`, `/`) and CI still exports both. They used to be hard throws, which broke every build that was not CI's.
+- `packages/core/dist/` is gitignored, so anything that typechecks the docs app must build core first — that is why CI builds core before the docs typecheck
 
 ## Pointers
 

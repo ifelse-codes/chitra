@@ -70,4 +70,8 @@ export type {
   ChartResult,
 } from "./types.js";
 
-export const VERSION = "0.1.0";
+// The version is machine-derived from package.json — see src/version.ts, which
+// scripts/sync-version.mjs generates and CI checks. Never restate it here: a
+// literal in this file shipped as "0.1.0" inside dist/ while the manifest said
+// 0.3.0 (S41 requirement 2).
+export { VERSION } from "./version.js";
