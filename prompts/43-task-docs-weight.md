@@ -149,7 +149,11 @@ written, `.ai/` re-synced, PR opened to `main`.
 
 ## The counterfactual this session demands
 
-`S42-gate-verbatim-goes-red` — S42's gate, run unmodified on this branch, must exit non-zero
-**on the S43 deletions** (a check that named one of the 43 components, or the replit plugins,
-or a removed dependency). This proves the coupling is real and that the S43 gate's
-discovery-based re-expression was necessary rather than tidy.
+`S42-gate-verbatim-goes-red` — S42's gate, run unmodified on this branch, must exit non-zero,
+and the reason is **`charts-untouched`**: S43 formats the LOCKED dirs (the F43-1 exception),
+S42's check diffs `main...HEAD` by path and cannot tell a formatting change from a semantic
+one, so it reports 25 changed files where it demands 0. The S43 gate re-expresses it as
+`charts-format-only` — proving the change under those dirs is *exactly* Prettier's
+transformation. **This is the S42 lesson one level down:** S42's gate discovered its vite
+configs (S41's enumerated them and broke), but it still *enumerated* the LOCKED dirs, so the
+first session that legitimately reformats them turns it red. Discover, do not enumerate.

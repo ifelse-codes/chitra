@@ -80,20 +80,19 @@ if not, they go, and the one-liner becomes true.**
   including that the first one's prescribed build fix did not fix the build.
   A **third** thing the first pass missed, and the one that mattered most, surfaced
   only when S42 deleted a directory S41's own gate had hard-coded a path into.
-- ⬜ **Session 43 (S43) — cleanup Batch 3: docs weight.** 43 unused shadcn components
-  (~5,000 LOC) and the dependencies that die with them, then the Prettier config
-  (31 core files currently fail `--check`) and the `lint` script, which points at an
-  eslint that is not installed and has no config.
-- ⬜ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions.**
-  `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job,
-  `engines`, and decisions **D1** (how much internal process goes public — options B
-  and C break `check_session_coverage` / `check_task_ref` unless the gates are
-  rewritten first), **D2** (hooks activation), **D3/D6** (track or ignore
-  `playground/` and the design mockups), **D4** (personal-path scrub —
-  **irreversible once public**), **D5** (`pnpm-workspace.yaml` overrides cruft, needs
-  a lockfile regen in its own commit). **Then the public flip**, which resolves the
-  README clone URL, npm `repository.url` / `homepage`, and turns npm provenance on in
-  one move.
+- ✅ **Session 43 (S43) — cleanup Batch 3: docs weight** (branch `session-43-docs-weight`).
+  **COMPLETE.** Deleted the **43** unused shadcn components (live set of **12** discovered as
+  the transitive closure of what the docs app imports), the **30** devDependencies that died
+  with them (lockfile regenerated in its own commit, 64 → 34), the three `@replit/*` Vite
+  plugins (config + manifest + workspace catalog), and the dead `lint` script. **Prettier
+  adopted** per **F43-1** (format + adopt + enforce, not delete): `.prettierrc` +
+  `.prettierignore` checked in, repo formatted, `format:check` wired into CI as a new `format`
+  job. `verify-session-43.sh` is a **port** of S42's gate; the eight S42 findings **N2–N9** are
+  fixed in it, each with a demonstrated counterfactual. The counterfactual
+  `s42-gate-verbatim-goes-red` extracts S42's **real** `charts-untouched` body (S42 enumerated
+  the LOCKED dirs; S43 reformats them) and asserts it exits non-zero — the port re-expresses it
+  as `charts-format-only`. Product untouched: 453 tests unchanged, LOCKED dirs reformat-only.
+- ⬜ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions.**  See `.ai/TASK.md` and `.ai/CONTINUATION-PROMPT.md`: `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job, `engines`, and decisions **D1–D6**. **Then the public flip.**
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
