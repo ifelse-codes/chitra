@@ -70,4 +70,10 @@ export type {
   ChartResult,
 } from "./types.js";
 
-export const VERSION = "0.1.0";
+// Injected at build time from package.json — see build.mjs (esbuild `define`)
+// and vitest.config.ts (the same define, so the suite sees the real value).
+// Never restate the version here: a literal in this file shipped as "0.1.0"
+// inside dist/ while the manifest said 0.3.0 (S41 requirement 2). If the define
+// is ever missing this throws a ReferenceError rather than silently lying.
+declare const __CHITRA_VERSION__: string;
+export const VERSION = __CHITRA_VERSION__;
