@@ -9,16 +9,17 @@
   **Published on npm as `@ifelse.codes/chitra@0.3.0` (S39, tag `latest`).** Renamed from
   `@ifelse.codes/core` on 2026-09-29; that name is **not** deprecated (no public release, no
   external user) — the S36/S37/S38 sections below keep it because they are dated records.
-- Around the lib sits a **Replit-scaffolded full-stack** (all in-scope per founder):
-  - `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4 + shadcn/ui docs/marketing site
-    (renders chitra output; `src/data/charts.ts`, `src/data/ansi-charts.json`).
-  - `artifacts/api-server/` — Node API server (esbuild bundle, pino logger; only `/healthz`
-    route so far).
-  - `artifacts/mockup-sandbox/` — Vite sandbox.
-  - `lib/api-spec/openapi.yaml` — OpenAPI 3.1 source of truth (title `Api` — do NOT rename).
-  - `lib/api-zod/` — zod schemas generated from the OpenAPI spec.
-  - `lib/api-client-react/` — orval-generated TanStack Query client.
-  - `lib/db/` — drizzle-orm schema.
+- Around the lib there is **one** app: `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4
+  + shadcn/ui docs/marketing site (renders chitra output; `src/data/charts.ts`,
+  `src/data/ansi-charts.json`). It is the **live** surface at `chitra.iifelse.com`.
+- **Deleted in S42 (2026-10-02), permanently from the tree** — the rest of the Replit-scaffolded
+  full-stack the product was extracted from. `main` retains every file at `4893683`:
+  `artifacts/api-server/` (Node API server, `/healthz` only), `artifacts/mockup-sandbox/` (Vite
+  sandbox), `lib/api-spec/` (`openapi.yaml`, title `Api`), `lib/api-zod/`,
+  `lib/api-client-react/` (orval + TanStack Query), `lib/db/` (drizzle-orm),
+  `attached_assets/`. None was imported by anything. **Permanent fact, not a session note:** the
+  generated-client and schema layer was never wired to the docs app, and `tsconfig.base.json` —
+  not `tsconfig.json` — is what the remaining packages extend.
 
 ## Stack & tooling
 - pnpm workspaces (pnpm 9.12). CI uses Node **26** (`.github/workflows/ci.yml` +
@@ -26,20 +27,23 @@
   TypeScript 5.9. ESM throughout.
 - **pnpm only** — root `preinstall` hard-fails any other package manager and deletes
   `package-lock.json`/`yarn.lock`.
-- Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `lib/*`, `lib/integrations/*`,
-  `packages/*`, `scripts`. Internal packages are named `@workspace/*`; the shippable one is
+- Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `packages/*`, `scripts` — three
+  globs, four projects. Internal packages are named `@workspace/*`; the shippable one is
   `@ifelse.codes/chitra` (the *directory* is still `packages/core/` — S39 kept the path).
+- There is no root `tsconfig.json` and no `typecheck:libs` script (both removed in S42 with the
+  `lib/` projects they existed to build). Root `pnpm run typecheck` is the recursive
+  per-package pass only.
 - Testing: **Vitest** (`packages/core/tests/`, 23 files, **453 tests**).
 
 ## Commands (verified working)
 | Command | Effect |
 |---|---|
-| `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
+| `pnpm install` | Install workspace (~25s). The esbuild peer-dep warning went with api-server in S42. |
 | `pnpm --filter @ifelse.codes/chitra run test` | 453 tests (23 files) |
 | `pnpm --filter @ifelse.codes/chitra run test:coverage` | tests + coverage |
 | `pnpm --filter @ifelse.codes/chitra run typecheck` | `tsc --noEmit` on the lib |
-| `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
-| `pnpm run build` | typecheck + `pnpm -r run build` |
+| `pnpm run typecheck` | recursive per-package typecheck (artifacts + scripts) |
+| `pnpm run build` | core build + typecheck + `pnpm -r run build` |
 
 ## Conventions & invariants (must never break)
 - **Zero runtime dependencies** in `@ifelse.codes/chitra` — ANSI, braille math, rendering are all
@@ -92,8 +96,9 @@
   The published build is real (S06): `build` runs `node build.mjs` (esbuild → `dist/index.js`
   ESM + `dist/index.cjs`) then `tsc -p tsconfig.build.json` for `.d.ts`. `typecheck` remains
   `tsc --noEmit`.
-- `lib/api-spec/openapi.yaml` `info.title` must stay `Api` (comment: changing it breaks
-  generated import paths).
+- **Moot since S42, kept as history:** `lib/api-spec/openapi.yaml` `info.title` had to stay `Api`
+  (changing it broke the orval-generated import paths). The spec and everything generated from it
+  were deleted in S42; nothing imports them now.
 - Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S39
   (latest merge PR #59, `ba6cf6f`). **Read `main`'s real range, don't copy it** — this line
   has now been wrong twice: it said S00–S08 (S35), was corrected to S00–S34 in S36, and
