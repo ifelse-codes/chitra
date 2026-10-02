@@ -37,7 +37,10 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
   let accentIdx = 0;
   let maxVal = -Infinity;
   data.forEach((v, i) => {
-    if (v > maxVal) { maxVal = v; accentIdx = i; }
+    if (v > maxVal) {
+      maxVal = v;
+      accentIdx = i;
+    }
   });
 
   const labelWidth = labels.length ? Math.max(...labels.map((l) => l.length)) : 0;
@@ -62,12 +65,14 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
   // the eyebrow, and the summary row is never clipped by the frame. `+4` is the
   // frame padding (2 border cols + 2 inner pad — panel's inner = width-4).
   const BAR_MIN = 12;
-  const effectiveWidth = opts.width ?? Math.max(
-    labelWidth + 1 + BAR_MIN + 1 + valueWidth + 4,
-    eyebrow.length + 4,
-    summaryPlain.length + 4,
-    36
-  );
+  const effectiveWidth =
+    opts.width ??
+    Math.max(
+      labelWidth + 1 + BAR_MIN + 1 + valueWidth + 4,
+      eyebrow.length + 4,
+      summaryPlain.length + 4,
+      36
+    );
   const innerWidth = effectiveWidth - 4;
   const barWidth = Math.max(1, innerWidth - labelWidth - valueWidth - 2);
 
@@ -76,9 +81,10 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
       const isPeak = i === accentIdx;
       const color = isPeak ? acc : grey;
       const label = colorize(padEnd(labels[i]!, labelWidth), theme.label, noColor);
-      const bar = renderer === "ascii"
-        ? buildAsciiHBar(v, yMin, yMax, barWidth, "#", " ")
-        : buildHorizontalBlockBar(v, yMin, yMax, barWidth, "█", " ");
+      const bar =
+        renderer === "ascii"
+          ? buildAsciiHBar(v, yMin, yMax, barWidth, "#", " ")
+          : buildHorizontalBlockBar(v, yMin, yMax, barWidth, "█", " ");
       const valueStr = padStart(formatNumber(v), valueWidth);
       const value = colorize(valueStr, isPeak ? acc : theme.label, noColor);
       return `${label} ${colorize(bar, color, noColor)} ${value}`;
@@ -115,34 +121,64 @@ export function horizontalBar(opts: HorizontalBarChartOptions): ChartResult {
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, opts.title ?? "HORIZONTAL BAR", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "HORIZONTAL BAR",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     const bodyRows = [...buildBarRows()];
     if (showAxes && hasData) bodyRows.push(buildAxisGuide(), buildAxisScale());
-    for (const row of fitBodyLines(bodyRows, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of fitBodyLines(bodyRows, opts.height))
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
 
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return horizontalBar({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return horizontalBar({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "horizontalBar",

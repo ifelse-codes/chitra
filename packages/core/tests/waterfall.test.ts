@@ -178,14 +178,29 @@ describe("waterfall chart — locked S26 design", () => {
     expect(j.total).toBe(550);
     const steps = j.steps as Array<Record<string, unknown>>;
     expect(steps.length).toBe(5);
-    expect(steps[0]).toMatchObject({ label: "Start", delta: 500, start: 0, end: 500, kind: "start" });
-    expect(steps[1]).toMatchObject({ label: "COGS", delta: -120, start: 500, end: 380, kind: "down" });
+    expect(steps[0]).toMatchObject({
+      label: "Start",
+      delta: 500,
+      start: 0,
+      end: 500,
+      kind: "start",
+    });
+    expect(steps[1]).toMatchObject({
+      label: "COGS",
+      delta: -120,
+      start: 500,
+      end: 380,
+      kind: "down",
+    });
     expect(steps[2]).toMatchObject({ label: "Rev", delta: 80, start: 380, end: 460, kind: "up" });
   });
 
   it("keeps the legacy surface: renders truthy, toJSON has total", () => {
     expect(
-      waterfall({ data: [100, -30, 20, -10, 50], labels: ["Start", "Q1", "Q2", "Q3", "Q4"] }).toString()
+      waterfall({
+        data: [100, -30, 20, -10, 50],
+        labels: ["Start", "Q1", "Q2", "Q3", "Q4"],
+      }).toString()
     ).toBeTruthy();
     expect((waterfall({ data: [10, -5, 5] }).toJSON() as Record<string, unknown>).total).toBe(10);
   });

@@ -62,9 +62,7 @@ export function sparkline(opts: SparklineOptions): ChartResult {
   const eyebrow = "SPARKLINE";
   const title = opts.label ?? "SPARKLINE";
   const summaryPlain =
-    count === 0
-      ? `0 readings · (no data)`
-      : `${count} readings · peak ${formatNumber(max)}`;
+    count === 0 ? `0 readings · (no data)` : `${count} readings · peak ${formatNumber(max)}`;
 
   // Auto-width: expand the panel so the strip and the summary are never
   // clipped — an explicit `width` shaped the columns above and stays a
@@ -88,7 +86,8 @@ export function sparkline(opts: SparklineOptions): ChartResult {
     for (let r = stripRows; r >= 1; r--) {
       let row = "";
       for (const col of columns) {
-        row += r <= col.h ? colorize(col.glyph.repeat(CELLW), col.color, noColor) : " ".repeat(CELLW);
+        row +=
+          r <= col.h ? colorize(col.glyph.repeat(CELLW), col.color, noColor) : " ".repeat(CELLW);
       }
       rows.push(row);
     }
@@ -97,11 +96,7 @@ export function sparkline(opts: SparklineOptions): ChartResult {
 
   function buildSummary(): string {
     if (count === 0) return colorize(summaryPlain, theme.label, noColor);
-    const head = colorize(
-      `${count} readings · `,
-      theme.label,
-      noColor
-    );
+    const head = colorize(`${count} readings · `, theme.label, noColor);
     return head + colorize(`peak ${formatNumber(max)}`, acc, noColor);
   }
 
@@ -110,30 +105,52 @@ export function sparkline(opts: SparklineOptions): ChartResult {
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, title, undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(effectiveWidth, title, undefined, theme.axis, theme.title, noColor, true)
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
-    for (const row of buildStrip()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of buildStrip())
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return sparkline({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return sparkline({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "sparkline",
@@ -156,6 +173,7 @@ function downsample(values: number[], cols: number): number[] {
   if (values.length <= cols) return [...values];
   if (cols === 1) return [values[0]!];
   const out: number[] = [];
-  for (let i = 0; i < cols; i++) out.push(values[Math.round((i * (values.length - 1)) / (cols - 1))]!);
+  for (let i = 0; i < cols; i++)
+    out.push(values[Math.round((i * (values.length - 1)) / (cols - 1))]!);
   return out;
 }

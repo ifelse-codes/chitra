@@ -30,10 +30,10 @@ const SPREAD_SHADES = ["░", "▒", "▓"];
  *    without colour.
  *  - **Adaptive value labels** (`axisPriceFmt`, shared with candlestick):
  *    integers when the range is wide, ≤2dp when tight. `│`/`+` guide, dashed
-  *    `└╌` baseline, truncated group labels, one rule separator. Width is a
+ *    `└╌` baseline, truncated group labels, one rule separator. Width is a
  *    floor (auto-expand, never clip, never `RangeError` on narrow widths).
  *  - Degenerate input is safe: empty / all-non-finite renders a framed
-  *    `0 groups · (no data)` panel with null `stats`/`peakGroup` facts;
+ *    `0 groups · (no data)` panel with null `stats`/`peakGroup` facts;
  *    single-value groups render via the flat-range guard (never `NaN`);
  *    non-finite samples are excluded before `quartiles()`, never plotted;
  *    groups left with no finite samples are dropped with their labels. */
@@ -48,11 +48,10 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
 
   const rawData = opts.data ?? [];
   const isMulti = Array.isArray(rawData[0]);
-  const inputSeries: number[][] = (
-    isMulti ? (rawData as number[][]) : [rawData as number[]]
-  ).map((s) => (Array.isArray(s) ? s : [s]));
-  const inputLabels =
-    opts.labels ?? inputSeries.map((_, i) => `Group ${i + 1}`);
+  const inputSeries: number[][] = (isMulti ? (rawData as number[][]) : [rawData as number[]]).map(
+    (s) => (Array.isArray(s) ? s : [s])
+  );
+  const inputLabels = opts.labels ?? inputSeries.map((_, i) => `Group ${i + 1}`);
 
   // Non-finite samples are excluded before quartiles(); groups left empty are
   // dropped with their labels (never plotted, never NaN).
@@ -136,7 +135,9 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
   function shadeOf(median: number): string {
     if (peakMedian === null || peakMedian === 0) return SPREAD_SHADES[SPREAD_SHADES.length - 1]!;
     const share = Math.min(1, Math.max(0, median / peakMedian));
-    return SPREAD_SHADES[Math.min(Math.floor(share * SPREAD_SHADES.length), SPREAD_SHADES.length - 1)]!;
+    return SPREAD_SHADES[
+      Math.min(Math.floor(share * SPREAD_SHADES.length), SPREAD_SHADES.length - 1)
+    ]!;
   }
 
   const rowOf = (v: number): number =>
@@ -147,7 +148,9 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
   function yRowLabel(row: number): string {
     if (!showAxes) return "";
     const label =
-      row % yLabelStep === 0 || row === boxHeight - 1 ? padStart(tickLabel(row), yLabelW) : " ".repeat(yLabelW);
+      row % yLabelStep === 0 || row === boxHeight - 1
+        ? padStart(tickLabel(row), yLabelW)
+        : " ".repeat(yLabelW);
     return colorize(label, theme.label, noColor);
   }
 
@@ -176,7 +179,8 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
         if (row >= boxStart && row <= boxEnd) {
           if (row === medRow) {
             // Horizontal median run — never confused with the vertical edges.
-            seg = pad(mid - 1) + colorize(isPeak ? "═══" : "───", tone, noColor) + pad(sw - mid - 2);
+            seg =
+              pad(mid - 1) + colorize(isPeak ? "═══" : "───", tone, noColor) + pad(sw - mid - 2);
           } else {
             const fill = isPeak ? "█" : shadeOf(stat.median);
             seg =
@@ -212,11 +216,7 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
     if (!showAxes || empty) return "";
     return (
       " ".repeat(gutter) +
-      colorize(
-        kept.map((k) => padEnd(k.label.slice(0, sw), sw + 1)).join(""),
-        theme.label,
-        noColor
-      )
+      colorize(kept.map((k) => padEnd(k.label.slice(0, sw), sw + 1)).join(""), theme.label, noColor)
     );
   }
 
@@ -227,7 +227,9 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
       theme.label,
       noColor
     );
-    return head + colorize(`peak ${peakLabel} (${axisPriceFmt(peakMedian!, yRange)})`, acc, noColor);
+    return (
+      head + colorize(`peak ${peakLabel} (${axisPriceFmt(peakMedian!, yRange)})`, acc, noColor)
+    );
   }
 
   function buildLines(): string[] {
@@ -236,29 +238,55 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
       lines.push(
-        frameTop(effectiveWidth, opts.title ?? "BOXPLOT", undefined, theme.axis, theme.title, noColor, true)
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "BOXPLOT",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
       );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
     if (!empty) {
-      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      for (const row of buildPlotRows())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+        );
       const baseline = buildBaseline();
-      if (baseline) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline);
+      if (baseline)
+        lines.push(
+          useFrame && !useCompact
+            ? frameRow(effectiveWidth, baseline, theme.axis, noColor)
+            : baseline
+        );
       const labels = buildGroupLabels();
-      if (labels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels);
+      if (labels.trim())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels
+        );
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -271,7 +299,9 @@ export function boxplot(opts: BoxPlotOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return boxplot({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return boxplot({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

@@ -79,8 +79,7 @@ describe("progress chart — locked S23 design", () => {
 
   // ── Intensity IS the shade ramp (the heatmap/gauge texture language) ──
   it("encodes the level as the shade ramp, light → dark (░▒▓)", () => {
-    const rowFor = (value: number) =>
-      plainLines({ value, max: 100 }).find((l) => RAMP.test(l))!;
+    const rowFor = (value: number) => plainLines({ value, max: 100 }).find((l) => RAMP.test(l))!;
     expect(rowFor(20)).toMatch(/░+█/); // bucket 0 fill + solid edge
     expect(rowFor(45)).toMatch(/▒+█/); // bucket 1
     expect(rowFor(70)).toMatch(/▓+█/); // bucket 2

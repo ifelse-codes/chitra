@@ -89,9 +89,7 @@ export function area(opts: AreaChartOptions): ChartResult {
 
   const rawData = opts.data;
   const isMulti = Array.isArray(rawData[0]);
-  const series: number[][] = isMulti
-    ? (rawData as number[][])
-    : [rawData as number[]];
+  const series: number[][] = isMulti ? (rawData as number[][]) : [rawData as number[]];
   const seriesLabels = opts.seriesLabels ?? series.map((_, i) => `Series ${i + 1}`);
 
   const allValues = series.flat();
@@ -123,7 +121,9 @@ export function area(opts: AreaChartOptions): ChartResult {
   const areas = series.map((s) => buildArea(s, plotCols, plotRows, yMin, yMax));
   const primary = areas[0]!;
   const maxIdx = primarySeriesMaxIndex(series[0]!);
-  const peakDotX = Math.round((maxIdx / Math.max(1, series[0]!.length - 1)) * (primary.fill.dotCols - 1));
+  const peakDotX = Math.round(
+    (maxIdx / Math.max(1, series[0]!.length - 1)) * (primary.fill.dotCols - 1)
+  );
   const peakCap = new Set([peakDotX - 1, peakDotX, peakDotX + 1]);
 
   function buildLines(): string[] {
@@ -132,11 +132,25 @@ export function area(opts: AreaChartOptions): ChartResult {
     const useCompact = opts.compact === true;
     const eyebrow = (opts.eyebrow ?? "TREND").toUpperCase();
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "AREA", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          width,
+          opts.title ?? "AREA",
+          opts.timestamp,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     const yStep = Math.max(1, Math.floor(plotRows / 5));
@@ -199,15 +213,26 @@ export function area(opts: AreaChartOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return area({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return area({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "area",

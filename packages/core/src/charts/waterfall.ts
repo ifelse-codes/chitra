@@ -143,9 +143,12 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
   }
 
   function outlineCell(row: number, rTop: number, rBot: number, color: string): string {
-    if (rTop === rBot) return colorize("┌" + "╌".repeat(Math.max(0, barW - 2)) + "┐", color, noColor);
-    if (row === rTop) return colorize("┌" + "╌".repeat(Math.max(0, barW - 2)) + "┐", color, noColor);
-    if (row === rBot) return colorize("└" + "╌".repeat(Math.max(0, barW - 2)) + "┘", color, noColor);
+    if (rTop === rBot)
+      return colorize("┌" + "╌".repeat(Math.max(0, barW - 2)) + "┐", color, noColor);
+    if (row === rTop)
+      return colorize("┌" + "╌".repeat(Math.max(0, barW - 2)) + "┐", color, noColor);
+    if (row === rBot)
+      return colorize("└" + "╌".repeat(Math.max(0, barW - 2)) + "┘", color, noColor);
     return colorize("│" + " ".repeat(Math.max(0, barW - 2)) + "│", color, noColor);
   }
 
@@ -177,9 +180,7 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
           cell = inSpan ? outlineCell(row, rTop, rBot, downColor) : " ".repeat(barW);
         } else if (b.kind === "start") {
           cell =
-            inSpan && yRange > 0
-              ? colorize("█".repeat(barW), tAnchor, noColor)
-              : " ".repeat(barW);
+            inSpan && yRange > 0 ? colorize("█".repeat(barW), tAnchor, noColor) : " ".repeat(barW);
         } else if (b.kind === "total") {
           cell =
             inSpan && yRange > 0
@@ -244,30 +245,62 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
       lines.push(
-        frameTop(effectiveWidth, opts.title ?? "WATERFALL", undefined, theme.axis, theme.title, noColor, true)
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "WATERFALL",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
       );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
     if (!empty) {
-      lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, buildDeltaRow(), theme.axis, noColor) : buildDeltaRow());
-      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      lines.push(
+        useFrame && !useCompact
+          ? frameRow(effectiveWidth, buildDeltaRow(), theme.axis, noColor)
+          : buildDeltaRow()
+      );
+      for (const row of buildPlotRows())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+        );
       const baseline = buildBaseline();
-      if (baseline) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline);
+      if (baseline)
+        lines.push(
+          useFrame && !useCompact
+            ? frameRow(effectiveWidth, baseline, theme.axis, noColor)
+            : baseline
+        );
       const stepLabels = buildStepLabels();
-      if (stepLabels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, stepLabels, theme.axis, noColor) : stepLabels);
+      if (stepLabels.trim())
+        lines.push(
+          useFrame && !useCompact
+            ? frameRow(effectiveWidth, stepLabels, theme.axis, noColor)
+            : stepLabels
+        );
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -280,7 +313,9 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return waterfall({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return waterfall({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },
@@ -294,7 +329,13 @@ export function waterfall(opts: WaterfallOptions): ChartResult {
         // kind (empty when there is no data).
         steps: bars
           .filter((b) => b.kind !== "total")
-          .map((b) => ({ label: b.label, delta: b.delta, start: b.start, end: b.end, kind: b.kind })),
+          .map((b) => ({
+            label: b.label,
+            delta: b.delta,
+            start: b.start,
+            end: b.end,
+            kind: b.kind,
+          })),
         plain: stripAnsi(output),
       };
     },

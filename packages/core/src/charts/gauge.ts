@@ -125,39 +125,69 @@ export function gauge(opts: GaugeOptions): ChartResult {
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, opts.title ?? "GAUGE", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "GAUGE",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
     const gaugeBody = [buildBar()];
     if (opts.showAxes !== false) gaugeBody.push(buildGuide(), buildScale());
-    for (const row of fitBodyLines(gaugeBody, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of fitBodyLines(gaugeBody, opts.height))
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return gauge({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return gauge({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "gauge",
         value,
         min,
         max,
-        percent: finite ? +((trueLevel * 100).toFixed(2)) : null,
+        percent: finite ? +(trueLevel * 100).toFixed(2) : null,
         bucket: finite ? bucket : null,
         plain: stripAnsi(output),
       };

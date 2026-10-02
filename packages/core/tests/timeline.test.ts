@@ -131,9 +131,7 @@ describe("timeline chart — locked S21 design", () => {
     const acc = resolveTheme(undefined).accent!;
     const out = timeline({ events: EVENTS }).toString();
     const segs = [...out.matchAll(/(\x1b\[[0-9;]*m)([^\x1b]+)(\x1b\[0m)/g)];
-    const barCodes = new Set(
-      segs.filter((s) => RAMP.test(s[2]!)).map((s) => s[1]!)
-    );
+    const barCodes = new Set(segs.filter((s) => RAMP.test(s[2]!)).map((s) => s[1]!));
     for (const code of barCodes) {
       expect(code === acc || GREY_TONES.includes(code)).toBe(true);
     }
@@ -161,12 +159,14 @@ describe("timeline chart — locked S21 design", () => {
       ],
     }).toString();
     expect(out).toMatch(/\x1b\[38;5;208m/); // the user's colour is honoured
-    expect(accentCensus({
-      events: [
-        { label: "a", start: 0, end: 2 },
-        { label: "b", start: 1, end: 4 },
-      ],
-    }).accent).toBe(1); // the DEFAULT path stays accent-once
+    expect(
+      accentCensus({
+        events: [
+          { label: "a", start: 0, end: 2 },
+          { label: "b", start: 1, end: 4 },
+        ],
+      }).accent
+    ).toBe(1); // the DEFAULT path stays accent-once
   });
 
   // ── Degenerate data is safe ───────────────────────────────────
@@ -190,20 +190,26 @@ describe("timeline chart — locked S21 design", () => {
   });
 
   it("a point event (no end) renders exactly one lightest-shade glyph", () => {
-    const plain = stripAnsi(timeline({
-      events: [
-        { label: "milestone", start: 3 },
-        { label: "phase", start: 0, end: 6 },
-      ],
-    }).toString());
+    const plain = stripAnsi(
+      timeline({
+        events: [
+          { label: "milestone", start: 3 },
+          { label: "phase", start: 0, end: 6 },
+        ],
+      }).toString()
+    );
     const row = plain.split("\n").find((l) => l.includes("milestone"))!;
     const glyphs = row.match(/[░▒▓█]/g) ?? [];
     expect(glyphs.length).toBe(1);
     expect(glyphs[0]).toBe("░"); // honestly zero-length → lightest ramp step
-    expect(accentCensus({ events: [
-      { label: "milestone", start: 3 },
-      { label: "phase", start: 0, end: 6 },
-    ] }).accent).toBe(1); // the 6-span phase takes the accent
+    expect(
+      accentCensus({
+        events: [
+          { label: "milestone", start: 3 },
+          { label: "phase", start: 0, end: 6 },
+        ],
+      }).accent
+    ).toBe(1); // the 6-span phase takes the accent
   });
 
   it("an end before start is honestly zero-length (one glyph, no crash)", () => {

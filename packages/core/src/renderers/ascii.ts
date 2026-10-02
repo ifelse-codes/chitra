@@ -41,9 +41,10 @@ export function buildAsciiHBar(
 export function sparklineAscii(data: number[], width?: number): string {
   if (data.length === 0) return "";
   const n = width ?? data.length;
-  const sampled = data.length === n
-    ? data
-    : new Array(n).fill(0).map((_, i) => data[Math.round((i / (n - 1)) * (data.length - 1))]);
+  const sampled =
+    data.length === n
+      ? data
+      : new Array(n).fill(0).map((_, i) => data[Math.round((i / (n - 1)) * (data.length - 1))]);
 
   const min = Math.min(...sampled);
   const max = Math.max(...sampled);

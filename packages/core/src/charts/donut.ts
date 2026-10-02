@@ -12,7 +12,10 @@ export function donut(opts: DonutChartOptions): ChartResult {
   const labels = opts.labels ?? data.map((_, i) => `Item ${i + 1}`);
 
   const baseRadius = opts.radius ?? 8;
-  const radius = opts.height === undefined ? baseRadius : Math.max(2, Math.min(baseRadius, Math.floor((opts.height - 1) / 2)));
+  const radius =
+    opts.height === undefined
+      ? baseRadius
+      : Math.max(2, Math.min(baseRadius, Math.floor((opts.height - 1) / 2)));
   const innerRadius = opts.innerRadius ?? Math.max(2, Math.floor(radius * 0.5));
 
   const { slices, total } = buildSlices(data, labels, theme);
@@ -24,7 +27,7 @@ export function donut(opts: DonutChartOptions): ChartResult {
     const ringCols = radius * 4 + 1;
     const eyebrow = (opts.eyebrow ?? "DISTRIBUTION").toUpperCase();
     const legendGap = 3;
-    const maxLegendRowLen = Math.max(0, ...legend.rows.map(r => visibleLength(r)));
+    const maxLegendRowLen = Math.max(0, ...legend.rows.map((r) => visibleLength(r)));
     const contentWidth = ringCols + legendGap + maxLegendRowLen;
     const width = opts.width ?? Math.max(contentWidth + 4, 52);
     const useFrame = opts.frame !== false;
@@ -32,11 +35,25 @@ export function donut(opts: DonutChartOptions): ChartResult {
 
     const lines: string[] = [];
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "DONUT", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          width,
+          opts.title ?? "DONUT",
+          opts.timestamp,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     const h = Math.max(ring.length, legend.rows.length);
@@ -44,31 +61,53 @@ export function donut(opts: DonutChartOptions): ChartResult {
     const combined: string[] = [];
     for (let i = 0; i < h; i++) {
       const ringRow = i < ring.length ? ring[i]! : "";
-      const legRow = i >= legendOffset && i < legendOffset + legend.rows.length
-        ? legend.rows[i - legendOffset]!
-        : "";
+      const legRow =
+        i >= legendOffset && i < legendOffset + legend.rows.length
+          ? legend.rows[i - legendOffset]!
+          : "";
       combined.push(padRow(ringRow, ringCols) + " ".repeat(legendGap) + legRow);
     }
-    for (const content of fitBodyLines(combined, opts.height)) lines.push(useFrame && !useCompact ? frameRow(width, content, theme.axis, noColor) : content);
+    for (const content of fitBodyLines(combined, opts.height))
+      lines.push(useFrame && !useCompact ? frameRow(width, content, theme.axis, noColor) : content);
 
     if (opts.status && !useCompact) {
       if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
-      lines.push(useFrame ? frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor) : colorize(`Status: ${opts.status}`, theme.title, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(
+              width,
+              colorize(`Status: ${opts.status}`, theme.title, noColor),
+              theme.axis,
+              noColor
+            )
+          : colorize(`Status: ${opts.status}`, theme.title, noColor)
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return donut({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return donut({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "donut",

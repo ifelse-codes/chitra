@@ -23,16 +23,26 @@ function parseAnsi(raw: string): Span[] {
     let i = 0;
     while (i < codes.length) {
       const c = codes[i];
-      if (c === 0) { fg = null; bold = false; dim = false; }
-      else if (c === 1) { bold = true; }
-      else if (c === 2) { dim = true; }
-      else if (c === 22) { bold = false; dim = false; }
-      else if (c === 39) { fg = null; }
-      else if (c >= 30 && c <= 37) { fg = ansi16(c - 30, bold); }
-      else if (c >= 90 && c <= 97) { fg = ansi16(c - 90 + 8, bold); }
-      else if (c === 38) {
+      if (c === 0) {
+        fg = null;
+        bold = false;
+        dim = false;
+      } else if (c === 1) {
+        bold = true;
+      } else if (c === 2) {
+        dim = true;
+      } else if (c === 22) {
+        bold = false;
+        dim = false;
+      } else if (c === 39) {
+        fg = null;
+      } else if (c >= 30 && c <= 37) {
+        fg = ansi16(c - 30, bold);
+      } else if (c >= 90 && c <= 97) {
+        fg = ansi16(c - 90 + 8, bold);
+      } else if (c === 38) {
         if (codes[i + 1] === 2 && i + 4 < codes.length) {
-          fg = `rgb(${codes[i+2]},${codes[i+3]},${codes[i+4]})`;
+          fg = `rgb(${codes[i + 2]},${codes[i + 3]},${codes[i + 4]})`;
           i += 4;
         } else if (codes[i + 1] === 5 && i + 2 < codes.length) {
           fg = xterm256(codes[i + 2]);
@@ -50,10 +60,22 @@ function parseAnsi(raw: string): Span[] {
 }
 
 const ANSI16 = [
-  "#3b4252","#bf616a","#a3be8c","#ebcb8b",
-  "#81a1c1","#b48ead","#88c0d0","#e5e9f0",
-  "#4c566a","#bf616a","#a3be8c","#ebcb8b",
-  "#81a1c1","#b48ead","#8fbcbb","#eceff4",
+  "#3b4252",
+  "#bf616a",
+  "#a3be8c",
+  "#ebcb8b",
+  "#81a1c1",
+  "#b48ead",
+  "#88c0d0",
+  "#e5e9f0",
+  "#4c566a",
+  "#bf616a",
+  "#a3be8c",
+  "#ebcb8b",
+  "#81a1c1",
+  "#b48ead",
+  "#8fbcbb",
+  "#eceff4",
 ];
 
 function ansi16(idx: number, bright: boolean): string {
@@ -62,9 +84,14 @@ function ansi16(idx: number, bright: boolean): string {
 
 function xterm256(n: number): string {
   if (n < 16) return ANSI16[n] ?? "#fff";
-  if (n >= 232) { const v = 8 + (n - 232) * 10; return `rgb(${v},${v},${v})`; }
+  if (n >= 232) {
+    const v = 8 + (n - 232) * 10;
+    return `rgb(${v},${v},${v})`;
+  }
   const i = n - 16;
-  const b = i % 6, g = Math.floor(i / 6) % 6, r = Math.floor(i / 36);
+  const b = i % 6,
+    g = Math.floor(i / 6) % 6,
+    r = Math.floor(i / 36);
   const c = (x: number) => (x === 0 ? 0 : 55 + x * 40);
   return `rgb(${c(r)},${c(g)},${c(b)})`;
 }
@@ -82,10 +109,7 @@ export function ansiToHtml(raw: string): string {
   const spans = parseAnsi(raw);
   return spans
     .map((s) => {
-      let text = s.text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      let text = s.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       // JetBrains Mono renders braille (U+2800-U+28FF) at 2ch advance width.
       // Wrap each braille char so CSS can force it back to 1ch.
       text = text.replace(/[\u2800-\u28ff]/g, '<span class="br">$&</span>');

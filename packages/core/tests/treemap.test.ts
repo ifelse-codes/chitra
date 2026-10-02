@@ -94,18 +94,14 @@ describe("treemap chart — locked S20 design", () => {
   });
 
   it("the ramp is the LITERAL documented greyscale (pinned to spec hexes)", () => {
-    expect(GREY_TONES).toEqual(
-      ["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi)
-    );
+    expect(GREY_TONES).toEqual(["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi));
   });
 
   it("intensity encoding IS the documented grey tone ramp (light → dark)", () => {
     const acc = resolveTheme(undefined).accent!;
     const out = treemap({ data: DATA }).toString();
     const segs = [...out.matchAll(/(\x1b\[[0-9;]*m)([^\x1b]+)(\x1b\[0m)/g)];
-    const cellCodes = new Set(
-      segs.filter((s) => CELL.test(s[2]!)).map((s) => s[1]!)
-    );
+    const cellCodes = new Set(segs.filter((s) => CELL.test(s[2]!)).map((s) => s[1]!));
     for (const code of cellCodes) {
       expect(code === acc || GREY_TONES.includes(code)).toBe(true);
     }
@@ -137,10 +133,14 @@ describe("treemap chart — locked S20 design", () => {
 
   it("nested children flatten; peak is the max leaf (first in flatten order)", () => {
     const nested = [
-      { label: "Lang", value: 10, children: [
-        { label: "TS", value: 8 },
-        { label: "Go", value: 2 },
-      ]},
+      {
+        label: "Lang",
+        value: 10,
+        children: [
+          { label: "TS", value: 8 },
+          { label: "Go", value: 2 },
+        ],
+      },
       { label: "Docs", value: 5 },
     ];
     const plain = stripAnsi(treemap({ data: nested }).toString());

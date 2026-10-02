@@ -33,13 +33,17 @@ export function minMaxFlat(data: number[][]): { min: number; max: number } {
   return minMax(data.flat());
 }
 
-export function niceTicks(min: number, max: number, maxTicks = 5): { min: number; max: number; step: number; ticks: number[] } {
+export function niceTicks(
+  min: number,
+  max: number,
+  maxTicks = 5
+): { min: number; max: number; step: number; ticks: number[] } {
   if (min === max) return { min, max, step: 1, ticks: [min] };
   const range = max - min;
   const rawStep = range / (maxTicks - 1);
   const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
   const norm = rawStep / mag;
-  
+
   let step: number;
   if (norm < 1.5) step = 1 * mag;
   else if (norm < 3) step = 2 * mag;
@@ -49,7 +53,7 @@ export function niceTicks(min: number, max: number, maxTicks = 5): { min: number
   // STRICT bounds: Do not force 0 if min is > 0. Just step down once.
   let niceMin = Math.floor(min / step) * step;
   let niceMax = Math.ceil(max / step) * step;
-  
+
   const ticks: number[] = [];
   for (let t = niceMin; t <= niceMax + 1e-9; t += step) {
     ticks.push(t);

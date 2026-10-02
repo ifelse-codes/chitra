@@ -25,7 +25,9 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
   const acc = theme.accent!;
   const tones = theme.tones!;
   // Same "one hue + grey tone ramp" language as the LOCKED bar/line/area charts.
-  const toneOrder = [tones[2], tones[0], tones[3] ?? tones[1], tones[1]].filter(Boolean) as string[];
+  const toneOrder = [tones[2], tones[0], tones[3] ?? tones[1], tones[1]].filter(
+    Boolean
+  ) as string[];
 
   const rawData = opts.data;
   const isMulti = Array.isArray(rawData[0]) && !("x" in (rawData[0] as object));
@@ -75,7 +77,9 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
   const plotRows = Math.max(3, height);
   const seriesLabels = opts.seriesLabels ?? series.map((_, i) => `Series ${i + 1}`);
   const multiSeries = series.length > 1;
-  const seriesColors = series.map((_, i) => (i === 0 && multiSeries ? acc : toneOrder[i % toneOrder.length]!));
+  const seriesColors = series.map((_, i) =>
+    i === 0 && multiSeries ? acc : toneOrder[i % toneOrder.length]!
+  );
 
   function yLabelFor(row: number): string {
     const yLabelStep = Math.max(1, Math.floor(plotRows / 5));
@@ -98,7 +102,8 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       const canvas = new BrailleCanvas(plotCols, plotRows);
       for (const pt of s) {
         const dotX = Math.round(((pt.x - xMinVal) / xSpan) * (canvas.dotCols - 1));
-        const dotY = canvas.dotRows - 1 - Math.round(((pt.y - yMinVal) / ySpan) * (canvas.dotRows - 1));
+        const dotY =
+          canvas.dotRows - 1 - Math.round(((pt.y - yMinVal) / ySpan) * (canvas.dotRows - 1));
         canvas.set(dotX, dotY);
       }
       return canvas;
@@ -151,8 +156,12 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
           continue;
         }
         const color = multiSeries
-          ? (si === 0 ? acc : toneOrder[si % toneOrder.length]!)
-          : (row * plotCols + col === peakKey ? acc : toneOrder[0]!);
+          ? si === 0
+            ? acc
+            : toneOrder[si % toneOrder.length]!
+          : row * plotCols + col === peakKey
+            ? acc
+            : toneOrder[0]!;
         rowStr += colorize(ch, color, noColor);
       }
       rows.push(rowStr);
@@ -185,7 +194,8 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
         const ch = GLYPHS[si % GLYPHS.length]!;
         for (const pt of series[si]!) {
           const rc = plotPoint(pt);
-          if (rc && grid[rc[0]]![rc[1]] === " ") grid[rc[0]]![rc[1]] = colorize(ch, toneOrder[si % toneOrder.length]!, noColor);
+          if (rc && grid[rc[0]]![rc[1]] === " ")
+            grid[rc[0]]![rc[1]] = colorize(ch, toneOrder[si % toneOrder.length]!, noColor);
         }
       }
       for (const pt of series[0]!) {
@@ -198,7 +208,8 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       for (const pt of series[0]!) {
         const rc = plotPoint(pt);
         if (!rc || (rc[0] === peakRow && rc[1] === peakCol)) continue;
-        if (grid[rc[0]]![rc[1]] === " ") grid[rc[0]]![rc[1]] = colorize(GLYPHS[0]!, toneOrder[0]!, noColor);
+        if (grid[rc[0]]![rc[1]] === " ")
+          grid[rc[0]]![rc[1]] = colorize(GLYPHS[0]!, toneOrder[0]!, noColor);
       }
       if (peak && peakRow >= 0 && peakRow < plotRows && peakCol >= 0 && peakCol < plotCols) {
         grid[peakRow]![peakCol] = colorize(GLYPHS[0]!, acc, noColor);
@@ -232,11 +243,7 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
 
   function buildFooter(): string {
     if (empty) return colorize("0 points · (no data)", theme.label, noColor);
-    const head = colorize(
-      `${n} points`,
-      theme.label,
-      noColor
-    );
+    const head = colorize(`${n} points`, theme.label, noColor);
     // Multi-series: the footer names the accent GROUP (the highlighted primary series), not a
     // single point — the accent is a whole cluster now, not one peak.
     if (multiSeries) {
@@ -244,7 +251,11 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
       return head + colorize(" · ", theme.label, noColor) + tail;
     }
     if (!peak) return head;
-    const peakCell = colorize(`peak (${formatNumber(peak.x)}, ${formatNumber(peak.y)})`, acc, noColor);
+    const peakCell = colorize(
+      `peak (${formatNumber(peak.x)}, ${formatNumber(peak.y)})`,
+      acc,
+      noColor
+    );
     return head + colorize(" · ", theme.label, noColor) + peakCell;
   }
 
@@ -254,16 +265,24 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     const useCompact = opts.compact === true;
     const eyebrow = (opts.eyebrow ?? "CORRELATION").toUpperCase();
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "SCATTER", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(width, opts.title ?? "SCATTER", undefined, theme.axis, theme.title, noColor, true)
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
-      for (const item of buildLegend()) lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
+      for (const item of buildLegend())
+        lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
     }
 
     const plotRowsOut = empty ? [] : renderer === "braille" ? buildBrailleRows() : buildGridRows();
-    for (const row of plotRowsOut) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of plotRowsOut)
+      lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
     if (!useCompact) {
       lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
@@ -273,7 +292,8 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -286,7 +306,9 @@ export function scatter(opts: ScatterPlotOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return scatter({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return scatter({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },
