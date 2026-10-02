@@ -406,5 +406,5 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   remain grandfathered.
 
 ## Guardrails carried forward (see [[knowledge]])
-- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · **452 tests green** ·
+- Zero runtime deps · keep `toPlain()`/`toJSON()` agent output · **453 tests green** ·
   public API stability.

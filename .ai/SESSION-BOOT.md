@@ -15,7 +15,7 @@
 - `main` = `ece61fc` == `origin/main` (`0 0`) at branch time.
 - Remote is still **private** — `github.com/ifelse-codes/chitra`. The public flip is
   founder-decided and **gated on the cleanup**, which is what S41 starts.
-- **Product, re-observed:** 452/452 tests in 23 files; root typecheck exit 0;
+- **Product, re-observed:** 453/453 tests in 23 files; root typecheck exit 0;
   `verify-session-39.sh` 43/43 on `main` HEAD before this branch started.
 - **S41's headline:** for the first time in this repo's history, a **fresh clone with no
   environment variables set** runs `pnpm install --frozen-lockfile && pnpm run build` to

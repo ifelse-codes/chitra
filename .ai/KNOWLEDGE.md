@@ -29,13 +29,13 @@
 - Workspace globs (`pnpm-workspace.yaml`): `artifacts/*`, `lib/*`, `lib/integrations/*`,
   `packages/*`, `scripts`. Internal packages are named `@workspace/*`; the shippable one is
   `@ifelse.codes/chitra` (the *directory* is still `packages/core/` — S39 kept the path).
-- Testing: **Vitest** (`packages/core/tests/`, 23 files, **452 tests**).
+- Testing: **Vitest** (`packages/core/tests/`, 23 files, **453 tests**).
 
 ## Commands (verified working)
 | Command | Effect |
 |---|---|
 | `pnpm install` | Install workspace (~25s; esbuild peer-dep warning on api-server is benign) |
-| `pnpm --filter @ifelse.codes/chitra run test` | 452 tests (23 files) |
+| `pnpm --filter @ifelse.codes/chitra run test` | 453 tests (23 files) |
 | `pnpm --filter @ifelse.codes/chitra run test:coverage` | tests + coverage |
 | `pnpm --filter @ifelse.codes/chitra run typecheck` | `tsc --noEmit` on the lib |
 | `pnpm run typecheck` | full-workspace typecheck (libs build + artifacts + scripts) |
@@ -81,7 +81,7 @@
     `packages/core/README.md`.
   - Handoff for LLM polish: `scripts/ring-polish-handoff.mjs` (the old `/tmp/ring-lab/`
     live preview is ephemeral — gone).
-- **452 core tests stay green.** Never leave the suite red.
+- **453 core tests stay green.** Never leave the suite red.
 - North-star (founder): *"the best terminal chart lib ever created — zero-dep,
   AI-first, delightful."*
 
@@ -222,8 +222,14 @@
   summary); `#check_ground_truth_no_code` (a GT session's diff touches no code).
   `.ai/hooks/hook-ground-truth-guard.sh` enforces no-code-in-GT in the Claude
   harness; opencode relies on the closeout backstop.
-- **One canonical test count: 452.** If a session changes it, update it in one
-  place and let `verify-session-34.sh#test-count-matches` guard the README badge.
+- **One canonical test count: 453.** If a session changes it, update it everywhere it
+  is displayed — and note that the guard this line used to name,
+  `verify-session-34.sh#test-count-matches`, is **dead** (it filters the pre-rename
+  `@chitra/core` and matches no project). The live guard is
+  `scripts/verify-session-41.sh#test-count-propagated`, which derives the count from the
+  suite run and fails if the README badge, the docs hero stat, this file, or the roadmap
+  guardrail disagree. Added S41, after the count moved 452 → 453 and had to be written
+  into nine places by hand — the exact drift that guard now makes impossible.
 
 ## S37 extension — package published to npm (2026-09-24)
 > Superseded by S39: the shippable name is now `@ifelse.codes/chitra` and `latest` is `0.3.0`.
