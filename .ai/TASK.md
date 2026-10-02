@@ -3,6 +3,7 @@
 ## Session 42 — CLOSED. Cleanup Batch 2: dead weight
 
 - **Branch:** `session-42-dead-weight`, from `main` `4893683` (the S41 merge). **PR #63, open.**
+- **Product:** **`@ifelse.codes/chitra@0.3.0`**, live on npm, untouched by this session.
 - **Contract:** `prompts/42-task-dead-weight.md` — at HEAD, which is what `review-inputs-attested`
   hashes. S40 failed that gate because a session cannot commit a contract it never wrote.
 - **Delivered:** 10 requirements. `verify-session-42.sh` **35/35**; `verify-closeout.sh` **16/16**
