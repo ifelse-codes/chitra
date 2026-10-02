@@ -5,6 +5,5 @@
     "rootDir": "src",
     "types": ["node"]
   },
-  "include": ["src"],
-  "exclude": ["src/demo09-donut.ts"]
+  "files": []
 }
