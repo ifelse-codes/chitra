@@ -8,7 +8,15 @@ function plainLines(opts: Parameters<typeof horizontalBar>[0]): string[] {
   return stripAnsi(horizontalBar(opts).toString()).split("\n");
 }
 
-const ALL_THEMES = ["default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome"] as const;
+const ALL_THEMES = [
+  "default",
+  "nord",
+  "dracula",
+  "github-dark",
+  "tokyo-night",
+  "solarized",
+  "monochrome",
+] as const;
 
 describe("horizontalBar chart — locked S19 design", () => {
   // ── Panel chrome (criterion 2) ─────────────────────────────────
@@ -57,7 +65,11 @@ describe("horizontalBar chart — locked S19 design", () => {
     const theme = resolveTheme("default");
     // showAxes:false isolates the bar cells from axis/label chrome (colored with
     // theme.axis/theme.label), so the scan below only sees bar glyphs.
-    const raw = horizontalBar({ data: [12, 47, 23, 8, 35], theme: "default", showAxes: false }).toString();
+    const raw = horizontalBar({
+      data: [12, 47, 23, 8, 35],
+      theme: "default",
+      showAxes: false,
+    }).toString();
     // Only `█` cells are colorize()'d in the plot; each bar contributes one color
     // code immediately before its `█` run. Scope the lookahead to the glyph itself.
     const cellCodes = [...raw.matchAll(/\x1b\[[0-9;]*m(?=█)/g)].map((m) => m[0]);
@@ -68,14 +80,20 @@ describe("horizontalBar chart — locked S19 design", () => {
   it("colors every non-peak bar with a grey tone — never a raw theme.colors rainbow entry, across all themes", () => {
     for (const name of ALL_THEMES) {
       const theme = resolveTheme(name);
-      const raw = horizontalBar({ data: [12, 47, 23, 8, 35], theme: name, showAxes: false }).toString();
+      const raw = horizontalBar({
+        data: [12, 47, 23, 8, 35],
+        theme: name,
+        showAxes: false,
+      }).toString();
       const cellCodes = [...raw.matchAll(/\x1b\[[0-9;]*m(?=█)/g)].map((m) => m[0]);
       expect(cellCodes.length).toBeGreaterThan(0);
       // Every bar cell code must be the accent or a grey tone — never a rainbow hue.
       for (const code of cellCodes) {
         expect(code === theme.accent || theme.tones!.includes(code)).toBe(true);
       }
-      const rainbowOnly = theme.colors.filter((c) => c !== theme.accent && !theme.tones!.includes(c));
+      const rainbowOnly = theme.colors.filter(
+        (c) => c !== theme.accent && !theme.tones!.includes(c)
+      );
       for (const code of cellCodes) {
         expect(rainbowOnly).not.toContain(code);
       }
@@ -95,7 +113,9 @@ describe("horizontalBar chart — locked S19 design", () => {
 
   // ── Value labels + accent peak (criterion 4) ───────────────────
   it("renders each item's value label", () => {
-    const plain = stripAnsi(horizontalBar({ data: [12, 47, 23], labels: ["a", "b", "c"] }).toString());
+    const plain = stripAnsi(
+      horizontalBar({ data: [12, 47, 23], labels: ["a", "b", "c"] }).toString()
+    );
     expect(plain).toContain("12");
     expect(plain).toContain("47");
     expect(plain).toContain("23");
@@ -109,7 +129,9 @@ describe("horizontalBar chart — locked S19 design", () => {
   });
 
   it("names the peak item in the summary row", () => {
-    const plain = stripAnsi(horizontalBar({ data: [12, 47, 23], labels: ["a", "b", "c"] }).toString());
+    const plain = stripAnsi(
+      horizontalBar({ data: [12, 47, 23], labels: ["a", "b", "c"] }).toString()
+    );
     expect(plain).toContain("3 items · peak b (47)");
   });
 
@@ -158,7 +180,11 @@ describe("horizontalBar chart — locked S19 design", () => {
   it("breaks accent ties toward the FIRST maximum in data order", () => {
     const theme = resolveTheme("default");
     // Two equal maxima (9) at index 1 and 2 — the accent must land on index 1 only.
-    const raw = horizontalBar({ data: [5, 9, 9, 2], labels: ["a", "b", "c", "d"], showAxes: false }).toString();
+    const raw = horizontalBar({
+      data: [5, 9, 9, 2],
+      labels: ["a", "b", "c", "d"],
+      showAxes: false,
+    }).toString();
     const cellCodes = [...raw.matchAll(/\x1b\[[0-9;]*m(?=█)/g)].map((m) => m[0]);
     expect(cellCodes.filter((c) => c === theme.accent).length).toBe(1);
     const plain = stripAnsi(raw);
@@ -167,7 +193,10 @@ describe("horizontalBar chart — locked S19 design", () => {
 
   // ── API stability + formats ────────────────────────────────────
   it("toJSON returns structured data with type horizontalBar", () => {
-    const json = horizontalBar({ data: [10, 20, 30], labels: ["a", "b", "c"] }).toJSON() as Record<string, unknown>;
+    const json = horizontalBar({ data: [10, 20, 30], labels: ["a", "b", "c"] }).toJSON() as Record<
+      string,
+      unknown
+    >;
     expect(json.type).toBe("horizontalBar");
     expect(json.data).toEqual([10, 20, 30]);
     expect(json.labels).toEqual(["a", "b", "c"]);

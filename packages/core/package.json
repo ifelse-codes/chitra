@@ -41,8 +41,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint src tests"
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "catalog:",

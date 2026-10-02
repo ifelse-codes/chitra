@@ -1,9 +1,22 @@
 import { describe, it, expect } from "vitest";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../src/renderers/braille.js";
-import { sparklineBlocks, buildHorizontalBlockBar, blockHeight, shadeCell } from "../src/renderers/blocks.js";
+import {
+  sparklineBlocks,
+  buildHorizontalBlockBar,
+  blockHeight,
+  shadeCell,
+} from "../src/renderers/blocks.js";
 import { sparklineAscii, buildAsciiHBar } from "../src/renderers/ascii.js";
 import { ansi, colorize, stripAnsi, hexToAnsi, padEnd, padStart } from "../src/ansi.js";
-import { normalize, clamp, minMax, formatNumber, quartiles, center, truncate } from "../src/utils.js";
+import {
+  normalize,
+  clamp,
+  minMax,
+  formatNumber,
+  quartiles,
+  center,
+  truncate,
+} from "../src/utils.js";
 
 describe("BrailleCanvas", () => {
   it("initializes with correct dimensions", () => {
@@ -60,9 +73,7 @@ describe("BrailleCanvas", () => {
     const c = new BrailleCanvas(20, 10);
     plotLineOnBrailleCanvas(c, [1, 2, 3, 2, 1], 1, 3);
     const lines = c.toLines();
-    const hasContent = lines.some((l) =>
-      l.split("").some((ch) => ch.codePointAt(0)! !== 0x2800)
-    );
+    const hasContent = lines.some((l) => l.split("").some((ch) => ch.codePointAt(0)! !== 0x2800));
     expect(hasContent).toBe(true);
   });
 });

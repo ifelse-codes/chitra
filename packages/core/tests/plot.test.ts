@@ -56,7 +56,10 @@ describe("PlotBuilder", () => {
   });
 
   it("supports multi-series", () => {
-    const result = plot([[1, 2, 3], [3, 2, 1]])
+    const result = plot([
+      [1, 2, 3],
+      [3, 2, 1],
+    ])
       .seriesLabels(["Alpha", "Beta"])
       .line();
     const plain = result.toPlain();
@@ -65,7 +68,15 @@ describe("PlotBuilder", () => {
   });
 
   it("supports all themes", () => {
-    const themes = ["default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome"] as const;
+    const themes = [
+      "default",
+      "nord",
+      "dracula",
+      "github-dark",
+      "tokyo-night",
+      "solarized",
+      "monochrome",
+    ] as const;
     for (const theme of themes) {
       expect(plot([1, 2, 3]).theme(theme).line().toString()).toBeTruthy();
     }

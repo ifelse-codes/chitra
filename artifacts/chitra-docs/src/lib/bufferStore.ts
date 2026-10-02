@@ -8,9 +8,7 @@
 const PREFIX = "chitra-buffer:";
 
 function bootId(): string {
-  return (
-    ((globalThis as Record<string, unknown>).__CHITRA_BOOT_ID__ as string) ?? "adhoc"
-  );
+  return ((globalThis as Record<string, unknown>).__CHITRA_BOOT_ID__ as string) ?? "adhoc";
 }
 
 function key(id: string): string {

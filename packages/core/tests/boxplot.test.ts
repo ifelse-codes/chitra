@@ -87,10 +87,13 @@ describe("boxplot chart — locked S27 design", () => {
   });
 
   it("peaks on the highest median, ties go to the first group", () => {
-    const j = boxplot({ data: [[1, 2, 3], [1, 2, 3]], labels: ["P", "Q"] }).toJSON() as Record<
-      string,
-      unknown
-    >;
+    const j = boxplot({
+      data: [
+        [1, 2, 3],
+        [1, 2, 3],
+      ],
+      labels: ["P", "Q"],
+    }).toJSON() as Record<string, unknown>;
     expect(j.peakGroup).toMatchObject({ label: "P", index: 0, median: 2 });
   });
 

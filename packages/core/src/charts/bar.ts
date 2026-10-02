@@ -65,14 +65,20 @@ export function bar(opts: BarChartOptions): ChartResult {
   // and the summary legend, not from separate bright hues.
   const acc = theme.accent!;
   const tones = theme.tones!;
-  const toneOrder = [tones[2]!, tones[0]!, tones[3] ?? tones[1]!, tones[1]!].filter(Boolean) as string[];
+  const toneOrder = [tones[2]!, tones[0]!, tones[3] ?? tones[1]!, tones[1]!].filter(
+    Boolean
+  ) as string[];
 
   let maxSi = 0;
   let maxBi = 0;
   let maxVal = -Infinity;
   series.forEach((sv, si) => {
     sv.forEach((v, bi) => {
-      if (v > maxVal) { maxVal = v; maxSi = si; maxBi = bi; }
+      if (v > maxVal) {
+        maxVal = v;
+        maxSi = si;
+        maxBi = bi;
+      }
     });
   });
 
@@ -82,10 +88,7 @@ export function bar(opts: BarChartOptions): ChartResult {
     return toneOrder[si % toneOrder.length]!;
   }
 
-  const yAxisW = Math.max(
-    formatNumber(yMax).length,
-    formatNumber(yMin).length
-  ) + 1; // +1 for the y-guide char (│ or +)
+  const yAxisW = Math.max(formatNumber(yMax).length, formatNumber(yMin).length) + 1; // +1 for the y-guide char (│ or +)
 
   const barSlotW = numSeries * barWidth + barGap;
   const plotCols = Math.max(numBars * barSlotW - barGap, 1);
@@ -93,10 +96,12 @@ export function bar(opts: BarChartOptions): ChartResult {
   // Pre-compute the minimum inner width to fit the widest summary row so the
   // panel never clips its own footer (accent/stats are only meaningful uncut).
   const nameW = Math.max(...seriesLabels.map((l) => l.length)) + 2;
-  const minSummaryInner = Math.max(...series.map((sv, si) => {
-    const s = seriesStats(sv);
-    return nameW + ` · avg ${formatNumber(s.avg)} · peak ${formatNumber(s.max)}`.length;
-  }));
+  const minSummaryInner = Math.max(
+    ...series.map((sv, si) => {
+      const s = seriesStats(sv);
+      return nameW + ` · avg ${formatNumber(s.avg)} · peak ${formatNumber(s.max)}`.length;
+    })
+  );
 
   // Reserve real room for the spark so it isn't silently starved to width 0 whenever the
   // summary row is the panel's binding width constraint. SPARK_RESERVE = SPARK_MIN glyphs +
@@ -104,16 +109,18 @@ export function bar(opts: BarChartOptions): ChartResult {
   // leading space placed directly before the spark itself).
   const SPARK_MIN = 5;
   const SPARK_RESERVE = SPARK_MIN + 2;
-  const effectiveWidth = opts.width ?? Math.max(plotCols + yAxisW + 4, minSummaryInner + 4 + SPARK_RESERVE, 36);
+  const effectiveWidth =
+    opts.width ?? Math.max(plotCols + yAxisW + 4, minSummaryInner + 4 + SPARK_RESERVE, 36);
   const innerWidth = effectiveWidth - 4;
 
   function yRowLabel(row: number): string {
     if (!showAxes) return "";
     const yLabelStep = Math.max(1, Math.floor(height / 4));
     const yVal = yMax - (row / Math.max(1, height - 1)) * (yMax - yMin);
-    const label = (row % yLabelStep === 0 || row === height - 1)
-      ? padStart(formatNumber(Math.round(yVal)), yAxisW - 1)
-      : " ".repeat(yAxisW - 1);
+    const label =
+      row % yLabelStep === 0 || row === height - 1
+        ? padStart(formatNumber(Math.round(yVal)), yAxisW - 1)
+        : " ".repeat(yAxisW - 1);
     return colorize(label, theme.label, noColor);
   }
 
@@ -131,9 +138,10 @@ export function bar(opts: BarChartOptions): ChartResult {
         for (let s = 0; s < numSeries; s++) {
           const value = series[s]![b]!;
           const color = barColorFor(s, b);
-          const cells = renderer === "ascii"
-            ? buildAsciiBar(value, yMin, yMax, height, "#", " ")
-            : buildBlockBar(value, yMin, yMax, height, "█", " ");
+          const cells =
+            renderer === "ascii"
+              ? buildAsciiBar(value, yMin, yMax, height, "#", " ")
+              : buildBlockBar(value, yMin, yMax, height, "█", " ");
           const cell = cells[row]!;
           line += cell === " " ? " " : colorize(cell, color, noColor);
         }
@@ -179,8 +187,10 @@ export function bar(opts: BarChartOptions): ChartResult {
     let cur = "";
     for (const item of items) {
       const candidate = cur ? cur + "  " + item : item;
-      if (visibleLength(candidate) > innerWidth && cur) { rows.push(cur); cur = item; }
-      else cur = candidate;
+      if (visibleLength(candidate) > innerWidth && cur) {
+        rows.push(cur);
+        cur = item;
+      } else cur = candidate;
     }
     if (cur) rows.push(cur);
     return rows;
@@ -191,9 +201,10 @@ export function bar(opts: BarChartOptions): ChartResult {
       const stats = seriesStats(sv);
       const color = toneOrder[si % toneOrder.length]!;
       // Accent on the peak fact for the series that holds the global peak bar.
-      const peakPart = si === maxSi
-        ? colorize(`peak ${formatNumber(stats.max)}`, acc, noColor)
-        : `peak ${formatNumber(stats.max)}`;
+      const peakPart =
+        si === maxSi
+          ? colorize(`peak ${formatNumber(stats.max)}`, acc, noColor)
+          : `peak ${formatNumber(stats.max)}`;
       const name = colorize(("■ " + seriesLabels[si]!).padEnd(nameW), color, noColor);
       const left = `${name} · avg ${formatNumber(stats.avg)} · ${peakPart}`;
       const room = innerWidth - visibleLength(left) - 2;
@@ -212,23 +223,48 @@ export function bar(opts: BarChartOptions): ChartResult {
     // xLabel reused as the eyebrow caption; defaults to "VALUES" when absent.
     const eyebrow = (opts.xLabel ?? "VALUES").toUpperCase();
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, opts.title ?? "BAR", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "BAR",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
-      for (const item of buildLegend()) lines.push(useFrame ? frameRow(effectiveWidth, item, theme.axis, noColor) : item);
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
+      for (const item of buildLegend())
+        lines.push(useFrame ? frameRow(effectiveWidth, item, theme.axis, noColor) : item);
     }
 
-    for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of buildPlotRows())
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
 
     const xTicks = buildXTicks();
-    if (xTicks) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, xTicks, theme.axis, noColor) : xTicks);
+    if (xTicks)
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, xTicks, theme.axis, noColor) : xTicks
+      );
     const xLabels = buildXLabels();
-    if (xLabels) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, xLabels, theme.axis, noColor) : xLabels);
+    if (xLabels)
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, xLabels, theme.axis, noColor) : xLabels
+      );
 
     if (!useCompact) {
-      for (const row of buildSummary()) lines.push(useFrame ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      for (const row of buildSummary())
+        lines.push(useFrame ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
     }
 
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
@@ -236,15 +272,26 @@ export function bar(opts: BarChartOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return bar({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return bar({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "bar",

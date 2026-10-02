@@ -24,7 +24,11 @@ export {
 } from "./charts/index.js";
 
 export { themes, resolveTheme } from "./themes/index.js";
-export { BrailleCanvas, plotLineOnBrailleCanvas, plotAreaOnBrailleCanvas } from "./renderers/braille.js";
+export {
+  BrailleCanvas,
+  plotLineOnBrailleCanvas,
+  plotAreaOnBrailleCanvas,
+} from "./renderers/braille.js";
 export { createLineChartModel, lineModelToSvg } from "./charts/line-model.js";
 export type { LineChartModel, LineSeriesModel } from "./charts/line-model.js";
 export { sparklineBlocks, buildHorizontalBlockBar, blockHeight } from "./renderers/blocks.js";

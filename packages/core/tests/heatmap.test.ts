@@ -107,9 +107,7 @@ describe("heatmap chart — locked S18 design", () => {
   it("the ramp is the LITERAL documented greyscale (pinned to spec hexes)", () => {
     // Pin GREY_TONES to the four spec hexes so a silent recolour of the ramp
     // in themes/ can't move the chart and its oracle together and stay green.
-    expect(GREY_TONES).toEqual(
-      ["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi)
-    );
+    expect(GREY_TONES).toEqual(["#ECECEF", "#C6C6CE", "#A4A4AE", "#6A6A75"].map(hexToAnsi));
   });
 
   it("intensity encoding IS the documented grey tone ramp (light → dark)", () => {
@@ -118,9 +116,7 @@ describe("heatmap chart — locked S18 design", () => {
     const acc = resolveTheme(undefined).accent!;
     const out = heatmap({ data: DATA }).toString();
     const segs = [...out.matchAll(/(\x1b\[[0-9;]*m)([^\x1b]+)(\x1b\[0m)/g)];
-    const cellCodes = new Set(
-      segs.filter((s) => CELL.test(s[2]!)).map((s) => s[1]!)
-    );
+    const cellCodes = new Set(segs.filter((s) => CELL.test(s[2]!)).map((s) => s[1]!));
     for (const code of cellCodes) {
       expect(code === acc || GREY_TONES.includes(code)).toBe(true);
     }
@@ -150,11 +146,25 @@ describe("heatmap chart — locked S18 design", () => {
   });
 
   it("an all-equal grid renders honestly with a collapsed range", () => {
-    const plain = stripAnsi(heatmap({ data: [[5, 5], [5, 5]] }).toString());
+    const plain = stripAnsi(
+      heatmap({
+        data: [
+          [5, 5],
+          [5, 5],
+        ],
+      }).toString()
+    );
     expect(plain).toMatch(/2×2 grid · peak \(0, 0\)/);
     expect(plain).not.toMatch(/NaN|Infinity/);
     // even with zero variance the accent is still spent exactly once
-    expect(accentCensus({ data: [[5, 5], [5, 5]] }).accent).toBe(1);
+    expect(
+      accentCensus({
+        data: [
+          [5, 5],
+          [5, 5],
+        ],
+      }).accent
+    ).toBe(1);
   });
 
   it("noColor renders plain shade glyphs and no escape codes", () => {

@@ -36,7 +36,7 @@ if (check) {
   if (current !== contents) {
     console.error(
       `FAIL: packages/core/src/version.ts is out of date with package.json (${version}).\n` +
-        `      Run: node scripts/sync-version.mjs`,
+        `      Run: node scripts/sync-version.mjs`
     );
     process.exit(1);
   }

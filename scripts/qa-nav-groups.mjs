@@ -22,7 +22,14 @@ const EXPECTED = {
   "Flow & accumulation": ["sankey", "waterfall"],
   "Single value & progress": ["gauge", "progress", "sparkline"],
 };
-const EXPECTED_COUNTS = { "Trend & time": 4, Comparison: 4, "Distribution & density": 3, "Part-to-whole": 4, "Flow & accumulation": 2, "Single value & progress": 3 };
+const EXPECTED_COUNTS = {
+  "Trend & time": 4,
+  Comparison: 4,
+  "Distribution & density": 3,
+  "Part-to-whole": 4,
+  "Flow & accumulation": 2,
+  "Single value & progress": 3,
+};
 
 const HEADED = process.argv.includes("--headed");
 const BASE_URL = "http://localhost:5174";
@@ -82,20 +89,31 @@ async function runQA() {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
     const errors = [];
-    page.on("console", (msg) => { if (msg.type() === "error") errors.push(msg.text()); });
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
     page.on("pageerror", (err) => errors.push(err.message));
 
     await page.goto(`${BASE_URL}/chart/line`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1200);
 
     // 1. Exactly six groups, exact labels + count tags.
-    const groups = await page.$$eval(".nav-group", (els) => els.map((el) => el.getAttribute("data-group")));
-    check("six-groups", JSON.stringify(groups) === JSON.stringify(Object.keys(EXPECTED)), JSON.stringify(groups));
+    const groups = await page.$$eval(".nav-group", (els) =>
+      els.map((el) => el.getAttribute("data-group"))
+    );
+    check(
+      "six-groups",
+      JSON.stringify(groups) === JSON.stringify(Object.keys(EXPECTED)),
+      JSON.stringify(groups)
+    );
 
     let countsOk = true;
     for (const [g, n] of Object.entries(EXPECTED_COUNTS)) {
       const tag = await page.$eval(`[data-group="${g}"] .nav-group-count`, (el) => el.textContent);
-      if (tag.trim() !== String(n)) { countsOk = false; break; }
+      if (tag.trim() !== String(n)) {
+        countsOk = false;
+        break;
+      }
     }
     check("group-count-tags", countsOk, "4·4·3·4·2·3");
 
@@ -103,8 +121,13 @@ async function runQA() {
     let memberOk = true;
     const memberDetail = [];
     for (const [g, ids] of Object.entries(EXPECTED)) {
-      const got = await page.$$eval(`[data-group="${g}"] [data-chart]`, (els) => els.map((el) => el.getAttribute("data-chart")));
-      if (JSON.stringify(got) !== JSON.stringify(ids)) { memberOk = false; memberDetail.push(`${g}: ${JSON.stringify(got)}`); }
+      const got = await page.$$eval(`[data-group="${g}"] [data-chart]`, (els) =>
+        els.map((el) => el.getAttribute("data-chart"))
+      );
+      if (JSON.stringify(got) !== JSON.stringify(ids)) {
+        memberOk = false;
+        memberDetail.push(`${g}: ${JSON.stringify(got)}`);
+      }
     }
     check("group-membership", memberOk, memberDetail.join("; ") || "20 charts in place");
 
@@ -119,13 +142,19 @@ async function runQA() {
     await page.click('[data-group="Comparison"] .nav-group-label');
     await page.waitForTimeout(300);
     const hiddenAfterClick = await page.$$eval('[data-group="Comparison"] [data-chart]', (els) =>
-      els.every((el) => !el.checkVisibility()));
+      els.every((el) => !el.checkVisibility())
+    );
     const collapsedClass = await page.$eval('[data-group="Comparison"]', (el) => el.className);
-    check("click-collapse", hiddenAfterClick && collapsedClass.includes("collapsed"), "Comparison hidden");
+    check(
+      "click-collapse",
+      hiddenAfterClick && collapsedClass.includes("collapsed"),
+      "Comparison hidden"
+    );
     await page.reload({ waitUntil: "networkidle" });
     await page.waitForTimeout(1200);
     const hiddenAfterReload = await page.$$eval('[data-group="Comparison"] [data-chart]', (els) =>
-      els.every((el) => !el.checkVisibility()));
+      els.every((el) => !el.checkVisibility())
+    );
     check("collapse-persists", hiddenAfterReload, "survives reload");
 
     // 5. Navigating to a chart auto-expands its group.
@@ -133,14 +162,19 @@ async function runQA() {
     await page.waitForTimeout(1200);
     const scatterVisible = await page.$eval('[data-chart="scatter"]', (el) => el.checkVisibility());
     const scatterActive = await page.$eval('[data-chart="scatter"]', (el) => el.className);
-    check("auto-expand-active", scatterVisible && scatterActive.includes("active"), "scatter visible + active");
+    check(
+      "auto-expand-active",
+      scatterVisible && scatterActive.includes("active"),
+      "scatter visible + active"
+    );
 
     // 6. Keyboard: focus header + Enter toggles.
     await page.focus('[data-group="Flow & accumulation"] .nav-group-label');
     await page.keyboard.press("Enter");
     await page.waitForTimeout(300);
     const kbHidden = await page.$$eval('[data-group="Flow & accumulation"] [data-chart]', (els) =>
-      els.every((el) => !el.checkVisibility()));
+      els.every((el) => !el.checkVisibility())
+    );
     check("keyboard-toggle", kbHidden, "Enter collapses");
 
     // 7. Expand all / collapse all pair.
@@ -148,10 +182,14 @@ async function runQA() {
     check("expand-collapse-pair", expandBtns.length === 2, `${expandBtns.length} controls`);
     await page.click(".nav-expand-btn >> nth=0"); // expand all
     await page.waitForTimeout(300);
-    const allVisible = await page.$$eval("[data-chart]", (els) => els.every((el) => el.checkVisibility()));
+    const allVisible = await page.$$eval("[data-chart]", (els) =>
+      els.every((el) => el.checkVisibility())
+    );
     await page.click(".nav-expand-btn >> nth=1"); // collapse all
     await page.waitForTimeout(300);
-    const allHidden = await page.$$eval("[data-chart]", (els) => els.every((el) => !el.checkVisibility()));
+    const allHidden = await page.$$eval("[data-chart]", (els) =>
+      els.every((el) => !el.checkVisibility())
+    );
     check("expand-all", allVisible, "20/20 visible");
     check("collapse-all", allHidden, "20/20 hidden");
 

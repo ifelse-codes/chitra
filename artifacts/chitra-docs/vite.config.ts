@@ -2,9 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-// PORT / BASE_PATH are Replit-scaffold requirements. They were hard throws, so a
+// PORT / BASE_PATH were Replit-scaffold requirements. They were hard throws, so a
 // human who followed the README and ran `pnpm run build` got a stack trace while
 // CI — which exports both — was green. Default them; CI still overrides.
 // S41 requirement 11.
@@ -39,20 +38,6 @@ export default defineConfig({
     },
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
   ],
   resolve: {
     alias: {

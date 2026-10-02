@@ -10,9 +10,12 @@ const theme = resolveTheme("default");
 // theme.colors[0] flood and any other hue fail the census.
 function census(raw: string): { accent: number; grey: number; other: number } {
   const segs = [...raw.matchAll(/(\x1b\[[0-9;]*m)([^\x1b]+)(\x1b\[0m)/g)];
-  let accent = 0, grey = 0, other = 0;
+  let accent = 0,
+    grey = 0,
+    other = 0;
   for (const s of segs) {
-    const code = s[1]!, body = s[2]!;
+    const code = s[1]!,
+      body = s[2]!;
     if (code === theme.axis) continue;
     if (!/[░▒▓█]/.test(body)) continue;
     if (/[A-Za-z0-9]/.test(body)) continue;
@@ -25,9 +28,9 @@ function census(raw: string): { accent: number; grey: number; other: number } {
 
 describe("sparkline (S28 LOCKED)", () => {
   it("renders the locked panel: dashed frame, eyebrow, 1 rule, uniform width", () => {
-    const lines = stripAnsi(
-      sparkline({ data: [1, 3, 2, 5, 4], noColor: true }).toString()
-    ).split("\n");
+    const lines = stripAnsi(sparkline({ data: [1, 3, 2, 5, 4], noColor: true }).toString()).split(
+      "\n"
+    );
     expect(lines[0]).toMatch(/^┌╌/);
     expect(lines[lines.length - 1]).toMatch(/^└╌/);
     expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
@@ -108,7 +111,9 @@ describe("sparkline (S28 LOCKED)", () => {
   it("accepts renderer but renders the same locked design (superseded)", () => {
     const base = stripAnsi(sparkline({ data: [1, 3, 2, 5, 4], noColor: true }).toString());
     for (const renderer of ["blocks", "braille", "ascii"] as const) {
-      expect(stripAnsi(sparkline({ data: [1, 3, 2, 5, 4], renderer, noColor: true }).toString())).toBe(base);
+      expect(
+        stripAnsi(sparkline({ data: [1, 3, 2, 5, 4], renderer, noColor: true }).toString())
+      ).toBe(base);
     }
   });
 

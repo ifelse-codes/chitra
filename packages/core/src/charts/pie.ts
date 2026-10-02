@@ -12,7 +12,10 @@ export function pie(opts: PieChartOptions): ChartResult {
   const labels = opts.labels ?? data.map((_, i) => `Item ${i + 1}`);
 
   const baseRadius = opts.radius ?? 8;
-  const radius = opts.height === undefined ? baseRadius : Math.max(2, Math.min(baseRadius, Math.floor((opts.height - 1) / 2)));
+  const radius =
+    opts.height === undefined
+      ? baseRadius
+      : Math.max(2, Math.min(baseRadius, Math.floor((opts.height - 1) / 2)));
   const innerRadius = 0;
 
   const { slices, total } = buildSlices(data, labels, theme);
@@ -22,7 +25,7 @@ export function pie(opts: PieChartOptions): ChartResult {
     const legend = renderLegend(slices, noColor, theme);
     const ringCols = radius * 4 + 1;
     const legendGap = 3;
-    const maxLegendRowLen = Math.max(0, ...legend.rows.map(r => visibleLength(r)));
+    const maxLegendRowLen = Math.max(0, ...legend.rows.map((r) => visibleLength(r)));
     const contentWidth = ringCols + legendGap + maxLegendRowLen;
     const width = opts.width ?? Math.max(contentWidth + 4, 52);
     const useFrame = opts.frame !== false;
@@ -30,11 +33,22 @@ export function pie(opts: PieChartOptions): ChartResult {
 
     const lines: string[] = [];
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "PIE", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(width, opts.title ?? "PIE", opts.timestamp, theme.axis, theme.title, noColor, true)
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (opts.eyebrow && !useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(opts.eyebrow.toUpperCase(), theme.label, noColor), theme.axis, noColor) : colorize(opts.eyebrow.toUpperCase(), theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(
+              width,
+              colorize(opts.eyebrow.toUpperCase(), theme.label, noColor),
+              theme.axis,
+              noColor
+            )
+          : colorize(opts.eyebrow.toUpperCase(), theme.label, noColor)
+      );
     }
 
     // ring on the left, legend on the right, vertically centred
@@ -43,12 +57,14 @@ export function pie(opts: PieChartOptions): ChartResult {
     const combined: string[] = [];
     for (let i = 0; i < h; i++) {
       const ringRow = i < ring.length ? ring[i]! : "";
-      const legRow = i >= legendOffset && i < legendOffset + legend.rows.length
-        ? legend.rows[i - legendOffset]!
-        : "";
+      const legRow =
+        i >= legendOffset && i < legendOffset + legend.rows.length
+          ? legend.rows[i - legendOffset]!
+          : "";
       combined.push(padRow(ringRow, ringCols) + " ".repeat(legendGap) + legRow);
     }
-    for (const content of fitBodyLines(combined, opts.height)) lines.push(useFrame && !useCompact ? frameRow(width, content, theme.axis, noColor) : content);
+    for (const content of fitBodyLines(combined, opts.height))
+      lines.push(useFrame && !useCompact ? frameRow(width, content, theme.axis, noColor) : content);
 
     if (!useCompact) {
       const foot = `${slices.length} slices · total ${formatTotal(total)}`;
@@ -56,7 +72,16 @@ export function pie(opts: PieChartOptions): ChartResult {
     }
     if (opts.status && !useCompact) {
       if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
-      lines.push(useFrame ? frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor) : colorize(`Status: ${opts.status}`, theme.title, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(
+              width,
+              colorize(`Status: ${opts.status}`, theme.title, noColor),
+              theme.axis,
+              noColor
+            )
+          : colorize(`Status: ${opts.status}`, theme.title, noColor)
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
@@ -69,15 +94,26 @@ export function pie(opts: PieChartOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return pie({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return pie({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "pie",

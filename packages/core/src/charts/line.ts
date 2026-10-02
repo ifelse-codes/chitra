@@ -2,7 +2,12 @@ import type { LineChartOptions, ChartResult } from "../types.js";
 import { resolveTheme } from "../themes/index.js";
 import { ansi, colorize, padStart, stripAnsi, truncateAnsi, visibleLength } from "../ansi.js";
 import { formatNumber } from "../utils.js";
-import { createLineChartModel, lineModelToPlain, lineModelToSvg, type LineSeriesModel } from "./line-model.js";
+import {
+  createLineChartModel,
+  lineModelToPlain,
+  lineModelToSvg,
+  type LineSeriesModel,
+} from "./line-model.js";
 import { BrailleCanvas, plotLineOnBrailleCanvas } from "../renderers/braille.js";
 import { frameTop, frameBottom, frameRow, frameRule } from "../renderers/panel.js";
 
@@ -187,7 +192,7 @@ export function line(opts: LineChartOptions): ChartResult {
   function plotRowLabel(row: number): string {
     if (!showAxes) return "";
     const yVal = model.yMax - (row / Math.max(1, plotRows - 1)) * (model.yMax - model.yMin);
-    return (row % yStep === 0 || row === plotRows - 1)
+    return row % yStep === 0 || row === plotRows - 1
       ? padStart(formatNumber(Math.round(yVal)), yAxisW - 1)
       : " ".repeat(yAxisW - 1);
   }
@@ -202,7 +207,15 @@ export function line(opts: LineChartOptions): ChartResult {
       }
     });
     const cap = primaryPeakCap(model.series[0], plotCols * 2);
-    const markers = markerCells(model.series, seriesColors, plotCols, plotRows, model.yMin, model.yMax, noColor);
+    const markers = markerCells(
+      model.series,
+      seriesColors,
+      plotCols,
+      plotRows,
+      model.yMin,
+      model.yMax,
+      noColor
+    );
     const gridColor = [...seriesColors, ansi.dim + (theme.grid ?? theme.axis)];
     const rows: string[] = [];
     for (let row = 0; row < plotRows; row++) {
@@ -276,7 +289,8 @@ export function line(opts: LineChartOptions): ChartResult {
           const idxL = Math.floor(exactX);
           const idxR = Math.min(s.values.length - 1, Math.ceil(exactX));
           const frac = exactX - idxL;
-          const val = idxL === idxR ? s.values[idxL]! : s.values[idxL]! * (1 - frac) + s.values[idxR]! * frac;
+          const val =
+            idxL === idxR ? s.values[idxL]! : s.values[idxL]! * (1 - frac) + s.values[idxR]! * frac;
           const yRow = yRowFor(val);
 
           let ch: string;
@@ -301,7 +315,8 @@ export function line(opts: LineChartOptions): ChartResult {
     for (let row = 0; row < plotRows; row++) {
       if (!isGridRow(row)) continue;
       for (let col = 0; col < plotCols; col++) {
-        if (col % 2 === 0 && !grid[row]![col]) grid[row]![col] = colorize("·", ansi.dim + (theme.grid ?? theme.axis), noColor);
+        if (col % 2 === 0 && !grid[row]![col])
+          grid[row]![col] = colorize("·", ansi.dim + (theme.grid ?? theme.axis), noColor);
       }
     }
 
@@ -351,7 +366,11 @@ export function line(opts: LineChartOptions): ChartResult {
   function renderLegend(): string[] {
     if (!model.showLegend || model.series.length === 0) return [];
     const items = model.series.map((s, i) =>
-      colorize(`${dashCharsFor(i, noColor)}${s.marker}${dashCharsFor(i, noColor)} ${s.name}`, seriesColors[i]!, noColor)
+      colorize(
+        `${dashCharsFor(i, noColor)}${s.marker}${dashCharsFor(i, noColor)} ${s.name}`,
+        seriesColors[i]!,
+        noColor
+      )
     );
     return wrapItems(items, innerWidth);
   }
@@ -380,9 +399,10 @@ export function line(opts: LineChartOptions): ChartResult {
     const rows = model.series.map((s, si) => {
       const stats = s.stats;
       const name = colorize(`${s.marker} ${s.name}`.padEnd(nameW), seriesColors[si]!, noColor);
-      const highestPart = si === 0
-        ? colorize(`highest ${formatNumber(stats.max)}`, acc, noColor)
-        : `highest ${formatNumber(stats.max)}`;
+      const highestPart =
+        si === 0
+          ? colorize(`highest ${formatNumber(stats.max)}`, acc, noColor)
+          : `highest ${formatNumber(stats.max)}`;
       const left = `${name} · lowest ${formatNumber(stats.min)} · ${highestPart} · avg ${formatNumber(stats.avg)} · last ${formatNumber(stats.last)}`;
       const leftLen = visibleLength(left);
       if (leftLen >= innerWidth) return left.slice(0, innerWidth);
@@ -402,41 +422,80 @@ export function line(opts: LineChartOptions): ChartResult {
     const eyebrow = model.eyebrow;
 
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "LINE", opts.timestamp, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          width,
+          opts.title ?? "LINE",
+          opts.timestamp,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
-      for (const item of renderLegend()) lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
+      for (const item of renderLegend())
+        lines.push(useFrame ? frameRow(width, item, theme.axis, noColor) : item);
     }
 
     const plotRowsOut = renderer === "braille" ? renderBrailleRows() : renderBlockRows();
-    for (const row of plotRowsOut) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
-    for (const row of renderXTickMarks()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
-    for (const row of renderXAxisLabels()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of plotRowsOut)
+      lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of renderXTickMarks())
+      lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of renderXAxisLabels())
+      lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
     if (model.showSummary && !useCompact) {
-      for (const row of renderSummary()) lines.push(useFrame ? frameRow(width, row, theme.axis, noColor) : row);
+      for (const row of renderSummary())
+        lines.push(useFrame ? frameRow(width, row, theme.axis, noColor) : row);
     }
 
     if (opts.status && !useCompact) {
       if (useFrame) lines.push(frameRule(width, theme.axis, noColor));
-      lines.push(useFrame ? frameRow(width, colorize(`Status: ${opts.status}`, theme.title, noColor), theme.axis, noColor) : colorize(`Status: ${opts.status}`, theme.title, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(
+              width,
+              colorize(`Status: ${opts.status}`, theme.title, noColor),
+              theme.axis,
+              noColor
+            )
+          : colorize(`Status: ${opts.status}`, theme.title, noColor)
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(width, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return line({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return line({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "line",
@@ -447,7 +506,9 @@ export function line(opts: LineChartOptions): ChartResult {
         model: lineModelToPlain(model),
       };
     },
-    toSVG() { return lineModelToSvg(model); },
+    toSVG() {
+      return lineModelToSvg(model);
+    },
   };
 }
 

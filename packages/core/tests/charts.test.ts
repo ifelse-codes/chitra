@@ -33,7 +33,11 @@ describe("area chart", () => {
     expect(out).toMatch(/[\u2801-\u28FF]/); // lit braille dots present
   });
   it("uses the dashed panel frame + eyebrow like the LOCKED circular look", () => {
-    const out = area({ data: [12, 19, 15], title: "REVENUE", eyebrow: "Monthly · Trend" }).toString();
+    const out = area({
+      data: [12, 19, 15],
+      title: "REVENUE",
+      eyebrow: "Monthly · Trend",
+    }).toString();
     expect(out).toContain("┌╌");
     expect(out).toContain("╌┐");
     expect(out).toContain("MONTHLY · TREND");
@@ -106,8 +110,14 @@ describe("scatter plot", () => {
     expect(scatter({ data }).toString()).toBeTruthy();
   });
   it("supports multi-series", () => {
-    const s1 = [{ x: 1, y: 2 }, { x: 2, y: 3 }];
-    const s2 = [{ x: 4, y: 1 }, { x: 5, y: 4 }];
+    const s1 = [
+      { x: 1, y: 2 },
+      { x: 2, y: 3 },
+    ];
+    const s2 = [
+      { x: 4, y: 1 },
+      { x: 5, y: 4 },
+    ];
     expect(scatter({ data: [s1, s2] }).toString()).toBeTruthy();
   });
 });
@@ -157,7 +167,9 @@ describe("donut chart", () => {
     expect(out).toContain("DISTRIBUTION · REQUESTS");
   });
   it("donut carries exactly one rule separator — S29 B-diet+ (exempt: legend owns facts, no footer)", () => {
-    const lines = donut({ data: [30, 40, 30] }).toPlain().split("\n");
+    const lines = donut({ data: [30, 40, 30] })
+      .toPlain()
+      .split("\n");
     expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
   });
   it("pie renders the eyebrow caption and status row", () => {
@@ -242,9 +254,7 @@ describe("gauge", () => {
 
 describe("horizontal bar chart", () => {
   it("renders without errors", () => {
-    expect(
-      horizontalBar({ data: [30, 60, 90], labels: ["A", "B", "C"] }).toString()
-    ).toBeTruthy();
+    expect(horizontalBar({ data: [30, 60, 90], labels: ["A", "B", "C"] }).toString()).toBeTruthy();
   });
   it("shows labels", () => {
     const plain = horizontalBar({ data: [10], labels: ["Alpha"], noColor: true }).toPlain();

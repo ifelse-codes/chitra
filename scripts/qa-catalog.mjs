@@ -14,10 +14,26 @@ const DOCS = join(ROOT, "artifacts/chitra-docs");
 
 // Chart IDs from the catalog
 const CHART_IDS = [
-  "line", "bar", "area", "sparkline", "histogram", "scatter",
-  "pie", "donut", "heatmap", "progress", "gauge", "horizontalBar",
-  "timeline", "radar", "boxplot", "waterfall", "funnel", "candlestick",
-  "treemap", "sankey"
+  "line",
+  "bar",
+  "area",
+  "sparkline",
+  "histogram",
+  "scatter",
+  "pie",
+  "donut",
+  "heatmap",
+  "progress",
+  "gauge",
+  "horizontalBar",
+  "timeline",
+  "radar",
+  "boxplot",
+  "waterfall",
+  "funnel",
+  "candlestick",
+  "treemap",
+  "sankey",
 ];
 
 const DOC_PAGES = ["install", "quickstart", "fluent-api", "ai-output", "ai-data"];
@@ -130,7 +146,10 @@ async function runQA() {
           // Wait for terminal output to appear
           try {
             await page.waitForSelector(".term-output, .term-error-block", { timeout: 10000 });
-            const output = await page.$eval(".term-output, .term-error-block", (el) => el.textContent || "");
+            const output = await page.$eval(
+              ".term-output, .term-error-block",
+              (el) => el.textContent || ""
+            );
             outputLength = output.length;
             hasOutput = outputLength > 0;
           } catch {
@@ -207,12 +226,18 @@ async function runQA() {
     await runPage.waitForTimeout(1000);
 
     // Check output changed (re-run happened)
-    const outputAfterRun = await runPage.$eval(".term-output, .term-error-block", (el) => el.textContent || "");
+    const outputAfterRun = await runPage.$eval(
+      ".term-output, .term-error-block",
+      (el) => el.textContent || ""
+    );
     console.log(`Run shortcut output length: ${outputAfterRun.length}`);
 
     // Test persistence: edit -> navigate away -> back -> buffer kept
     console.log("Testing persistence on /chart/line...");
-    await runPage.fill(".vim-ta", "// edited by QA\nimport { line } from \"@ifelse.codes/chitra\";\nline({ data: [1,2,3] }).render();");
+    await runPage.fill(
+      ".vim-ta",
+      '// edited by QA\nimport { line } from "@ifelse.codes/chitra";\nline({ data: [1,2,3] }).render();'
+    );
     await runPage.waitForTimeout(500);
 
     // Navigate away and back
@@ -237,9 +262,12 @@ async function runQA() {
     // Summary
     console.log("\n=== QA Summary ===");
     for (const r of results) {
-      const status = r.errors.length === 0 && (r.hasOutput || !r.name.startsWith("chart-")) ? "PASS" : "FAIL";
+      const status =
+        r.errors.length === 0 && (r.hasOutput || !r.name.startsWith("chart-")) ? "PASS" : "FAIL";
       if (status === "FAIL") hasFailures = true;
-      console.log(`${status} ${r.name}: output=${r.outputLength} consoleErrors=${r.consoleErrors} pageErrors=${r.pageErrors} ms=${r.ms}`);
+      console.log(
+        `${status} ${r.name}: output=${r.outputLength} consoleErrors=${r.consoleErrors} pageErrors=${r.pageErrors} ms=${r.ms}`
+      );
       if (r.errors.length > 0) {
         for (const e of r.errors) console.log(`  ERROR: ${e}`);
       }

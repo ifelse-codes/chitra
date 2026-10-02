@@ -29,19 +29,34 @@ export function frameTop(
   );
 }
 
-export function frameBottom(width: number, frameColor: string, noColor: boolean, dashed = false): string {
+export function frameBottom(
+  width: number,
+  frameColor: string,
+  noColor: boolean,
+  dashed = false
+): string {
   const dash = dashed ? "╌" : "─";
   return colorize("└" + dash.repeat(width - 2) + "┘", frameColor, noColor);
 }
 
-export function frameRow(width: number, content: string, frameColor: string, noColor: boolean): string {
+export function frameRow(
+  width: number,
+  content: string,
+  frameColor: string,
+  noColor: boolean
+): string {
   const inner = width - 4;
   const len = visibleLength(content);
   const padded = len >= inner ? content : content + " ".repeat(inner - len);
   return colorize("│ ", frameColor, noColor) + padded + colorize(" │", frameColor, noColor);
 }
 
-export function frameRule(width: number, frameColor: string, noColor: boolean, dashChar = "╌"): string {
+export function frameRule(
+  width: number,
+  frameColor: string,
+  noColor: boolean,
+  dashChar = "╌"
+): string {
   const inner = width - 4;
   return colorize("│ " + dashChar.repeat(inner) + " │", frameColor, noColor);
 }

@@ -55,7 +55,10 @@ export function timeline(opts: TimelineOptions): ChartResult {
   let peakIdx = 0;
   let peakSpan = -Infinity;
   spans.forEach((span, i) => {
-    if (span > peakSpan) { peakSpan = span; peakIdx = i; }
+    if (span > peakSpan) {
+      peakSpan = span;
+      peakIdx = i;
+    }
   });
   const peakLabel = hasData ? events[peakIdx]!.label : "";
 
@@ -76,12 +79,9 @@ export function timeline(opts: TimelineOptions): ChartResult {
   // the eyebrow, and the summary row is never clipped by the frame. `+4` is
   // the frame padding (2 border cols + 2 inner pad — panel's inner = width-4).
   const TRACK_MIN = 12;
-  const effectiveWidth = opts.width ?? Math.max(
-    labelWidth + 1 + TRACK_MIN + 4,
-    eyebrow.length + 4,
-    summaryPlain.length + 4,
-    36
-  );
+  const effectiveWidth =
+    opts.width ??
+    Math.max(labelWidth + 1 + TRACK_MIN + 4, eyebrow.length + 4, summaryPlain.length + 4, 36);
   const innerWidth = effectiveWidth - 4;
   const trackWidth = Math.max(1, innerWidth - labelWidth - 1);
 
@@ -95,9 +95,10 @@ export function timeline(opts: TimelineOptions): ChartResult {
       const end = event.end ?? event.start;
       // A point event renders ONE block; a real span always renders at least
       // one block, even when the scale clamps it against a panel edge.
-      const endPos = end > event.start
-        ? Math.min(Math.max(rawPos(end), startPos + 1), trackWidth)
-        : Math.min(startPos + 1, trackWidth);
+      const endPos =
+        end > event.start
+          ? Math.min(Math.max(rawPos(end), startPos + 1), trackWidth)
+          : Math.min(startPos + 1, trackWidth);
       const isPeak = i === peakIdx;
       const color = event.color ?? (isPeak ? acc : tones[toneIdx(spans[i]!)]!);
       const left = colorize("─".repeat(startPos), theme.axis, noColor);
@@ -130,11 +131,7 @@ export function timeline(opts: TimelineOptions): ChartResult {
 
   function buildSummary(): string {
     if (!hasData) return colorize(summaryPlain, theme.label, noColor);
-    const head = colorize(
-      `${events.length} events · `,
-      theme.label,
-      noColor
-    );
+    const head = colorize(`${events.length} events · `, theme.label, noColor);
     const tail = colorize(`longest ${peakLabel}`, acc, noColor);
     return head + tail;
   }
@@ -144,34 +141,64 @@ export function timeline(opts: TimelineOptions): ChartResult {
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, opts.title ?? "TIMELINE", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "TIMELINE",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     const bodyRows = [...buildEventRows()];
     if (showAxes && hasData) bodyRows.push(buildGuide(), buildScale());
-    for (const row of fitBodyLines(bodyRows, opts.height)) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of fitBodyLines(bodyRows, opts.height))
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
 
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return timeline({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return timeline({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "timeline",
