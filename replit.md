@@ -54,8 +54,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
+- `pnpm-workspace.yaml` globs `artifacts/*`, `packages/*` and `scripts`. It used to glob `lib/*` too — the Replit-era API scaffolding (an OpenAPI spec, zod schemas, a generated client, a drizzle schema, and a `/healthz` server). None of it was imported by anything, so it was **deleted in S42**; `main` retains it at `4893683`.
+- There is no root `tsconfig.json` and no `typecheck:libs` script — both existed only to `tsc --build` those `lib/` projects, and both went with them in S42. `tsconfig.base.json` is what the remaining packages extend.
 - TypeScript files use `.js` extensions in imports (ESM NodeNext convention) — run via `tsx` (`pnpm example`) not `node` directly
-- `pnpm-workspace.yaml` globs `packages/*` and `lib/*`; `lib/` is Replit-era scaffolding for an API server that is not part of the product
 - `tsconfig.json` for the core package uses `noEmit: true` — no `rootDir` set so tests can be in a sibling `tests/` directory
 - `PORT` / `BASE_PATH` are optional now — the vite configs default them (`5000`, `/`) and CI still exports both. They used to be hard throws, which broke every build that was not CI's.
 - `packages/core/dist/` is gitignored, so anything that typechecks the docs app must build core first — that is why CI builds core before the docs typecheck
