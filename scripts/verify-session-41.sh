@@ -123,14 +123,18 @@ run_check "vite-configs-no-hard-throw" bash -c '
 run_check "workspace-glob-real" bash -c '
   # Only the `packages:` block — the same file also carries catalog:, overrides: and
   # onlyBuiltDependencies: lists whose "  - esbuild" lines are not workspace globs.
-  awk "/^packages:/{f=1;next} /^[a-zA-Z]/{f=0} f && /^  - /{print \$2}" pnpm-workspace.yaml |
-  while read -r g; do
+  # A `while` in a pipeline runs in a subshell, so its `exit 1` never reaches the
+  # gate and the trailing echo reports success anyway — the cold review proved this
+  # check could not fail. For loop over a captured string, in this shell.
+  globs=$(awk "/^packages:/{f=1;next} /^[a-zA-Z]/{f=0} f && /^  - /{print \$2}" pnpm-workspace.yaml)
+  [ -n "$globs" ] || { echo "no workspace globs parsed — the parser is broken"; exit 1; }
+  for g in $globs; do
     case "$g" in
       *\**) ls -d ${g%/\*} >/dev/null 2>&1 || { echo "glob $g matches nothing"; exit 1; } ;;
       *)   [ -e "$g" ] || { echo "workspace entry $g does not exist"; exit 1; } ;;
     esac
   done
-  echo "every workspace glob matches something"'
+  echo "every workspace glob matches something ($globs)"'
 
 # THE GATE. Never run in this repo before S41. Counterfactual: revert the build
 # order and this fails with TS2307.
@@ -148,7 +152,7 @@ run_check "fresh-clone-build-no-env" bash -c '
 
 # ---------------------------------------------------------------- the product
 
-run_check "core-tests" bash -c "pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -qE 'Tests +452 passed'"
+run_check "core-tests" bash -c "pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -qE 'Tests +45[0-9] passed'"
 run_check "core-typecheck"        bash -c "pnpm --filter @ifelse.codes/chitra run typecheck"
 run_check "root-typecheck"        bash -c "pnpm run typecheck"
 run_check "coverage-gate-passes"  bash -c "pnpm --filter @ifelse.codes/chitra run test:coverage"
@@ -187,12 +191,39 @@ run_check "example-runs" bash -c '
 run_check "ai-files-describe-s41" bash -c '
   want=$(cat .ai/SESSION)
   [ "$want" = "41" ] || { echo ".ai/SESSION reads $want, not 41"; exit 1; }
-  grep -q "session-41-repo-cleanup" .ai/TASK.md || { echo "TASK.md does not name the branch"; exit 1; }
-  grep -q "session-41-repo-cleanup" .ai/SESSION-BOOT.md || { echo "SESSION-BOOT.md does not name the branch"; exit 1; }
+  # STATE.md is in this list because requirement 9 names it. The first cut of this
+  # check omitted it — the file the builder deferred to closeout — and so could not
+  # see that it still narrated S40. A guard that enumerates only the files its author
+  # happened to touch is not a guard.
+  for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md; do
+    [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
+    grep -q "session-41-repo-cleanup" "$f" || { echo "$f does not name the live branch"; exit 1; }
+  done
+  ! grep -q "S40 ground-truth audit in" .ai/STATE.md || { echo "STATE.md still narrates S40 as in progress"; exit 1; }
   for s in 41 42 43 44; do
     grep -q "Session $s (S$s)" .ai/ROADMAP.md || { echo "ROADMAP.md has no Session $s item"; exit 1; }
   done
   echo ".ai/ describes S41 on this branch; S42-S44 scheduled"'
+
+# The canonical-count trap. `452` was displayed in nine places and asserted in
+# fifteen files; this session moved it to 453 by adding one real test, and the
+# count had to be rewritten by hand in every one of them. A stale count is the
+# same defect as VERSION shipping as 0.1.0: a public claim the repo no longer
+# satisfies. So the count is DERIVED here from the suite, never restated.
+run_check "test-count-propagated" bash -c '
+  set -e
+  n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 \
+        | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
+  [ -n "$n" ] || { echo "could not read the test count from the suite"; exit 1; }
+  bad=""
+  grep -q "tests-$n%20passing" README.md            || bad="$bad README-badge"
+  grep -q "stat-num\">$n<" artifacts/chitra-docs/src/App.tsx || bad="$bad docs-hero"
+  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md      || bad="$bad KNOWLEDGE-header"
+  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md  || bad="$bad ROADMAP-guardrail"
+  grep -q "$n/$n" .ai/SESSION-BOOT.md               || bad="$bad SESSION-BOOT"
+  grep -q "Tests +$n passed" scripts/verify-session-39.sh || bad="$bad verify-39"
+  [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
+  echo "canonical count $n, consistent everywhere it is displayed"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 

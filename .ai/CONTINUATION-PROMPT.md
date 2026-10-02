@@ -100,7 +100,7 @@ S39 renamed the package. Detail: `sessions/session-39-summary.md` + `sessions/se
 
 ## Housekeeping
 
-- `pnpm --filter @ifelse.codes/chitra run test` → **452 green**
+- `pnpm --filter @ifelse.codes/chitra run test` → **453 green**
 - `scripts/verify-session-39.sh` → **43/43**
 - `scripts/demo-session-39.sh` → exit 0
 - `scripts/verify-closeout.sh 39` → **16/16 ALL GREEN** with `VAJRA_CLOSEOUT_WAIVER=39`
