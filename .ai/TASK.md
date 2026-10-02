@@ -22,10 +22,11 @@
   B what a stranger can do (10–12), C junk that would ship on a careless `git add -A`
   (13). Max 1 story per session, so **Batch 1 only** — Batches 2–4 are now roadmap items
   **S42, S43, S44**, which is the S40 row 2 finding (unowned work) closing.
-- **Cross-cutting trap, named in the contract:** `452` is asserted in **12 places**
-  (README badge, `App.tsx`, and six historical verify/demo scripts). That is how `main`
-  lost `ece61fc`. So the new drift guard adds **no test file** and the count does not
-  move; `verify-session-39.sh` must stay 43/43.
+- **Cross-cutting trap, named in the contract:** the canonical test count is displayed in
+  nine places and asserted as a literal in 15 tracked files. That is how `main` lost
+  `ece61fc`. So the new drift guard adds **no test file**, and `test-count-propagated`
+  *derives* the count from a suite run and fails if any guarded site disagrees — instead
+  of the count being restated and hoped for. `verify-session-39.sh` must stay 43/43.
 - **Founder decisions this session does not make:** D1 (how much internal process goes
   public — blocks the *flip*, not this work), D2, D3/D6, D4 (personal-path scrub —
   irreversible once public), D5.

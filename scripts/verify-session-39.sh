@@ -390,7 +390,7 @@ run_check "ai-docs-quote-real-score" bash -c '
   want="$(grep -c "^run_check " scripts/verify-session-39.sh)"
   for f in .ai/STATE.md .ai/TASK.md .ai/SESSION-BOOT.md .ai/ROADMAP.md .ai/CONTINUATION-PROMPT.md; do
     [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
-    # Only scores on lines that name the script. "4/4" (release jobs) and "452/452"
+    # Only scores on lines that name the script. "4/4" (release jobs) and "453/453"
     # (tests) are real scores that have nothing to do with this gate, and a first cut
     # that scanned every "N/N" in the file flagged both.
     bad="$(grep -F "verify-session-39.sh" "$f" 2>/dev/null \

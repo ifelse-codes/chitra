@@ -1,7 +1,7 @@
 name: CI
 
 # Session 07 — the gates that must stay green (see .ai/ROADMAP.md guardrails):
-#   core:  @ifelse.codes/chitra test (452) + typecheck + dist build (ESM + CJS + .d.ts)
+#   core:  @ifelse.codes/chitra test (453) + typecheck + dist build (ESM + CJS + .d.ts)
 #   docs:  @workspace/chitra-docs typecheck + build
 #   drift: generated chart previews match the spec source (gen:charts:check)
 # Toolchain is pinned to the versions proven green locally (Node 26, pnpm 9.12.3,
