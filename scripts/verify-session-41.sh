@@ -271,7 +271,44 @@ scripts/verify-session-39.sh"
     echo "  a new display site must be added to this check, or the stale site removed"
     exit 1
   fi
-  echo "canonical count $n: 11 declared sites agree, and no other tracked file displays it"'
+  # The four words the fifth cold-review pass flagged: "no other tracked file
+  # displays it" was literally false — this file and the vendored attached_assets
+  # HTML both display it, and both are exempted above. The claim is now exactly
+  # what the clause checks.
+  echo "canonical count $n: 11 declared sites agree, and no other tracked file outside the 4 documented exemptions displays it"'
+
+# CONTRIBUTING publishes four coverage percentages. Those are the last
+# hand-written public numbers in the repo, and this session's whole thesis is that
+# hand-written numbers rot — the review flagged them as the remaining place the
+# same rot could hide. So they are computed and compared, not pattern-matched.
+#
+# Honest note on stability: the measured row was identical across five consecutive
+# runs, but one earlier run of this same check read branch coverage 0.01 higher.
+# v8 coverage on a library whose layout is width-dependent is not something to
+# claim is bit-stable. If this ever fails on branch coverage by exactly ±0.01,
+# re-run once before treating it as rot.
+#
+# The check earned its place on its first run: it caught branch coverage at 87.63
+# in CONTRIBUTING's 87.64, a drift introduced two commits earlier by the test this
+# same session added.
+run_check "contributing-coverage-numbers-real" bash -c '
+  set -e
+  out=$(pnpm --filter @ifelse.codes/chitra run test:coverage 2>&1)
+  row=$(echo "$out" | grep -E "^All files" | head -1)
+  [ -n "$row" ] || { echo "no All files row in the coverage output"; exit 1; }
+  # Take everything after the first "|" and read the four numeric cells. Parsing by
+  # field position was wrong once already (the row is "All files | a | b | c | d").
+  nums=$(echo "$row" | sed "s/^[^|]*|//" | tr "|" "\n" | tr -d " " | grep -E "^[0-9]+(\\.[0-9]+)?$" | head -4 | tr "\n" " ")
+  want=$(echo $nums)   # word-split into exactly four
+  set -- $want
+  [ "$#" -eq 4 ] || { echo "could not read four coverage numbers from: $row"; exit 1; }
+  got="$1 / $2 / $3 / $4"
+  grep -qF "$got" CONTRIBUTING.md || {
+    echo "CONTRIBUTING publishes different numbers than coverage measures."
+    echo "  measured: $got"
+    grep -nE "[0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2}" CONTRIBUTING.md
+    exit 1; }
+  echo "CONTRIBUTING publishes the measured coverage ($got)"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 

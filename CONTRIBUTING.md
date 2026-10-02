@@ -137,7 +137,9 @@ CI runs `node scripts/sync-version.mjs --check` and fails if you forget. Do not 
 - Every exported function must have a corresponding test
 - Coverage thresholds are enforced by `vitest.config.ts` and run in CI:
   statements 90, branches 85, functions 85, lines 90. Measured today:
-  **96.11 / 87.64 / 86.28 / 96.11**. `test:coverage` exits non-zero below the threshold.
+  **96.11 / 87.63 / 86.28 / 96.11**. `test:coverage` exits non-zero below the threshold,
+  and `scripts/verify-session-41.sh#contributing-coverage-numbers-real` fails if the
+  numbers published here stop matching what coverage measures.
 - Use `const` over `let` wherever possible
 - Name renderers, charts, and utilities consistently
 
