@@ -1,67 +1,50 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 42 — **COMPLETE** (cleanup Batch 2, dead weight; code session)
-- **Branch:** `session-42-dead-weight` (from `main` `4893683`), PR #63, **open**
-- **Contract:** `prompts/42-task-dead-weight.md`, committed at HEAD
-- **Closed:** 2026-10-02 · 23 commits · 133 files changed, +2115 / −12422 · **110 deleted** ·
-  gate **35/35** · closeout **16/16** (founder waiver `VAJRA_CLOSEOUT_WAIVER=42`) ·
-  independent cold review **REJECT → fixed → ACCEPT** (8 of 10 SHIPPED)
-- **Product untouched:** **453/453** in 23 files; **0** files under `src/charts/`,
-  `src/renderers/`, `src/themes/`; CI green at `c05e3ad`.
+- **Number:** 43 — **COMPLETE** (cleanup Batch 3, docs weight; code session)
+- **Branch:** `session-43-docs-weight` (from `main` `49e1ee2`, the S42 merge)
+- **Contract:** `prompts/43-task-docs-weight.md`, committed at HEAD
+- **Closed:** 2026-10-03 · gate `verify-session-43.sh` · **453/453** tests in 23 files ·
+  **0** semantic changes under the LOCKED chart code (format-only, proven) · CI green.
+- **The story:** the docs app ships the components it uses. Deleted the **43** unused
+  shadcn components, the **30** devDeps that died with them, the three `@replit/*` Vite
+  plugins, and the dead `lint` script. **Adopted Prettier** (F43-1): config checked in,
+  repo formatted, `format:check` enforced in CI.
 
 ## Repo State Snapshot
-> Re-read from live facts at S42 boot, not copied from S41's prose — the S35
-> lesson, and the reason the S40 audit flagged `state_drift` on SESSION-BOOT itself.
+> Re-read from live facts at S43 boot, not copied from S42's prose.
 
-- `.ai/SESSION` = 41 at boot, now 42. S41 was **merged** when this session started:
-  PR #62 carried the contract, the deletions and the S41 gate.
-- `main` = `4893683` == `origin/main` at branch time. Remote is still **private**.
-  The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm.
-- **Product, re-observed at S42 boot:** **453/453** tests in 23 files; root typecheck
-  exit 0; `test:coverage` exit 0; `verify-session-39.sh` 43/43; `pnpm example` runs.
-  20 charts / 3 renderers / 7 themes / 0 runtime deps.
-- **The headline this session found:** two claims in the roadmap did not survive
-  contact with the tree. The roadmap said `mockup-sandbox` "breaks the root build" —
-  run at boot, its build and its typecheck both exit 0, because S41's build-order
-  fix cured it. And it said "5 dead scripts", one of which (`build-audit-html.mjs`)
-  does not exist; four remain, plus two more with zero live refs that S41's audit
-  missed. The contract records both rather than repeating them.
-- **The number that bit hardest:** S41's own gate. `vite-configs-no-hard-throw`
-  enumerated two vite configs by path, one of them
-  `artifacts/mockup-sandbox/vite.config.ts`. Deleting that tree — requirement 1 —
-  turns the inherited gate **red**: `grep -q` on a missing file exits 1, the guard
-  fires, and the gate reports a defect that does not exist. The S42 gate is a
-  **port**, not a copy: the check discovers its inventory and asserts the
-  discovered list is non-empty.
+- `.ai/SESSION` = 43. S42 was **merged** when this session started:
+  `main` = `49e1ee2` (the S42 merge), == `origin/main` at branch time.
+- **Product untouched, re-observed:** **453/453** tests in 23 files; root typecheck exit 0;
+  `pnpm example` runs. 20 charts / 3 renderers / 7 themes / 0 runtime deps.
+  The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm. Repo still **private**.
+- **What S43 changed under the product:** every file under `packages/core/src/charts/`,
+  `renderers/`, `themes/` is **reformat-only** — `charts-format-only` proves each changed
+  file is exactly `prettier(base)`. No logic, no strings.
+- **The gate is a PORT of `verify-session-42.sh`.** The checks this session forces to be
+  re-expressed: `charts-untouched` → `charts-format-only` (S43 formats the LOCKED dirs,
+  and S42's check also passed vacuously when `main` didn't resolve — N6);
+  `ai-files-describe-s42` → `-s43`; `s41-gate-verbatim-goes-red` → `s42-gate-verbatim-goes-red`.
+- **The eight S42 findings N2–N9 are fixed** in the port, each with a counterfactual.
+  N5 and N7 touched `browser-qa-catalog-pages`: it now builds core inside the check and
+  discovers its catalog inventory from `charts.ts` instead of a hardcoded `>= 20`.
 
 ## Next Session
-- **Number:** 43 — cleanup **Batch 3: docs weight.** 43 unused shadcn components
-  (~5,000 LOC) and the dependencies that die with them, then the Prettier config
-  (31 core files currently fail `--check`) and the `lint` script, which points at
-  an eslint that is not installed and has no config.
-- ⚠️ **S43 also inherits EIGHT owned findings from S42's cold review** — each with a
-  done-condition that must go red — plus the three `@replit/*` plugins still in the
-  docs vite config, which make S42's own one-liner only two-thirds true. The table is
-  `.ai/ROADMAP.md` § "S42 residual findings — OWNED, with a done-condition each".
-  **Read it first: seven of the eight live in `artifacts/chitra-docs`, which is
-  exactly what S43 is about.** Do **N5** first — `browser-qa-catalog-pages` is
-  order-fragile and goes red for the *wrong reason* in a clean clone.
-- Then **S44** (OSS polish + founder decisions D1–D6), after which the public flip
-  resolves the README clone URL, npm `repository.url` / `homepage`, and npm
-  provenance in one move. S44 also owns two S42 findings: the contract-rewrite
-  freshness hole, and the ~60-minute gate.
-- **The two decisions that block the flip, both the founder's:** **D1** — how much
-  internal process goes public (~146 files; options B and C break
-  `check_session_coverage` / `check_task_ref` unless the gates are rewritten first)
-  — and **D4**, the personal-path scrub, which is **irreversible once published**.
-- Still open from S40, deliberately not in this session's story: `required-crew`
-  (third waiver), `check_ground_truth_no_code` failing **vacuously** on a GT
-  session, the cost gate that greps a heading, disposition S16, and the GTM proof
-  pack — which must record the measured zero downloads as its `t0` and must never
-  cite the 304 self-downloads.
-- `pnpm-workspace.yaml` still carries ~140 lines of `overrides` for packages
-  (expo, ngrok) that are not in the dependency graph — **D5**, S44, needs its own
-  lockfile regen. S42 regenerated the lockfile and deliberately left `overrides`
-  alone so the two regens stay separable.
+- **Number:** 44 — cleanup **Batch 4: OSS polish + the founder decisions.**
+  `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job,
+  `engines`; and decisions **D1** (how much internal process goes public — options B/C
+  break `check_session_coverage`/`check_task_ref` unless the gates are rewritten first),
+  **D2** (hooks activation), **D3/D6** (track or ignore `playground/` + mockups),
+  **D4** (the `/Users/suman/…` personal-path scrub — **irreversible once published**),
+  **D5** (`pnpm-workspace.yaml` `overrides` cruft, needs its own lockfile regen).
+- S44 also owns the two S42/S43 findings: the contract-rewrite freshness hole (N1), and
+  the **~60-minute gate cost** (§4.9) — which S43 does not worsen (its counterfactual
+  extracts one check instead of chaining S42→S41's whole gate).
+- **Then the public flip** — resolves the README clone URL, npm `repository.url` /
+  `homepage`, and npm provenance in one move.
+- Still open from S40, untouched: `required-crew` (third waiver), the vacuously passing
+  `check_ground_truth_no_code`, the cost gate that greps a heading, disposition S16, and
+  the GTM proof pack (record the measured **zero** downloads as `t0`; never cite the 304
+  `@ifelse.codes/core` self-downloads).
 - Open in a **new chat** (one session per chat).
