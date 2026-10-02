@@ -321,15 +321,22 @@ run_check "test-count-propagated" bash -c '
   grep -q "Tests +$n passed" scripts/verify-session-39.sh    || bad="$bad verify-39"
   [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
 
+  # S41 exempts ITS OWN gate from this inventory, because it names the number
+  # only to explain the trap. The exemption is widened here to both S41 scripts:
+  # demo-session-41.sh is FROZEN history that legitimately still displays 453,
+  # so it belongs in the expected SET rather than in the exemptions. An
+  # exemption is for files that must NOT display the number; demo-41 does.
   expected=".ai/CONTINUATION-PROMPT.md
 .ai/KNOWLEDGE.md
 .ai/ROADMAP.md
 .ai/SESSION-BOOT.md
 .ai/STATE.md
+.ai/TASK.md
 .github/workflows/ci.yml
 README.md
 artifacts/chitra-docs/src/App.tsx
 replit.md
+scripts/demo-session-41.sh
 scripts/demo-session-42.sh
 scripts/verify-session-39.sh"
   found=$(git grep -lE "(^|[^0-9])$n([^0-9]|$)" -- . \
@@ -344,7 +351,7 @@ scripts/verify-session-39.sh"
     echo "  a new display site must be added to this check, or the stale site removed"
     exit 1
   fi
-  echo "canonical count $n: 11 declared sites agree, and no other tracked file outside the exemptions displays it"'
+  echo "canonical count $n: 13 declared sites agree, and no other tracked file outside the exemptions displays it"'
 
 # ═══════════════════════════════════════════════ S42 · group C: the deletions
 
@@ -505,7 +512,8 @@ run_check "ai-names-no-deleted-tree" bash -c '
   found=$(git grep -lE "$tok" -- .ai 2>/dev/null \
           | grep -vE "^.ai/(GT-REMEDIATIONS|handoffs)/" \
           | LC_ALL=C sort)
-  expected=".ai/KNOWLEDGE.md
+  expected=".ai/CONTINUATION-PROMPT.md
+.ai/KNOWLEDGE.md
 .ai/ROADMAP.md
 .ai/SESSION-BOOT.md
 .ai/STATE.md
@@ -522,7 +530,7 @@ run_check "ai-names-no-deleted-tree" bash -c '
     || { echo "KNOWLEDGE.md does not record the S42 deletion"; exit 1; }
   grep -q "4893683" .ai/KNOWLEDGE.md \
     || { echo "KNOWLEDGE.md does not say where the files still live"; exit 1; }
-  echo ".ai/: 5 declared mention sites, and KNOWLEDGE.md records the deletion"'
+  echo ".ai/: 6 declared mention sites, and KNOWLEDGE.md records the deletion"'
 
 # ═══════════════════════════════════════════════ S42 · the contract (req 10)
 
