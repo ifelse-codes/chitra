@@ -33,6 +33,7 @@ command-code-session-*.html
 # but whether they ship as tracked demos is founder decision D3 — until it is
 # answered they stay local rather than half-tracked.
 design-reference/*.html
+design-reference/*.md
 playground/buffy-dashboard/
 playground/*.html
 playground/field-test-prompt.md
