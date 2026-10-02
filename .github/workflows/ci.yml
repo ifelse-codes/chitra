@@ -41,6 +41,18 @@ jobs:
         run: pnpm --filter @ifelse.codes/chitra run typecheck
       - name: Build dist (ESM + CJS + .d.ts)
         run: pnpm --filter @ifelse.codes/chitra run build
+      # S41 req. 2: VERSION is injected from package.json at build time, so this
+      # is the check that would have caught the literal "0.1.0" that shipped
+      # inside dist/ while the manifest said 0.3.0. Behavioural, not a grep.
+      - name: VERSION in dist matches the manifest
+        run: |
+          DIST=$(node -e "import('./packages/core/dist/index.js').then(m => console.log(m.VERSION))")
+          MANIFEST=$(node -p "require('./packages/core/package.json').version")
+          if [ "$DIST" != "$MANIFEST" ]; then
+            echo "VERSION drift - dist says $DIST, manifest says $MANIFEST"
+            exit 1
+          fi
+          echo "VERSION $DIST == manifest"
 
   docs:
     name: docs · typecheck + build
