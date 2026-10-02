@@ -211,29 +211,6 @@ block "bricks the build agent's own commits". This project ships **no** such lin
 is deliberate. Whether that is still right for an agent-driven workflow is a question for S44's
 decision batch, not a side effect of one session's friction.
 
-## Crew dispatch — tech-lead: skipped (disclosed, not waived)
-
-`tech-lead: skipped — no tech-lead was dispatched for S42, and this is disclosed rather than waived,
-following the same route S30 and S38 took.`
-
-The reason is the standing S40 finding, `.ai/GT-REMEDIATIONS.md` row 5, which is **still open and
-unfixed**: `check_required_crew` demands a tech-lead handoff that `.ai/AGENTS.md`'s nine-step
-Session Loop never asks for. The Session Loop this repo actually runs is BRANCH → PLAN → EXECUTE →
-VERIFY + DEMO → PR → SUMMARY + FIDELITY REVIEW → CLOSEOUT. There is no crew-dispatch step in it,
-so no amount of compliance produces the file it wants. S38 and S39 founder-waived it; S40 read
-`verdict: NOT READY` with zero waivers and is the third failure. Waiving it a fourth time would
-bury a known-broken gate behind another signature.
-
-Recording the skip costs nothing and is true. **The fix — rewriting or removing the check — is S44
-decision work**, alongside D2 (hooks activation), because it changes what the gate family means.
-It is listed here so it cannot be lost, not so it can be quietly deferred twice more.
-
-**What the builder substituted for the tech-lead's actual job**, since that job is real even when
-the role is not dispatched: every requirement carries a demonstrated counterfactual, and the
-independent cold review is the adversarial pass the tech-lead was standing in for — it REJECTED
-this delivery on four real defects before ACCEPTING it. That is a stronger guarantee than a
-self-recorded handoff, and it is what `.ai/GT-REMEDIATIONS.md` row 5 itself asks for.
-
 ## Closeout
 
 `verify-closeout.sh` exits 0 — which structurally requires an **ACCEPT** review, not a `PARTIAL`.
