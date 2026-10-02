@@ -106,8 +106,9 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   token-savings / before-after), a real **`0.4.0` through CI** (the cheapest proof that the
   trusted publisher works; nothing needs to change for it), and **fixing the
   `required-crew` gate** (two founder waivers, S38/S39, for a tech-lead step
-  `.ai/AGENTS.md` never asks for). `artifacts/api-server` beyond `/healthz` remains the
-  undecided "if the hosted API is pursued" bet, not a task.
+  `.ai/AGENTS.md` never asks for). `artifacts/api-server` beyond `/healthz` **was** the
+  undecided "if the hosted API is pursued" bet — **S42 closed it**: the tree is deleted,
+  and git history keeps it at `4893683` if the bet is ever revisited.
 - 🔜 **Session 40 (S40) — NO-CODE ground-truth audit (`40 % 5 == 0`) — DONE, 🔴 overall.** The
   **5-session cadence is now on the board**: it is constitutional and hook-enforced, yet it
   appeared in **zero of the last four handoffs** — which is exactly how S40 arrived as a
@@ -403,7 +404,7 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
   gates → `pnpm publish --access public` with `NODE_AUTH_TOKEN`. Plus line-chart
   SV-grade upgrade, shared `LineChartModel` + `toSVG()` web renderer, docs SVG
   output, and the terminal dashboard panel (`timestamp`/`status`/`summary`).
-- Flesh out `artifacts/api-server` beyond `/healthz` if the hosted API is pursued.
+- ~~Flesh out `artifacts/api-server` beyond `/healthz` if the hosted API is pursued.~~ **Closed in S42** — the tree is deleted; `main@4893683` keeps it if the bet is ever revisited.
 - ✅ Real release **done (S37)**: `@ifelse.codes/core@0.1.0` is **live on npm**
   (renamed from the unowned `@chitra` scope); `v0.1.0` tag cut on post-merge `main`.
 - ✅ S05 ground-truth remediation **closed (S36)**: S17/S32 records backfilled;

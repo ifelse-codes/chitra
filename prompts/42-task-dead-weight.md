@@ -132,10 +132,14 @@ proves discipline, never fidelity.
    - **0 files changed under `packages/core/src/charts/`, `src/renderers/`, `src/themes/`** — the
      LOCKED chart code. Asserted, not promised.
 
-8. **Browser QA and CI green.** `pnpm --filter @workspace/chitra-docs run qa` (the same entry
-   `ci.yml#browser-qa` runs) exits 0, and the branch is pushed with a green Actions run. The docs
-   site is the only human-facing surface left after this session, so it is the one that must not
-   visibly break.
+8. **Browser QA and CI green.** The real entry point is `node scripts/qa-catalog.mjs` — the
+   exact command `ci.yml#browser-qa` runs. The docs package has **no `qa` script**, so
+   `pnpm --filter @workspace/chitra-docs run qa` prints *"None of the selected packages has a
+   'qa' script"* and **exits 0**; it cannot fail, and naming it here would have been a check
+   that cannot fail wearing a command's clothes. (Corrected after the cold review; the first
+   draft of this line named the non-existent filter.) The command exits 0, and the branch is
+   pushed with a green Actions run. The docs site is the only human-facing surface left after
+   this session, so it is the one that must not visibly break.
 
 9. **`.ai/` truth is re-synced, and the frozen history is left alone.**
    `KNOWLEDGE.md` currently describes what chitra is *around* — `artifacts/api-server/`,
