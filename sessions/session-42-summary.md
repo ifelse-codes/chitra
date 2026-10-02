@@ -62,6 +62,37 @@ does not exist — but rewriting a cold input mid-review means the freshness gua
 covers this session. A spec that a reviewer has ruled against should be frozen; the note belongs
 in the handoff that records the verdict, and it is not there.
 
+## `required-crew` — RED at closeout, disclosed rather than waived
+
+`verify-closeout.sh` finishes **15/16**. The one failure is `check_required_crew`, the standing
+S40 finding (`.ai/GT-REMEDIATIONS.md` row 5, still open): it demands
+`.ai/handoffs/session-42-tech-lead.md` and a tech-lead verdict, which `.ai/AGENTS.md`'s nine-step
+Session Loop never asks anyone to produce. The loop this repo runs is BRANCH → PLAN → EXECUTE →
+VERIFY + DEMO → PR → SUMMARY + FIDELITY REVIEW → CLOSEOUT. There is no crew-dispatch step in it.
+
+S38 and S39 founder-waived it; S40 read `verdict: NOT READY` with zero waivers and is the third
+failure. **A fourth waiver would bury a known-broken gate behind another signature**, so this
+session did not take one.
+
+The check's own documented alternative is to record `tech-lead: skipped — <reason>` **in the
+contract** — and that route is structurally unavailable here. `prompts/` is excluded from the
+attested *diff*, but the contract is the attested *preimage*'s first half, read from `HEAD`. Adding
+a section to it changes the `Review-Inputs-SHA`, so the check that would document the skip is the
+one thing that would invalidate the acceptance documenting it. That is a real conflict between two
+closeout checks, and it is the founder's to resolve:
+
+- **`VAJRA_CLOSEOUT_WAIVER=42`** — waives `required-crew`, attestation untouched. The designed
+  path, and what S38/S39 did. Costs a fourth signature on a gate the founder already knows is wrong.
+- **A third cold pass** with the crew note in the contract. Costs another full review; yields an
+  acceptance that covers the skip instead of a waiver sitting next to it.
+
+**What stood in for the role's actual job**, since that job is real even when the role is not
+dispatched: every requirement carries a demonstrated counterfactual, and the independent cold
+review is the adversarial pass the tech-lead was standing in for — it REJECTED this delivery on four
+real defects before accepting it. That is a stronger guarantee than a self-recorded handoff, and
+it is what `GT-REMEDIATIONS` row 5 itself asks for. **The fix — rewriting or removing the check —
+is S44 decision work**, beside D2.
+
 ---
 
 ## The map — 10 of 10
