@@ -52,8 +52,10 @@ Detail: `sessions/session-42-summary.md` + `sessions/session-42-review.md` + `.a
    (one large mechanical commit) or delete the config. Do not leave it red.
 3. **The `lint` script** — it points at an eslint that is not installed and has no config.
 
-> **Gate:** S42's gate (33 checks, including the fresh clone and the S41 coupling proof)
-> + browser QA + CI green. **Port, do not copy** — see point 4 above.
+> **Gate:** S42's gate (**34 checks**, including the fresh clone, the S41 coupling proof, and
+> `browser-qa-catalog-pages`, which drives a real browser) + CI green. **Port, do not copy** —
+> see point 4 above. S42's own browser QA was run and is green; S43 must re-run it, not inherit
+> it, because S43 deletes 43 more files.
 
 ## Then
 
@@ -91,7 +93,15 @@ Detail: `sessions/session-42-summary.md` + `sessions/session-42-review.md` + `.a
   **comment**. Fixed for S42 only; the shape likely survives elsewhere, not swept.
 - **New, from S42:** `verify-session-31.sh` is now permanently unrunnable (it names
   `check-hero-dims.py`, deleted by founder decision). It joins 01, 02, 03, 07, 34, 36, 37, 38.
-  The live pair is 39 and 42.
+  The live pair is **39 / 41 / 42**.
+- **New, from S42:** the cold review **REJECTED** the first delivery on four small defects and
+  all four were real. Read `sessions/session-42-review.md` before writing a gate: the two checks
+  that could not fail were `contract-at-head` (a phrase grep) and a typecheck clause that
+  passed over an empty `files: []`. **A gate written by the same mind that wrote the code is
+  where this repo leaks.**
+- **New, from S42:** three separate syntax breaks while editing `verify-session-42.sh`, all the
+  same shape — a single quote inside a `bash -c '...'` argument. Any check you add from here
+  should be written as a **shell function**, not a nested-quoted string.
 - **`commit_guard`** — S42 needed **F42-1**: this session's agent was authorised to set
   `VAJRA_ALLOW_COMMIT` inline, because the L3 hook that enforces its un-forgeability is Claude
   Code configuration and does not run under other harnesses. Whether `commit_guard: off` belongs
