@@ -65,7 +65,7 @@ run_check "version-in-built-dist" bash -c '
 run_check "no-stale-version-literal" bash -c '
   hits="$(grep -rn "0\.1\.0" '"$CORE"'/dist/ 2>/dev/null || true)"
   [ -z "$hits" ] || { echo "$hits"; exit 1; }
-  ! grep -qE "VERSION\s*=\s*\"0." '"$CORE"'/src/index.ts || { echo "src/index.ts restates a literal version"; exit 1; }
+  ! grep -qE "VERSION\s*=\s*\"0\." '"$CORE"'/src/index.ts || { echo "src/index.ts restates a literal version"; exit 1; }
   echo "no 0.1.0 in dist; src/index.ts derives"'
 
 run_check "docs-meta-not-scaffold" bash -c '
@@ -130,29 +130,39 @@ run_check "no-public-doc-points-into-ai" bash -c '
 #   2. rename every vite.config.ts out of the way               -> fails
 # Counterfactual 2 is the one that matters: an empty discovered list is the
 # vacuous pass the S41 cold review caught in a different check.
-run_check "vite-configs-discovered" bash -c '
-  files=$(git ls-files | grep -E "(^|/)vite\.config\.[a-z]+$" | grep -v node_modules)
-  [ -n "$files" ] || { echo "no vite config discovered — the glob is broken, not the repo clean"; exit 1; }
-  n=0
+# Written as a FUNCTION, not a bash -c '...' string. This check broke the file
+# twice while being edited as a nested-quoted string — a comment containing a
+# backtick or an unescaped quote is parsed by the OUTER shell — and the check was
+# already found too weak once. A function has no quoting minefield.
+vite_configs_discovered() {
+  local files f v n=0
+  files=$(git ls-files | grep -E '(^|/)vite\.config\.[a-z]+$' | grep -v node_modules || true)
+  [ -n "$files" ] || { echo "no vite config discovered - the glob is broken, not the repo clean"; return 1; }
   for f in $files; do
     n=$((n+1))
-    # (1) the hard throw itself. Asserted on the string because that is the
-    # defect: the config refused to load without the Replit env.
-    if grep -q "is required but was not provided" "$f"; then
-      echo "$f still hard-throws on the Replit env"; exit 1
+    # (1) the hard throw itself: the config refused to load without the Replit env.
+    if grep -q 'is required but was not provided' "$f"; then
+      echo "$f still hard-throws on the Replit env"; return 1
     fi
-    # (2) an undefaulted read of PORT or BASE_PATH. Conditional on the config
-    # reading it at all, so a config that does not use the Replit env is not
-    # forced to pretend it does — and the conditional cannot go vacuous,
-    # because counterfactual 1 removes the string entirely.
+    # (2) An undefaulted PORT or BASE_PATH. The cold review showed the first
+    # version was too weak: it triggered only on process.env.PORT, so stripping
+    # process.env.PORT ?? "5000" out of the docs config entirely - leaving a
+    # hardcoded 5000 and a BASE_PATH of / - still exited 0, and S41 would have
+    # rejected that. So the trigger is ANY mention of the name, which means the
+    # config own explanatory comment is enough to make the default mandatory.
+    # A config that hardcodes the Replit values is exactly the shape S41 check
+    # existed to catch: hardcoding is not configuring.
     for v in PORT BASE_PATH; do
-      if grep -qE "process\.env\.$v\b" "$f"; then
-        grep -qE "process\.env\.$v\s*\?\?" "$f" \
-          || { echo "$f reads $v with no default"; exit 1; }
+      if grep -qE "(^|[^a-zA-Z0-9_])${v}([^a-zA-Z0-9_]|$)" "$f"; then
+        grep -qE "process\.env\.${v}[[:space:]]*\?\?" "$f" || {
+          echo "$f mentions $v but never defaults it"; return 1; }
       fi
     done
   done
-  echo "$n vite config(s) discovered; none hard-throws, no undefaulted env read"'
+  echo "$n vite config(s) discovered; none hard-throws, no undefaulted env read"
+  return 0
+}
+run_check "vite-configs-discovered" vite_configs_discovered
 
 run_check "workspace-glob-real" bash -c '
   globs=$(awk "/^packages:/{f=1;next} /^[a-zA-Z]/{f=0} f && /^  - /{print \$2}" pnpm-workspace.yaml)
@@ -296,7 +306,11 @@ run_check "ai-files-describe-s42" bash -c '
 # prose, and this script is exempted in its place for the same reason S41
 # exempted itself — it names the canonical count only to explain the trap.
 run_check "test-count-propagated" bash -c '
-  n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+")
+  set -e
+  # | head -1 restored from S41: without it a duplicated "Tests N passed" line
+  # would produce a false RED rather than being truncated.
+  n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 \
+        | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
   [ -n "$n" ] || { echo "could not derive the count from the suite"; exit 1; }
   # PORTED from verify-session-41.sh with demo-41 -> demo-42. The first version
   # of this port INVENTED three idioms instead of copying them: it grepped
@@ -378,7 +392,52 @@ run_check "dead-trees-gone" bash -c "
   done
   echo \"all 4 dead trees: 0 tracked files, no untracked source\""
 
-# req 2 — nothing that builds, resolves or publishes names a deleted tree.
+# replit.md must agree with pnpm-workspace.yaml, which is the thing that actually runs.
+#
+# The cold review's most embarrassing find: replit.md still said the globs were
+# "packages/* and lib/*" AFTER this session deleted lib/, and no check could see
+# it -- the reference check's token list had no bare lib/. Fixing the sentence was
+# not enough. This asserts the AGREEMENT, so the sentence cannot drift again: every
+# real glob must be named in replit.md, and replit.md must not name a glob that
+# does not exist.
+#
+# Counterfactual: re-add `- lib/*` to pnpm-workspace.yaml, or restore the stale
+# sentence to replit.md, and this goes red.
+replit_globs_match_workspace() {
+  local globs g missing=0 stale=0
+  globs=$(awk '/^packages:/{f=1;next} /^[a-zA-Z]/{f=0} f && /^  - /{print $2}' pnpm-workspace.yaml)
+  [ -n "$globs" ] || { echo "could not parse the workspace globs"; return 1; }
+  # `set -f`: an UNQUOTED $globs would be pathname-expanded, so the glob
+  # "artifacts/*" would silently expand to every directory under artifacts/ and
+  # the loop would check none of the real globs. That bug was in the first draft.
+  set -f
+  # (a) every real glob must be named in replit.md
+  for g in $globs; do
+    grep -qF "\`$g\`" replit.md || { echo "replit.md does not name the real glob: $g"; missing=1; }
+  done
+  # (b) no dead glob may be claimed as current
+  for g in $(grep -oE '`[a-z]+/[a-z*]+`' replit.md | tr -d '`' | LC_ALL=C sort -u); do
+    case " $globs " in *" $g "*) continue ;; esac
+    # The ONE phrase-coupled clause in this gate, disclosed. A dead glob is
+    # acceptable in replit.md only on a line that records its removal -- because
+    # replit.md is allowed to SAY it used to glob lib/*. Without this the check
+    # would demand the history be deleted, which is worse. Scoped to the line the
+    # token appears on, and the markers are the ones this file already uses.
+    # Every line that mentions a dead glob must record its removal, not just one
+    # of them. The first version used a plain -q, so a single historical line
+    # mentioning lib/* masked a second line still claiming it -- and the review's
+    # counterfactual went green again. It is `grep -v` (ANY line lacking the
+    # marker fails), not `grep -q` (ANY line having it passes).
+    grep -n -F "\`$g\`" replit.md \
+      | grep -qvE 'used to|no longer|deleted|removed|S42' \
+      && { echo "replit.md claims a glob that does not exist: $g"; stale=1; }
+  done
+  set +f
+  [ "$missing" -eq 0 ] && [ "$stale" -eq 0 ] || return 1
+  echo "replit.md and pnpm-workspace.yaml agree on: $(echo $globs)"
+  return 0
+}
+run_check "replit-globs-match-workspace" replit_globs_match_workspace
 # Scoped to build/config/script files on purpose. sessions/, prompts/ and the
 # two S41 audit documents are FROZEN: they record what past sessions found.
 # The four excluded scripts are the two gates and the two demos that must NAME
@@ -390,14 +449,25 @@ run_check "dead-trees-gone" bash -c "
 # The first version of this list omitted demo-session-42.sh, which the gate then
 # flagged on 12 lines. The demo legitimately names every deleted tree; the
 # exclusion was the bug, not the demo.
-run_check "no-live-ref-to-dead-trees" bash -c "
-  hits=\$(git grep -nE 'mockup-sandbox|api-server|@workspace/(db|api-)|attached_assets|@assets' -- . \
+#
+# A second version used the bare token `lib/`, which the review's replit.md
+# finding exposed as uselessly broad: it matched 50 shadcn imports of
+# "@/lib/utils", the docs own src/lib/bufferStore, and prose that legitimately
+# RECORDS the deletion. The tokens below name the deleted paths specifically —
+# the four lib/ packages and the workspace glob line — so a real reference is
+# still caught and a path that merely contains "lib" is not.
+no_live_ref_to_dead_trees() {
+  local hits
+  hits=$(git grep -nE 'mockup-sandbox|api-server|@workspace/(db|api-)|attached_assets|@assets|lib/(api-spec|api-zod|api-client-react|db|integrations)|^[[:space:]]*- lib/\*' -- . \
     ':!sessions' ':!prompts' ':!.ai' \
     ':!code-cleanup-plan-session-41.md' ':!independent-audit-RESULT.md' \
     ':!scripts/verify-session-41.sh' ':!scripts/demo-session-41.sh' \
     ':!scripts/verify-session-42.sh' ':!scripts/demo-session-42.sh' || true)
-  [ -z \"\$hits\" ] || { echo \"\$hits\"; exit 1; }
-  echo \"no build, config or script file references a deleted tree\""
+  [ -z "$hits" ] || { echo "$hits"; return 1; }
+  echo "no build, config or script file references a deleted tree"
+  return 0
+}
+run_check "no-live-ref-to-dead-trees" no_live_ref_to_dead_trees
 
 # req 3 — typecheck:libs is gone from the script, from the chain, from CI, and
 # from the release path. Four files asserted separately because the release
@@ -424,10 +494,27 @@ run_check "dead-scripts-gone" bash -c "
   # src/ left tsc failing TS18003 until the config was fixed.
   grep -q '\"hello\"' scripts/package.json && { echo \"the hello script dangles\"; exit 1; }
   grep -q 'demo09-donut' scripts/tsconfig.json && { echo \"a dead exclude entry survives\"; exit 1; }
-  # And the package must still typecheck rather than quietly do nothing.
-  pnpm --filter @workspace/scripts run typecheck >/dev/null 2>&1 \
-    || { echo \"@workspace/scripts typecheck is red (TS18003: empty include)\"; exit 1; }
-  echo \"6 dead scripts gone, 2 dangling refs cut, scripts package still green\""
+  # The cold review killed the clause this check used to end with. It ran the
+  # workspace scripts typecheck and called it proof that the package still
+  # typechecks rather than quietly doing nothing -- but
+  # scripts/tsconfig.json is now files: [], so tsc exits 0 even with a hard
+  # TS2322 sitting in a file it is not told to look at. It could not fail.
+  #
+  # (NOTE for whoever edits this next: this check is a DOUBLE-quoted bash -c, so
+  # a backtick or an unescaped double quote in a comment here is executed or
+  # parsed by the OUTER shell. That is what broke the file once.)
+  #
+  # What IS true and checkable: the config must not claim to have sources it does
+  # not, and the package must still be reachable by the root typecheck chain --
+  # because that chain is what req 3 rewired, and a filter that silently matches
+  # nothing would leave the docs app as the only thing typechecked.
+  grep -q '\"include\"' scripts/tsconfig.json && { echo \"scripts/tsconfig.json still claims an include with no src/\"; exit 1; }
+  grep -q '\"files\"' scripts/tsconfig.json || { echo \"scripts/tsconfig.json has neither files nor include\"; exit 1; }
+  pnpm run typecheck >/dev/null 2>&1 \
+    || { echo \"root typecheck is red\"; exit 1; }
+  pnpm -r --filter \"./scripts\" --if-present run typecheck >/dev/null 2>&1 \
+    || { echo \"the ./scripts filter no longer reaches a typecheck\"; exit 1; }
+  echo \"6 dead scripts gone, 2 dangling refs cut, root typecheck chain green\""
 
 # req 5 — the lockfile is in sync AND carries no dead importer. Both halves:
 # a lockfile with dead importers fails --frozen-lockfile, and a lockfile that
@@ -534,15 +621,71 @@ run_check "ai-names-no-deleted-tree" bash -c '
 
 # ═══════════════════════════════════════════════ S42 · the contract (req 10)
 
-run_check "contract-at-head" bash -c '
+# req 8 — browser QA, as a check the gate RUNS.
+#
+# This check did not exist and the cold review found the hole: requirement 8 was
+# displayed SHIPPED off two checks that never open a browser, and the command the
+# contract named for it (`pnpm --filter @workspace/chitra-docs run qa`) does not
+# exist — pnpm prints "None of the selected packages has a 'qa' script" and exits
+# 0. A command that cannot fail is not evidence. The real entry point is
+# `node scripts/qa-catalog.mjs`, which is exactly what ci.yml#browser-qa runs.
+#
+# The demo's req-8 row now derives from THIS check, so the row can only say
+# SHIPPED if a browser was really driven. Counterfactual: break a chart page and
+# qa-catalog exits non-zero; the check goes red with it.
+run_check "browser-qa-catalog-pages" bash -c '
+  out=$(node scripts/qa-catalog.mjs 2>&1) || { echo "$out" | tail -25; echo "qa-catalog.mjs exited non-zero"; exit 1; }
+  echo "$out" | grep -q "Persistence smoke: PASS" || { echo "no persistence smoke line"; exit 1; }
+  # Every catalog page must have been visited, and none may carry an error. The
+  # count is derived, never restated, so a chart added or removed cannot leave a
+  # stale number behind.
+  n=$(echo "$out" | grep -cE "^PASS chart-")
+  [ "$n" -ge 20 ] || { echo "only $n chart pages visited; expected the full catalog"; exit 1; }
+  if echo "$out" | grep -qE "consoleErrors=[1-9]|pageErrors=[1-9]"; then
+    echo "$out" | grep -E "consoleErrors=[1-9]|pageErrors=[1-9]"; exit 1
+  fi
+  echo "$n chart pages driven, 0 console errors, 0 page errors, persistence PASS"'
+
+# req 10 — the contract, and the requirements it promises.
+#
+# The first version of this check was `grep -q "10 numbered requirements"`, and the
+# cold review broke it twice: it deleted requirements 4 through 10 from the contract
+# and it passed, and it replaced the contract with a four-line stub containing that
+# one phrase and it passed. A phrase check standing in for a structural requirement
+# is the anti-pattern this contract names in its own header.
+#
+# So it now requires the contract to actually CONTAIN each numbered requirement,
+# discovered by pattern rather than remembered, and to name every out-of-scope
+# section. Counterfactual: delete any one requirement and it goes red.
+  # A FUNCTION, not a bash -c '...' string. That form broke this file twice: an awk
+  # program needs single quotes, and a single quote inside a single-quoted argument
+  # terminates the string and re-parses the rest as shell code. Anything edited from
+  # this point on should be written as a function.
+  contract_at_head() {
+  local c found want s
   c=prompts/42-task-dead-weight.md
-  [ -f "$c" ] || { echo "the contract is missing"; exit 1; }
-  # review-inputs-attested hashes the contract; S40 failed that gate for
-  # committing no contract, so it must be in the tree, not merely on disk.
-  git ls-files --error-unmatch -- "$c" >/dev/null 2>&1 || { echo "the contract is untracked"; exit 1; }
-  # Every numbered requirement the gate asserts against must exist in it.
-  grep -q "10 numbered requirements" "$c" || { echo "the contract does not state its requirement count"; exit 1; }
-  echo "contract tracked, 10 requirements"'
+  [ -f "$c" ] || { echo "the contract is missing"; return 1; }
+  git ls-files --error-unmatch -- "$c" >/dev/null 2>&1 || { echo "the contract is untracked"; return 1; }
+  # Every numbered requirement 1..10 must be present AS A HEADING, and the set of
+  # numbers found must be exactly 1..10 - no gaps, and nothing standing in for a
+  # missing one. Scoped to the Scope section on purpose: the Assumptions block
+  # also carries items numbered 1 and 2, and counting those would make the set
+  # 1..10,1,2 and the comparison meaningless.
+  found=$(awk '/^## Scope/{f=1;next} /^## /{f=0} f' "$c" \
+          | grep -oE '^[0-9]+\. \*\*' | grep -oE '^[0-9]+' | LC_ALL=C sort -n | tr '\n' ' ')
+  want=$(seq 1 10 | tr '\n' ' ')
+  [ "$found" = "$want" ] || { echo "contract requirements are [$found], expected [$want]"; return 1; }
+  # The sections that carry obligations the gate does not itself assert.
+  for s in '## Out of scope' '## Assumptions' '## Founder decision' '## Closeout'; do
+    grep -q "^$s" "$c" || { echo "contract is missing the section: $s"; return 1; }
+  done
+  # And the counterfactual the contract demands must be named in it.
+  grep -q 's41-gate-verbatim-goes-red' "$c" \
+    || { echo "the contract does not name the counterfactual it demands"; return 1; }
+  echo "contract tracked, requirements 1-10 all present as headings, obligation sections intact"
+  return 0
+}
+run_check "contract-at-head" contract_at_head
 
 # The inherited test-count-propagated check asserts the demo "displays" the
 # canonical count by grepping the demo FILE for "(453 tests". That grep is
@@ -570,6 +713,15 @@ echo "=== Session 42 Verify Summary ==="
 printf '%-38s %s\n' "CHECK" "RESULT"
 printf '%-38s %s\n' "----------------------------------------" "------"
 for r in "${RESULTS[@]:-}"; do echo "$r"; done
+
+# Machine-readable copy of the table above, one "<name> PASS|FAIL" per line.
+# The demo reads THIS rather than grepping each check's log: a log's prose is not
+# a status, and reading it as one made the demo mislabel two requirements.
+{
+  for r in "${RESULTS[@]:-}"; do
+    printf '%s %s\n' "$(echo "$r" | awk '{print $1}')" "$(echo "$r" | awk '{print $NF}')"
+  done
+} > "$ARTIFACTS/summary.txt"
 
 if [ "$FAIL" -eq 0 ]; then echo "ALL GREEN ($PASS pass, 0 fail)"; exit 0
 else echo "RED ($PASS pass, $FAIL fail)"; exit 1; fi
