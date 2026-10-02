@@ -1,59 +1,53 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 40 — IN PROGRESS (NO-CODE ground-truth audit, `40 % 5 == 0`)
-- **Type:** NO-CODE audit — no code, no commits, no PRs by constitution
-- **Branch:** `session-40-ground-truth` (from `main` `ba6cf6f`)
-- **Date last updated:** 2026-09-30
+- **Number:** 41 — **COMPLETE** (cleanup Batch 1, code session)
+- **Branch:** `session-41-repo-cleanup` (from `main` `ece61fc`)
+- **Contract:** `prompts/41-task-repo-cleanup.md`, committed at HEAD
+- **Closed:** 2026-10-02 · 32 commits · 34 tracked files · verify **24/24**
 
 ## Repo State Snapshot
-> Taken at S40 boot against a `main` that is **exactly** `origin/main` (`0 0`), so no
-> merge-lag can be hiding here. The S35 lesson — a snapshot written pre-merge and never
-> re-synced — is closed by reading live facts, not by copying the prior session's prose.
+> Re-read from live facts at S41 boot and again at closeout, not copied from S40's prose —
+> the S35 lesson, and the reason the S40 audit flagged `state_drift` on this very file.
 
-- `.ai/SESSION` = 40 (was 39 on `main`).
-- Remote: `github.com/ifelse-codes/chitra` (**private** — proven anonymously: `api.github.com`,
-  `raw.githubusercontent.com` and `github.com` all 404). `main` is `ba6cf6f` (S39 PR #59);
-  S00–S39 are on `main` via squash merges #53–#59. `v0.3.0` → `f4ff6ef9`, `v0.2.0` →
-  `76d21f3`, `v0.1.0` → `802ffc7` — **all three pushed, and none stale** (S35's highest-risk
-  finding is verifiably closed). The Release workflow is green.
-- **Product, re-observed:** 452/452 tests in 23 files, `dist/` built, 20 charts / 3 renderers
-  / 7 themes, and `scripts/verify-session-39.sh` still **43/43 green on `main` HEAD** after
-  PRs #56/#58/#59 landed.
-- **S40's headline finding — the adoption baseline is zero, and that is the correct
-  pre-launch reading** (founder: nothing has been released-and-marketed). The finding is that
-  **the number had never been read**: `@ifelse.codes/core`'s 304 lifetime downloads are 0 for
-  the 9 days before its publish, then 75/17/12/181/19 in the 5 days it existed — all
-  release-runner and founder verification shaped, never citable as traction — and
-  `@ifelse.codes/chitra` is **unindexed by the npm downloads API** on three endpoints while
-  the registry answers 200. **S40 is the first session to read this series.**
-- **S40's second finding — the repo goes public after a code cleanup** (founder decision).
-  Today's 404s are known and temporary; the real gap is that the **cleanup that gates the
-  flip has no roadmap item, no scope, and no owner.**
-- **S40 verdict: 🔴** — the product is excellent; the governance and the record around it are
-  not. Full audit, 49 probes: `sessions/session-40-ground-truth.md`; cold review
-  `ACCEPT-with-conditions` (41 probes re-run, **0 fabricated**). **Eleven** remediations in
-  `.ai/GT-REMEDIATIONS.md`: 3 `DONE` in-session, 8 `DEFERRED` to S41. **Closeout RED, 14/2** —
-  `required-crew` and `review-inputs-attested`, founder-waived (`VAJRA_CLOSEOUT_WAIVER=40`)
-  because a NO-CODE session commits nothing and the attestation hash needs a committed
-  contract.
+- `.ai/SESSION` = 41. S40 was already **merged** when this session started (PR #60 carried
+  the audit, PR #61 carried a fix for a line of mine that had broken S39's own gate).
+- `main` = `ece61fc` == `origin/main` (`0 0`) at branch time. Remote is still **private**.
+- **Product, re-observed:** **453/453** tests in 23 files; root typecheck exit 0;
+  `test:coverage` exit 0; `verify-session-39.sh` is 43/43; the S41 gate is 24 of 24;
+  20 charts / 3 renderers / 7 themes / 0 runtime deps.
+- **The headline:** for the first time in this repo's history, a **fresh clone with no
+  environment variables set** runs `pnpm install --frozen-lockfile && pnpm run build` to
+  **exit 0**. It never had — the root script typechecked the docs app before
+  `@ifelse.codes/chitra`'s gitignored `dist/` existed, so the failure was invisible on any
+  machine that had ever run a build. The blind audit caught it; the first audit's prescribed
+  fix (defaulting `PORT`/`BASE_PATH`) would **not** have fixed it.
+- **Also closed:** the live docs site was serving the Replit scaffold placeholder as its
+  meta description, and `VERSION` — exported public API — shipped to npm as `0.1.0` while
+  the manifest said `0.3.0`.
+- **The number that kept biting:** the canonical test count is displayed in tracked files and
+  asserted as a literal in the historical verify scripts. `main` already lost commit
+  `ece61fc` to it. S41 added one real test, moved it 452 → 453, and now
+  `verify-session-41.sh#test-count-propagated` **discovers** its own inventory by grepping
+  the tree — a new display site fails the gate.
 
 ## Next Session
-- **Number:** 41. The recommendation changed at S40 close: **scope the code cleanup that
-  gates the public launch** (founder sequencing — clean up, make it good, then go public).
-  That cleanup is a named prerequisite with **no roadmap item, no scope, no owner**, and the
-  public flip unblocks the README clone line, both npm links and npm provenance from it.
-  Cheap, unambiguous items to fold alongside: fix the `KNOWLEDGE.md` `main`-range line the
-  S35 ledger already closed once, **disposition S16** (no gate can see it), fix the
-  `required-crew` gate (second waiver, S38/S39), and put the 5-session GT cadence on the board.
-- The three S39 candidates remain available, in this order:
-  1. **A real `0.4.0` through CI** — the cheapest possible proof that the trusted publisher
-     works, converting a founder attestation into a demonstrated fact. Nothing needs to change.
-  2. **GTM proof pack** — benchmarks / token-savings / before-after. Materially more valuable
-     *after* the cleanup and the public flip: it is the **first** measurement, so it must
-     record the measured zero as its `t0` baseline and never cite the 304 self-downloads.
-  3. **Fix the `required-crew` gate** — second founder waiver; a ten-minute edit.
-- `artifacts/api-server` stays an undecided "if the hosted API is pursued" bet, not a task.
-- **MCP server stays founder-deferred** until someone demands it. `@ifelse.codes/chitra@0.3.0`
-  counts as a release; demand is the missing half, and nothing has been marketed yet.
+- **Number:** 42 — cleanup **Batch 2: dead weight.** Delete `artifacts/mockup-sandbox/`
+  (69 files, breaks the root build, zero CI references), `lib/` + `artifacts/api-server/`
+  (31 files, `/healthz` only, plus the 6-file reference chain in root `tsconfig.json`, docs
+  `tsconfig.json`, docs `package.json`, `ci.yml`, root scripts, `pnpm-workspace.yaml`),
+  `attached_assets/` (3, reachable only through an unused `@assets` alias), and 5 dead
+  scripts. Gate: Batch 1's gate + browser QA + CI green. Scoped in `.ai/ROADMAP.md`.
+- Then **S43** (docs weight: 43 unused shadcn components, Prettier, the `lint` script that
+  points at an eslint nobody installed) and **S44** (OSS polish + founder decisions D1–D6),
+  after which the public flip resolves the README clone URL, npm `repository.url` /
+  `homepage`, and npm provenance in one move.
+- **The two decisions that block the flip, both the founder's:** **D1** — how much internal
+  process goes public (~146 files; options B and C break `check_session_coverage` /
+  `check_task_ref` unless the gates are rewritten first) — and **D4**, the personal-path
+  scrub, which is **irreversible once published**.
+- Still open from S40, deliberately not in this session's story: `required-crew` (third
+  waiver), `check_ground_truth_no_code` failing **vacuously** on a GT session, the cost gate
+  that greps a heading, disposition S16, and the GTM proof pack — which must record the
+  measured zero downloads as its `t0` and must never cite the 304 self-downloads.
 - Open in a **new chat** (one session per chat).

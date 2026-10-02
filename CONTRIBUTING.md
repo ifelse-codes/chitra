@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Chitra! This guide will help you 
 
 ```bash
 # Clone and install
-git clone https://github.com/chitra-dev/chitra.git
+git clone https://github.com/ifelse-codes/chitra.git
 cd chitra
 pnpm install
 
@@ -19,8 +19,8 @@ pnpm --filter @ifelse.codes/chitra run test:coverage
 # Typecheck
 pnpm --filter @ifelse.codes/chitra run typecheck
 
-# Run examples
-node --experimental-specifier-resolution=node examples/basic.ts
+# Run examples (no build needed — the examples import from src/)
+pnpm example
 ```
 
 ## Project Structure
@@ -33,10 +33,13 @@ packages/
       ansi.ts           — ANSI color primitives
       utils.ts          — Math and formatting utilities
       plot.ts           — Fluent PlotBuilder API
+      version.ts        — GENERATED from package.json; see scripts/sync-version.mjs
       themes/           — Built-in theme definitions
       renderers/        — Braille, blocks, and ASCII engines
       charts/           — Individual chart implementations
-    tests/              — Vitest test suite
+    tests/              — Vitest test suite, one file per chart
+scripts/
+  sync-version.mjs      — regenerates src/version.ts from the manifest
 ```
 
 ## Adding a New Chart Type
@@ -46,10 +49,14 @@ packages/
 3. Export from `packages/core/src/charts/index.ts`
 4. Re-export from `packages/core/src/index.ts`
 5. Add a method to `PlotBuilder` in `packages/core/src/plot.ts`
-6. Write tests in `packages/core/tests/charts.test.ts`
+6. Write tests in `packages/core/tests/<name>.test.ts` — one file per chart, named
+   after the chart (`bar.test.ts`, `line.test.ts`, …)
 7. Add an example in `examples/basic.ts`
 
 ### Chart Template
+
+`ChartResult` (`src/types.ts`) requires six members. Omitting `toContent()` is a type
+error, not a style choice.
 
 ```ts
 import type { BaseChartOptions, ChartResult } from "../types.js";
@@ -77,6 +84,8 @@ export function myChart(opts: MyChartOptions): ChartResult {
     render() { process.stdout.write(output + "\n"); },
     toString() { return output; },
     toPlain() { return stripAnsi(output); },
+    // Body only — no frame, no eyebrow, no legend, no summary.
+    toContent() { return myChart({ ...opts, frame: false, compact: true }).toPlain(); },
     toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
     toJSON() {
       return {
@@ -109,12 +118,32 @@ export const themes: Record<ThemeName, Theme> = {
 
 Also add `"my-theme"` to the `ThemeName` type in `types.ts`.
 
+## Bumping the Version
+
+`packages/core/package.json` is the only place the version lives. After editing it:
+
+```bash
+node scripts/sync-version.mjs   # regenerates src/version.ts
+```
+
+CI runs `node scripts/sync-version.mjs --check` and fails if you forget. Do not hand-edit
+`src/version.ts` — a literal there once shipped to npm as `0.1.0` while the manifest said
+`0.3.0`.
+
 ## Code Style
 
 - TypeScript strict mode
 - No runtime dependencies
 - Every exported function must have a corresponding test
-- Target >90% test coverage
+- Coverage thresholds are enforced by `vitest.config.ts` and run in CI:
+  statements 90, branches 85, functions 85, lines 90. Measured:
+  **96.11 / 87.63–87.64 / 86.28 / 96.11**. `test:coverage` exits non-zero below the
+  threshold, and `scripts/verify-session-41.sh#contributing-coverage-numbers-real` fails if
+  the figures published here stop matching what coverage measures.
+  *Branch coverage is genuinely bimodal at ±0.01* — eight identical runs split 4–4
+  between 87.63 and 87.64, with no TTY, environment, clock or random dependence anywhere
+  in `src/`. It is v8's collection, not the code. The check allows one hundredth; publish a
+  single value and the gate is a coin flip.
 - Use `const` over `let` wherever possible
 - Name renderers, charts, and utilities consistently
 
@@ -127,7 +156,7 @@ pnpm --filter @ifelse.codes/chitra run test
 # Run tests in watch mode
 pnpm --filter @ifelse.codes/chitra run test:watch
 
-# Coverage report
+# Coverage report (enforces the thresholds above)
 pnpm --filter @ifelse.codes/chitra run test:coverage
 ```
 

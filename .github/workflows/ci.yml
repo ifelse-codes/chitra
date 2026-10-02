@@ -1,7 +1,7 @@
 name: CI
 
 # Session 07 — the gates that must stay green (see .ai/ROADMAP.md guardrails):
-#   core:  @ifelse.codes/chitra test (452) + typecheck + dist build (ESM + CJS + .d.ts)
+#   core:  @ifelse.codes/chitra test (453) + typecheck + dist build (ESM + CJS + .d.ts)
 #   docs:  @workspace/chitra-docs typecheck + build
 #   drift: generated chart previews match the spec source (gen:charts:check)
 # Toolchain is pinned to the versions proven green locally (Node 26, pnpm 9.12.3,
@@ -35,12 +35,31 @@ jobs:
           cache: pnpm
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
+      # S41 req. 2: src/version.ts is generated from the manifest by
+      # scripts/sync-version.mjs. This fails before anything is built if a version
+      # bump forgot to re-run the generator.
+      - name: VERSION in src matches the manifest
+        run: node scripts/sync-version.mjs --check
       - name: Test
         run: pnpm --filter @ifelse.codes/chitra run test
       - name: Typecheck
         run: pnpm --filter @ifelse.codes/chitra run typecheck
       - name: Build dist (ESM + CJS + .d.ts)
         run: pnpm --filter @ifelse.codes/chitra run build
+      # S41 req. 2: the same version, proven on the artifact rather than the
+      # source. This executes the built ESM bundle and compares — it is the check
+      # that would have caught the literal "0.1.0" that shipped inside dist/ while
+      # the manifest said 0.3.0. The suite asserts the same pair; this one is
+      # downstream of the build, so a bundling regression cannot hide it.
+      - name: VERSION in dist matches the manifest
+        run: |
+          DIST=$(node -e "import('./packages/core/dist/index.js').then(m => console.log(m.VERSION))")
+          MANIFEST=$(node -p "require('./packages/core/package.json').version")
+          if [ "$DIST" != "$MANIFEST" ]; then
+            echo "VERSION drift - dist says $DIST, manifest says $MANIFEST"
+            exit 1
+          fi
+          echo "VERSION $DIST == manifest"
 
   docs:
     name: docs · typecheck + build
