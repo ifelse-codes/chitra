@@ -6,7 +6,7 @@ cleanup. `main` = the S42 merge `49e1ee2`; S43's branch `session-43-docs-weight`
 just done.
 
 > **The one thing to carry forward:** the docs app now ships the components it renders and
-> nothing else — **43** unused shadcn components, the **30** devDeps that served them, the
+> nothing else — **53** unused shadcn components, the **36** devDeps that served them, the
 > three `@replit/*` Vite plugins and the dead `lint` script are gone, and **Prettier is
 > adopted and CI-enforced** (F43-1). The product was not touched: 453 tests stay **453 green**,
 > and every change under the LOCKED chart dirs is proven to be a Prettier transform.
@@ -17,8 +17,8 @@ Detail: `sessions/session-43-summary.md` + `sessions/session-43-review.md` + `.a
 
 | Delivered in S43 | State |
 |---|---|
-| 43 unused shadcn components | **deleted** — live set (12) discovered, not enumerated |
-| 30 dead devDeps | **removed** + lockfile regenerated in its own commit (64 → 34) |
+| 53 unused shadcn components | **deleted** — live set (2) discovered, not enumerated |
+| 36 dead devDeps | **removed** + lockfile regenerated in its own commit (64 → 25) |
 | 3 `@replit/*` Vite plugins | **removed** from config, manifest, and workspace catalog |
 | dead `lint` script | **removed** — it called an eslint installed nowhere |
 | Prettier | **adopted** (`.prettierrc` + `.prettierignore`), repo formatted, CI `format` job |

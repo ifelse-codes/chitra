@@ -6,8 +6,8 @@
 - **Contract:** `prompts/43-task-docs-weight.md`, committed at HEAD
 - **Closed:** 2026-10-03 · gate `verify-session-43.sh` · **453/453** tests in 23 files ·
   **0** semantic changes under the LOCKED chart code (format-only, proven) · CI green.
-- **The story:** the docs app ships the components it uses. Deleted the **43** unused
-  shadcn components, the **30** devDeps that died with them, the three `@replit/*` Vite
+- **The story:** the docs app ships the components it uses. Deleted the **53** unused
+  shadcn components, the **36** devDeps that died with them, the three `@replit/*` Vite
   plugins, and the dead `lint` script. **Adopted Prettier** (F43-1): config checked in,
   repo formatted, `format:check` enforced in CI.
 

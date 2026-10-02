@@ -7,7 +7,7 @@
 - **Contract:** `prompts/43-task-docs-weight.md` — at HEAD, which is what
   `review-inputs-attested` hashes.
 - **Delivered:** 10 requirements.
-  - **Deleted:** the **43** unused shadcn components (live set discovered: 12), the **30**
+  - **Deleted:** the **53** unused shadcn components (live set discovered: 2), the **36**
     devDeps that died with them (lockfile regenerated in its own commit), the three
     `@replit/*` Vite plugins (+ their workspace-catalog entries), the dead `lint` script.
   - **Prettier (F43-1):** `.prettierrc` + `.prettierignore` checked in, repo formatted
