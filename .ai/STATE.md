@@ -1,7 +1,7 @@
 # chitra — Current State Snapshot
 
 **Snapshot, not log.** Overwritten in full at every closeout. (S41 — cleanup Batch 1,
-2026-10-02.)
+**complete**, 2026-10-02.)
 
 ## Active Branch
 `session-41-repo-cleanup`, branched from `main` `ece61fc` (== `origin/main` at branch
@@ -99,24 +99,34 @@ on npm, and the repo around it is being made fit to publish.
   **S41** cleanup Batch 1 — the public face is honest and a fresh clone builds.
 
 ## What Is In Progress
-- **S41 — cleanup Batch 1**, on `session-41-repo-cleanup`. 13 requirements: the live meta
-  placeholder, `VERSION`, the npm README design log, CONTRIBUTING's five claims, the
-  example command, `replit.md`, the provenance comment, the README's pointer into `.ai/`,
-  the `.ai/` files themselves, the build order, the vite configs, the workspace glob, and
-  the untracked junk. `verify-session-41.sh` **23/23**. A cold independent review
-  (`sessions/session-41-review.md`) returned **REJECT** on the first pass and its findings
-  were fixed in place — see the review for what it caught that a green gate could not.
-- Next (S42): cleanup Batch 2, dead weight. See [[roadmap]].
+- **Nothing.** S41 is **complete**: 13 requirements, 12 SHIPPED and 1 PARTIAL (req 8 —
+  `AGENTS.md`/`CLAUDE.md` still point into `.ai/`, which is founder decision **D1** that the
+  contract explicitly does not make). 32 commits, 34 tracked files, 0 files under the LOCKED
+  chart code, `verify-session-41.sh` **24/24**, `verify-session-39.sh` 43/43, 453/453 tests.
+  Fidelity map: `sessions/session-41-summary.md`. Independent verdict over **six** passes,
+  **ACCEPT**: `sessions/session-41-review.md` — it rejected the delivery twice, and the
+  findings (a check that provably could not fail, a guard scoped to its author's habits,
+  three fabricated numbers in the demo, a missing test the summary had called done) were all
+  fixed in place.
+- Next (S42): cleanup **Batch 2, dead weight** — `mockup-sandbox`, `lib/`, `api-server`,
+  `attached_assets`, 5 dead scripts, and the 6-file chain that references them. Then S43
+  (docs weight), then S44 (OSS polish + D1–D6), then the public flip. See [[roadmap]].
 
 ## Cost Tracking
-- S41 measured: one opencode session, one cold independent review subagent, 13
-  requirements across 19 tracked files and 14 commits, 0 product-code changes under
-  `packages/core/src/charts`, `renderers/` or `themes/`, 0 releases. One `pnpm install`
-  (adding `tsx` at the root) and one lockfile update. Several full verify runs, each of
-  which includes a real `git clone` + install + build — roughly 40 s each.
+- S41 measured: one opencode session; **one** in-chat founder decision (the session goal:
+  cleanup Batch 1) and one unanswered (D1); **six** independent cold-review passes by a
+  separate subagent, all against the committed diff; 13 requirements across 34 tracked
+  files and 32 commits; **0** product-code changes under `src/charts/`, `src/renderers/` or
+  `src/themes/`; **1** new test (453 from 452); 2 new CI steps; 0 releases. One `pnpm
+  install` (adding `tsx` at the root) and one lockfile update. Roughly a dozen full
+  `verify-session-41.sh` runs at ~40 s each — each one performs a **real** `git clone` +
+  install + build — plus a fresh-clone build run three extra times, and ~15 targeted
+  counterfactuals. Two new session gates written from scratch (24 checks).
   Token/`$` cost **unmeasured** (billed to the founder's plan). npm cost: $0. No new
   recurring infrastructure.
-- S40 measured: 49 audit probes + 41 independent re-verifications, 0 code changes,
-  0 commits. S39: a package rename across 27 files, one human bootstrap publish, a red
-  release diagnosed rather than retried, two hollow checks caught in my own verify script
-  and one more by the cold review.
+- The honest cost line: **the review was not overhead.** It rejected twice, and every
+  rejection was a real defect a green gate had passed — including one check that could not
+  fail at all.
+- S40 measured: 49 audit probes + 41 independent re-verifications, 0 code changes.
+  S39: a package rename across 27 files, one human bootstrap publish, a red release
+  diagnosed rather than retried.
