@@ -56,18 +56,16 @@ if not, they go, and the one-liner becomes true.**
 | `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, **and now S42**. Three waivers is a decision, four is a burial. It is **S44 decision work beside D2** |
 
 ## Backlog (not yet scheduled)
-- 🔄 **Session 42 (S42) — cleanup Batch 2: dead weight** (branch
-  `session-42-dead-weight`, contract `prompts/42-task-dead-weight.md`). Delete
-  `artifacts/mockup-sandbox/`, `lib/`, `artifacts/api-server/`, `attached_assets/`
-  and 6 dead scripts; cut the 9-file chain; regenerate the lockfile; re-prove the
-  product. **Two roadmap claims did not survive the tree and are corrected in the
-  contract rather than repeated:** `mockup-sandbox` did **not** break the root build
-  (its build and typecheck both exit 0 — S41's build-order fix cured it, so the reason
-  to delete it is weight), and one of the "5 dead scripts" (`build-audit-html.mjs`)
-  does not exist. **The load-bearing finding is that S41's own gate breaks under
-  requirement 1**: `vite-configs-no-hard-throw` enumerated a path into
-  `mockup-sandbox/`, so deleting it turns the inherited gate red. The S42 gate is a
-  **port**, with the inventory discovered rather than named. See [[session-42-summary]].
+- ✅ **Session 42 (S42) — cleanup Batch 2: dead weight** (branch `session-42-dead-weight`,
+  PR #63, contract `prompts/42-task-dead-weight.md`). **COMPLETE.** Deleted `mockup-sandbox/`,
+  `lib/`, `api-server/`, `attached_assets/` and 6 dead scripts — **110 tracked files**; cut the
+  **9-file** chain; regenerated the lockfile (**+67 / −3177**, ten importers → four). Gate **35/35**,
+  closeout **16/16** under `VAJRA_CLOSEOUT_WAIVER=42`, CI green. **Independent cold review REJECTED
+  it 7/10 on four real defects — a browser-QA tick resting on a command that does not exist and
+  exits 0, a false `replit.md`, a `contract-at-head` that passed on a gutted contract, and a check
+  that could not fail — all fixed; pass 2 ACCEPTED 8/10 with 10 of 14 findings FIXED.** Two roadmap
+  claims did not survive the tree and are corrected above rather than repeated. **Nine findings were
+  carried forward with owners** — see the table below.
 - 🔄 **Session 41 (S41) — cleanup Batch 1: the public face tells the truth, and a
   stranger can build it** (branch `session-41-repo-cleanup`, merged as PR #62,
   contract `prompts/41-task-repo-cleanup.md`). 13 requirements in three groups: what a
