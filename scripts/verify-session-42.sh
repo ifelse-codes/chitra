@@ -272,7 +272,20 @@ run_check "ai-files-describe-s42" bash -c '
     [ -f "$f" ] || { echo "FILE MISSING: $f"; exit 1; }
     grep -q "session-42-dead-weight" "$f" || { echo "$f does not name the live branch"; exit 1; }
   done
-  ! grep -q "cleanup Batch 1" .ai/STATE.md || { echo "STATE.md still narrates S41 as in progress"; exit 1; }
+  # The S41 clause for "STATE.md must not narrate the previous session" was a
+  # bare substring test for the words "cleanup Batch 1". It is REMOVED here, not
+  # kept alongside: a phrase standing in for a structural claim, and wrong the
+  # moment the milestones list mentions Batch 1 in the PAST tense, which it must
+  # -- so it was asserting on prose, and would have forced STATE.md to stop
+  # recording history. These two assert on the SECTIONS instead: the live branch
+  # section names this session, and the In Progress section names S42.
+  ab=$(awk "/^## Active Branch/{f=1;next} /^## /{f=0} f" .ai/STATE.md)
+  [ -n "$ab" ] || { echo "STATE.md has no Active Branch section"; exit 1; }
+  echo "$ab" | grep -q "session-42-dead-weight" || { echo "Active Branch does not name session-42-dead-weight"; exit 1; }
+  echo "$ab" | grep -q "session-41-repo-cleanup" && { echo "Active Branch still names the S41 branch"; exit 1; }
+  ip=$(awk "/^## What Is In Progress/{f=1;next} /^## /{f=0} f" .ai/STATE.md)
+  [ -n "$ip" ] || { echo "STATE.md has no What Is In Progress section"; exit 1; }
+  echo "$ip" | grep -q "S42" || { echo "the In Progress section does not name S42"; exit 1; }
   for s in 42 43 44; do
     grep -q "Session $s (S$s)" .ai/ROADMAP.md || { echo "ROADMAP.md has no Session $s item"; exit 1; }
   done
