@@ -567,7 +567,7 @@ function Hero({ onNav }: { onNav: (id: string) => void }) {
           <div className="stat"><span className="stat-num">20</span><span className="stat-label">Chart types</span></div>
           <div className="stat"><span className="stat-num">3</span><span className="stat-label">Renderers</span></div>
           <div className="stat"><span className="stat-num">7</span><span className="stat-label">Themes</span></div>
-          <div className="stat"><span className="stat-num">452</span><span className="stat-label">Tests passing</span></div>
+          <div className="stat"><span className="stat-num">453</span><span className="stat-label">Tests passing</span></div>
           <div className="stat"><span className="stat-num">0</span><span className="stat-label">Dependencies</span></div>
         </div>
 

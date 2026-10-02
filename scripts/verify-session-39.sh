@@ -352,7 +352,7 @@ run_check "mcp-rider-on-every-surface" bash -c '
       || { echo "$f shows an MCP handler with no \"not shipped yet\" rider — nothing ships it"; exit 1; }
   done'
 run_check "prompt-exists"             test -f prompts/39-task-rename-chitra.md
-run_check "core-tests-452"            bash -c "pnpm --filter $NEW run test 2>&1 | grep -qE 'Tests +452 passed'"
+run_check "core-tests-453"            bash -c "pnpm --filter $NEW run test 2>&1 | grep -qE 'Tests +453 passed'"
 run_check "core-typecheck"            pnpm --filter @ifelse.codes/chitra run typecheck
 run_check "core-build"                pnpm --filter @ifelse.codes/chitra run build
 

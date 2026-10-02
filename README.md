@@ -11,7 +11,7 @@ logs, and the language models reading them.
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)](packages/core/package.json)
 [![charts: 20](https://img.shields.io/badge/charts-20-blue)](packages/core/README.md)
-[![tests: 452 passing](https://img.shields.io/badge/tests-452%20passing-brightgreen)](packages/core/tests)
+[![tests: 453 passing](https://img.shields.io/badge/tests-453%20passing-brightgreen)](packages/core/tests)
 
 [Docs](https://chitra.iifelse.com) · [Chart gallery](https://chitra.iifelse.com) · [AI data reference](https://chitra.iifelse.com/ai-data) · [API reference](packages/core/README.md)
 
