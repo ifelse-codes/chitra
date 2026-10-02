@@ -3,10 +3,12 @@
 # Cumulative: numbers already true (the suite, 20 charts, 0 deps) are context,
 # not claims of new work.
 #
-# Every number printed below is DERIVED at run time. NONE is typed — in
-# particular the suite count, which this session's own test-count check asserts
-# is ABSENT from this file (a demo that types the number is the rot S43 exists
-# to kill; S41's demo passed that check on a COMMENT alone).
+# Every LOAD-BEARING number below is DERIVED at run time — the suite count, the
+# component and devDep counts, and every per-requirement STATE. The before/after
+# figures in the prose (55, 53, 36, 64, 26, ~6000 LOC) are context, typed on
+# purpose. In particular the suite count is ABSENT from this file, which the
+# session's own test-count check asserts (a demo that types the number is the rot
+# S43 exists to kill; the S41 demo passed that check on a COMMENT alone).
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
