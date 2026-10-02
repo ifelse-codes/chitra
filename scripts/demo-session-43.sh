@@ -30,39 +30,39 @@ hdr "The 53 shadcn components the docs app never rendered"
 
 case_ "1 · 55 components seeded, 2 reachable"
 printf '  %sbefore%s  a select, a calendar, a carousel, a chart wrapper, a\n' "$D" "$N"
-printf '        %scommand palette — the Replit scaffold shipped a whole UI kit.\n' "$D" "$N"
-printf '        %sThe live set is the transitive closure of what the docs app\n' "$D" "$N"
-printf '        %sactually imports: only NOT-FOUND.tsx (card) and use-toast.ts\n' "$D" "$N"
+printf '        %scommand palette — the Replit scaffold shipped a whole UI kit.%s\n' "$D" "$N"
+printf '        %sThe live set is the transitive closure of what the docs app%s\n' "$D" "$N"
+printf '        %sactually imports: only NOT-FOUND.tsx (card) and use-toast.ts%s\n' "$D" "$N"
 printf '        %s(toast). All 53 others have zero inbound references anywhere.%s\n' "$D" "$N"
 n=$(git ls-files artifacts/chitra-docs/src/components/ui | wc -l | tr -d ' ')
 [ "$n" = "2" ] && ok "2 components tracked (was 55) — 53 gone, ~6000 LOC with them" \
               || bad "expected 2 components tracked, found $n"
 
 case_ "2 · the 36 devDependencies that died with them"
-printf '  %s26 @radix-ui primitives, plus cmdk, embla-carousel-react,\n' "$D" "$N"
-printf '        %sinput-otp, next-themes, react-day-picker, react-hook-form,\n' "$D" "$N"
-printf '        %srecharts, sonner, vaul and @hookform/resolvers — imported by\n' "$D" "$N"
-printf '        %snothing that survives. react-resizable-panels is KEPT: the\n' "$D" "$N"
+printf '  %s26 @radix-ui primitives, plus cmdk, embla-carousel-react,%s\n' "$D" "$N"
+printf '        %sinput-otp, next-themes, react-day-picker, react-hook-form,%s\n' "$D" "$N"
+printf '        %srecharts, sonner, vaul and @hookform/resolvers — imported by%s\n' "$D" "$N"
+printf '        %snothing that survives. react-resizable-panels is KEPT: the%s\n' "$D" "$N"
 printf '        %scatalog page imports it. Lockfile regenerated in its own commit.%s\n' "$D" "$N"
 d=$(python3 -c "import json;print(len(json.load(open('artifacts/chitra-docs/package.json'))['devDependencies']))")
 ok "docs devDependencies now $d (was 64)"
 
 case_ "3 · the three @replit/* Vite plugins"
 printf '  %sbefore%s  runtime-error-modal was in the PRODUCTION plugins list;\n' "$D" "$N"
-printf '        %scartographer and dev-banner loaded only under REPL_ID. None is\n' "$D" "$N"
-printf '        %sload-bearing for a static public build. S42 left its own one-liner\n' "$D" "$N"
+printf '        %scartographer and dev-banner loaded only under REPL_ID. None is%s\n' "$D" "$N"
+printf '        %sload-bearing for a static public build. S42 left its own one-liner%s\n' "$D" "$N"
 printf '        %stwo-thirds true because of these. Now it is true.%s\n' "$D" "$N"
 if ! grep -q "@replit" artifacts/chitra-docs/vite.config.ts; then ok "no @replit reference in the docs vite config"; else bad "a @replit reference survives"; fi
 
 case_ "4 · the lint script that pointed at nothing"
-printf '  %spackages/core ran `eslint src tests`. eslint is installed nowhere\n' "$D" "$N"
+printf '  %spackages/core ran `eslint src tests`. eslint is installed nowhere%s\n' "$D" "$N"
 printf '        %sand has no config — a script that can only fail. Removed.%s\n' "$D" "$N"
 if ! grep -q '"lint"' packages/core/package.json; then ok "no lint script in packages/core"; else bad "the lint script is back"; fi
 
 case_ "5 · Prettier — adopted, formatted, enforced (F43-1)"
 printf '  %sbefore%s  a root prettier devDependency, NO config file, and 31 core\n' "$D" "$N"
 printf '        %sfiles failing --check under bare defaults. Nothing in CI looked.%s\n' "$D" "$N"
-printf '        %sNow: .prettierrc + .prettierignore are checked in, the repo is\n' "$D" "$N"
+printf '        %sNow: .prettierrc + .prettierignore are checked in, the repo is%s\n' "$D" "$N"
 printf '        %sformatted, and a CI job runs format:check so it cannot rot back.%s\n' "$D" "$N"
 n=$(node_modules/.bin/prettier --list-different . 2>/dev/null | wc -l | tr -d ' ')
 [ "$n" = "0" ] && ok "0 files differ from Prettier style" || bad "$n files still differ"
@@ -73,10 +73,10 @@ printf '        %sthe LOCKED chart dirs are reformatted too — proven behaviour
 hdr "The counterfactual: S42's gate does not survive the S43 format"
 
 case_ "6 · S42's charts-untouched, run from its own gate body, goes RED"
-printf '  %sS42 asserted `git diff main...HEAD -- <LOCKED dirs>` was empty. S43\n' "$D" "$N"
-printf '        %sformats those dirs, so the check reports changed files and exits 1 —\n' "$D" "$N"
-printf '        %son a change that changes no behaviour. It also PASSED VACUOUSLY when\n' "$D" "$N"
-printf '        %smain did not resolve (N6). The S43 check replaces it: every changed\n' "$D" "$N"
+printf '  %sS42 asserted `git diff main...HEAD -- <LOCKED dirs>` was empty. S43%s\n' "$D" "$N"
+printf '        %sformats those dirs, so the check reports changed files and exits 1 —%s\n' "$D" "$N"
+printf '        %son a change that changes no behaviour. It also PASSED VACUOUSLY when%s\n' "$D" "$N"
+printf '        %smain did not resolve (N6). The S43 check replaces it: every changed%s\n' "$D" "$N"
 printf '        %sfile under those dirs must be EXACTLY the Prettier transform of main.%s\n' "$D" "$N"
 F=$(git diff --name-only main...HEAD -- packages/core/src/charts packages/core/src/renderers packages/core/src/themes | wc -l | tr -d ' ')
 ok "$F changed files under the LOCKED dirs — each proven to be the Prettier transform of main"
@@ -112,8 +112,8 @@ req_state() {
   esac
 }
 
-printf '  %-4s %-46s %s\n' "#" "REQUIREMENT" "STATE"
-printf '  %-4s %-46s %s\n' "----" "----------------------------------------------" "----------"
+printf '  %-4s %-46s %s%s\n' "#" "REQUIREMENT" "STATE"
+printf '  %-4s %-46s %s%s\n' "----" "----------------------------------------------" "----------"
 row() { printf '  %-4s %-46s %b\n' "$1" "$2" "$(req_state "${@:3}")"; }
 row 1  "53 unused ui components deleted (2 live)"     ui-components-shipped
 row 2  "36 dead devDeps gone; lockfile regenerated"     docs-dead-deps-gone lockfile-frozen-no-dead-importers
@@ -136,14 +136,14 @@ DEPS=$(python3 -c "import json;print(len(json.load(open('artifacts/chitra-docs/p
 GATES=$(grep -c '^run_check ' scripts/verify-session-43.sh)
 RAN=$(ls -1 "$LOG"/*.log 2>/dev/null | wc -l | tr -d ' ')
 DEL=$(git diff --diff-filter=D --name-only main...HEAD 2>/dev/null | wc -l | tr -d ' ')
-printf '  %-34s %s\n' "core suite"              "($TESTS tests in $TFILES files)"
-printf '  %-34s %s\n' "docs ui components"      "55 -> $UI"
-printf '  %-34s %s\n' "docs devDependencies"    "64 -> $DEPS"
-printf '  %-34s %s\n' "tracked files deleted"   "$DEL (53 components + the rest)"
-printf '  %-34s %s\n' "verify checks defined"   "$GATES"
-printf '  %-34s %s\n' "verify checks with a log" "$RAN"
-printf '  %-34s %s\n' "prettier: files off-style" "$(node_modules/.bin/prettier --list-different . 2>/dev/null | wc -l | tr -d ' ')"
-printf '  %-34s %s\n' "commits"                 "$(git rev-list --count main..HEAD)"
+printf '  %-34s %s%s\n' "core suite"              "($TESTS tests in $TFILES files)"
+printf '  %-34s %s%s\n' "docs ui components"      "55 -> $UI"
+printf '  %-34s %s%s\n' "docs devDependencies"    "64 -> $DEPS"
+printf '  %-34s %s%s\n' "tracked files deleted"   "$DEL files (the unused components)"
+printf '  %-34s %s%s\n' "verify checks defined"   "$GATES"
+printf '  %-34s %s%s\n' "verify checks with a log" "$RAN"
+printf '  %-34s %s%s\n' "prettier: files off-style" "$(node_modules/.bin/prettier --list-different . 2>/dev/null | wc -l | tr -d ' ')"
+printf '  %-34s %s%s\n' "commits"                 "$(git rev-list --count main..HEAD)"
 
 printf '\n%s%sNot built here — named, so it cannot be smuggled in:%s\n' "$B" "$Y" "$N"
 printf '  %sBatch 4 (S44)%s  OSS templates, coverage job, engines — and founder decisions D1–D6\n' "$D" "$N"
