@@ -102,7 +102,8 @@ on npm, and the repo around it is being made fit to publish.
 - **Nothing.** S41 is **complete**: 13 requirements, 12 SHIPPED and 1 PARTIAL (req 8 —
   `AGENTS.md`/`CLAUDE.md` still point into `.ai/`, which is founder decision **D1** that the
   contract explicitly does not make). 32 commits, 34 tracked files, 0 files under the LOCKED
-  chart code, `verify-session-41.sh` **24/24**, `verify-session-39.sh` 43/43, 453/453 tests.
+  chart code. `verify-session-39.sh` is 43/43. The S41 gate is 24 checks, all green, and
+  the core suite is green at 453.
   Fidelity map: `sessions/session-41-summary.md`. Independent verdict over **six** passes,
   **ACCEPT**: `sessions/session-41-review.md` — it rejected the delivery twice, and the
   findings (a check that provably could not fail, a guard scoped to its author's habits,

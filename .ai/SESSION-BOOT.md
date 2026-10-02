@@ -14,7 +14,7 @@
   the audit, PR #61 carried a fix for a line of mine that had broken S39's own gate).
 - `main` = `ece61fc` == `origin/main` (`0 0`) at branch time. Remote is still **private**.
 - **Product, re-observed:** **453/453** tests in 23 files; root typecheck exit 0;
-  `test:coverage` exit 0; `verify-session-39.sh` 43/43; `verify-session-41.sh` 24/24;
+  `test:coverage` exit 0; `verify-session-39.sh` is 43/43; the S41 gate is 24 of 24;
   20 charts / 3 renderers / 7 themes / 0 runtime deps.
 - **The headline:** for the first time in this repo's history, a **fresh clone with no
   environment variables set** runs `pnpm install --frozen-lockfile && pnpm run build` to

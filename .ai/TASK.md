@@ -9,8 +9,9 @@
 - **Delivered:** all 13 numbered requirements, 12 SHIPPED and 1 PARTIAL (req 8 —
   `AGENTS.md`/`CLAUDE.md` still point into `.ai/`, which is founder decision **D1** that
   the contract explicitly does not make). 32 commits, 34 tracked files, **0 files touched
-  under the LOCKED chart code**. `verify-session-41.sh` **24/24**, each check with a
-  demonstrated counterfactual; **453/453** tests; `verify-session-39.sh` 43/43.
+  under the LOCKED chart code**. The S41 gate is 24/24, each check with a demonstrated
+  counterfactual; the core suite is green; S39's gate is 43/43. The package is
+  **`@ifelse.codes/chitra@0.3.0`**, live on npm.
 - **The three that were live, not theoretical:** the docs site at `chitra.iifelse.com` was
   serving the Replit placeholder as its meta description; `VERSION` shipped to npm as
   `0.1.0` against a `0.3.0` manifest; and a fresh clone could not build at all.
