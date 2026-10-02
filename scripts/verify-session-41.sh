@@ -205,11 +205,17 @@ run_check "ai-files-describe-s41" bash -c '
   done
   echo ".ai/ describes S41 on this branch; S42-S44 scheduled"'
 
-# The canonical-count trap. `452` was displayed in nine places and asserted in
-# fifteen files; this session moved it to 453 by adding one real test, and the
-# count had to be rewritten by hand in every one of them. A stale count is the
-# same defect as VERSION shipping as 0.1.0: a public claim the repo no longer
-# satisfies. So the count is DERIVED here from the suite, never restated.
+# The canonical-count trap. The count is displayed in nine places and asserted as a
+# literal in fifteen tracked files once the dead pre-rename verify scripts are
+# counted; this session moved it 452 -> 453 by adding one real test and had to
+# rewrite the display sites by hand. A stale count is the same defect as VERSION
+# shipping as 0.1.0: a public claim the repo no longer satisfies. So the count is
+# DERIVED here from the suite, never restated.
+#
+# Honest limit, stated because the cold review caught this check overclaiming: it
+# guards the seven sites below, not "everywhere it is displayed". A display added
+# later must be added here too. Proven failable — copy the sites to a temp dir,
+# flip the number, and every clause fires.
 run_check "test-count-propagated" bash -c '
   set -e
   n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 \
@@ -221,9 +227,10 @@ run_check "test-count-propagated" bash -c '
   grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md      || bad="$bad KNOWLEDGE-header"
   grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md  || bad="$bad ROADMAP-guardrail"
   grep -q "$n/$n" .ai/SESSION-BOOT.md               || bad="$bad SESSION-BOOT"
+  grep -q "test ($n)" .github/workflows/ci.yml      || bad="$bad ci-header-comment"
   grep -q "Tests +$n passed" scripts/verify-session-39.sh || bad="$bad verify-39"
   [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
-  echo "canonical count $n, consistent everywhere it is displayed"'
+  echo "canonical count $n, consistent across the 7 guarded sites"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 

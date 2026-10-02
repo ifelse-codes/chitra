@@ -78,14 +78,15 @@ proves discipline, never fidelity.
 
 ### Cross-cutting requirement — the canonical test count
 
-The canonical test count is **displayed in nine places** — `README.md:14` (badge),
-`App.tsx:570`, `replit.md`, and the permanent-facts header, guardrail and "next steps"
-lines of `.ai/KNOWLEDGE.md`, `.ai/ROADMAP.md`, `.ai/SESSION-BOOT.md`,
-`.ai/CONTINUATION-PROMPT.md` — and **asserted as a literal in 15 tracked files** once the
-historical `verify-session-*.sh` / `demo-session-*.sh` are counted. (An earlier draft of
-this contract claimed "12 places"; the cold review counted and it was wrong in both
-directions. Corrected here.) This is exactly the trap that cost `main` commit `ece61fc`
-("a line of mine broke S39's `ai-docs-quote-real-score` gate").
+The canonical test count is **displayed in nine places** — `README.md` (badge),
+`App.tsx` (hero stat), `replit.md`, the `.github/workflows/ci.yml` header comment, and
+the permanent-facts header, guardrail and "next steps" lines of `.ai/KNOWLEDGE.md`,
+`.ai/ROADMAP.md`, `.ai/SESSION-BOOT.md`, `.ai/CONTINUATION-PROMPT.md` — and **asserted as
+a literal in 15 tracked files** once the historical `verify-session-*.sh` /
+`demo-session-*.sh` are counted. (An earlier draft claimed "12 places"; the cold review
+counted and it was wrong in both directions. Corrected.) This is exactly the trap that
+cost `main` commit `ece61fc` ("a line of mine broke S39's `ai-docs-quote-real-score`
+gate").
 
 - **Preferred:** add requirement 2's drift assertion **inside an existing test file**, so
   no new file appears. Note that adding an `it()` still moves the count — the count is
@@ -95,8 +96,11 @@ directions. Corrected here.) This is exactly the trap that cost `main` commit `e
   dated sections of `KNOWLEDGE.md`, or the dead pre-rename verify scripts is rewritten.
 - **A guard, not a convention.** `verify-session-41.sh#test-count-propagated` derives the
   count from the suite run and fails if the badge, the docs hero stat, `KNOWLEDGE.md`, the
-  `ROADMAP.md` guardrail, `SESSION-BOOT.md` or `verify-session-39.sh` disagree. Restating
-  a number in nine files and hoping is how this bit twice.
+  `ROADMAP.md` guardrail, `SESSION-BOOT.md`, the `ci.yml` header comment or
+  `verify-session-39.sh` disagree. Restating a number in nine files and hoping is how this
+  bit twice. **The guard covers those seven sites, not every display that may be added
+  later** — a new one has to be added to the check, and that limit is written into the
+  check's own comment rather than papered over.
 - Either way: **`bash scripts/verify-session-39.sh` must be 43/43 on the branch tip.**
 
 ### Also landing with this contract (evidence, not scope)

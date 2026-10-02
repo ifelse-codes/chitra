@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # S41 demo — what a visitor and a stranger actually get, before and after.
-# Cumulative: the numbers that were already true (452 tests, 20 charts, 0 deps)
+# Cumulative: the numbers that were already true (453 tests, 20 charts, 0 deps)
 # are shown as context, not claimed as new.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
