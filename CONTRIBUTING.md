@@ -136,10 +136,14 @@ CI runs `node scripts/sync-version.mjs --check` and fails if you forget. Do not 
 - No runtime dependencies
 - Every exported function must have a corresponding test
 - Coverage thresholds are enforced by `vitest.config.ts` and run in CI:
-  statements 90, branches 85, functions 85, lines 90. Measured today:
-  **96.11 / 87.63 / 86.28 / 96.11**. `test:coverage` exits non-zero below the threshold,
-  and `scripts/verify-session-41.sh#contributing-coverage-numbers-real` fails if the
-  numbers published here stop matching what coverage measures.
+  statements 90, branches 85, functions 85, lines 90. Measured:
+  **96.11 / 87.63–87.64 / 86.28 / 96.11**. `test:coverage` exits non-zero below the
+  threshold, and `scripts/verify-session-41.sh#contributing-coverage-numbers-real` fails if
+  the figures published here stop matching what coverage measures.
+  *Branch coverage is genuinely bimodal at ±0.01* — eight identical runs split 4–4
+  between 87.63 and 87.64, with no TTY, environment, clock or random dependence anywhere
+  in `src/`. It is v8's collection, not the code. The check allows one hundredth; publish a
+  single value and the gate is a coin flip.
 - Use `const` over `let` wherever possible
 - Name renderers, charts, and utilities consistently
 

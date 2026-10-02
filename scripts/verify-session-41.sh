@@ -80,9 +80,11 @@ run_check "contributing-claims-true" bash -c '
   ! grep -q "experimental-specifier-resolution" $f || { echo "dead run command"; exit 1; }
   grep -q "pnpm example" $f || { echo "working run command missing"; exit 1; }
   grep -q "toContent()" $f || { echo "ChartResult template still omits toContent()"; exit 1; }
-  grep -qE "9[0-9]\.[0-9]+ / 8[0-9]\.[0-9]+ / 8[0-9]\.[0-9]+ / 9[0-9]\.[0-9]+" $f \
-    || { echo "measured coverage numbers not published"; exit 1; }
   ! grep -q ">90% test coverage" $f || { echo "unmeasured >90% claim still there"; exit 1; }
+  # The coverage figures themselves are NOT checked here. This check used to
+  # pattern-match four decimals, which was a weak proxy that went stale the moment
+  # the figures became a range. contributing-coverage-numbers-real below is the real
+  # check: it measures and compares.
   echo "CONTRIBUTING: 5 claims reconciled"'
 
 # req 6 — replit.md must agree with ci.yml, which is the thing that actually runs.
@@ -277,38 +279,60 @@ scripts/verify-session-39.sh"
   # what the clause checks.
   echo "canonical count $n: 11 declared sites agree, and no other tracked file outside the 4 documented exemptions displays it"'
 
-# CONTRIBUTING publishes four coverage percentages. Those are the last
-# hand-written public numbers in the repo, and this session's whole thesis is that
-# hand-written numbers rot — the review flagged them as the remaining place the
-# same rot could hide. So they are computed and compared, not pattern-matched.
+# CONTRIBUTING publishes four coverage figures. Those are the last hand-written
+# public numbers in the repo, and this session's whole thesis is that hand-written
+# numbers rot — the review flagged them as the remaining place the same rot could
+# hide. So they are computed and compared, not pattern-matched.
 #
-# Honest note on stability: the measured row was identical across five consecutive
-# runs, but one earlier run of this same check read branch coverage 0.01 higher.
-# v8 coverage on a library whose layout is width-dependent is not something to
-# claim is bit-stable. If this ever fails on branch coverage by exactly ±0.01,
-# re-run once before treating it as rot.
+# Honest note on stability, and it changed the design: branch coverage is genuinely
+# BIMODAL at ±0.01. Eight identical runs split 4–4 between 87.63 and 87.64, and
+# `src/` contains no TTY, environment, clock or random dependence that could explain
+# it — it is v8's collection, not the code. So exact equality would make this gate a
+# coin flip, and a gate that flips is worse than no gate. It compares to one
+# hundredth, and CONTRIBUTING publishes the range. The first version of this check
+# demanded exact equality and "caught" a drift that was one of the two real readings.
 #
-# The check earned its place on its first run: it caught branch coverage at 87.63
-# in CONTRIBUTING's 87.64, a drift introduced two commits earlier by the test this
-# same session added.
+# The check still earns its place: it fails on gross rot, which is the rot that
+# actually happens. Proven by publishing 96.11 / 87.00 / 86.28 / 96.11.
 run_check "contributing-coverage-numbers-real" bash -c '
   set -e
   out=$(pnpm --filter @ifelse.codes/chitra run test:coverage 2>&1)
   row=$(echo "$out" | grep -E "^All files" | head -1)
   [ -n "$row" ] || { echo "no All files row in the coverage output"; exit 1; }
-  # Take everything after the first "|" and read the four numeric cells. Parsing by
-  # field position was wrong once already (the row is "All files | a | b | c | d").
-  nums=$(echo "$row" | sed "s/^[^|]*|//" | tr "|" "\n" | tr -d " " | grep -E "^[0-9]+(\\.[0-9]+)?$" | head -4 | tr "\n" " ")
-  want=$(echo $nums)   # word-split into exactly four
-  set -- $want
+  # Read the four numeric cells after the first "|". Parsing by field position was
+  # wrong once already (the row is "All files | a | b | c | d").
+  nums=$(echo "$row" | sed "s/^[^|]*|//" | tr "|" "\n" | tr -d " " \
+         | grep -E "^[0-9]+(\\.[0-9]+)?$" | head -4 | tr "\n" " ")
+  set -- $nums
   [ "$#" -eq 4 ] || { echo "could not read four coverage numbers from: $row"; exit 1; }
-  got="$1 / $2 / $3 / $4"
-  grep -qF "$got" CONTRIBUTING.md || {
-    echo "CONTRIBUTING publishes different numbers than coverage measures."
-    echo "  measured: $got"
-    grep -nE "[0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2} / [0-9]{2}\.[0-9]{2}" CONTRIBUTING.md
-    exit 1; }
-  echo "CONTRIBUTING publishes the measured coverage ($got)"'
+
+  # What CONTRIBUTING publishes: four figures, each optionally a range "a-b".
+  # NOTE: the measured values must be captured into named variables BEFORE the
+  # published ones overwrite "$@" — the first version of this check did it the
+  # other way round, so it compared each published figure against ITSELF and
+  # passed no matter what was written. Found by running the counterfactual.
+  set -- $nums
+  e1=$1; e2=$2; e3=$3; e4=$4
+  pub=$(grep -oE "[0-9]{2}\\.[0-9]{2}(–[0-9]{2}\\.[0-9]{2})?" CONTRIBUTING.md | head -4 | tr "\n" " ")
+  set -- $pub
+  [ "$#" -eq 4 ] || { echo "could not read four published figures from CONTRIBUTING.md"; exit 1; }
+
+  i=0
+  for p in "$@"; do
+    i=$((i+1))
+    lo="${p%%–*}"; hi="${p##*–}"
+    m=$(eval echo \$e$i)
+    ok=1
+    for v in "$lo" "$hi"; do
+      d=$(awk -v a="$v" -v b="$m" "BEGIN{d=a-b; if(d<0)d=-d; printf \"%.4f\", d}")
+      awk -v d="$d" "BEGIN{exit !(d <= 0.0101)}" || ok=0
+    done
+    if [ "$ok" -ne 1 ]; then
+      echo "CONTRIBUTING figure $i ($p) does not match the measured ${m}."
+      exit 1
+    fi
+  done
+  echo "CONTRIBUTING publishes figures within one hundredth of measured ($nums)"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
