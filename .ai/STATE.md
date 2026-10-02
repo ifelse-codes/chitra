@@ -10,9 +10,12 @@ on npm, and the repo around it is being made fit to publish.
 
 ## What Currently Works (observed, not claimed)
 - **The docs app ships only the components it uses.** 55 shadcn components seeded with the
-  Replit scaffold, **12 reachable**; the other **43** (~5,000 LOC) are deleted, along with
-  the **30 devDependencies** that died with them. `ui-components-shipped` computes the live
-  set as the transitive closure of what the docs app imports — it does not hardcode the 12.
+  Replit scaffold; the app reaches **2** — `card` (via `not-found.tsx`) and `toast` (via
+  `use-toast.ts`). The other **53** (~6,000 LOC) are deleted, along with the **36
+  devDependencies** that died with them. `ui-components-shipped` computes the live set as the
+  transitive closure of what the docs app imports — it does not hardcode the 2. **The scope
+  numbers were corrected in-session: the roadmap said 43/12, but that came from a grep whose
+  `-o` flag stripped paths, so intra-ui imports counted as usage. The truth is 53/2.**
 - **The three `@replit/*` Vite plugins are gone** from `vite.config.ts`, the docs manifest,
   and the workspace catalog. `runtime-error-modal` was in the **production** plugins list;
   with all three removed, S42's line — *the repo ships the library, not the scaffold it came

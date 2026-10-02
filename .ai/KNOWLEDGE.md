@@ -12,7 +12,7 @@
 - Around the lib there is **one** app: `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4
   + shadcn/ui docs/marketing site (renders chitra output; `src/data/charts.ts`,
   `src/data/ansi-charts.json`). It is the **live** surface at `chitra.iifelse.com`. Since S43 it
-  ships **12** shadcn components (of 55) — only the ones the app renders.
+  ships **2** shadcn components (of 55) — only the ones the app renders.
 - **Deleted in S42 (2026-10-02), permanently from the tree** — the rest of the Replit-scaffolded
   full-stack the product was extracted from. `main` retains every file at `4893683`:
   `artifacts/api-server/` (Node API server, `/healthz` only), `artifacts/mockup-sandbox/` (Vite
@@ -21,8 +21,8 @@
   `attached_assets/`. None was imported by anything. **Permanent fact, not a session note:** the
   generated-client and schema layer was never wired to the docs app, and `tsconfig.base.json` —
   not `tsconfig.json` — is what the remaining packages extend.
-- **Deleted in S43 (2026-10-03): the dead weight inside the docs app.** 43 unused shadcn
-  components (`artifacts/chitra-docs/src/components/ui/`), the 30 devDependencies that served
+- **Deleted in S43 (2026-10-03): the dead weight inside the docs app.** 53 unused shadcn
+  components (`artifacts/chitra-docs/src/components/ui/`), the 36 devDependencies that served
   only them, the three `@replit/*` Vite plugins (config, manifest, and workspace catalog), and
   the `lint` script in `packages/core`. `main` (S42's merge `49e1ee2`) retains all of it.
 
@@ -353,11 +353,16 @@
 ## S43 extension — docs weight, and Prettier adopted (2026-10-03)
 
 - **The docs app ships only what it renders.** `artifacts/chitra-docs/src/components/ui/` had
-  **55** shadcn components seeded with the Replit scaffold; the app reaches **12**
-  (`button card dialog input label separator sheet skeleton textarea toast toggle tooltip`).
-  The live set is the transitive closure of everything referenced **outside** the ui folder —
+  **55** shadcn components seeded with the Replit scaffold; the app reaches **2** — only
+  `pages/not-found.tsx` uses `card` and `hooks/use-toast.ts` uses `toast`. The live set is the
+  transitive closure of everything referenced **outside** the ui folder —
   `ui-components-shipped` computes it; do **not** hardcode it. `react-resizable-panels` is used
-  by `CatalogPage.tsx` and was kept while 30 other devDeps went.
+  by `CatalogPage.tsx` and was kept while 39 other devDeps went (64 → 25).
+- **The audit bug that produced "43":** a `grep -o` prints only the match, so the
+  `grep -v "src/components/ui/"` meant to exclude intra-ui references filtered nothing, and one
+  ui component importing another counted as usage. The real external referencers are `card` and
+  `toast`; the true unused count is **53**, not 43. **When excluding by directory, exclude by
+  PATH, not by match text.**
 - **Prettier is real now (F43-1: format + adopt + enforce, not delete).** Before S43 there was a
   root `prettier` devDependency, **no config file**, 31 core files failing `--check` under bare
   defaults, and nothing in CI looking. Now: `.prettierrc` (printWidth 100, `trailingComma: es5`)
