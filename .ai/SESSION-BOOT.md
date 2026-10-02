@@ -13,6 +13,7 @@
 - `.ai/SESSION` = 41 at boot, now 42. S41 was **merged** when this session started:
   PR #62 carried the contract, the deletions and the S41 gate.
 - `main` = `4893683` == `origin/main` at branch time. Remote is still **private**.
+  The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm.
 - **Product, re-observed at S42 boot:** **453/453** tests in 23 files; root typecheck
   exit 0; `test:coverage` exit 0; `verify-session-39.sh` 43/43; `pnpm example` runs.
   20 charts / 3 renderers / 7 themes / 0 runtime deps.

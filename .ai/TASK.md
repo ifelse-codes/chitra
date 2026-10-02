@@ -6,7 +6,8 @@
 - **Contract:** `prompts/42-task-dead-weight.md` — committed at HEAD, which is what
   `review-inputs-attested` hashes. S40 failed that gate because a session cannot
   commit a contract it never wrote; this one could, and did.
-- **Scope:** 10 numbered requirements. Delete four dead trees (103 tracked files)
+- **Scope:** 10 numbered requirements, against **`@ifelse.codes/chitra@0.3.0`** live on npm.
+  Delete four dead trees (103 tracked files)
   and six dead scripts; cut the 9-file chain that references them; regenerate the
   lockfile; **port** the S41 gate rather than copy it; re-prove the product from
   live facts; browser QA + green CI; re-sync `.ai/`; fidelity map + independent

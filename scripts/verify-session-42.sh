@@ -298,11 +298,23 @@ run_check "ai-files-describe-s42" bash -c '
 run_check "test-count-propagated" bash -c '
   n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+")
   [ -n "$n" ] || { echo "could not derive the count from the suite"; exit 1; }
+  # PORTED from verify-session-41.sh with demo-41 -> demo-42. The first version
+  # of this port INVENTED three idioms instead of copying them: it grepped
+  # README and CONTRIBUTING for "(453 tests" and App.tsx for "**453 green**".
+  # None of those three strings exists anywhere in this repo, so the check
+  # failed on three files nobody had touched. The real idioms are a README
+  # badge, a stat-num span, and a bolded figure PER FILE -- and a per-file idiom
+  # is precisely the thing that cannot be guessed. Four guards S41 had were also
+  # missing here (replit, ci.yml, KNOWLEDGE header, ROADMAP guardrail); a port
+  # that quietly drops checks is not a port.
   bad=""
-  grep -q "($n tests" README.md                             || bad="$bad README"
-  grep -q "($n tests" CONTRIBUTING.md                        || bad="$bad CONTRIBUTING"
-  grep -q "\*\*$n green\*\*" '"$DOCS"'/src/App.tsx         || bad="$bad App.tsx"
-  grep -q "\*\*$n green\*\*" .ai/CONTINUATION-PROMPT.md     || bad="$bad CONTINUATION-PROMPT"
+  grep -q "tests-$n%20passing" README.md                     || bad="$bad README-badge"
+  grep -q "stat-num\">$n<" artifacts/chitra-docs/src/App.tsx || bad="$bad docs-hero"
+  grep -q "($n tests)" replit.md                             || bad="$bad replit"
+  grep -q "test ($n)" .github/workflows/ci.yml               || bad="$bad ci-header-comment"
+  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md               || bad="$bad KNOWLEDGE-header"
+  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md           || bad="$bad ROADMAP-guardrail"
+  grep -q "\*\*$n green\*\*" .ai/CONTINUATION-PROMPT.md      || bad="$bad CONTINUATION-PROMPT"
   grep -q "$n/$n" .ai/SESSION-BOOT.md                        || bad="$bad SESSION-BOOT"
   grep -q "$n/$n" .ai/STATE.md                               || bad="$bad STATE"
   grep -q "($n tests" scripts/demo-session-42.sh             || bad="$bad demo-42"
@@ -361,15 +373,22 @@ run_check "dead-trees-gone" bash -c "
 
 # req 2 — nothing that builds, resolves or publishes names a deleted tree.
 # Scoped to build/config/script files on purpose. sessions/, prompts/ and the
-# two S41 audit documents are FROZEN: they record what past sessions found, and
-# .ai/ is asserted separately below, by ai-names-no-deleted-tree, because .ai/
-# is a live file this session has not yet rewritten.
+# two S41 audit documents are FROZEN: they record what past sessions found.
+# The four excluded scripts are the two gates and the two demos that must NAME
+# a deleted tree to do their job -- S41's gate hard-codes the path (that is the
+# coupling this session exists to prove), and the demos show before/after.
+# .ai/ is asserted separately by ai-names-no-deleted-tree, which carries its own
+# declared list.
+#
+# The first version of this list omitted demo-session-42.sh, which the gate then
+# flagged on 12 lines. The demo legitimately names every deleted tree; the
+# exclusion was the bug, not the demo.
 run_check "no-live-ref-to-dead-trees" bash -c "
   hits=\$(git grep -nE 'mockup-sandbox|api-server|@workspace/(db|api-)|attached_assets|@assets' -- . \
     ':!sessions' ':!prompts' ':!.ai' \
     ':!code-cleanup-plan-session-41.md' ':!independent-audit-RESULT.md' \
     ':!scripts/verify-session-41.sh' ':!scripts/demo-session-41.sh' \
-    ':!scripts/verify-session-42.sh' || true)
+    ':!scripts/verify-session-42.sh' ':!scripts/demo-session-42.sh' || true)
   [ -z \"\$hits\" ] || { echo \"\$hits\"; exit 1; }
   echo \"no build, config or script file references a deleted tree\""
 
@@ -470,21 +489,40 @@ run_check "s41-gate-verbatim-goes-red" s41_gate_goes_red
 # ═══════════════════════════════════════════════ S42 · the .ai/ truth (req 9)
 
 run_check "ai-names-no-deleted-tree" bash -c '
-  # KNOWLEDGE.md describes what chitra is AROUND, in the present tense. After
-  # this session those lines are false, and a knowledge base that describes
-  # deleted trees is the same defect S41 fixed in the npm README.
-  for pair in "api-server" "mockup-sandbox" "api-client-react" "api-zod" "api-spec" "attached_assets"; do
-    for f in .ai/KNOWLEDGE.md .ai/STATE.md .ai/TASK.md .ai/ROADMAP.md .ai/SESSION-BOOT.md; do
-      [ -f "$f" ] || continue
-      if grep -qE "(^|[^-])$pair" "$f"; then
-        # A mention is only acceptable when the line also says it is gone.
-        if grep -qE "$pair.*(deleted|gone|Batch 2|S42|no longer)" "$f"; then :; else
-          echo "$f describes $pair as present:"; grep -nE "$pair" "$f" | head -3; exit 1
-        fi
-      fi
-    done
-  done
-  echo ".ai/ does not describe a deleted tree as present"'
+  # The first version of this check tried to judge semantics: for each mention
+  # it required a qualifier (deleted|gone|Batch 2|S42|no longer) ON THE SAME
+  # LINE. It failed on STATE.md own bullet, because the qualifier sits two
+  # lines below the mention. A check that demands the right word appear in the
+  # right PLACE is a check on prose, and the fix would have been to reword
+  # STATE.md until it passed, which is backwards.
+  #
+  # So it asserts what is mechanically true: the SET of .ai/ files that mention
+  # a dead tree, against a declared list. A new mention site fails the gate and
+  # a human decides whether it is history or a live claim. Same pattern as
+  # test-count-propagated, which the S41 review forced into existence for the
+  # same reason.
+  tok="mockup-sandbox|api-server|api-client-react|api-zod|api-spec|attached_assets"
+  found=$(git grep -lE "$tok" -- .ai 2>/dev/null \
+          | grep -vE "^.ai/(GT-REMEDIATIONS|handoffs)/" \
+          | LC_ALL=C sort)
+  expected=".ai/KNOWLEDGE.md
+.ai/ROADMAP.md
+.ai/SESSION-BOOT.md
+.ai/STATE.md
+.ai/TASK.md"
+  if [ "$found" != "$expected" ]; then
+    echo "the set of .ai/ files mentioning a deleted tree changed."
+    diff <(echo "$expected") <(echo "$found") || true
+    echo "  add the file to this list with a reason, or remove the mention."
+    exit 1
+  fi
+  # And the permanent-facts file must actually record the deletion, so a reader
+  # of KNOWLEDGE.md is not left thinking the trees are still there.
+  grep -q "Deleted in S42" .ai/KNOWLEDGE.md \
+    || { echo "KNOWLEDGE.md does not record the S42 deletion"; exit 1; }
+  grep -q "4893683" .ai/KNOWLEDGE.md \
+    || { echo "KNOWLEDGE.md does not say where the files still live"; exit 1; }
+  echo ".ai/: 5 declared mention sites, and KNOWLEDGE.md records the deletion"'
 
 # ═══════════════════════════════════════════════ S42 · the contract (req 10)
 
