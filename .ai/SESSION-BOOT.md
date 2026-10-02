@@ -36,9 +36,17 @@
   (~5,000 LOC) and the dependencies that die with them, then the Prettier config
   (31 core files currently fail `--check`) and the `lint` script, which points at
   an eslint that is not installed and has no config.
+- ⚠️ **S43 also inherits EIGHT owned findings from S42's cold review** — each with a
+  done-condition that must go red — plus the three `@replit/*` plugins still in the
+  docs vite config, which make S42's own one-liner only two-thirds true. The table is
+  `.ai/ROADMAP.md` § "S42 residual findings — OWNED, with a done-condition each".
+  **Read it first: seven of the eight live in `artifacts/chitra-docs`, which is
+  exactly what S43 is about.** Do **N5** first — `browser-qa-catalog-pages` is
+  order-fragile and goes red for the *wrong reason* in a clean clone.
 - Then **S44** (OSS polish + founder decisions D1–D6), after which the public flip
   resolves the README clone URL, npm `repository.url` / `homepage`, and npm
-  provenance in one move.
+  provenance in one move. S44 also owns two S42 findings: the contract-rewrite
+  freshness hole, and the ~60-minute gate.
 - **The two decisions that block the flip, both the founder's:** **D1** — how much
   internal process goes public (~146 files; options B and C break
   `check_session_coverage` / `check_task_ref` unless the gates are rewritten first)

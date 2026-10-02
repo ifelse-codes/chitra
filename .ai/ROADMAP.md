@@ -9,6 +9,52 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S03** ✅ — Polish docs site.
 - **S04** ✅ — README / getting-started.
 
+## S42 residual findings — OWNED, with a done-condition each
+
+`sessions/session-42-review.md` pass 2 returned **ACCEPT** with **nine** findings it could not close
+in-session, plus three disclosed limits. *Knowing they exist is not the same as fixing them*, so each
+one below has an **owner session** and a **done-condition that can be checked** — because "fixed" with
+no counterfactual is the exact defect this repo keeps shipping. Source of truth:
+`sessions/session-42-summary.md`.
+
+### → S43 (cleanup Batch 3: docs weight) — eight items, all code-level
+
+S43 is already about `artifacts/chitra-docs`, which is where seven of these live. Doing them in the
+session that touches the docs app is far cheaper than deferring them again.
+
+| # | Finding | What "fixed" means — the counterfactual that must go red |
+|---|---|---|
+| **N5** | `browser-qa-catalog-pages` is **order-fragile**: it only passes because checks #2 and #4 happened to build core first. In a clean clone it goes **red for the wrong reason** (`Failed to resolve @ifelse.codes/chitra`) | Build core inside the check (as `ci.yml` and `release.yml` already do), then run it in a **fresh clone with no prior build** and get 20 pages + exit 0 |
+| **N7** | Its coverage claim is false: `qa-catalog.mjs` **hardcodes `CHART_IDS`** and the check asserts only `>= 20`. A 21st live catalog page is invisible | Add a page to the docs catalog; the check must fail naming it |
+| **N2** | `summary.txt` is written **after** the last check runs, so during a real gate run the demo prints **10 × NOT PROVEN** — the fix for a finding re-created its cause one layer down | Run the demo mid-gate and see real PASS/FAIL, not NOT PROVEN |
+| **N6** | `charts-untouched` passes **vacuously** when `main` does not resolve (`fatal: bad revision` → PASS). It bit the reviewer's own clone | Break the base ref and the check must go **red**, not pass |
+| **N3** | The handoff carries **two wrong hand-written check counts** (33 and 34; truth 35) — the same rot as the canonical test count, in the commit meant to kill it | The number is **derived**, and a stale display fails the gate |
+| **N4** | `replit-globs-match-workspace`'s success line misreports its own globs: `set +f` restores globbing *before* `$(echo $globs)`, so the log reads `artifacts/chitra-docs packages/core scripts` | The success message prints the three real glob strings |
+| **N8** | That check's **claimed counterfactual is false** — re-adding `- lib/*` goes green, because clause (a) is satisfied by replit.md's *historical* mention | Either make clause (b) independent of (a), or delete the claim. Re-adding `- lib/*` must go red |
+| **N9** | `dead-scripts-gone` clause (iv) cannot detect the condition its comment names — `pnpm -r --if-present run typecheck` exits 0 whether it ran or skipped | Delete `- scripts` from the workspace globs and the clause must go red |
+
+**Also newly in S43's scope, and was not in its original wording:** the one surviving
+`artifacts/chitra-docs/vite.config.ts` still imports **`@replit/vite-plugin-runtime-error-modal`,
+`@replit/vite-plugin-cartographer` and `@replit/vite-plugin-dev-banner`**, and `chitra-docs`
+still carries all three as devDependencies. The S42 contract's one-liner — *"the repo ships the
+library, not the scaffold it came from"* — is **two-thirds true** because of this, and S43 is
+precisely the session that deletes unused docs weight. **Determine whether they are load-bearing;
+if not, they go, and the one-liner becomes true.**
+
+### → S44 (OSS polish + founder decisions D1–D6) — two items, both governance
+
+| # | Finding | Why S44 |
+|---|---|---|
+| **N1** | **The contract was rewritten between review passes**, so the attestation's freshness guarantee no longer covers this session. `prompts/` is outside the attested *diff*, but the contract is the attested *preimage*'s first half — so documenting a required-crew skip **invalidates the acceptance documenting it**. Two closeout checks in conflict | Needs a rule plus almost certainly a change to `verify-closeout.sh` / `reviewer/SKILL.md`. That is governance change work and belongs beside **D2**, not inside a cleanup session |
+| **§4.9** | The gate now costs **~60 minutes** — it transitively runs S41's entire 24-check gate, the suite ~5×, and two clone installs, now plus a docs build and a Playwright run. Measured by the reviewer | It is a **growing** cost on the repo's load-bearing artifact. Price it against the sessions it slows; a `VAJRA_SKIP_*`-style opt-out for the counterfactual half is the obvious candidate |
+
+### → recorded, deliberately NOT scheduled
+
+| Item | Why it stays open |
+|---|---|
+| §4.3 — `ai-names-no-deleted-tree` is a membership check and **cannot catch a lie inside a listed file** | The reviewer judged it an **acceptable disclosed limit**, and I agree: the alternative it rejected was a prose-coupled check this repo has refused repeatedly. Its intended failure mode is demonstrated — a new mention site turns the gate red and forces a human. Revisit only if it costs something real |
+| `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, **and now S42**. Three waivers is a decision, four is a burial. It is **S44 decision work beside D2** |
+
 ## Backlog (not yet scheduled)
 - 🔄 **Session 42 (S42) — cleanup Batch 2: dead weight** (branch
   `session-42-dead-weight`, contract `prompts/42-task-dead-weight.md`). Delete
