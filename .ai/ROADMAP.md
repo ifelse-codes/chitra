@@ -10,6 +10,40 @@ zero-dep, AI-first, delightful. (Seeded S00; sequenced S01, 2026-07-02.)
 - **S04** ✅ — README / getting-started.
 
 ## Backlog (not yet scheduled)
+- 🔄 **Session 41 (S41) — cleanup Batch 1: the public face tells the truth, and a
+  stranger can build it** (branch `session-41-repo-cleanup`, contract
+  `prompts/41-task-repo-cleanup.md`). 13 requirements in three groups: what a visitor
+  or consumer sees (the live docs meta placeholder, `VERSION` shipping as `0.1.0`,
+  the internal design log in the npm README, five false claims in CONTRIBUTING, the
+  `replit.md` Node facts, the release.yml provenance comment, the README's pointer
+  into `.ai/`), what a stranger can do (root `build` typechecked the docs before
+  core's gitignored `dist/` existed, so a fresh clone got `TS2307`; both vite configs
+  threw without `PORT`/`BASE_PATH`), and junk that would ship on `git add -A`.
+  Scope came from two independent audits — `code-cleanup-plan-session-41.md` and the
+  blind `independent-audit-RESULT.md`, which found 8 things the first missed,
+  including that the first one's prescribed build fix did not fix the build.
+- ⬜ **Session 42 (S42) — cleanup Batch 2: dead weight.** Delete
+  `artifacts/mockup-sandbox/` (69 files, breaks the root build, zero CI references),
+  `lib/` + `artifacts/api-server/` (31 files, `/healthz` only, plus the 6-file
+  reference chain in root `tsconfig.json`, docs `tsconfig.json`, docs
+  `package.json`, `ci.yml`, root scripts, `pnpm-workspace.yaml`), `attached_assets/`
+  (3 files, reachable only through an unused `@assets` alias), and 5 dead scripts.
+  Do **not** delete the `verify-session-NN.sh` / `demo-session-NN.sh` pairs —
+  `verify-closeout.sh` reads the current session's.
+- ⬜ **Session 43 (S43) — cleanup Batch 3: docs weight.** 43 unused shadcn components
+  (~5,000 LOC) and the dependencies that die with them, then the Prettier config
+  (31 core files currently fail `--check`) and the `lint` script, which points at an
+  eslint that is not installed and has no config.
+- ⬜ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions.**
+  `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job,
+  `engines`, and decisions **D1** (how much internal process goes public — options B
+  and C break `check_session_coverage` / `check_task_ref` unless the gates are
+  rewritten first), **D2** (hooks activation), **D3/D6** (track or ignore
+  `playground/` and the design mockups), **D4** (personal-path scrub —
+  **irreversible once public**), **D5** (`pnpm-workspace.yaml` overrides cruft, needs
+  a lockfile regen in its own commit). **Then the public flip**, which resolves the
+  README clone URL, npm `repository.url` / `homepage`, and turns npm provenance on in
+  one move.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
