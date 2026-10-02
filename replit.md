@@ -4,7 +4,7 @@ A production-grade TypeScript terminal charting library — "Beautiful visualiza
 
 ## Run & Operate
 
-- `pnpm --filter @ifelse.codes/chitra run test` — run all tests (452 tests)
+- `pnpm --filter @ifelse.codes/chitra run test` — run all tests (453 tests)
 - `pnpm --filter @ifelse.codes/chitra run test:coverage` — run tests with coverage report
 - `pnpm --filter @ifelse.codes/chitra run typecheck` — typecheck the library
 - `pnpm run typecheck` — full typecheck across all packages
@@ -57,7 +57,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 - TypeScript files use `.js` extensions in imports (ESM NodeNext convention) — run via `tsx` (`pnpm example`) not `node` directly
 - `pnpm-workspace.yaml` globs `packages/*` and `lib/*`; `lib/` is Replit-era scaffolding for an API server that is not part of the product
 - `tsconfig.json` for the core package uses `noEmit: true` — no `rootDir` set so tests can be in a sibling `tests/` directory
-- `artifacts/chitra-docs` and `artifacts/mockup-sandbox` throw in their vite configs if `PORT` / `BASE_PATH` are unset; CI exports both
+- `PORT` / `BASE_PATH` are optional now — the vite configs default them (`5000`, `/`) and CI still exports both. They used to be hard throws, which broke every build that was not CI's.
 - `packages/core/dist/` is gitignored, so anything that typechecks the docs app must build core first — that is why CI builds core before the docs typecheck
 
 ## Pointers
