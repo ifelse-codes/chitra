@@ -1,10 +1,14 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 42 — **IN PROGRESS** (cleanup Batch 2, dead weight; code session)
-- **Branch:** `session-42-dead-weight` (from `main` `4893683`)
+- **Number:** 42 — **COMPLETE** (cleanup Batch 2, dead weight; code session)
+- **Branch:** `session-42-dead-weight` (from `main` `4893683`), PR #63, **open**
 - **Contract:** `prompts/42-task-dead-weight.md`, committed at HEAD
-- **Opened:** 2026-10-02 · 10 numbered requirements
+- **Closed:** 2026-10-02 · 23 commits · 133 files changed, +2115 / −12422 · **110 deleted** ·
+  gate **35/35** · closeout **16/16** (founder waiver `VAJRA_CLOSEOUT_WAIVER=42`) ·
+  independent cold review **REJECT → fixed → ACCEPT** (8 of 10 SHIPPED)
+- **Product untouched:** **453/453** in 23 files; **0** files under `src/charts/`,
+  `src/renderers/`, `src/themes/`; CI green at `c05e3ad`.
 
 ## Repo State Snapshot
 > Re-read from live facts at S42 boot, not copied from S41's prose — the S35

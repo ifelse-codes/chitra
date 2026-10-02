@@ -1,7 +1,7 @@
 # chitra — Current State Snapshot
 
 **Snapshot, not log.** Overwritten in full at every closeout. (S42 — cleanup Batch 2,
-**in progress**, opened 2026-10-02.)
+**complete**, closed 2026-10-02.)
 
 ## Active Branch
 `session-42-dead-weight`, branched from `main` `4893683` (the S41 merge, == `origin/main`
@@ -98,21 +98,34 @@ on npm, and the repo around it is being made fit to publish.
   **S42** cleanup Batch 2 — dead weight: 110 tracked files deleted, 9-file chain cut.
 
 ## What Is In Progress
-- **S42**, past its deletions: requirements 7 (the gate green end to end), 8 (browser
-  QA + green CI), the rest of 9 (this snapshot), and 10 (fidelity map + **independent**
-  cold review). Then the PR and closeout.
-- 10 requirements, 10 commits so far, **110 deleted / 3 added / 11 modified**, 0 files
-  under the LOCKED chart code. Contract: `prompts/42-task-dead-weight.md`, at HEAD.
-- **Founder decision F42-1**, recorded in the contract: this session's agent is
-  authorised to set `VAJRA_ALLOW_COMMIT` inline, because the L3 hook that would enforce
-  its un-forgeability is Claude Code configuration and does not run here. A marker the
-  agent typed is not un-forgeable evidence, and the contract says so rather than
-  letting it pass silently. Whether `commit_guard: off` belongs in `CONSTRAINTS.yaml`,
-  as in the vajra repo, is **S44's** question — this project ships no such line, so
-  enforcement is deliberate.
-- Next (S43): cleanup **Batch 3, docs weight** — 43 unused shadcn components (~5,000
-  LOC), Prettier (31 core files fail `--check`), and the `lint` script. Then S44
-  (OSS polish + D1–D6), then the public flip. See [[roadmap]].
+- **Nothing.** S42 is **closed**: `verify-session-42.sh` **35/35**, `verify-closeout.sh`
+  **16/16** under founder waiver `VAJRA_CLOSEOUT_WAIVER=42`, CI green at `c05e3ad`, PR #63
+  open. 23 commits, 133 files changed, **110 tracked files deleted**, **0** files under the
+  LOCKED chart code. The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm.
+- **The independent cold review is the headline, not the deletions.** Pass 1 came back
+  **REJECT — 7 of 10 SHIPPED** on four defects that were all real: requirement 8's browser QA
+  rested on a command that **does not exist and exits 0**; `replit.md` was **false** and the
+  reference check was structurally blind to it; `contract-at-head` passed on a contract with
+  7 of 10 requirements deleted **and** on a four-line stub; and `dead-scripts-gone` ended in a
+  clause that could not fail under a comment claiming the opposite. All fixed, all re-broken by
+  the reviewer with its own counterfactuals. **Pass 2: ACCEPT, 8 of 10 SHIPPED, 10 of 14
+  findings FIXED.** Attestation `6f2bb299…` verified to bind to exactly the delivered diff.
+  Verdict: `sessions/session-42-review.md`. Fidelity map: `sessions/session-42-summary.md`.
+- **A green gate from the previous session is not evidence for this one.** S41's own gate broke
+  under requirement 1 — it hard-coded a path into a tree this session deleted — so the S42 gate
+  is a **port** that *discovers* its inventory, and `s41-gate-verbatim-goes-red` runs S41's
+  actual gate to prove the coupling is real. **Any gate that names a path will break the moment
+  that path is deleted. Discover, do not enumerate.** S43 is about to delete 43 more files.
+- **Nine findings could not be closed in-session and are OWNED, not just recorded.** Eight go
+  to **S43** (seven of them inside `artifacts/chitra-docs`, which is what S43 is about, each
+  with a done-condition that must go red), two to **S44** beside D2. Table:
+  `.ai/ROADMAP.md` § "S42 residual findings — OWNED, with a done-condition each". Do **N5**
+  first — `browser-qa-catalog-pages` is order-fragile and goes red for the wrong reason in a
+  clean clone.
+- Next (S43): cleanup **Batch 3, docs weight** — 43 unused shadcn components (~5,000 LOC),
+  Prettier (31 core files fail `--check`), the `lint` script, **and S42's eight inherited
+  findings including the three `@replit/*` plugins still in the docs vite config**. Then S44
+  (OSS polish + D1–D6), then the public flip. **In a new chat.** See [[roadmap]].
 
 ## Cost Tracking
 - S42 measured so far: one opencode session; **three** in-chat founder decisions (the
