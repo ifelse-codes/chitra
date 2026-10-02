@@ -537,7 +537,8 @@ no_live_ref_to_dead_trees() {
     ':!sessions' ':!prompts' ':!.ai' \
     ':!code-cleanup-plan-session-41.md' ':!independent-audit-RESULT.md' \
     ':!scripts/verify-session-41.sh' ':!scripts/demo-session-41.sh' \
-    ':!scripts/verify-session-42.sh' ':!scripts/demo-session-42.sh' || true)
+    ':!scripts/verify-session-42.sh' ':!scripts/demo-session-42.sh' \
+    ':!scripts/verify-session-43.sh' ':!scripts/demo-session-43.sh' || true)
   [ -z "$hits" ] || { echo "$hits"; return 1; }
   echo "no build, config or script file references a deleted tree"
   return 0
@@ -865,7 +866,7 @@ run_check "browser-qa-catalog-pages" browser_qa_catalog_pages
     grep -q "^$s" "$c" || { echo "contract is missing the section: $s"; return 1; }
   done
   # And the counterfactual the contract demands must be named in it.
-  grep -q 's42-gate-verbatim-goes-red' "$c" \
+  grep -qi 's42-gate-verbatim-goes-red' "$c" \
     || { echo "the contract does not name the counterfactual it demands"; return 1; }
   echo "contract tracked, requirements 1-10 all present as headings, obligation sections intact"
   return 0
