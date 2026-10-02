@@ -68,11 +68,13 @@ scripts/src/hello.ts scripts/src/demo09-donut.ts"
 # path a future session deletes.
 DEAD_DOCS_DEPS="@hookform/resolvers @radix-ui/react-accordion @radix-ui/react-alert-dialog \
 @radix-ui/react-aspect-ratio @radix-ui/react-avatar @radix-ui/react-checkbox \
-@radix-ui/react-collapsible @radix-ui/react-context-menu @radix-ui/react-dropdown-menu \
-@radix-ui/react-hover-card @radix-ui/react-menubar @radix-ui/react-navigation-menu \
-@radix-ui/react-popover @radix-ui/react-progress @radix-ui/react-radio-group \
-@radix-ui/react-scroll-area @radix-ui/react-select @radix-ui/react-slider \
-@radix-ui/react-switch @radix-ui/react-tabs @radix-ui/react-toggle-group \
+@radix-ui/react-collapsible @radix-ui/react-context-menu @radix-ui/react-dialog \
+@radix-ui/react-dropdown-menu @radix-ui/react-hover-card @radix-ui/react-label \
+@radix-ui/react-menubar @radix-ui/react-navigation-menu @radix-ui/react-popover \
+@radix-ui/react-progress @radix-ui/react-radio-group @radix-ui/react-scroll-area \
+@radix-ui/react-select @radix-ui/react-separator @radix-ui/react-slider \
+@radix-ui/react-slot @radix-ui/react-switch @radix-ui/react-tabs \
+@radix-ui/react-toggle @radix-ui/react-toggle-group @radix-ui/react-tooltip \
 cmdk embla-carousel-react input-otp next-themes react-day-picker react-hook-form \
 recharts sonner vaul"
 REPLIT_PLUGINS="@replit/vite-plugin-cartographer @replit/vite-plugin-dev-banner \
@@ -595,10 +597,10 @@ run_check "dead-scripts-gone" bash -c "
   # the filter to RESOLVE to the project instead.
   # Counterfactual: delete \`- scripts\` from pnpm-workspace.yaml -> the filter
   # matches nothing ('No projects matched the filters') -> RED.
-  sp=$(pnpm --filter \"./scripts\" exec pwd 2>/dev/null || true)
-  case \"$sp\" in
+  sp=\$(pnpm --filter \"./scripts\" exec pwd 2>/dev/null || true)
+  case \"\$sp\" in
     */scripts) ;;
-    *) echo \"the ./scripts filter resolves to no project (got '$sp')\"; exit 1 ;;
+    *) echo \"the ./scripts filter resolves to no project (got '\$sp')\"; exit 1 ;;
   esac
   echo \"6 dead scripts gone, 2 dangling refs cut, root typecheck chain green\""
 
@@ -618,9 +620,9 @@ run_check "lockfile-frozen-no-dead-importers" bash -c '
 # req 1 — every tracked ui component is reachable from the live set. The live
 # set is DISCOVERED: roots are the ui ids referenced from OUTSIDE the ui folder,
 # closed transitively over ui->ui imports. This is the check that retires the
-# 43 orphans, and it is also the one a future session cannot fool by deleting a
+# 53 orphans, and it is also the one a future session cannot fool by deleting a
 # component that something still imports.
-# Counterfactual: restore any of the 43 (e.g. accordion.tsx) -> tracked but not
+# Counterfactual: restore any of the 53 (e.g. accordion.tsx) -> tracked but not
 # reachable -> RED.
 ui_components_shipped() {
   python3 - <<'PY'
@@ -672,7 +674,7 @@ docs_dead_deps_gone() {
     [ -z "$hits" ] || { echo "$p is still imported: $hits"; bad=1; }
   done
   [ "$bad" -eq 0 ] || return 1
-  echo "all 30 removed devDeps are gone from the manifest and imported by nothing"
+  echo "all 36 removed devDeps are gone from the manifest and imported by nothing"
   return 0
 }
 run_check "docs-dead-deps-gone" docs_dead_deps_gone

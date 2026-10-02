@@ -26,20 +26,20 @@ printf '%s└──────────────────────�
 
 # ---------------------------------------------------------------- what shipped
 
-hdr "The 43 shadcn components the docs app never rendered"
+hdr "The 53 shadcn components the docs app never rendered"
 
-case_ "1 · 55 components seeded, 12 reachable"
+case_ "1 · 55 components seeded, 2 reachable"
 printf '  %sbefore%s  a select, a calendar, a carousel, a chart wrapper, a\n' "$D" "$N"
 printf '        %scommand palette — the Replit scaffold shipped a whole UI kit.\n' "$D" "$N"
 printf '        %sThe live set is the transitive closure of what the docs app\n' "$D" "$N"
-printf '        %sactually imports: button, card, dialog, input, label,\n' "$D" "$N"
-printf '        %sseparator, sheet, skeleton, textarea, toast, toggle, tooltip.%s\n' "$D" "$N"
+printf '        %sactually imports: only NOT-FOUND.tsx (card) and use-toast.ts\n' "$D" "$N"
+printf '        %s(toast). All 53 others have zero inbound references anywhere.%s\n' "$D" "$N"
 n=$(git ls-files artifacts/chitra-docs/src/components/ui | wc -l | tr -d ' ')
-[ "$n" = "12" ] && ok "12 components tracked (was 55) — 43 gone, ~5000 LOC with them" \
-               || bad "expected 12 components tracked, found $n"
+[ "$n" = "2" ] && ok "2 components tracked (was 55) — 53 gone, ~6000 LOC with them" \
+              || bad "expected 2 components tracked, found $n"
 
-case_ "2 · the 30 devDependencies that died with them"
-printf '  %s20 @radix-ui primitives, plus cmdk, embla-carousel-react,\n' "$D" "$N"
+case_ "2 · the 36 devDependencies that died with them"
+printf '  %s26 @radix-ui primitives, plus cmdk, embla-carousel-react,\n' "$D" "$N"
 printf '        %sinput-otp, next-themes, react-day-picker, react-hook-form,\n' "$D" "$N"
 printf '        %srecharts, sonner, vaul and @hookform/resolvers — imported by\n' "$D" "$N"
 printf '        %snothing that survives. react-resizable-panels is KEPT: the\n' "$D" "$N"
@@ -115,8 +115,8 @@ req_state() {
 printf '  %-4s %-46s %s\n' "#" "REQUIREMENT" "STATE"
 printf '  %-4s %-46s %s\n' "----" "----------------------------------------------" "----------"
 row() { printf '  %-4s %-46s %b\n' "$1" "$2" "$(req_state "${@:3}")"; }
-row 1  "43 unused ui components deleted (12 live)"     ui-components-shipped
-row 2  "30 dead devDeps gone; lockfile regenerated"     docs-dead-deps-gone lockfile-frozen-no-dead-importers
+row 1  "53 unused ui components deleted (2 live)"     ui-components-shipped
+row 2  "36 dead devDeps gone; lockfile regenerated"     docs-dead-deps-gone lockfile-frozen-no-dead-importers
 row 3  "3 @replit/* Vite plugins stripped"              replit-plugins-gone
 row 4  "dead lint script removed"                       lint-script-gone
 row 5  "Prettier adopted, formatted, CI-enforced"       prettier-adopted charts-format-only
@@ -139,7 +139,7 @@ DEL=$(git diff --diff-filter=D --name-only main...HEAD 2>/dev/null | wc -l | tr 
 printf '  %-34s %s\n' "core suite"              "($TESTS tests in $TFILES files)"
 printf '  %-34s %s\n' "docs ui components"      "55 -> $UI"
 printf '  %-34s %s\n' "docs devDependencies"    "64 -> $DEPS"
-printf '  %-34s %s\n' "tracked files deleted"   "$DEL (43 components + the rest)"
+printf '  %-34s %s\n' "tracked files deleted"   "$DEL (53 components + the rest)"
 printf '  %-34s %s\n' "verify checks defined"   "$GATES"
 printf '  %-34s %s\n' "verify checks with a log" "$RAN"
 printf '  %-34s %s\n' "prettier: files off-style" "$(node_modules/.bin/prettier --list-different . 2>/dev/null | wc -l | tr -d ' ')"
