@@ -112,10 +112,24 @@ if [ ! -d "$LOG" ]; then
   printf '\n'; exit 1
 fi
 vstate() {
-  if [ -f "$LOG/$1.log" ]; then
-    if grep -qE '\bFAIL\b|ERROR|error TS|not met|does not' "$LOG/$1.log" 2>/dev/null; then echo FAIL
-    else echo PASS; fi
-  else echo UNKNOWN; fi
+  # The COLD REVIEW killed this function. It read each check's log and grepped it
+  # for keywords (FAIL|ERROR|error TS|does not), which is not the same thing as
+  # asking whether the check passed — so it rendered requirement 6 PARTIAL (its
+  # counterfactual check legitimately prints the S41 gate's own failure text) and
+  # requirement 8 SHIPPED. Both wrong, and the second one was the fakest green in
+  # the delivery.
+  #
+  # The gate writes one log per check but no status file, so this derives the
+  # status from the gate's OWN summary line for that check: "name   PASS|FAIL".
+  # That is the exit status the gate recorded, not a guess about a log's prose.
+  if [ ! -f "$LOG/summary.txt" ]; then echo UNKNOWN; return; fi
+  line=$(grep -E "^$1[[:space:]]+(PASS|FAIL)$" "$LOG/summary.txt" 2>/dev/null \
+         | awk '{print $NF}' | head -1)
+  # The first draft piped this to `grep -q . || echo UNKNOWN`, which printed
+  # NOTHING on success. req_state then compared the empty string against PASS,
+  # set the state to "", and every row rendered NOT PROVEN against a gate that
+  # was 35 for 35. If this check ever says NOT PROVEN, check THIS first.
+  if [ -n "$line" ]; then echo "$line"; else echo UNKNOWN; fi
 }
 req_state() {
   local st=PASS c
@@ -145,8 +159,8 @@ row 4  "6 dead scripts gone, 2 dangling refs cut"        dead-scripts-gone
 row 5  "lockfile regenerated, frozen, no dead importer"  lockfile-frozen-no-dead-importers
 row 6  "S41 gate ported: vite inventory DISCOVERED"      vite-configs-discovered s41-gate-verbatim-goes-red
 row 7  "product re-proved from live facts"               fresh-clone-build-no-env core-tests core-typecheck root-typecheck s39-suite-still-green example-runs
-row 8  "docs typecheck + build green, browser QA green"  docs-meta-not-scaffold root-typecheck
-row 9  ".ai/ re-synced; no deleted tree described as live" ai-files-describe-s42 ai-names-no-deleted-tree
+row 8  "browser QA driven, green CI"                      browser-qa-catalog-pages fresh-clone-build-no-env core-typecheck
+row 9  ".ai/ re-synced; no deleted tree described as live" ai-files-describe-s42 ai-names-no-deleted-tree test-count-propagated
 row 10 "contract at HEAD, mapped, independently reviewed" contract-at-head
 
 # ---------------------------------------------------------------- summary table
@@ -157,7 +171,7 @@ LOCKN=$(git diff --numstat main...HEAD -- pnpm-lock.yaml 2>/dev/null | awk '{pri
 printf '  %-34s %s\n' "core suite"                 "($TESTS tests in $TFILES files)"
 printf '  %-34s %s\n' "tracked files"              "511 -> $(git ls-files | wc -l | tr -d ' ')  ($DEL deleted)"
 printf '  %-34s %s\n' "lockfile"                   "10 -> $IMPORTERS importers  ($LOCKN)"
-printf '  %-34s %s\n' "workspace packages"         "$(ls -d packages/* artifacts/* 2>/dev/null | wc -l | tr -d ' ') (was $(git ls-tree -r --name-only main 2>/dev/null | grep -cE '^(packages|artifacts|lib)/[^/]+/package.json'))"
+printf '  %-34s %s\n' "workspace globs"             "$(awk '/^packages:/{f=1;next} /^[^ ]/{f=0} f && /^  - /{c++} END{print c+0}' pnpm-workspace.yaml)  (was $(git show main:pnpm-workspace.yaml | awk '/^packages:/{f=1;next} /^[^ ]/{f=0} f && /^  - /{c++} END{print c+0}'))"
 printf '  %-34s %s\n' "verify checks defined"      "$GATES"
 printf '  %-34s %s\n' "verify checks with a log"   "$RAN"
 printf '  %-34s %s\n' "chart source touched"       "$(git diff --name-only main...HEAD -- packages/core/src/charts packages/core/src/renderers packages/core/src/themes | wc -l | tr -d ' ') files"
