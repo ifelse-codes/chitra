@@ -53,7 +53,7 @@ proves discipline, never fidelity.
 | # | Requirement | Files | Accept when |
 |---|---|---|---|
 | 1 | The live docs site must not serve the Replit scaffold placeholder as its meta description. It is `https://chitra.iifelse.com`'s search-engine and social-card text *today*. | `artifacts/chitra-docs/index.html` | zero occurrences of `built on Replit` / `Update this description` in the file **and** in the built `dist/index.html`; a real product line in `title`, `description`, `og:*`, `twitter:*` |
-| 2 | `VERSION` is exported public API and **ships** as `"0.1.0"` while the manifest is `0.3.0` (`src/index.ts:73`; proven in `dist/index.d.ts:13`). | `packages/core/src/index.ts`, `packages/core/build.mjs` (or equivalent), one existing `packages/core/tests/*.test.ts` | `VERSION` is **derived** from `package.json`, never restated; built `dist/index.d.ts` and `dist/index.js` contain no `0.1.0`; a test asserts `VERSION === pkg.version` and runs in CI |
+| 2 | `VERSION` is exported public API and **ships** as `"0.1.0"` while the manifest is `0.3.0` (`src/index.ts:73`; proven in `dist/index.d.ts:13`). | `packages/core/src/index.ts`, `packages/core/src/version.ts`, `packages/core/build.mjs` or equivalent, `packages/core/tests/composability.test.ts` | `VERSION` is **derived** from `package.json`, never restated; built `dist/index.d.ts` and `dist/index.js` contain no `0.1.0`; **a test asserts `VERSION === pkg.version`** and runs in CI |
 | 3 | `packages/core/README.md` **ships to npm** as an internal design log — 19 `### LOCKED: … session NN design` sections naming internal sessions — and contradicts itself: "block (default for line)" vs `line.ts:151` `?? "braille"`, and "Three Renderers" above four bullets. | `packages/core/README.md` | no internal-session design-log sections; the default renderer is stated as `braille`; the renderer count matches the bullets |
 | 4 | `CONTRIBUTING.md` is wrong in five places: clone URL says `chitra-dev/chitra` (real org `ifelse-codes/chitra`); the run command uses the removed `--experimental-specifier-resolution` flag and does not run; the chart template omits `toContent()`, which `ChartResult` **requires** (`types.ts:237`), so a contributor following it gets a type error; tests are one file per chart now, not `tests/charts.test.ts`; and it promises ">90% test coverage" while `test:coverage` **fails** at 86.28% functions against a 90% threshold. | `CONTRIBUTING.md` | every one of the five is true as written; the coverage claim states the measured reality, or the threshold is met — no claim left standing that the repo does not satisfy |
 | 5 | The documented example command needs a runner that exists. `tsx` is in the catalog but not installed at the root. | `package.json` (root), `CONTRIBUTING.md` | `pnpm example` runs `examples/basic.ts` and exits 0 |
@@ -78,14 +78,25 @@ proves discipline, never fidelity.
 
 ### Cross-cutting requirement — the canonical test count
 
-`452` is asserted in **12 places**: `README.md:14` (badge), `App.tsx:570`, and
-`verify-session-34/36/37/38/39.sh` + `demo-session-34/36/37.sh`. This is exactly the trap that
-cost `main` commit `ece61fc` ("a line of mine broke S39's `ai-docs-quote-real-score` gate").
+The canonical test count is **displayed in nine places** — `README.md:14` (badge),
+`App.tsx:570`, `replit.md`, and the permanent-facts header, guardrail and "next steps"
+lines of `.ai/KNOWLEDGE.md`, `.ai/ROADMAP.md`, `.ai/SESSION-BOOT.md`,
+`.ai/CONTINUATION-PROMPT.md` — and **asserted as a literal in 15 tracked files** once the
+historical `verify-session-*.sh` / `demo-session-*.sh` are counted. (An earlier draft of
+this contract claimed "12 places"; the cold review counted and it was wrong in both
+directions. Corrected here.) This is exactly the trap that cost `main` commit `ece61fc`
+("a line of mine broke S39's `ai-docs-quote-real-score` gate").
 
-- **Preferred:** add requirement 2's drift assertion **inside an existing test file**, so the
-  count stays 452 and no badge, no `App.tsx` stat, and no historical verify script moves.
-- **If a new test file is unavoidable**, every one of the 12 sites changes **in the same
-  atomic commit**, and `verify-session-34/36/37/38/39.sh` are re-run green.
+- **Preferred:** add requirement 2's drift assertion **inside an existing test file**, so
+  no new file appears. Note that adding an `it()` still moves the count — the count is
+  the number of tests, not the number of files.
+- **If the count moves**, every place that *displays* it changes in the same session, and
+  `verify-session-39.sh` is updated with it. Nothing historical under `sessions/`, the
+  dated sections of `KNOWLEDGE.md`, or the dead pre-rename verify scripts is rewritten.
+- **A guard, not a convention.** `verify-session-41.sh#test-count-propagated` derives the
+  count from the suite run and fails if the badge, the docs hero stat, `KNOWLEDGE.md`, the
+  `ROADMAP.md` guardrail, `SESSION-BOOT.md` or `verify-session-39.sh` disagree. Restating
+  a number in nine files and hoping is how this bit twice.
 - Either way: **`bash scripts/verify-session-39.sh` must be 43/43 on the branch tip.**
 
 ### Also landing with this contract (evidence, not scope)

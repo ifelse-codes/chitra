@@ -103,13 +103,13 @@ row 13 "machine-path junk deleted, rest gitignored"       no-machine-path-junk
 
 # ---------------------------------------------------------------- summary table
 hdr "Summary"
-printf '  %-34s %s\n' "core suite"                 "$TESTS passed / 23 files (unchanged)"
+printf '  %-34s %s\n' "core suite"                 "$TESTS passed / 23 files"
 printf '  %-34s %s\n' "verify checks defined"      "$GATES"
 printf '  %-34s %s\n' "verify checks with a log"   "$RAN"
-printf '  %-34s %s\n' "root typecheck"             "exit 0"
-printf '  %-34s %s\n' "npm README"                 "785 -> 116 lines"
-printf '  %-34s %s\n' "tracked files deleted"      "4 (transcript, 2 stale plans, dead script)"
-printf '  %-34s %s\n' "tracked files edited"       "17"
+printf '  %-34s %s\n' "npm README"                 "785 -> $(wc -l < packages/core/README.md | tr -d ' ') lines"
+printf '  %-34s %s\n' "tracked files changed"      "$(git diff --name-only main...HEAD | wc -l | tr -d ' ')"
+printf '  %-34s %s\n' "  …deleted"                 "$(git diff --diff-filter=D --name-only main...HEAD | wc -l | tr -d ' ') (the 4 untracked junk files were never tracked)"
+printf '  %-34s %s\n' "commits"                    "$(git rev-list --count main..HEAD)"
 
 printf '\n%s%sNot built here — named, not smuggled:%s\n' "$B" "$Y" "$N"
 printf '  %sBatch 2 (S42)%s  ~100 files of dead weight: mockup-sandbox, lib/, api-server, attached_assets\n' "$D" "$N"
