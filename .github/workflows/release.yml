@@ -97,10 +97,13 @@ jobs:
     permissions:
       # S38 — Trusted Publishing (OIDC). `id-token: write` lets GitHub mint the OIDC
       # token npm exchanges for a short-lived publish token; this job therefore needs
-      # NO long-lived npm secret. Provenance is NOT produced: the GitHub repo is
-      # private, and npm does not generate provenance for private repos even under
-      # trusted publishing (a known npm limitation). Making the repo public would turn
-      # provenance on — a founder decision, not a workflow one.
+      # NO long-lived npm secret.
+      #
+      # Provenance: npm only generates it for a PUBLIC GitHub repo. While this repo is
+      # private, `dist.signatures` is present and `attestations` is null — verified on
+      # 0.2.0 and 0.3.0. Publishing is unaffected either way. If the repo is ever made
+      # public, provenance starts appearing on new versions automatically; nothing in
+      # this workflow needs to change, and this paragraph stays true in both states.
       id-token: write
       contents: read
     steps:
