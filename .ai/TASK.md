@@ -23,10 +23,12 @@
   (13). Max 1 story per session, so **Batch 1 only** — Batches 2–4 are now roadmap items
   **S42, S43, S44**, which is the S40 row 2 finding (unowned work) closing.
 - **Cross-cutting trap, named in the contract:** the canonical test count is displayed in
-  nine places and asserted as a literal in 15 tracked files. That is how `main` lost
-  `ece61fc`. So the new drift guard adds **no test file**, and `test-count-propagated`
-  *derives* the count from a suite run and fails if any guarded site disagrees — instead
-  of the count being restated and hoped for. `verify-session-39.sh` must stay 43/43.
+  several tracked files and asserted as a literal in the historical verify scripts. That is
+  how `main` lost `ece61fc`. So the new drift guard adds **no test file**, and
+  `test-count-propagated` *derives* the count from a suite run and fails if any site it
+  reads disagrees — its clause list is the inventory, and no document claims how many
+  display sites there are, because a hand-counted number about a test count is the thing
+  that rots. `verify-session-39.sh` must stay 43/43.
 - **Founder decisions this session does not make:** D1 (how much internal process goes
   public — blocks the *flip*, not this work), D2, D3/D6, D4 (personal-path scrub —
   irreversible once public), D5.

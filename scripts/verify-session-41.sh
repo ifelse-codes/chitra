@@ -159,8 +159,10 @@ run_check "coverage-gate-passes"  bash -c "pnpm --filter @ifelse.codes/chitra ru
 run_check "chart-drift"           bash -c "pnpm --filter @workspace/chitra-docs run gen:charts:check"
 
 # The S39 suite is the regression guard for the canonical-count trap this session
-# walked straight into: 452 is asserted in 12 places, and main already lost one
-# commit to it. If this goes red, a count moved.
+# walked straight into: the count is displayed in many files and asserted as a
+# literal in the historical scripts, and main already lost one commit to it. If
+# this goes red, a count moved. Its exact sites are the clauses of
+# test-count-propagated below — not a number anyone has to keep in their head.
 run_check "s39-suite-still-green" bash -c "bash scripts/verify-session-39.sh"
 
 # req 13 — the machine-path junk must be gone, not merely ignored.
@@ -205,32 +207,36 @@ run_check "ai-files-describe-s41" bash -c '
   done
   echo ".ai/ describes S41 on this branch; S42-S44 scheduled"'
 
-# The canonical-count trap. The count is displayed in nine places and asserted as a
-# literal in fifteen tracked files once the dead pre-rename verify scripts are
-# counted; this session moved it 452 -> 453 by adding one real test and had to
-# rewrite the display sites by hand. A stale count is the same defect as VERSION
-# shipping as 0.1.0: a public claim the repo no longer satisfies. So the count is
-# DERIVED here from the suite, never restated.
+# The canonical-count trap. This session added one real test, which moved the
+# count 452 -> 453, and the number then had to be rewritten by hand in every file
+# that displays it — the third instance of this family in three sessions. A stale
+# count is the same defect as VERSION shipping as 0.1.0: a public claim the repo no
+# longer satisfies. So the count is DERIVED here from the suite, never restated —
+# and nothing else in the repo states how many places display it.
 #
-# Honest limit, stated because the cold review caught this check overclaiming: it
-# guards the seven sites below, not "everywhere it is displayed". A display added
-# later must be added here too. Proven failable — copy the sites to a temp dir,
-# flip the number, and every clause fires.
+# THIS CLAUSE LIST IS THE INVENTORY. No document states a count of display sites,
+# because a hand-counted number about a test count is precisely the thing that
+# rots: the cold review caught a missing site AND a stale "nine places"/"twelve
+# places" figure in three consecutive passes of this session. A new display site
+# must be added here.
 run_check "test-count-propagated" bash -c '
   set -e
   n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 \
         | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
   [ -n "$n" ] || { echo "could not read the test count from the suite"; exit 1; }
   bad=""
-  grep -q "tests-$n%20passing" README.md            || bad="$bad README-badge"
+  grep -q "tests-$n%20passing" README.md                    || bad="$bad README-badge"
   grep -q "stat-num\">$n<" artifacts/chitra-docs/src/App.tsx || bad="$bad docs-hero"
-  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md      || bad="$bad KNOWLEDGE-header"
-  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md  || bad="$bad ROADMAP-guardrail"
-  grep -q "$n/$n" .ai/SESSION-BOOT.md               || bad="$bad SESSION-BOOT"
-  grep -q "test ($n)" .github/workflows/ci.yml      || bad="$bad ci-header-comment"
-  grep -q "Tests +$n passed" scripts/verify-session-39.sh || bad="$bad verify-39"
+  grep -q "($n tests)" replit.md                            || bad="$bad replit"
+  grep -q "test ($n)" .github/workflows/ci.yml              || bad="$bad ci-header-comment"
+  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md              || bad="$bad KNOWLEDGE-header"
+  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md          || bad="$bad ROADMAP-guardrail"
+  grep -q "\*\*$n green\*\*" .ai/CONTINUATION-PROMPT.md     || bad="$bad CONTINUATION-PROMPT"
+  grep -q "$n/$n" .ai/SESSION-BOOT.md                       || bad="$bad SESSION-BOOT"
+  grep -q "$n/$n" .ai/STATE.md                              || bad="$bad STATE"
+  grep -q "Tests +$n passed" scripts/verify-session-39.sh    || bad="$bad verify-39"
   [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
-  echo "canonical count $n, consistent across the 7 guarded sites"'
+  echo "canonical count $n, consistent across every site this check reads"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
