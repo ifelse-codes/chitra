@@ -9,10 +9,19 @@ S40 failed that gate precisely because a contract that was never committed canno
 ## Why this session exists
 
 S42 removed the dead trees. This session removes the dead **weight** inside what is left:
-the docs app carries **55 shadcn components** and reaches **12**. The other **43** are
-~5,000 LOC of a component library that was seeded with the Replit scaffold — a select, a
-calendar, a carousel, a chart wrapper, a command palette — imported by nothing the docs app
-renders. Thirty devDependencies exist to serve them.
+the docs app carries **55 shadcn components** and reaches **2** — only `pages/not-found.tsx`
+uses `card` and `hooks/use-toast.ts` uses `toast`. The other **53** are ~6,000 LOC of a
+component library that was seeded with the Replit scaffold — a select, a calendar, a
+carousel, a chart wrapper, a command palette, a button, a dialog, an input — imported by
+nothing the docs app renders. Thirty-six devDependencies exist to serve them.
+
+**Correction, made in-session.** The roadmap and the first draft of this contract said **43**,
+and said the live set was **12**. Both came from the same audit bug: a grep with `-o` prints
+only the match, so the `grep -v "src/components/ui/"` meant to exclude intra-ui references
+matched nothing, and one ui component importing another counted as usage. The real roots —
+references from *outside* the ui folder — are `card` and `toast`. **53, not 43; 2 live, not
+12.** Recorded rather than repeated, the way S42 recorded the three roadmap claims that did
+not survive its tree.
 
 Three more pieces of Replit scaffold survive in the same app: the `@replit/*` Vite plugins
 (one still wired into the production `plugins` list), a `lint` script in `packages/core`
@@ -25,7 +34,7 @@ it actually uses — not the scaffold they came from.**
 ## The one story
 
 > A stranger who clones this repo finds the docs app ships the components it renders and
-> nothing else: no 43 unused UI primitives, no Replit plugins, no dead `lint` script, and a
+> nothing else: no 53 unused UI primitives, no Replit plugins, no dead `lint` script, and a
 > Prettier config that is real, formatted, and enforced in CI.
 
 `max_stories_per_session: 1`, so **Batch 3 only.** Batch 4 (OSS polish + founder decisions
@@ -35,18 +44,19 @@ D1–D6) is S44; then the public flip.
 
 ### A · The deletions (discovered, never enumerated)
 
-1. **Delete the 43 unused shadcn components.** The live set is **12** — `button`, `card`,
-   `dialog`, `input`, `label`, `separator`, `sheet`, `skeleton`, `textarea`, `toast`,
-   `toggle`, `tooltip` — computed as the transitive closure of everything referenced outside
-   `src/components/ui/`. The complement of that closure (43 files) goes. **Discover the
-   live set; do not hand-copy the list.** Re-adding any one of the 43 must turn the gate red.
+1. **Delete the unused shadcn components.** The live set is **2** — `card` (used by
+   `pages/not-found.tsx`) and `toast` (used by `hooks/use-toast.ts`) — computed as the
+   transitive closure of everything referenced outside `src/components/ui/`. The complement
+   of that closure (**53** files) goes. **Discover the live set; do not hand-copy the list.**
+   Re-adding any one of the 53 must turn the gate red.
 
-2. **Remove the dependencies that die with them, in their own commit.** ~30 devDependencies
-   are imported by no surviving file: 20 `@radix-ui/react-*` packages, `cmdk`,
+2. **Remove the dependencies that die with them, in their own commit.** **36** devDependencies
+   are imported by no surviving file: 26 `@radix-ui/react-*` packages, `cmdk`,
    `embla-carousel-react`, `input-otp`, `next-themes`, `react-day-picker`, `react-hook-form`,
-   `recharts`, `sonner`, `vaul`, and the resolvers/types that rode with them. **Keep
-   `react-resizable-panels`** — `CatalogPage.tsx` imports it. Regenerate the lockfile in a
-   commit separate from the deletion commit so the two stay separable (the S42 precedent).
+   `recharts`, `sonner`, `vaul`, and `@hookform/resolvers`. **Keep `react-resizable-panels`**
+   (`CatalogPage.tsx`), `@radix-ui/react-toast`, `class-variance-authority` and `lucide-react`
+   (`toast.tsx` still imports them). Regenerate the lockfile in a commit separate from the
+   deletion commit so the two stay separable (the S42 precedent).
 
 3. **Strip the three `@replit/*` Vite plugins** from `artifacts/chitra-docs/vite.config.ts`
    and from `devDependencies`. `runtime-error-modal` is in the production `plugins` list
@@ -126,10 +136,11 @@ D1–D6) is S44; then the public flip.
 
 ## Assumptions (2 — the constitution's cap)
 
-1. **The 43 components and the ~30 dependencies are safe to delete wholesale.** Verified at
+1. **The 53 components and the 36 dependencies are safe to delete wholesale.** Verified at
    plan time: every "dead" component is unreferenced outside `src/components/ui/` (transitive
    closure computed), and every "dead" dependency has **zero** imports outside the deleted
-   files. `react-resizable-panels` is the one shared dep and is kept.
+   files. `react-resizable-panels` is kept (`CatalogPage.tsx`); `@radix-ui/react-toast`,
+   `class-variance-authority` and `lucide-react` are kept (`toast.tsx`).
 2. **The three `@replit/*` plugins are non-load-bearing** for the static public docs build.
    `runtime-error-modal` wraps the dev overlay; `cartographer`/`dev-banner` load only under
    `REPL_ID`. Removing them changes no rendered output.
