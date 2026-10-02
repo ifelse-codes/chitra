@@ -138,9 +138,8 @@ chart.toContent(); // compact text → drop straight into an LLM prompt
 chart.toJSON();    // { type: "bar", data: [42, 67, 38], labels: [...], plain: "..." }
 ```
 
-MCP tool handler — **not shipped yet.** Deferred at the founder's direction until a
-release exists and someone actually asks for it (tracked in `.ai/ROADMAP.md`). Shown
-here to document the intended shape, not to advertise a working feature:
+MCP tool handler — **not shipped yet.** Deferred until a release draws an actual request
+for it. Shown here to document the intended shape, not to advertise a working feature:
 
 ```ts
 import { plot } from "@ifelse.codes/chitra";
