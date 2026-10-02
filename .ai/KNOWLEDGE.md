@@ -11,7 +11,8 @@
   external user) — the S36/S37/S38 sections below keep it because they are dated records.
 - Around the lib there is **one** app: `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4
   + shadcn/ui docs/marketing site (renders chitra output; `src/data/charts.ts`,
-  `src/data/ansi-charts.json`). It is the **live** surface at `chitra.iifelse.com`.
+  `src/data/ansi-charts.json`). It is the **live** surface at `chitra.iifelse.com`. Since S43 it
+  ships **12** shadcn components (of 55) — only the ones the app renders.
 - **Deleted in S42 (2026-10-02), permanently from the tree** — the rest of the Replit-scaffolded
   full-stack the product was extracted from. `main` retains every file at `4893683`:
   `artifacts/api-server/` (Node API server, `/healthz` only), `artifacts/mockup-sandbox/` (Vite
@@ -20,6 +21,10 @@
   `attached_assets/`. None was imported by anything. **Permanent fact, not a session note:** the
   generated-client and schema layer was never wired to the docs app, and `tsconfig.base.json` —
   not `tsconfig.json` — is what the remaining packages extend.
+- **Deleted in S43 (2026-10-03): the dead weight inside the docs app.** 43 unused shadcn
+  components (`artifacts/chitra-docs/src/components/ui/`), the 30 devDependencies that served
+  only them, the three `@replit/*` Vite plugins (config, manifest, and workspace catalog), and
+  the `lint` script in `packages/core`. `main` (S42's merge `49e1ee2`) retains all of it.
 
 ## Stack & tooling
 - pnpm workspaces (pnpm 9.12). CI uses Node **26** (`.github/workflows/ci.yml` +
@@ -344,3 +349,28 @@
 - **Packument propagation lag, re-confirmed:** the human publish returned success and the
   tarball was live immediately, but `npm view <pkg> version` 404'd for **~4 min**. Re-query;
   never re-publish on a 404.
+
+## S43 extension — docs weight, and Prettier adopted (2026-10-03)
+
+- **The docs app ships only what it renders.** `artifacts/chitra-docs/src/components/ui/` had
+  **55** shadcn components seeded with the Replit scaffold; the app reaches **12**
+  (`button card dialog input label separator sheet skeleton textarea toast toggle tooltip`).
+  The live set is the transitive closure of everything referenced **outside** the ui folder —
+  `ui-components-shipped` computes it; do **not** hardcode it. `react-resizable-panels` is used
+  by `CatalogPage.tsx` and was kept while 30 other devDeps went.
+- **Prettier is real now (F43-1: format + adopt + enforce, not delete).** Before S43 there was a
+  root `prettier` devDependency, **no config file**, 31 core files failing `--check` under bare
+  defaults, and nothing in CI looking. Now: `.prettierrc` (printWidth 100, `trailingComma: es5`)
+  + `.prettierignore` are checked in, the repo is formatted, and `.github/workflows/ci.yml` has
+  a **`format` job** running `pnpm run format:check`.
+- **`.prettierignore` excludes generated + frozen + check-coupled files on purpose:** the
+  generator output `artifacts/chitra-docs/src/data/` (drift-gated — formatting it would make
+  `gen:charts:check` fight Prettier forever), `sessions/`, `prompts/`, `.ai/`, and `*.md`
+  (several are grepped verbatim by the verify scripts).
+- **Reformatting the LOCKED chart code is safe and proven.** S43 formats `src/charts/`,
+  `renderers/`, `themes/`; `charts-format-only` asserts every changed file is **exactly**
+  `prettier(base)`, and the suite stays **453 tests green**. S42's `charts-untouched` (which
+  diffed those dirs by path and passed vacuously when `main` didn't resolve) is re-expressed.
+- **The S43 gate is a port, and its counterfactual is cheap.** `s42-gate-verbatim-goes-red`
+  extracts S42's real `charts-untouched` body and asserts it exits non-zero on the S43 format.
+  It deliberately does **not** run S42's whole gate (which chains S41's, ~60 min — S42 §4.9).
