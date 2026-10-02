@@ -75,10 +75,6 @@ jobs:
           cache: pnpm
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
-      # docs tsconfig references lib/ projects whose declaration output is not
-      # in git; build them first or a fresh clone fails typecheck.
-      - name: Build lib type declarations
-        run: pnpm run typecheck:libs
       # S11: the docs app imports @ifelse.codes/chitra at runtime, and core resolves through
       # dist/ (gitignored). Without this the docs typecheck fails on a fresh clone
       # with TS2307 while passing on any machine that happens to have a built dist.
@@ -124,9 +120,7 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
       # qa-catalog.mjs builds the docs app itself; it resolves @ifelse.codes/chitra
-      # through dist/ (gitignored) and the lib declarations, so build both first.
-      - name: Build lib type declarations
-        run: pnpm run typecheck:libs
+      # through dist/ (gitignored), so build it first.
       - name: Build @ifelse.codes/chitra (docs imports it)
         run: pnpm --filter @ifelse.codes/chitra run build
       - name: Install Playwright Chromium
