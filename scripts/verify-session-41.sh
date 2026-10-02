@@ -214,29 +214,64 @@ run_check "ai-files-describe-s41" bash -c '
 # longer satisfies. So the count is DERIVED here from the suite, never restated —
 # and nothing else in the repo states how many places display it.
 #
-# THIS CLAUSE LIST IS THE INVENTORY. No document states a count of display sites,
-# because a hand-counted number about a test count is precisely the thing that
-# rots: the cold review caught a missing site AND a stale "nine places"/"twelve
-# places" figure in three consecutive passes of this session. A new display site
-# must be added here.
+# THE INVENTORY IS DISCOVERED, NOT REMEMBERED. The expected list below is not
+# authoritative on its own: this check greps the tree for the derived number and
+# fails if a file displays it and is not on the list, or is on the list and no
+# longer does. The cold review caught a hand-kept list that missed a file written
+# two commits earlier, and a "nine places"/"twelve places" figure that was wrong
+# three times in three passes. Both failure modes are now structural, not a matter
+# of care.
 run_check "test-count-propagated" bash -c '
   set -e
   n=$(pnpm --filter @ifelse.codes/chitra run test 2>&1 \
         | grep -oE "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
   [ -n "$n" ] || { echo "could not read the test count from the suite"; exit 1; }
+
+  # --- 1. each guarded site states the count in its own idiom, asserted per file
   bad=""
-  grep -q "tests-$n%20passing" README.md                    || bad="$bad README-badge"
+  grep -q "tests-$n%20passing" README.md                     || bad="$bad README-badge"
   grep -q "stat-num\">$n<" artifacts/chitra-docs/src/App.tsx || bad="$bad docs-hero"
-  grep -q "($n tests)" replit.md                            || bad="$bad replit"
-  grep -q "test ($n)" .github/workflows/ci.yml              || bad="$bad ci-header-comment"
-  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md              || bad="$bad KNOWLEDGE-header"
-  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md          || bad="$bad ROADMAP-guardrail"
-  grep -q "\*\*$n green\*\*" .ai/CONTINUATION-PROMPT.md     || bad="$bad CONTINUATION-PROMPT"
-  grep -q "$n/$n" .ai/SESSION-BOOT.md                       || bad="$bad SESSION-BOOT"
-  grep -q "$n/$n" .ai/STATE.md                              || bad="$bad STATE"
+  grep -q "($n tests)" replit.md                             || bad="$bad replit"
+  grep -q "test ($n)" .github/workflows/ci.yml               || bad="$bad ci-header-comment"
+  grep -q "\*\*$n tests\*\*" .ai/KNOWLEDGE.md               || bad="$bad KNOWLEDGE-header"
+  grep -q "\*\*$n tests green\*\*" .ai/ROADMAP.md           || bad="$bad ROADMAP-guardrail"
+  grep -q "\*\*$n green\*\*" .ai/CONTINUATION-PROMPT.md      || bad="$bad CONTINUATION-PROMPT"
+  grep -q "$n/$n" .ai/SESSION-BOOT.md                        || bad="$bad SESSION-BOOT"
+  grep -q "$n/$n" .ai/STATE.md                               || bad="$bad STATE"
+  grep -q "($n tests" scripts/demo-session-41.sh             || bad="$bad demo-41"
   grep -q "Tests +$n passed" scripts/verify-session-39.sh    || bad="$bad verify-39"
   [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
-  echo "canonical count $n, consistent across every site this check reads"'
+
+  # --- 2. and nothing ELSE displays it undeclared
+  # LC_ALL=C order, matching the sort applied to the discovered set below.
+  expected=".ai/CONTINUATION-PROMPT.md
+.ai/KNOWLEDGE.md
+.ai/ROADMAP.md
+.ai/SESSION-BOOT.md
+.ai/STATE.md
+.github/workflows/ci.yml
+README.md
+artifacts/chitra-docs/src/App.tsx
+replit.md
+scripts/demo-session-41.sh
+scripts/verify-session-39.sh"
+  # Exempt, each with a reason: this check names the number only to explain the trap;
+  # sessions/ and .ai/handoffs/ are frozen history; the dated .ai/GT-REMEDIATIONS rows
+  # record what past sessions found; attached_assets/ is a vendored third-party HTML
+  # file that cleanup Batch 2 deletes.
+  found=$(git grep -lE "(^|[^0-9])$n([^0-9]|\$)" -- . \
+          | grep -vE "^\.ai/(GT-REMEDIATIONS|handoffs|CHITRA)" \
+          | grep -vE "^sessions/" \
+          | grep -vE "^scripts/verify-session-41\.sh$" \
+          | grep -vE "^attached_assets/" \
+          | LC_ALL=C sort)
+  if [ "$found" != "$expected" ]; then
+    echo "count is $n; the set of files displaying it changed."
+    diff <(echo "$expected" | LC_ALL=C sort) <(echo "$found") || true
+    echo "  a new display site must be added to this check, or the stale site removed"
+    exit 1
+  fi
+  echo "canonical count $n: 11 declared sites agree, and no other tracked file displays it"'
 
 ( cd ".ai/verify/session-41" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
