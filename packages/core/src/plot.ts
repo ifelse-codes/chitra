@@ -1,10 +1,4 @@
-import type {
-  ThemeName,
-  Theme,
-  RendererType,
-  BaseChartOptions,
-  ChartResult,
-} from "./types.js";
+import type { ThemeName, Theme, RendererType, BaseChartOptions, ChartResult } from "./types.js";
 import {
   bar,
   line,

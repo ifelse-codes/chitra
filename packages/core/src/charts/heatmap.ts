@@ -103,11 +103,7 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
 
   function buildFooter(): string {
     if (empty) return colorize("0 cells · (no data)", theme.label, noColor);
-    const head = colorize(
-      `${rows}×${cols} grid`,
-      theme.label,
-      noColor
-    );
+    const head = colorize(`${rows}×${cols} grid`, theme.label, noColor);
     const peakCell = colorize(`peak (${peakR}, ${peakC})`, acc, noColor);
     return head + colorize(" · ", theme.label, noColor) + peakCell;
   }
@@ -118,15 +114,22 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
     const useCompact = opts.compact === true;
     const eyebrow = "DENSITY";
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "HEATMAP", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(width, opts.title ?? "HEATMAP", undefined, theme.axis, theme.title, noColor, true)
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     const gridRows = empty ? [] : fitBodyLines(buildGridRows(), opts.height);
-    for (const row of gridRows) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+    for (const row of gridRows)
+      lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
 
     if (!useCompact) {
       lines.push(useFrame ? frameRow(width, buildFooter(), theme.axis, noColor) : buildFooter());
@@ -136,15 +139,26 @@ export function heatmap(opts: HeatmapOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return heatmap({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return heatmap({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "heatmap",

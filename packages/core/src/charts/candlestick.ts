@@ -31,18 +31,18 @@ export function axisPriceFmt(v: number, range: number): string {
  *    candles (open == close) count as up (a 1-row solid).
  *  - **One accent, spent EXACTLY once.** The peak candle (highest close, ties
  *    → first in data order, the family peak rule) renders its body as solid
-  *    `█` in the theme's accent hue. Wicks always stay in the candle's own
-  *    kind tone (never accent), so at raw-ANSI level the accent touches only
-  *    solid `█` body mass plus non-block text (the `last` foot fact).
+ *    `█` in the theme's accent hue. Wicks always stay in the candle's own
+ *    kind tone (never accent), so at raw-ANSI level the accent touches only
+ *    solid `█` body mass plus non-block text (the `last` foot fact).
  *  - **Adaptive price labels** (`axisPriceFmt`): integers when the range is
  *    wide, ≤2dp when tight — never the old `162.55`-style sprawl, and never
-  *    silent integer rounding of real prices. `│`/`+` guide, dashed `└╌`
-  *    baseline, full period labels under their candles, one rule separator.
+ *    silent integer rounding of real prices. `│`/`+` guide, dashed `└╌`
+ *    baseline, full period labels under their candles, one rule separator.
  *  - Panel width auto-expands (explicit `width` is a floor, candles fit the
  *    longest period label — never the old 4-char `Jan`/`Jan1` mush — with a
  *    `CANDLE_MIN` floor so outlines never clip). The frame top carries
  *    `opts.title`; the eyebrow stays `OHLC` (never an uppercased title echo).
-  *  - **Degenerate input is safe.** Empty / all-non-finite renders a framed `0 candles · (no data)` panel with
+ *  - **Degenerate input is safe.** Empty / all-non-finite renders a framed `0 candles · (no data)` panel with
  *    null JSON facts; a flat range (all OHLC equal) pads ±1 so candles stay
  *    visible (never `NaN` rows); non-finite candles are excluded, never
  *    plotted. No `NaN`/`Infinity` anywhere. */
@@ -59,7 +59,11 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
 
   const raw = opts.data ?? [];
   const valid = raw.filter(
-    (c) => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close)
+    (c) =>
+      Number.isFinite(c.open) &&
+      Number.isFinite(c.high) &&
+      Number.isFinite(c.low) &&
+      Number.isFinite(c.close)
   );
   const n = valid.length;
   const empty = n === 0;
@@ -130,7 +134,9 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
   function yRowLabel(row: number): string {
     if (!showAxes) return "";
     const label =
-      row % yLabelStep === 0 || row === height - 1 ? padStart(tickLabel(row), yLabelW) : " ".repeat(yLabelW);
+      row % yLabelStep === 0 || row === height - 1
+        ? padStart(tickLabel(row), yLabelW)
+        : " ".repeat(yLabelW);
     return colorize(label, theme.label, noColor);
   }
 
@@ -140,14 +146,21 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
   }
 
   function outlineCell(row: number, rTop: number, rBot: number, color: string): string {
-    if (rTop === rBot) return colorize("┌" + "╌".repeat(Math.max(0, candleW - 2)) + "┐", color, noColor);
-    if (row === rTop) return colorize("┌" + "╌".repeat(Math.max(0, candleW - 2)) + "┐", color, noColor);
-    if (row === rBot) return colorize("└" + "╌".repeat(Math.max(0, candleW - 2)) + "┘", color, noColor);
+    if (rTop === rBot)
+      return colorize("┌" + "╌".repeat(Math.max(0, candleW - 2)) + "┐", color, noColor);
+    if (row === rTop)
+      return colorize("┌" + "╌".repeat(Math.max(0, candleW - 2)) + "┐", color, noColor);
+    if (row === rBot)
+      return colorize("└" + "╌".repeat(Math.max(0, candleW - 2)) + "┘", color, noColor);
     return colorize("│" + " ".repeat(Math.max(0, candleW - 2)) + "│", color, noColor);
   }
 
   function wickCell(color: string): string {
-    return colorize(" ".repeat(mid) + "│" + " ".repeat(Math.max(0, candleW - mid - 1)), color, noColor);
+    return colorize(
+      " ".repeat(mid) + "│" + " ".repeat(Math.max(0, candleW - mid - 1)),
+      color,
+      noColor
+    );
   }
 
   function buildPlotRows(): string[] {
@@ -213,29 +226,55 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
       lines.push(
-        frameTop(effectiveWidth, opts.title ?? "CANDLESTICK", undefined, theme.axis, theme.title, noColor, true)
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "CANDLESTICK",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
       );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
     if (!empty) {
-      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      for (const row of buildPlotRows())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+        );
       const baseline = buildBaseline();
-      if (baseline) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline);
+      if (baseline)
+        lines.push(
+          useFrame && !useCompact
+            ? frameRow(effectiveWidth, baseline, theme.axis, noColor)
+            : baseline
+        );
       const labels = buildPeriodLabels();
-      if (labels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels);
+      if (labels.trim())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, labels, theme.axis, noColor) : labels
+        );
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -248,7 +287,9 @@ export function candlestick(opts: CandlestickOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return candlestick({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return candlestick({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

@@ -98,26 +98,25 @@ line({
     ...single(() =>
       line({
         data: [
-          24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310,
-          24480, 24390, 24270, 24140, 24060, 24060, 23990, 23880, 23940, 23900,
-          24060, 24000, 24060, 24120, 24180, 24260, 24280, 24240, 24350, 24340,
-          24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860, 24860,
-          24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600
+          24000, 24080, 24150, 24260, 24400, 24460, 24380, 24400, 24340, 24310, 24480, 24390, 24270,
+          24140, 24060, 24060, 23990, 23880, 23940, 23900, 24060, 24000, 24060, 24120, 24180, 24260,
+          24280, 24240, 24350, 24340, 24460, 24470, 24490, 24510, 24550, 24600, 24660, 24800, 24860,
+          24860, 24720, 24660, 24630, 24590, 24540, 24510, 24470, 24520, 24560, 24600,
         ],
         labels: ["7D Ago", "6D Ago", "5D Ago", "4D Ago", "3D Ago", "2D Ago", "1D Ago", "Now"],
         title: "NIFTY 50 INDEX",
         width: 72,
         height: 18,
         theme: {
-            name: "nifty",
-            colors: ["\x1b[38;2;52;211;153m"], // Bright explicit green
-            axis: "\x1b[38;2;71;85;105m", // Dim explicit slate
-            label: "\x1b[38;2;148;163;184m",
-            title: "\x1b[38;2;52;211;153m",
-            grid: "\x1b[38;2;51;65;85m"
+          name: "nifty",
+          colors: ["\x1b[38;2;52;211;153m"], // Bright explicit green
+          axis: "\x1b[38;2;71;85;105m", // Dim explicit slate
+          label: "\x1b[38;2;148;163;184m",
+          title: "\x1b[38;2;52;211;153m",
+          grid: "\x1b[38;2;51;65;85m",
         },
         renderer: "ascii",
-      }),
+      })
     ),
   },
   {
@@ -140,7 +139,7 @@ bar({
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
         title: "Monthly Sales",
         height: 10,
-      }),
+      })
     ),
   },
   {
@@ -163,15 +162,14 @@ area({
         title: "Area Chart",
         width: 52,
         height: 10,
-      }),
+      })
     ),
   },
   {
     id: "sparkline",
     group: "Single value & progress",
     name: "Sparkline",
-    description:
-      "Compact inline charts — perfect for dashboards, logs, and status readouts.",
+    description: "Compact inline charts — perfect for dashboards, logs, and status readouts.",
     code: `import { sparkline } from "@ifelse.codes/chitra";
 
 // Unicode blocks (default)
@@ -203,7 +201,7 @@ sparkline({ data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
           data: [12, 8, 15, 6, 20, 18, 25, 22, 30, 28],
           label: "NET",
           renderer: "ascii",
-        }),
+        })
     ),
   },
   {
@@ -227,15 +225,14 @@ histogram({
         title: "Distribution",
         height: 10,
         width: 40,
-      }),
+      })
     ),
   },
   {
     id: "scatter",
     group: "Comparison",
     name: "Scatter Plot",
-    description:
-      "Two-dimensional point data for spotting correlations and clusters.",
+    description: "Two-dimensional point data for spotting correlations and clusters.",
     code: `import { scatter } from "@ifelse.codes/chitra";
 
 scatter({
@@ -262,15 +259,14 @@ scatter({
         title: "Scatter Plot",
         width: 50,
         height: 12,
-      }),
+      })
     ),
   },
   {
     id: "pie",
     group: "Part-to-whole",
     name: "Pie Chart",
-    description:
-      "Circular proportional chart for showing part-to-whole relationships.",
+    description: "Circular proportional chart for showing part-to-whole relationships.",
     code: `import { pie } from "@ifelse.codes/chitra";
 
 pie({
@@ -281,15 +277,14 @@ pie({
       pie({
         data: [35, 25, 20, 12, 8],
         labels: ["Organic", "Direct", "Social", "Email", "Paid"],
-      }),
+      })
     ),
   },
   {
     id: "donut",
     group: "Part-to-whole",
     name: "Donut Chart",
-    description:
-      "Pie chart with a hollow centre — great for showing a primary metric.",
+    description: "Pie chart with a hollow centre — great for showing a primary metric.",
     code: `import { donut } from "@ifelse.codes/chitra";
 
 donut({
@@ -300,7 +295,7 @@ donut({
       donut({
         data: [30, 25, 22, 15, 8],
         labels: ["TypeScript", "Python", "Rust", "Go", "Other"],
-      }),
+      })
     ),
   },
   {
@@ -333,7 +328,7 @@ heatmap({
         title: "Activity Heatmap",
         width: 40,
         height: 8,
-      }),
+      })
     ),
   },
   {
@@ -350,7 +345,7 @@ progress({ value: 34, label: "Coverage" }).render();`,
     ...multi(
       () => progress({ value: 87, label: "Build" }),
       () => progress({ value: 62, label: "Tests" }),
-      () => progress({ value: 34, label: "Coverage" }),
+      () => progress({ value: 34, label: "Coverage" })
     ),
   },
   {
@@ -368,16 +363,13 @@ gauge({
   label: "CPU Load",
   width: 40,
 }).render();`,
-    ...single(() =>
-      gauge({ value: 73, min: 0, max: 100, label: "CPU Load", width: 40 }),
-    ),
+    ...single(() => gauge({ value: 73, min: 0, max: 100, label: "CPU Load", width: 40 })),
   },
   {
     id: "horizontalBar",
     group: "Comparison",
     name: "Horizontal Bar",
-    description:
-      "Bars running left-to-right — ideal for ranked lists and comparisons.",
+    description: "Bars running left-to-right — ideal for ranked lists and comparisons.",
     code: `import { horizontalBar } from "@ifelse.codes/chitra";
 
 horizontalBar({
@@ -388,7 +380,7 @@ horizontalBar({
       horizontalBar({
         data: [892, 645, 534, 421, 289],
         labels: ["TypeScript", "Python", "Rust", "Go", "Ruby"],
-      }),
+      })
     ),
   },
   {
@@ -419,15 +411,14 @@ timeline({
         ],
         title: "Sprint Timeline",
         width: 52,
-      }),
+      })
     ),
   },
   {
     id: "radar",
     group: "Comparison",
     name: "Radar Chart",
-    description:
-      "Spider/radar chart for multi-axis comparison of a single entity.",
+    description: "Spider/radar chart for multi-axis comparison of a single entity.",
     code: `import { radar } from "@ifelse.codes/chitra";
 
 radar({
@@ -444,15 +435,14 @@ radar({
         title: "System Radar",
         width: 64,
         height: 28,
-      }),
+      })
     ),
   },
   {
     id: "boxplot",
     group: "Distribution & density",
     name: "Box Plot",
-    description:
-      "Statistical summary showing median, quartiles, and whiskers.",
+    description: "Statistical summary showing median, quartiles, and whiskers.",
     code: `import { boxplot } from "@ifelse.codes/chitra";
 
 boxplot({
@@ -475,15 +465,14 @@ boxplot({
         labels: ["Q1", "Q2", "Q3"],
         width: 50,
         height: 12,
-      }),
+      })
     ),
   },
   {
     id: "waterfall",
     group: "Flow & accumulation",
     name: "Waterfall",
-    description:
-      "Running total chart — shows cumulative effect of positive/negative values.",
+    description: "Running total chart — shows cumulative effect of positive/negative values.",
     code: `import { waterfall } from "@ifelse.codes/chitra";
 
 waterfall({
@@ -500,15 +489,14 @@ waterfall({
         height: 10,
         width: 50,
         showTotal: true,
-      }),
+      })
     ),
   },
   {
     id: "funnel",
     group: "Part-to-whole",
     name: "Funnel Chart",
-    description:
-      "Conversion funnel — visualise drop-off across stages of a pipeline.",
+    description: "Conversion funnel — visualise drop-off across stages of a pipeline.",
     code: `import { funnel } from "@ifelse.codes/chitra";
 
 funnel({
@@ -521,7 +509,7 @@ funnel({
         data: [10000, 6800, 3400, 1200, 340],
         labels: ["Visitors", "Sign-ups", "Trials", "Paid", "Enterprise"],
         width: 55,
-      }),
+      })
     ),
   },
   {
@@ -571,7 +559,7 @@ candlestick({
         height: 16,
         width: 72,
         theme: "dracula",
-      }),
+      })
     ),
   },
   {
@@ -606,7 +594,7 @@ treemap({
         title: "Codebase",
         width: 50,
         height: 10,
-      }),
+      })
     ),
   },
   {
@@ -636,7 +624,7 @@ sankey({
           { source: 1, target: 4, value: 20 },
         ],
         width: 52,
-      }),
+      })
     ),
   },
 ];

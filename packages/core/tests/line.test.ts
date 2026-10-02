@@ -111,7 +111,9 @@ describe("line chart", () => {
   });
 
   it("has exactly one frame rule separator (│ ╌) — S29 B-diet+", () => {
-    const lines = line({ data: [1, 2, 3] }).toPlain().split("\n");
+    const lines = line({ data: [1, 2, 3] })
+      .toPlain()
+      .split("\n");
     expect(lines.filter((l) => /^│ ╌+ │$/.test(l))).toHaveLength(1);
   });
 
@@ -133,7 +135,10 @@ describe("line chart", () => {
         const code = ch.charCodeAt(0);
         return code >= 0x2800 && code <= 0x28ff;
       }).length;
-    const counts = rows.map(brailleCount).filter((n) => n > 0).sort((a, b) => b - a);
+    const counts = rows
+      .map(brailleCount)
+      .filter((n) => n > 0)
+      .sort((a, b) => b - a);
     expect(counts.length).toBe(3);
     expect(counts[0]!).toBeGreaterThan(counts[1]!);
     expect(counts[1]!).toBeGreaterThan(counts[2]!);
@@ -156,11 +161,12 @@ describe("line chart", () => {
       line({ ...opts, noColor })
         .toPlain()
         .split("\n")
-        .map((s) =>
-          [...s].filter((ch) => {
-            const code = ch.charCodeAt(0);
-            return code >= 0x2800 && code <= 0x28ff;
-          }).length
+        .map(
+          (s) =>
+            [...s].filter((ch) => {
+              const code = ch.charCodeAt(0);
+              return code >= 0x2800 && code <= 0x28ff;
+            }).length
         )
         .reduce((a, b) => a + b, 0);
     const colour = totalBraille(false);
@@ -227,7 +233,12 @@ describe("line chart", () => {
   });
 
   it("renders dashed gridlines on y-step rows when grid is enabled", () => {
-    const result = line({ data: [10, 20, 15, 30, 25, 40, 35, 50], height: 16, noColor: true, grid: true });
+    const result = line({
+      data: [10, 20, 15, 30, 25, 40, 35, 50],
+      height: 16,
+      noColor: true,
+      grid: true,
+    });
     expect(result.toPlain()).toContain("· · ·"); // the dotted grid cadence
   });
 

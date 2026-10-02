@@ -110,7 +110,15 @@ describe("bar chart — locked S12 design", () => {
   });
 
   it("never uses a raw theme.colors[] rainbow entry for bar fill color, across every built-in theme", () => {
-    const themeNames = ["default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome"] as const;
+    const themeNames = [
+      "default",
+      "nord",
+      "dracula",
+      "github-dark",
+      "tokyo-night",
+      "solarized",
+      "monochrome",
+    ] as const;
     for (const name of themeNames) {
       const theme = resolveTheme(name);
       const raw = bar({ data: [10, 99, 30, 55], theme: name, showAxes: false }).toString();
@@ -135,7 +143,13 @@ describe("bar chart — locked S12 design", () => {
 
   it("renders a sparkline for every series in a multi-series chart's default width", () => {
     const plain = stripAnsi(
-      bar({ data: [[10, 20, 15], [8, 25, 12]], seriesLabels: ["Up", "Down"] }).toString()
+      bar({
+        data: [
+          [10, 20, 15],
+          [8, 25, 12],
+        ],
+        seriesLabels: ["Up", "Down"],
+      }).toString()
     );
     const lines = plain.split("\n").filter((l) => l.includes("avg") && l.includes("peak"));
     expect(lines.length).toBe(2);
@@ -147,7 +161,13 @@ describe("bar chart — locked S12 design", () => {
   // ── Multi-series ───────────────────────────────────────────────
   it("renders multi-series with legend", () => {
     const plain = stripAnsi(
-      bar({ data: [[10, 20], [15, 25]], seriesLabels: ["Alpha", "Beta"] }).toString()
+      bar({
+        data: [
+          [10, 20],
+          [15, 25],
+        ],
+        seriesLabels: ["Alpha", "Beta"],
+      }).toString()
     );
     expect(plain).toContain("Alpha");
     expect(plain).toContain("Beta");
@@ -155,7 +175,13 @@ describe("bar chart — locked S12 design", () => {
 
   it("multi-series summary has a row per series", () => {
     const plain = stripAnsi(
-      bar({ data: [[10, 20], [15, 25]], seriesLabels: ["A", "B"] }).toString()
+      bar({
+        data: [
+          [10, 20],
+          [15, 25],
+        ],
+        seriesLabels: ["A", "B"],
+      }).toString()
     );
     // Both series appear in summary (each has avg/peak)
     const peakMatches = (plain.match(/peak /g) ?? []).length;
@@ -178,7 +204,15 @@ describe("bar chart — locked S12 design", () => {
   });
 
   it("supports all themes without error", () => {
-    const themes = ["default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome"] as const;
+    const themes = [
+      "default",
+      "nord",
+      "dracula",
+      "github-dark",
+      "tokyo-night",
+      "solarized",
+      "monochrome",
+    ] as const;
     for (const theme of themes) {
       expect(bar({ data: [1, 2, 3], theme }).toString()).toBeTruthy();
     }

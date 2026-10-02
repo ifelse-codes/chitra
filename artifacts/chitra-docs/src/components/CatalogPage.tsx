@@ -16,8 +16,7 @@ type RunStatus = "Ready" | "Running…" | "Error";
 type RendererChoice = "braille" | "blocks" | "ascii";
 
 // Run shortcut label — ⌘↩ on Apple platforms, Ctrl+↩ elsewhere
-const IS_MAC =
-  typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
 const RUN_KBD = IS_MAC ? "⌘↩" : "Ctrl ↩";
 type ThemeChoice =
   | "default"
@@ -30,7 +29,13 @@ type ThemeChoice =
 
 const RENDERERS: RendererChoice[] = ["braille", "blocks", "ascii"];
 const THEMES: ThemeChoice[] = [
-  "default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome",
+  "default",
+  "nord",
+  "dracula",
+  "github-dark",
+  "tokyo-night",
+  "solarized",
+  "monochrome",
 ];
 
 const LINE_H = 20; // px — must match CSS var(--vim-lh)
@@ -138,7 +143,9 @@ function buildFnBody(code: string, renderer: RendererChoice, theme: ThemeChoice)
 // Fallback for code that ends in an expression (e.g. `…toString()`) and therefore
 // writes nothing to stdout.
 function buildReturnBody(code: string, renderer: RendererChoice, theme: ThemeChoice): string {
-  const src = stripImports(applyOverrides(code, renderer, theme)).trimEnd().replace(/;$/, "");
+  const src = stripImports(applyOverrides(code, renderer, theme))
+    .trimEnd()
+    .replace(/;$/, "");
   return `"use strict";\nreturn (\n${src}\n);`;
 }
 
@@ -154,18 +161,17 @@ interface RunResult {
 
 // Exported so `scripts/check-catalog-examples.ts` can execute the REAL evaluator
 // against every catalog example — a grep for `new Function` proves nothing.
-export function evalCode(
-  code: string,
-  renderer: RendererChoice,
-  theme: ThemeChoice,
-): RunResult {
+export function evalCode(code: string, renderer: RendererChoice, theme: ThemeChoice): RunResult {
   const t0 = performance.now();
   // Mock process.stdout so any stray .render() calls are captured
   const captured: string[] = [];
   const origProcess = (globalThis as Record<string, unknown>).process;
   (globalThis as Record<string, unknown>).process = {
     stdout: {
-      write: (s: string) => { captured.push(s); return true; },
+      write: (s: string) => {
+        captured.push(s);
+        return true;
+      },
       columns: 80,
       isTTY: true,
     },
@@ -193,7 +199,7 @@ export function evalCode(
       ansi = result;
     } else {
       throw new Error(
-        "Chart returned no output. Ensure code calls a chart function like line({...}).render().",
+        "Chart returned no output. Ensure code calls a chart function like line({...}).render()."
       );
     }
 
@@ -283,7 +289,7 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
         setRunStatus(res.error ? "Error" : "Ready");
       }, 0);
     },
-    [],
+    []
   );
 
   // Tab content helpers
@@ -319,16 +325,13 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
   // Keyboard handler — Escape only; Run lives in a GLOBAL listener below so
   // ⌘↩ / Ctrl+↩ fires anywhere on the page, not just inside the editor.
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Escape") {
-        setMode("NORMAL");
-        textareaRef.current?.blur();
-        return;
-      }
-    },
-    [],
-  );
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Escape") {
+      setMode("NORMAL");
+      textareaRef.current?.blur();
+      return;
+    }
+  }, []);
 
   // Global run shortcut — ⌘↩ (mac) / Ctrl+↩ (everything else)
   useEffect(() => {
@@ -435,7 +438,9 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             onChange={(e) => handleRendererChange(e.target.value as RendererChoice)}
           >
             {RENDERERS.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
 
@@ -446,7 +451,9 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             onChange={(e) => handleThemeChange(e.target.value as ThemeChoice)}
           >
             {THEMES.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </div>
@@ -456,11 +463,23 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
             {copied === "code" ? "✓ Copied!" : copied === "failed" ? "⚠ Copy failed" : "⧉ Code"}
           </button>
           <button className="ct-btn" onClick={() => copy("out")}>
-            {copied === "out" ? "✓ Copied!" : copied === "out-empty" ? "⚠ No output" : copied === "failed" ? "⚠ Copy failed" : "⧉ Output"}
+            {copied === "out"
+              ? "✓ Copied!"
+              : copied === "out-empty"
+                ? "⚠ No output"
+                : copied === "failed"
+                  ? "⚠ Copy failed"
+                  : "⧉ Output"}
           </button>
-          <button className="ct-btn" onClick={() => download("ts")}>⇩ .ts</button>
-          <button className="ct-btn" onClick={() => download("txt")}>⇩ .txt</button>
-          <button className="ct-btn ct-reset" onClick={reset}>↺ Reset</button>
+          <button className="ct-btn" onClick={() => download("ts")}>
+            ⇩ .ts
+          </button>
+          <button className="ct-btn" onClick={() => download("txt")}>
+            ⇩ .txt
+          </button>
+          <button className="ct-btn ct-reset" onClick={reset}>
+            ↺ Reset
+          </button>
         </div>
       </div>
 
@@ -504,7 +523,9 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
                 ))}
                 {/* ~ tilde markers past EOF */}
                 {Array.from({ length: 8 }, (_, i) => (
-                  <div key={`tilde-${i}`} className="vim-tilde">~</div>
+                  <div key={`tilde-${i}`} className="vim-tilde">
+                    ~
+                  </div>
                 ))}
               </div>
 
@@ -572,14 +593,21 @@ export function CatalogPage({ chart }: { chart: ChartDef }) {
 
             {/* Modeline */}
             <div className="vim-modeline">
-              <span className={`vim-mode-badge vim-mode-${mode === "NORMAL" ? "normal" : "insert"}`}>
+              <span
+                className={`vim-mode-badge vim-mode-${mode === "NORMAL" ? "normal" : "insert"}`}
+              >
                 -- {mode} --
               </span>
-              <span className="vim-ml-path"> catalog/{chart.id}/{activeTab}</span>
+              <span className="vim-ml-path">
+                {" "}
+                catalog/{chart.id}/{activeTab}
+              </span>
               <span className="vim-ml-spacer" />
               <span className="vim-ml-item">typescript</span>
               <span className="vim-ml-sep"> │ </span>
-              <span className="vim-ml-item">Ln {curLine}, Col {curCol}</span>
+              <span className="vim-ml-item">
+                Ln {curLine}, Col {curCol}
+              </span>
               <span className="vim-ml-sep"> │ </span>
               <span className="vim-ml-item">{pct}%</span>
             </div>

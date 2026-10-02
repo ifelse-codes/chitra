@@ -105,6 +105,26 @@ jobs:
       - name: Chart generation drift check
         run: pnpm --filter @workspace/chitra-docs run gen:charts:check
 
+  format:
+    name: format · prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      # S43 (F43-1): Prettier is adopted and enforced. Without this step the 31
+      # core files that failed --check under bare defaults would have silently
+      # rotted back to red the moment nobody ran `pnpm run format` locally.
+      - name: Prettier check
+        run: pnpm run format:check
+
   browser-qa:
     name: qa · browser QA (all catalog pages)
     runs-on: ubuntu-latest

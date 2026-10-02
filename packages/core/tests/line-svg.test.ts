@@ -22,7 +22,10 @@ function rgbOf(ansi: string): string {
 }
 
 const EIGHT = [1, 2, 3, 4, 5, 6, 7, 8];
-const TWO = [[1, 2, 3, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, 3, 2, 1]];
+const TWO = [
+  [1, 2, 3, 4, 5, 6, 7, 8],
+  [8, 7, 6, 5, 4, 3, 2, 1],
+];
 
 describe("line SVG parity with terminal", () => {
   it("paints every series with the terminal's exact colour (no drift)", () => {

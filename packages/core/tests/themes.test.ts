@@ -2,7 +2,15 @@ import { describe, it, expect } from "vitest";
 import { themes, resolveTheme } from "../src/themes/index.js";
 
 describe("themes", () => {
-  const themeNames = ["default", "nord", "dracula", "github-dark", "tokyo-night", "solarized", "monochrome"] as const;
+  const themeNames = [
+    "default",
+    "nord",
+    "dracula",
+    "github-dark",
+    "tokyo-night",
+    "solarized",
+    "monochrome",
+  ] as const;
 
   it("all themes are defined", () => {
     for (const name of themeNames) {

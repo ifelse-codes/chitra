@@ -62,15 +62,14 @@ function charWidth(ch: string): number {
     (code >= 0x4e00 && code <= 0x9fff) ||
     (code >= 0x3400 && code <= 0x4dbf) ||
     (code >= 0x20000 && code <= 0x2a6df)
-  ) return 2;
+  )
+    return 2;
   // Fullwidth forms (U+FF01–U+FF60) — 2 columns
   if (code >= 0xff01 && code <= 0xff60) return 2;
   // Braille Patterns (U+2800–U+28FF) — 1 column
   if (code >= 0x2800 && code <= 0x28ff) return 1;
   // Zero-width characters
-  if (
-    code === 0x200b || code === 0x200c || code === 0x200d || code === 0xfeff
-  ) return 0;
+  if (code === 0x200b || code === 0x200c || code === 0x200d || code === 0xfeff) return 0;
   return 1;
 }
 

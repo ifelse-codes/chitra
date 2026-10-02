@@ -182,11 +182,7 @@ export function treemap(opts: TreemapOptions): ChartResult {
 
   function buildFooter(): string {
     if (empty) return colorize("0 leaves · (no data)", theme.label, noColor);
-    const head = colorize(
-      `${flatNodes.length} leaves`,
-      theme.label,
-      noColor
-    );
+    const head = colorize(`${flatNodes.length} leaves`, theme.label, noColor);
     const peakTail = colorize(`peak ${peakNode!.label}`, acc, noColor);
     return head + colorize(" · ", theme.label, noColor) + peakTail;
   }
@@ -197,15 +193,22 @@ export function treemap(opts: TreemapOptions): ChartResult {
     const useCompact = opts.compact === true;
     const eyebrow = "AREA";
     if (useFrame && !useCompact) {
-      lines.push(frameTop(width, opts.title ?? "TREEMAP", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(width, opts.title ?? "TREEMAP", undefined, theme.axis, theme.title, noColor, true)
+      );
       lines.push(frameRule(width, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(width, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
     if (!empty) {
-      for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
+      for (const row of buildPlotRows())
+        lines.push(useFrame && !useCompact ? frameRow(width, row, theme.axis, noColor) : row);
     }
 
     if (!useCompact) {
@@ -216,15 +219,26 @@ export function treemap(opts: TreemapOptions): ChartResult {
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return treemap({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return treemap({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "treemap",

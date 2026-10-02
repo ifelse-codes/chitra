@@ -84,7 +84,13 @@ export function funnel(opts: FunnelOptions): ChartResult {
 
   // Auto-width: the panel expands so rows, eyebrow, and foot never clip.
   const rowLens = data.map(
-    (v) => labelW + 1 + barW + 1 + [...formatNumber(v)].length + (showPercent ? [...pctStr(v)].length + 3 : 0)
+    (v) =>
+      labelW +
+      1 +
+      barW +
+      1 +
+      [...formatNumber(v)].length +
+      (showPercent ? [...pctStr(v)].length + 3 : 0)
   );
   const effectiveWidth = Math.max(
     40,
@@ -108,7 +114,11 @@ export function funnel(opts: FunnelOptions): ChartResult {
   }
 
   function buildStageRow(v: number, i: number): string {
-    const label = colorize(padEnd((labels[i] ?? "").slice(0, labelW), labelW), theme.label, noColor);
+    const label = colorize(
+      padEnd((labels[i] ?? "").slice(0, labelW), labelW),
+      theme.label,
+      noColor
+    );
     const share = maxValue === 0 ? 0 : v / maxValue;
     const w = Math.max(1, Math.round(share * barW));
     // Centered on the bar field: the symmetric stepped silhouette that makes
@@ -145,7 +155,11 @@ export function funnel(opts: FunnelOptions): ChartResult {
     const convFact = colorize(conv, acc, noColor);
     const tail =
       dropIdx >= 0
-        ? colorize(` · DROP ${labels[dropIdx]} −${Math.round(dropPct * 100)}%`, theme.label, noColor)
+        ? colorize(
+            ` · DROP ${labels[dropIdx]} −${Math.round(dropPct * 100)}%`,
+            theme.label,
+            noColor
+          )
         : "";
     return head + convFact + tail;
   }
@@ -156,24 +170,45 @@ export function funnel(opts: FunnelOptions): ChartResult {
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
       lines.push(
-        frameTop(effectiveWidth, opts.title ?? "FUNNEL", undefined, theme.axis, theme.title, noColor, true)
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "FUNNEL",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
       );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
-    const bodyRows = fitBodyLines(data.map((v, i) => buildStageRow(v, i)), opts.height);
-    for (const row of bodyRows) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    const bodyRows = fitBodyLines(
+      data.map((v, i) => buildStageRow(v, i)),
+      opts.height
+    );
+    for (const row of bodyRows)
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -186,7 +221,9 @@ export function funnel(opts: FunnelOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return funnel({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return funnel({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },
@@ -195,12 +232,13 @@ export function funnel(opts: FunnelOptions): ChartResult {
         type: "funnel",
         data: opts.data,
         labels,
-        conversionRates: data.map((v, i) => (i === 0 ? 1 : first !== 0 ? +(v / first).toFixed(4) : 0)),
+        conversionRates: data.map((v, i) =>
+          i === 0 ? 1 : first !== 0 ? +(v / first).toFixed(4) : 0
+        ),
         // Additive S26 facts: end-to-end conversion and the biggest drop
         // (null when there is no data or no measurable drop).
         conversion,
-        biggestDrop:
-          dropIdx >= 0 ? { label: labels[dropIdx], pct: +(dropPct.toFixed(4)) } : null,
+        biggestDrop: dropIdx >= 0 ? { label: labels[dropIdx], pct: +dropPct.toFixed(4) } : null,
         plain: stripAnsi(output),
       };
     },

@@ -111,11 +111,12 @@ function catmullRom(data: number[], u: number): number {
   const p3 = data[Math.min(n - 1, i + 2)]!;
   const t2 = t * t;
   const t3 = t2 * t;
-  return 0.5 * (
-    2 * p1 +
-    (-p0 + p2) * t +
-    (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
-    (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+  return (
+    0.5 *
+    (2 * p1 +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
   );
 }
 
@@ -208,11 +209,17 @@ function drawBrailleLine(
     canvas.set(x0, y0);
     lastX = x0;
     lastY = y0;
-    
+
     if (x0 === x1 && y0 === y1) break;
-    
+
     const e2 = 2 * err;
-    if (e2 > -dy) { err -= dy; x0 += sx; }
-    if (e2 < dx) { err += dx; y0 += sy; }
+    if (e2 > -dy) {
+      err -= dy;
+      x0 += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y0 += sy;
+    }
   }
 }

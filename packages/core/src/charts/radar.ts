@@ -37,8 +37,8 @@ const DOT_BITS = [
  *    it** (the S23 progress precedent): braille web in every mode.
  *  - Magnitudes clamp at zero (negatives and non-finite samples collapse to
  *    the center, never `NaN`).
-  *  - Same panel language as all locked charts: dashed frame, `AXES · SERIES`
-  *    eyebrow, glyph legend, one rule, `average · peak` foot (peak accented).
+ *  - Same panel language as all locked charts: dashed frame, `AXES · SERIES`
+ *    eyebrow, glyph legend, one rule, `average · peak` foot (peak accented).
  *    Width auto-expands (explicit `width` is a floor, not a cap). */
 export function radar(opts: RadarChartOptions): ChartResult {
   const theme = resolveTheme(opts.theme);
@@ -331,12 +331,11 @@ export function radar(opts: RadarChartOptions): ChartResult {
 
   function buildSummary(): string {
     if (empty) return colorize(footPlain, theme.label, noColor);
-    const head = colorize(
-      `average ${formatNumber(overallAvg)} · `,
-      theme.label,
-      noColor
+    const head = colorize(`average ${formatNumber(overallAvg)} · `, theme.label, noColor);
+    return (
+      head +
+      colorize(`peak ${axisLabels[peakAxis] ?? ""} (${formatNumber(overallMax)})`, acc, noColor)
     );
-    return head + colorize(`peak ${axisLabels[peakAxis] ?? ""} (${formatNumber(overallMax)})`, acc, noColor);
   }
 
   function buildLines(): string[] {
@@ -345,28 +344,48 @@ export function radar(opts: RadarChartOptions): ChartResult {
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
       lines.push(
-        frameTop(effectiveWidth, opts.title ?? "RADAR", undefined, theme.axis, theme.title, noColor, true)
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "RADAR",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
       );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
     if (!empty) {
-      for (const row of buildWeb()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+      for (const row of buildWeb())
+        lines.push(
+          useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+        );
       if (!useCompact) {
-        lines.push(useFrame ? frameRow(effectiveWidth, legendRow(), theme.axis, noColor) : legendRow());
+        lines.push(
+          useFrame ? frameRow(effectiveWidth, legendRow(), theme.axis, noColor) : legendRow()
+        );
       }
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
@@ -379,7 +398,9 @@ export function radar(opts: RadarChartOptions): ChartResult {
     toPlain() {
       return stripAnsi(output);
     },
-    toContent() { return radar({ ...opts, frame: false, compact: true }).toPlain(); },
+    toContent() {
+      return radar({ ...opts, frame: false, compact: true }).toPlain();
+    },
     toMarkdown() {
       return "```\n" + stripAnsi(output) + "\n```";
     },

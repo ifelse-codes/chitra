@@ -74,7 +74,9 @@ for (const chart of CHARTS) {
   }
 }
 if (notInjected.length > 0) {
-  console.error(`FAIL  renderer/theme not injected into ${notInjected.length} chart(s) — ${notInjected.join(", ")}`);
+  console.error(
+    `FAIL  renderer/theme not injected into ${notInjected.length} chart(s) — ${notInjected.join(", ")}`
+  );
 } else {
   console.log(`ok    renderer + theme injected into all ${CHARTS.length} chart sources`);
 }
@@ -93,10 +95,12 @@ checked++;
 if (differing.length < RENDERER_SENSITIVE_CHARTS) {
   failed++;
   console.error(
-    `FAIL  only ${differing.length} chart(s) changed OUTPUT between braille and ascii, expected >= ${RENDERER_SENSITIVE_CHARTS} — the rewrite is not reaching the renderer`,
+    `FAIL  only ${differing.length} chart(s) changed OUTPUT between braille and ascii, expected >= ${RENDERER_SENSITIVE_CHARTS} — the rewrite is not reaching the renderer`
   );
 } else {
-  console.log(`ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii, floor ${RENDERER_SENSITIVE_CHARTS})`);
+  console.log(
+    `ok    renderer reaches output  (${differing.length}/${comparable.length} charts differ braille vs ascii, floor ${RENDERER_SENSITIVE_CHARTS})`
+  );
 }
 
 // The Theme control had NO end-to-end assertion: the only theme coverage was a
@@ -114,10 +118,12 @@ checked++;
 if (themeDiffering.length < THEME_SENSITIVE_CHARTS) {
   failed++;
   console.error(
-    `FAIL  only ${themeDiffering.length} chart(s) changed OUTPUT between themes, expected >= ${THEME_SENSITIVE_CHARTS} — the theme rewrite is not reaching the renderer`,
+    `FAIL  only ${themeDiffering.length} chart(s) changed OUTPUT between themes, expected >= ${THEME_SENSITIVE_CHARTS} — the theme rewrite is not reaching the renderer`
   );
 } else {
-  console.log(`ok    theme reaches output  (${themeDiffering.length}/${CHARTS.length} charts differ default vs monochrome, floor ${THEME_SENSITIVE_CHARTS})`);
+  console.log(
+    `ok    theme reaches output  (${themeDiffering.length}/${CHARTS.length} charts differ default vs monochrome, floor ${THEME_SENSITIVE_CHARTS})`
+  );
 }
 
 // A deliberately broken buffer must be CAUGHT (exit 1 + message), never thrown.
@@ -138,16 +144,22 @@ const EXPECTED_CHARTS = 20;
 const EXPECTED_RENDERERS = 3;
 if (CHARTS.length !== EXPECTED_CHARTS) {
   failed++;
-  console.error(`FAIL  expected ${EXPECTED_CHARTS} charts, found ${CHARTS.length} — the input set changed`);
+  console.error(
+    `FAIL  expected ${EXPECTED_CHARTS} charts, found ${CHARTS.length} — the input set changed`
+  );
 }
 if (RENDERERS.length !== EXPECTED_RENDERERS) {
   failed++;
-  console.error(`FAIL  expected ${EXPECTED_RENDERERS} renderers, found ${RENDERERS.length} — the input set changed`);
+  console.error(
+    `FAIL  expected ${EXPECTED_RENDERERS} renderers, found ${RENDERERS.length} — the input set changed`
+  );
 }
 const EXPECTED_CHECKS = EXPECTED_CHARTS * (2 + EXPECTED_RENDERERS) + 3;
 if (checked !== EXPECTED_CHECKS) {
   failed++;
-  console.error(`FAIL  expected ${EXPECTED_CHECKS} checks, ran ${checked} — the suite changed shape`);
+  console.error(
+    `FAIL  expected ${EXPECTED_CHECKS} checks, ran ${checked} — the suite changed shape`
+  );
 }
 
 console.log(`\n${checked - failed}/${checked} catalog example checks passed`);

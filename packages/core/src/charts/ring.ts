@@ -198,11 +198,7 @@ export function renderLegend(
 
   const rows = slices.map((s, i) => {
     const glyph = colorize(s.glyph, s.color, noColor);
-    const name = colorize(
-      padEnd(s.label, nameW),
-      s.accent ? theme.title : theme.label,
-      noColor
-    );
+    const name = colorize(padEnd(s.label, nameW), s.accent ? theme.title : theme.label, noColor);
     const val = showValues
       ? colorize(padStart(valStrs[i]!, valW), s.accent ? theme.title : theme.label, noColor)
       : "";

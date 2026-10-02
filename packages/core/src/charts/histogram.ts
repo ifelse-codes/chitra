@@ -70,7 +70,10 @@ export function histogram(opts: HistogramOptions): ChartResult {
   let modeIdx = 0;
   let modeCount = -1;
   bins.forEach((c, i) => {
-    if (c > modeCount) { modeCount = c; modeIdx = i; }
+    if (c > modeCount) {
+      modeCount = c;
+      modeIdx = i;
+    }
   });
   const modeValue = hasData ? dataMin + modeIdx * binSize : 0;
   const p50 = percentile(sorted, 50);
@@ -113,9 +116,10 @@ export function histogram(opts: HistogramOptions): ChartResult {
     const yLabelStep = Math.max(1, Math.floor(height / 4));
     const yVal = yMax - (row / Math.max(1, height - 1)) * (yMax - yMin);
     // Counts are integers — the y axis never prints decimals.
-    const label = row % yLabelStep === 0 || row === height - 1
-      ? padStart(formatNumber(Math.round(yVal)), yLabelW)
-      : " ".repeat(yLabelW);
+    const label =
+      row % yLabelStep === 0 || row === height - 1
+        ? padStart(formatNumber(Math.round(yVal)), yLabelW)
+        : " ".repeat(yLabelW);
     return colorize(label, theme.label, noColor);
   }
 
@@ -138,7 +142,10 @@ export function histogram(opts: HistogramOptions): ChartResult {
         const cell = !isFilled
           ? " ".repeat(barWidth)
           : colorize(
-              (isMode ? "█" : COUNT_SHADES[Math.min(toneIdx(count), COUNT_SHADES.length - 1)]!).repeat(barWidth),
+              (isMode
+                ? "█"
+                : COUNT_SHADES[Math.min(toneIdx(count), COUNT_SHADES.length - 1)]!
+              ).repeat(barWidth),
               isMode ? acc : tones[toneIdx(count)]!,
               noColor
             );
@@ -158,9 +165,7 @@ export function histogram(opts: HistogramOptions): ChartResult {
 
   function buildBinLabels(): string {
     if (!showAxes || !hasData) return "";
-    const cells = bins.map((_, i) =>
-      padEnd(formatNumber(dataMin + i * binSize, 0), barWidth + 1)
-    );
+    const cells = bins.map((_, i) => padEnd(formatNumber(dataMin + i * binSize, 0), barWidth + 1));
     return " ".repeat(gutter) + colorize(cells.join("").slice(0, plotCols), theme.label, noColor);
   }
 
@@ -176,36 +181,74 @@ export function histogram(opts: HistogramOptions): ChartResult {
     const useFrame = opts.frame !== false;
     const useCompact = opts.compact === true;
     if (useFrame && !useCompact) {
-      lines.push(frameTop(effectiveWidth, opts.title ?? "HISTOGRAM", undefined, theme.axis, theme.title, noColor, true));
+      lines.push(
+        frameTop(
+          effectiveWidth,
+          opts.title ?? "HISTOGRAM",
+          undefined,
+          theme.axis,
+          theme.title,
+          noColor,
+          true
+        )
+      );
       lines.push(frameRule(effectiveWidth, theme.axis, noColor));
     }
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor) : colorize(eyebrow, theme.label, noColor));
+      lines.push(
+        useFrame
+          ? frameRow(effectiveWidth, colorize(eyebrow, theme.label, noColor), theme.axis, noColor)
+          : colorize(eyebrow, theme.label, noColor)
+      );
     }
 
-    for (const row of buildPlotRows()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row);
+    for (const row of buildPlotRows())
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, row, theme.axis, noColor) : row
+      );
     const baseline = buildBaseline();
-    if (baseline) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline);
+    if (baseline)
+      lines.push(
+        useFrame && !useCompact ? frameRow(effectiveWidth, baseline, theme.axis, noColor) : baseline
+      );
     const binLabels = buildBinLabels();
-    if (binLabels.trim()) lines.push(useFrame && !useCompact ? frameRow(effectiveWidth, binLabels, theme.axis, noColor) : binLabels);
+    if (binLabels.trim())
+      lines.push(
+        useFrame && !useCompact
+          ? frameRow(effectiveWidth, binLabels, theme.axis, noColor)
+          : binLabels
+      );
 
     if (!useCompact) {
-      lines.push(useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary());
+      lines.push(
+        useFrame ? frameRow(effectiveWidth, buildSummary(), theme.axis, noColor) : buildSummary()
+      );
     }
     if (useFrame && !useCompact) lines.push(frameBottom(effectiveWidth, theme.axis, noColor, true));
     return lines;
   }
 
   const rawLines = buildLines();
-  const clippedLines = opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
+  const clippedLines =
+    opts.maxWidth === undefined ? rawLines : rawLines.map((l) => truncateAnsi(l, opts.maxWidth!));
   const output = clippedLines.join("\n");
 
   return {
-    render() { process.stdout.write(output + "\n"); },
-    toString() { return output; },
-    toPlain() { return stripAnsi(output); },
-    toContent() { return histogram({ ...opts, frame: false, compact: true }).toPlain(); },
-    toMarkdown() { return "```\n" + stripAnsi(output) + "\n```"; },
+    render() {
+      process.stdout.write(output + "\n");
+    },
+    toString() {
+      return output;
+    },
+    toPlain() {
+      return stripAnsi(output);
+    },
+    toContent() {
+      return histogram({ ...opts, frame: false, compact: true }).toPlain();
+    },
+    toMarkdown() {
+      return "```\n" + stripAnsi(output) + "\n```";
+    },
     toJSON() {
       return {
         type: "histogram",
