@@ -22,8 +22,8 @@ Detail: `sessions/session-41-summary.md` + `sessions/session-41-review.md` + `.a
 | npm README | 785 → 122 lines; the internal design log is not public any more |
 | CONTRIBUTING / replit.md / `ci.yml` | five false claims, the Node facts, and the provenance comment all corrected |
 | Machine-path junk | 4 untracked files deleted, one a 277 KB transcript with `/Users/suman/…` |
-| Verify | `verify-session-41.sh` **24/24**, every check with a proven counterfactual; `verify-session-39.sh` 43/43 |
-| Tests | **453/453** in 23 files — the one new test guards the version |
+| Verify | S41's gate is 24/24, every check with a proven counterfactual; S39's is 43/43 |
+| Tests | **453 green** in 23 files — the one new test guards the version |
 | Product code | **untouched.** 0 files under `src/charts/`, `src/renderers/`, `src/themes/` |
 
 ## S42 — cleanup Batch 2: dead weight (the roadmap's next item)
