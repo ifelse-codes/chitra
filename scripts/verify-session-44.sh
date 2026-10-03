@@ -451,7 +451,7 @@ run_check "test-count-propagated" bash -c '
 
   # S41 exempts ITS OWN gate from this inventory, because it names the number
   # only to explain the trap. Each port extends the exemption to itself for the
-  # same reason: S44's gate carries those inherited comments verbatim. The frozen demo-41/demo-42 legitimately still
+  # same reason: the S44 gate carries those inherited comments verbatim. The frozen demo-41/demo-42 legitimately still
   # display 453 in their prose, so they belong in the expected SET rather than
   # in the exemptions. An exemption is for files that must NOT display it.
   expected=".ai/CONTINUATION-PROMPT.md
