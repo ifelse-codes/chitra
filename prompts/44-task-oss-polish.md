@@ -177,6 +177,40 @@ D4b = **record, do not rewrite history** · D5 = **strip + own-commit regen** ·
 N1 + §4.9 = **fix both**. Recorded in requirement 7 rather than left in chat, because a
 decision that lives only in a transcript is a decision the next session cannot find.
 
+## Contract amendments
+
+Appended, never written into the requirement above — the N1 rule this session ships, applied
+to this contract from the start. Each amendment names the requirement it touches and the
+evidence that forced it.
+
+### A1 — requirement 11: the removal set is all 81 `overrides` entries, not the 11 whose package
+is absent from the lockfile
+
+Requirement 11 says an entry goes only "when the package they override is not in the dependency
+graph". Measured literally that is **11 of 81** — `@esbuild-kit/esm-loader` plus the ten
+`@expo/ngrok-bin-*` — because the other 70 name platform packages that do appear in
+`pnpm-lock.yaml`.
+
+That was the wrong test. The question is whether the override **affects resolution**, and the
+experiment answers it for every entry: delete all 81, run `pnpm install --lockfile-only`, and
+the lockfile diff is **empty**. Then a full `pnpm install` exits 0, `pnpm install
+--frozen-lockfile` exits 0, root typecheck exits 0, and **453/453** pass. The 70 platform
+entries are inert — `@esbuild/darwin-arm64@0.27.3` sits in `node_modules/.pnpm` *while*
+`esbuild>@esbuild/darwin-arm64` is overridden to `"-"`.
+
+All 81 go, so the requirement's intent — no dead config in the workspace manifest — is met
+rather than a quarter of it. The requirement text above is unchanged, which is the point of
+having an amendments section at all.
+
+**The "in its own commit" clause needs one honest note.** The regen ran and its result is the
+empty diff above: `pnpm-lock.yaml` did not change, so there is no lockfile commit to separate
+from the manifest change. `git log -1 --format=%h -- pnpm-lock.yaml` still names S43's commit,
+and that *is* the evidence that this session regenerated it and nothing moved.
+
+**Not covered by this amendment, deliberately:** `minimumReleaseAgeExclude:
+stripe-replit-sync` is the same species of Replit-scaffold cruft but is not an `overrides`
+entry, so requirement 11 does not reach it. Named here rather than smuggled in.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder
