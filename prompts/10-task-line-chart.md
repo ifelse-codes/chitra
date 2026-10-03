@@ -1,7 +1,7 @@
 # Session 10 — reference-lock the line chart: thin multi-series lines (founder direction)
 
 ## Goal (one story)
-The founder's reference `/Users/suman/Downloads/tui-chart (1).html` is a classic
+The founder's reference `~/Downloads/tui-chart (1).html` is a classic
 terminal multi-series chart: continuous colored lines, glyph markers (`* o + x`) at
 data points, a `─ glyph ─ name` legend, dashed gridlines, and a per-series
 MIN/MAX/AVG/LAST summary. Rebuild `line()` so the terminal braille/ascii output

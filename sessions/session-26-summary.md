@@ -124,7 +124,7 @@ Contract: `prompts/26-task-waterfall-mudra.md` (one of the two cold-review
 inputs, extended for funnel + sankey). Atomic, ≤3 files each:
 
 ```bash
-V=26; cd /Users/suman/playground/chitra && git checkout session-26-waterfall-mudra
+V=26; cd ~/playground/chitra && git checkout session-26-waterfall-mudra
 git add packages/core/src/charts/waterfall.ts packages/core/tests/waterfall.test.ts packages/core/src/charts/funnel.ts && VAJRA_ALLOW_COMMIT=$V git commit -m "S26: lock waterfall + funnel renders"
 git add packages/core/src/charts/sankey.ts packages/core/tests/funnel.test.ts packages/core/tests/sankey.test.ts && VAJRA_ALLOW_COMMIT=$V git commit -m "S26: lock sankey render + funnel/sankey tests"
 git add packages/core/src/charts/radar.ts packages/core/tests/radar.test.ts && VAJRA_ALLOW_COMMIT=$V git commit -m "S26: lock radar render + tests"

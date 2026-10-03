@@ -56,7 +56,7 @@ on npm, and the repo around it is being made fit to publish.
 - 🔴 **The public flip still has no date and two unanswered founder decisions.** **D1** — how
   much internal process (`.ai/`, `sessions/`, `prompts/`, `.claude/`, `reviewer/`, `darshan/`;
   ~146 files) goes public; options B and C break `check_session_coverage` / `check_task_ref`
-  unless the closeout gates are rewritten first. **D4** — whether to scrub the `/Users/suman/…`
+  unless the closeout gates are rewritten first. **D4** — whether to scrub the `~/…`
   paths in tracked files. **D4 is irreversible once published.**
 - 🟠 **Unattended publishing is configured but unproven since S38.** No release has traversed
   CI since the trusted publisher was created. The cheapest close is a real `0.4.0`.

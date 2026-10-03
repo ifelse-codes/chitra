@@ -36,7 +36,7 @@
   `engines`; and decisions **D1** (how much internal process goes public — options B/C
   break `check_session_coverage`/`check_task_ref` unless the gates are rewritten first),
   **D2** (hooks activation), **D3/D6** (track or ignore `playground/` + mockups),
-  **D4** (the `/Users/suman/…` personal-path scrub — **irreversible once published**),
+  **D4** (the `~/…` personal-path scrub — **irreversible once published**),
   **D5** (`pnpm-workspace.yaml` `overrides` cruft, needs its own lockfile regen).
 - S44 also owns the two S42/S43 findings: the contract-rewrite freshness hole (N1), and
   the **~60-minute gate cost** (§4.9) — which S43 does not worsen (its counterfactual

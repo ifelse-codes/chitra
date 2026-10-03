@@ -130,7 +130,7 @@ Not smuggled in, not deferred quietly:
 - **S43** — 43 unused shadcn components (~5,000 LOC), Prettier (31 core files fail `--check`),
   the `lint` script pointing at an eslint nobody installed.
 - **S44** — OSS polish (`SECURITY.md`, CoC, templates, CI badge, coverage job, `engines`) and
-  founder decisions **D1–D6**, including **D4**, the `/Users/suman/…` scrub, which is
+  founder decisions **D1–D6**, including **D4**, the `~/…` scrub, which is
   **irreversible once published**.
 - **The public flip** — after S44.
 - **`pnpm-workspace.yaml`'s ~140 lines of `overrides`** (expo, ngrok) — **D5**, S44, needs its

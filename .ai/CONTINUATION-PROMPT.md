@@ -32,7 +32,7 @@ Detail: `sessions/session-43-summary.md` + `sessions/session-43-review.md` + `.a
 2. **Founder decisions D1–D6:** **D1** (how much internal process goes public — options B/C
    break `check_session_coverage` / `check_task_ref` unless the gates are rewritten first);
    **D2** (hooks activation); **D3/D6** (track or ignore `playground/` + the design mockups);
-   **D4** (the `/Users/suman/…` scrub — **irreversible once published**); **D5**
+   **D4** (the `~/…` scrub — **irreversible once published**); **D5**
    (`pnpm-workspace.yaml` `overrides` cruft, needs its **own** lockfile regen).
 3. **Two carried findings:** the contract-rewrite freshness hole (S42 N1), and the **~60-minute
    gate cost** (§4.9). S43 did not worsen the cost — its counterfactual extracts one check
@@ -48,7 +48,7 @@ Detail: `sessions/session-43-summary.md` + `sessions/session-43-review.md` + `.a
 - **D1 — how much internal process goes public?** `~146 files`. Option A (keep) keeps the
   closeout gates working. **B and C break `check_session_coverage` / `check_task_ref` unless the
   gates are rewritten first.**
-- **D4 — the personal-path scrub.** Tracked files carry `/Users/suman/…`. **History is published
+- **D4 — the personal-path scrub.** Tracked files carry `~/…`. **History is published
   with the flip; this is irreversible after it.** Answer before, not after.
 
 ## Also still open

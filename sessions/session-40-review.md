@@ -40,7 +40,7 @@ requires redoing the audit.
 
 ## Independently re-verified probes
 
-All run read-only from `/Users/suman/playground/chitra` on 2026-09-30. No file written
+All run read-only from `~/playground/chitra` on 2026-09-30. No file written
 except this review.
 
 | Probe | Stated in audit | What I got | Agrees? |

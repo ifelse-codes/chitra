@@ -180,6 +180,6 @@ printf '  %-34s %s\n' "commits"                    "$(git rev-list --count main.
 printf '\n%s%sNot built here — named, so it cannot be smuggled in:%s\n' "$B" "$Y" "$N"
 printf '  %sBatch 3 (S43)%s  43 unused shadcn components, Prettier, the lint script pointing at an eslint nobody installed\n' "$D" "$N"
 printf '  %sBatch 4 (S44)%s  OSS templates, coverage job, engines — and founder decisions D1–D6\n' "$D" "$N"
-printf '  %sthe flip%s      after S44. D1 (what goes public) and D4 (the /Users/suman path scrub, irreversible once published) are yours.\n' "$D" "$N"
+printf '  %sthe flip%s      after S44. D1 (what goes public) and D4 (the ~ path scrub, irreversible once published) are yours.\n' "$D" "$N"
 printf '  %suntouched%s    pnpm-workspace overrides (D5, needs its own regen), the historical verify/demo pairs, all frozen history.\n' "$D" "$N"
 printf '\n'
