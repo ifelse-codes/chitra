@@ -95,7 +95,26 @@ if not, they go, and the one-liner becomes true.**
   re-expresses it as `charts-format-only`. Product untouched: 453 tests unchanged, LOCKED dirs
   reformat-only. **Also corrected: Prettier lowered v8 statement/line coverage 96.11 → 94.27
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
-- ⬜ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions.**  See `.ai/TASK.md` and `.ai/CONTINUATION-PROMPT.md`: `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job, `engines`, and decisions **D1–D6**. **Then the public flip.**
+- ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
+  (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendment **A1**).
+  **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
+  **no invented mailbox** — private reports route through the one channel that reaches the
+  maintainers), `.github/ISSUE_TEMPLATE/` (2 forms + `config.yml`), a PR template, a **CI badge**
+  read out of the README and matched against a file that must exist, **coverage enforced** in the
+  `core` job (`test:coverage` replaces the plain `Test` step, suite still runs once, no coverage
+  service), and **`engines` derived from what `ci.yml` pins** (repo `>=26`/`>=9.12.3`; package
+  `>=22` disclosed in CONTRIBUTING as a support policy, not a test result).
+  **The six decisions, answered:** **D1 = A** (publish all ~146 process files), **D2** documented
+  in CONTRIBUTING, **D3/D6 = ignore**, **D4 = scrub** (15 files, one mechanical commit, `--no-verify`
+  under the contract's authorisation), **D4b = recorded for the flip**, **D5 = all 81 `overrides`
+  stripped with a zero-delta lockfile regen**. **N1** closed with a rule in `reviewer/SKILL.md` +
+  a pure `contract-freshness` core in `verify-closeout.sh`; **§4.9** with `VAJRA_GATE_SCOPE` +
+  per-check timings. Product untouched: **453/453**, no file under `packages/core/src/`.
+- ⬜ **Session 45 (S45) — the public flip.** One move resolves: the README `git clone` URL, npm
+  `repository.url` / `homepage`, **npm provenance** (a private repo cannot generate it), a real
+  **`0.4.0`** through the trusted-publisher runway, and **D4b** — the history rewrite that purges
+  the home path from all 565 commits (**irreversible; every recorded SHA moves**). Then the GTM
+  proof pack, with the measured **zero** downloads as its `t0`.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
