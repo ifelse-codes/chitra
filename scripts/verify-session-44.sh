@@ -949,7 +949,7 @@ run_check "contract-freshness-teeth" freshness_teeth
 # this session owns, and — the counterfactual — the measured seconds it removes
 # are > 0 and < the whole gate, read out of the timings this script just wrote.
 gate_scope_switch() {
-  local s tf total=0 skipped=0 name secs lines=0
+  local s tf="" total=0 skipped=0 name secs lines=0 f
   [ "$(resolve_scope)" = full ] || { echo "the default scope is not full"; return 1; }
   [ "$(resolve_scope fast)" = fast ] || { echo "fast does not resolve"; return 1; }
   resolve_scope bogus >/dev/null 2>&1 && { echo "an invalid scope is accepted"; return 1; }
@@ -962,12 +962,25 @@ gate_scope_switch() {
            overrides-gone contract-freshness-teeth s43-gate-verbatim-goes-red contract-at-head; do
     if gate_skips fast "$s"; then echo "fast would skip $s, which this session owns"; return 1; fi
   done
-  # The largest timings file is a full run (fast skips checks, so it records
-  # fewer lines) — reading a fast run here would price nothing.
-  tf=$(for f in .ai/verify/session-44/*/timings.txt; do
-         [ -f "$f" ] && echo "$(wc -l < "$f" | tr -d ' ') $f"
-       done | sort -rn | head -1 | cut -d' ' -f2)
-  [ -n "$tf" ] || { echo "no timings recorded yet — run this gate once in full scope"; return 1; }
+  # The timings have to come from a FULL run: fast never runs a check it skips,
+  # so a fast run's file contains none of these names and prices nothing. Two
+  # traps found by running it — (a) picking by line count alone tied 41 = 41
+  # between the current run and the previous fast one, and `sort -rn`'s
+  # last-resort comparison put "latest/" above a timestamp, so it read the OLD
+  # run and reported 0; (b) `latest` is a symlink, so it can name a run that is
+  # not the one in progress. Selection is therefore: real dirs only, and the
+  # file must actually contain a check fast would skip.
+  local best=0
+  for f in .ai/verify/session-44/*/timings.txt; do
+    [ -f "$f" ] || continue
+    case "$f" in */latest/*) continue ;; esac
+    lines=$(wc -l < "$f" | tr -d ' ')
+    [ "$lines" -gt 0 ] || continue
+    awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
+      || continue
+    if [ "$lines" -gt "$best" ]; then best=$lines; tf=$f; fi
+  done
+  [ -n "$tf" ] || { echo "no FULL run's timings yet — run this gate once with VAJRA_GATE_SCOPE=full"; return 1; }
   while read -r name secs; do
     [ -n "$name" ] || continue
     total=$((total + secs)); lines=$((lines + 1))
@@ -976,7 +989,7 @@ gate_scope_switch() {
   [ "$lines" -gt 0 ] || { echo "$tf records no checks"; return 1; }
   [ "$skipped" -gt 0 ] || { echo "the skip list costs 0 measured seconds — fast would not be faster"; return 1; }
   [ "$skipped" -lt "$total" ] || { echo "the skip list covers the entire gate"; return 1; }
-  echo "fast removes ${skipped}s of ${total}s measured across $lines checks ($((skipped * 100 / (total > 0 ? total : 1)))%) — prints it either way as wall-clock minutes"
+  echo "fast removes ${skipped}s ($((skipped / 60))m$((skipped % 60))s) of ${total}s ($((total / 60))m$((total % 60))s) measured across $lines checks — $((skipped * 100 / (total > 0 ? total : 1)))% of this gate's own wall clock"
 }
 run_check "gate-scope-switch" gate_scope_switch
 
@@ -1156,9 +1169,9 @@ run_check "demo-displays-count-at-runtime" bash -c "
 
 ( cd ".ai/verify/session-44" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
-ELAPSED_MIN=$(( ( $(date +%s) - START ) / 60 ))
-echo ""
-echo "=== Session 44 Verify Summary (scope=$SCOPE, ${ELAPSED_MIN} min) ==="
+ELAPSED_SEC=$(( $(date +%s) - START ))
+ELAPSED_MIN=$(( ELAPSED_SEC / 60 ))
+echo "=== Session 44 Verify Summary (scope=$SCOPE, ${ELAPSED_MIN}m$(( ELAPSED_SEC % 60 ))s) ==="
 printf '%-38s %s\n' "CHECK" "RESULT"
 printf '%-38s %s\n' "----------------------------------------" "------"
 for r in "${RESULTS[@]:-}"; do echo "$r"; done
@@ -1174,7 +1187,7 @@ for r in "${RESULTS[@]:-}"; do echo "$r"; done
 
 # §4.9: the number this gate costs, printed whatever the scope, so the ~60 min
 # claim is measurable by whoever runs it next instead of repeated from a review.
-printf 'scope=%s checks=%s pass=%s fail=%s elapsed_min=%s\n' \
-  "$SCOPE" "$((PASS + FAIL))" "$PASS" "$FAIL" "$ELAPSED_MIN" | tee "$ARTIFACTS/run-meta.txt"
-if [ "$FAIL" -eq 0 ]; then echo "ALL GREEN ($PASS pass, 0 fail, scope=$SCOPE, ${ELAPSED_MIN} min)"; exit 0
+printf 'scope=%s checks=%s pass=%s fail=%s elapsed_min=%s elapsed_sec=%s\n' \
+  "$SCOPE" "$((PASS + FAIL))" "$PASS" "$FAIL" "$ELAPSED_MIN" "$ELAPSED_SEC" | tee "$ARTIFACTS/run-meta.txt"
+if [ "$FAIL" -eq 0 ]; then echo "ALL GREEN ($PASS pass, 0 fail, scope=$SCOPE, ${ELAPSED_MIN}m$(( ELAPSED_SEC % 60 ))s)"; exit 0
 else echo "RED ($PASS pass, $FAIL fail)"; exit 1; fi
