@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://chitra.iifelse.com
+    about: Chart gallery, guides, and the AI data reference — most questions are answered here.
+  - name: API reference
+    url: https://www.npmjs.com/package/@ifelse.codes/chitra
+    about: "The package README is the API reference: every chart's options, with examples."
+  - name: Security vulnerability
+    url: https://github.com/ifelse-codes/chitra/security/advisories/new
+    about: Report a suspected vulnerability privately. Please do not open a public issue.

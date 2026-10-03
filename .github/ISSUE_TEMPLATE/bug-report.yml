@@ -1,0 +1,83 @@
+name: Bug report
+description: Something renders wrong, crashes, or differs from the documented behaviour.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Suspected vulnerability? Stop — use
+        [the private security report](https://github.com/ifelse-codes/chitra/security/advisories/new) instead.**
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: "`npm ls @ifelse.codes/chitra`, or the `version` in your lockfile."
+      placeholder: "0.3.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Terminal and OS
+      description: The renderer is font- and terminal-dependent, so this is load-bearing.
+      placeholder: "iTerm2 3.5, macOS 26.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: chart
+    attributes:
+      label: Chart type
+      options:
+        - line
+        - bar
+        - horizontalBar
+        - area
+        - stackedBar
+        - scatter
+        - heatmap
+        - treemap
+        - timeline
+        - gauge
+        - progress
+        - histogram
+        - sparkline
+        - candlestick
+        - boxplot
+        - radar
+        - funnel
+        - sankey
+        - waterfall
+        - other / not a chart
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: The smallest script that shows it. A script that fails is worth more than prose.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Paste the rendered output, not a screenshot, so the glyphs survive.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for this.
+          required: true
+        - label: This reproduces on the latest published version.
+          required: true
