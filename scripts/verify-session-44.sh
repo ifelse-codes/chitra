@@ -949,7 +949,7 @@ run_check "contract-freshness-teeth" freshness_teeth
 # this session owns, and — the counterfactual — the measured seconds it removes
 # are > 0 and < the whole gate, read out of the timings this script just wrote.
 gate_scope_switch() {
-  local s tf="" total=0 skipped=0 name secs lines=0 f
+  local s tf="" total=0 skipped=0 name secs lines=0 cnt f
   [ "$(resolve_scope)" = full ] || { echo "the default scope is not full"; return 1; }
   [ "$(resolve_scope fast)" = fast ] || { echo "fast does not resolve"; return 1; }
   resolve_scope bogus >/dev/null 2>&1 && { echo "an invalid scope is accepted"; return 1; }
@@ -974,11 +974,11 @@ gate_scope_switch() {
   for f in .ai/verify/session-44/*/timings.txt; do
     [ -f "$f" ] || continue
     case "$f" in */latest/*) continue ;; esac
-    lines=$(wc -l < "$f" | tr -d ' ')
-    [ "$lines" -gt 0 ] || continue
+    cnt=$(wc -l < "$f" | tr -d ' ')
+    [ "$cnt" -gt 0 ] || continue
     awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
       || continue
-    if [ "$lines" -gt "$best" ]; then best=$lines; tf=$f; fi
+    if [ "$cnt" -gt "$best" ]; then best=$cnt; tf=$f; fi
   done
   [ -n "$tf" ] || { echo "no FULL run's timings yet — run this gate once with VAJRA_GATE_SCOPE=full"; return 1; }
   while read -r name secs; do
@@ -987,6 +987,8 @@ gate_scope_switch() {
     if gate_skips fast "$name"; then skipped=$((skipped + secs)); fi
   done < "$tf"
   [ "$lines" -gt 0 ] || { echo "$tf records no checks"; return 1; }
+  # (lines counts what was READ below; cnt/best are the selection loop's own —
+  # sharing one variable there reported 41+47=88 "checks" on the second run.)
   [ "$skipped" -gt 0 ] || { echo "the skip list costs 0 measured seconds — fast would not be faster"; return 1; }
   [ "$skipped" -lt "$total" ] || { echo "the skip list covers the entire gate"; return 1; }
   echo "fast removes ${skipped}s ($((skipped / 60))m$((skipped % 60))s) of ${total}s ($((total / 60))m$((total % 60))s) measured across $lines checks — $((skipped * 100 / (total > 0 ? total : 1)))% of this gate's own wall clock"
