@@ -395,6 +395,69 @@ check_review_attestation() {
   fi
 }
 
+# --- Contract freshness (S44 req. 9, the S42 cold review's N1) ------------------
+# The contract is a COLD INPUT: `check_review_attestation` hashes whatever
+# prompts/NN-*.md says NOW, so an edit made between a REJECT pass and the ACCEPT
+# pass rebinds the attestation to a spec that already contains its own rebuttal
+# and the gate goes on agreeing. Two observable failures:
+#   (a) POST-ACCEPTANCE rewrite — some commit after the one that first added the
+#       review file changes the contract. The verdict was cast against bytes
+#       that no longer exist.
+#   (b) MID-CYCLE rewrite laundered by re-attesting — the review carries a
+#       first-feed inputs hash (`Review-Inputs-SHA-Pass-1:`) that differs from
+#       the final one while the contract shows no amendments section explaining
+#       the change.
+# PURE on purpose: no ok/bad, no $ARTIFACTS. The S44 gate extracts this body and
+# runs it against another session to prove it can go green AND red — a check only
+# its own author can run is a check nobody can audit.
+contract_freshness_core() {
+  local n="${N:-}"
+  [ -n "$n" ] || { echo "N unresolved"; return 1; }
+  local padded; padded="$(printf '%02d' "$n")"
+  shopt -s nullglob
+  local prompts=(prompts/${padded}-task-*.md)
+  (( ${#prompts[@]} == 1 )) || { echo "prompts/${padded}-task-*.md matches ${#prompts[@]} files, need exactly 1"; return 1; }
+  local prompt="${prompts[0]}" review="sessions/session-${padded}-review.md"
+  # No review yet => nothing has been attested against; the fidelity gate owns
+  # that outcome (no double-jeopardy), same N/A shape as check_review_attestation.
+  [ -s "$review" ] || { echo "N/A: no review file yet - nothing to be stale about"; return 0; }
+  git cat-file -e "HEAD:${prompt}" 2>/dev/null || { echo "the contract is not committed at HEAD"; return 1; }
+  local first after
+  # The commit that FIRST added the review, not the one that last touched it —
+  # a rewritten review must not move the goalpost.
+  first="$(git log --diff-filter=A --format=%H -- "$review" 2>/dev/null | tail -1)"
+  [ -n "$first" ] || { echo "no commit in history adds $review - freshness cannot be evaluated (fail closed)"; return 1; }
+  # Deliberately EXCLUDES `first` itself: that commit is the merge carrying the
+  # whole branch, contract included, so counting it would fail every session.
+  after="$(git log --format=%H "${first}..HEAD" -- "$prompt" 2>/dev/null || true)"
+  if [ -n "$after" ]; then
+    echo "CONTRACT REWRITTEN AFTER THE REVIEW: $(echo "$after" | tr '\n' ' ')"
+    echo "  rule: prompts/${padded}-task-*.md is frozen from the first cold feed to closeout."
+    echo "  corrections are APPENDED under '## Contract amendments' (see reviewer/SKILL.md);"
+    echo "  the requirement they failed is never rewritten in place."
+    return 1
+  fi
+  local pass1 final
+  pass1="$(grep -m1 'Review-Inputs-SHA-Pass-1' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
+  final="$(grep -m1 'Review-Inputs-SHA' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
+  if [ -n "$pass1" ] && [ -n "$final" ] && [ "$pass1" != "$final" ]; then
+    grep -q '^## Contract amendments' "$prompt" || {
+      echo "the review declares a first-feed inputs hash that differs from the final one,"
+      echo "but $prompt has no '## Contract amendments' section explaining the change."
+      echo "A mid-cycle rewrite that is neither appended nor declared is the N1 defect."
+      return 1; }
+    echo "mid-cycle correction declared (Pass-1 != final) and explained by an amendments section"
+  fi
+  echo "contract untouched since the commit that added the review ($first)"
+  return 0
+}
+
+check_contract_freshness() {
+  local NAME="contract-freshness"; local LOG="$ARTIFACTS/${NAME}.log"
+  if [ -z "$N" ]; then echo "BLOCK: N unresolved" > "$LOG"; bad "$NAME"; return; fi
+  if contract_freshness_core > "$LOG" 2>&1; then ok "$NAME"; else bad "$NAME"; fi
+}
+
 # --- The attested-verdict delta ledger (S59 — DECISION-004) -----------------
 # A DERIVED, regenerable view over sessions/session-*-review.md + git — NOT a new
 # source of truth (feedback-distill-no-drift). Each session that carries a review
@@ -752,6 +815,7 @@ check_execution_shas
 check_verify_demo_scripts
 check_fidelity_review
 check_review_attestation
+check_contract_freshness
 check_required_crew
 check_ground_truth_no_code
 check_gt_remediations
