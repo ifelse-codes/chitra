@@ -379,3 +379,46 @@
 - **The S43 gate is a port, and its counterfactual is cheap.** `s42-gate-verbatim-goes-red`
   extracts S42's real `charts-untouched` body and asserts it exits non-zero on the S43 format.
   It deliberately does **not** run S42's whole gate (which chains S41's, ~60 min — S42 §4.9).
+
+## S44 — what became permanent on 2026-10-03
+
+- **The repo ships an OSS surface that is checked, not decorated.** `SECURITY.md`,
+  `CODE_OF_CONDUCT.md`, `.github/ISSUE_TEMPLATE/{bug-report,feature-request}.yml` +
+  `config.yml`, `.github/PULL_REQUEST_TEMPLATE.md`, and a CI badge. The badge assertion reads
+  every `actions/workflows/*.yml` URL out of `README.md` and requires the file to exist — run
+  against `main` the same code fails, which is how the counterfactual is demonstrated without
+  breaking anything.
+- **There is no contact mailbox for this project, and that is deliberate.** The CoC routes
+  private reports through GitHub private reporting and says why in the file. Never add a
+  `conduct@` or `security@` that nobody reads: a placeholder address is a lie, and
+  `oss-surface-present` fails on any email address in `CODE_OF_CONDUCT.md`.
+- **Coverage thresholds are enforced by CI as of S44.** `ci.yml#core` runs
+  `pnpm --filter @ifelse.codes/chitra run test:coverage` in place of the plain `Test` step —
+  the suite runs **once**, under v8, and the four thresholds in `vitest.config.ts` can fail the
+  build. **No coverage service** (Codecov/Coveralls): that would be new recurring
+  infrastructure, and `coverage-enforced-in-ci` fails if one appears.
+- **`engines` are derived from `ci.yml`, never chosen.** Repo `node >=26` / `pnpm >=9.12.3`
+  copy the workflow's own pins. The package's `node >=22` is a **support policy, not a test
+  result**, and CONTRIBUTING must keep saying so in those words — `engines-derived` checks for
+  the phrase. Do not add `packageManager` to the root manifest: `pnpm/action-setup@v4` already
+  takes its version from `ci.yml` and rejects the two disagreeing.
+- **`pnpm-workspace.yaml` carries no `overrides` block (D5).** All 81 entries were inert —
+  removing them left `pnpm-lock.yaml` byte-identical, so the "regen in its own commit" clause
+  has no commit to point at; the evidence is the empty `git diff main...HEAD -- pnpm-lock.yaml`.
+  If an override is ever needed again, add it because **resolution changes**, not because the
+  package name appears in the lockfile.
+- **The founder's home path is gone from the tracked tree and NOT from history (D4/D4b).**
+  The tree check is `git grep -nE '(/|-)Users[-/][a-z]+' -- .` — it matches both spellings, so
+  rewording one of them cannot satisfy it. History still carries it in 16 of 565 commits;
+  purging it moves every recorded SHA and belongs to the flip session.
+- **A contract is frozen for the duration of a review cycle (N1).** Corrections are appended
+  under `## Contract amendments`, numbered, each naming the requirement and the evidence; the
+  requirement text is never rewritten. Enforced by `contract-freshness` in
+  `scripts/verify-closeout.sh`, whose core is **pure** so a session gate can extract it and run
+  it in both directions. Editing `prompts/NN-*.md` after `sessions/session-NN-review.md` exists
+  now fails closeout.
+- **The gate can be run fast, and it says which one it ran.** `VAJRA_GATE_SCOPE=fast` skips only
+  the inherited wall-clock checks (fresh clone, Playwright, docs build, the repeated coverage
+  runs) and marks them `SKIP`; the default and the closeout run are `full`. Every check writes
+  its seconds to `timings.txt`, so the cost is measured per check rather than repeated from a
+  review.

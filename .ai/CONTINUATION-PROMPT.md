@@ -1,66 +1,57 @@
-# chitra — Continuation Handoff (after S43)
+# chitra — Continuation Handoff (after S44)
 
-**Resume in a NEW chat (S44).** `.ai/SESSION` = 43; **`@ifelse.codes/chitra@0.3.0` is LIVE
-on npm** (`latest`); the repo is still **private**, by decision — it goes public after a code
-cleanup. `main` = the S42 merge `49e1ee2`; S43's branch `session-43-docs-weight` is the work
-just done.
+**Resume in a NEW chat (S45).** `.ai/SESSION` = 44; **`@ifelse.codes/chitra@0.3.0` is LIVE
+on npm** (`latest`); the repo is still **private**. `main` = the S43 merge `1b6c17d`; S44's
+branch `session-44-oss-polish` is the work just done.
 
-> **The one thing to carry forward:** the docs app now ships the components it renders and
-> nothing else — **53** unused shadcn components, the **36** devDeps that served them, the
-> three `@replit/*` Vite plugins and the dead `lint` script are gone, and **Prettier is
-> adopted and CI-enforced** (F43-1). The product was not touched: 453 tests stay **453 green**,
-> and every change under the LOCKED chart dirs is proven to be a Prettier transform.
+> **The one thing to carry forward:** the founder decisions are **answered**, and the answers
+> live in the contract, `sessions/session-44-summary.md` and `.ai/STATE.md` — not in a
+> transcript. **D1 = A** (publish all ~146 process files), **D2** documented in CONTRIBUTING,
+> **D3/D6 = ignore**, **D4 = the tree is scrubbed**, **D4b = history is not, and that is yours
+> to schedule**, **D5 = all 81 `overrides` removed with a zero-delta lockfile**. The product was
+> not touched: **453 green**, and no file under `packages/core/src/` changed.
 
 ## Where we are
 
-Detail: `sessions/session-43-summary.md` + `sessions/session-43-review.md` + `.ai/STATE.md`.
+Detail: `sessions/session-44-summary.md` + `sessions/session-44-review.md` + `.ai/STATE.md`.
 
-| Delivered in S43 | State |
+| Delivered in S44 | State |
 |---|---|
-| 53 unused shadcn components | **deleted** — live set (2) discovered, not enumerated |
-| 36 dead devDeps | **removed** + lockfile regenerated in its own commit (64 → 25) |
-| 3 `@replit/*` Vite plugins | **removed** from config, manifest, and workspace catalog |
-| dead `lint` script | **removed** — it called an eslint installed nowhere |
-| Prettier | **adopted** (`.prettierrc` + `.prettierignore`), repo formatted, CI `format` job |
-| S42 gate | **ported** to `verify-session-43.sh`; N2–N9 fixed, each with a counterfactual |
-| Product | **untouched** — 453 tests unchanged; LOCKED dirs reformat-only (proven) |
+| `SECURITY.md` | **shipped** — supported versions, private disclosure, no-SLA/no-bounty scope that includes the release pipeline |
+| `CODE_OF_CONDUCT.md` | **shipped** — Contributor Covenant 2.1, **no invented mailbox** |
+| issue forms + PR template | **shipped** — bug + feature forms, `config.yml` with blank issues off |
+| CI badge | **shipped** — URL read out of the README, file must exist; RED on `main` |
+| coverage in CI | **shipped** — `test:coverage` replaces the plain `Test` step; suite runs once; no coverage service |
+| `engines` | **shipped** — repo `>=26`/`>=9.12.3` from `ci.yml`; package `>=22` stated as policy |
+| D1–D6 | **answered + recorded** (D4b deferred to this session) |
+| N1 — contract freshness | **closed** — rule in `reviewer/SKILL.md`, pure gate in `verify-closeout.sh` |
+| §4.9 — gate cost | **priced** — `VAJRA_GATE_SCOPE=fast\|full` + per-check timings |
+| D5 — workspace overrides | **removed** (81), lockfile **byte-identical** to `main` |
 
-## S44 — cleanup Batch 4: OSS polish + the founder decisions (the roadmap's next item)
+## S45 — the public flip
 
-1. **OSS polish:** `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, a CI badge, a
-   coverage job, and `engines`.
-2. **Founder decisions D1–D6:** **D1** (how much internal process goes public — options B/C
-   break `check_session_coverage` / `check_task_ref` unless the gates are rewritten first);
-   **D2** (hooks activation); **D3/D6** (track or ignore `playground/` + the design mockups);
-   **D4** (the `~/…` scrub — **irreversible once published**); **D5**
-   (`pnpm-workspace.yaml` `overrides` cruft, needs its **own** lockfile regen).
-3. **Two carried findings:** the contract-rewrite freshness hole (S42 N1), and the **~60-minute
-   gate cost** (§4.9). S43 did not worsen the cost — its counterfactual extracts one check
-   from `verify-session-42.sh` rather than chaining S42's whole gate.
+1. **History rewrite first (D4b).** The tracked tree is clean; **16 of 565 commits still carry
+   the home path**. Purging history changes **every** commit SHA — `.ai/` cites `main` at
+   `49e1ee2`, PR merge history and every recorded ref move with it. Decide the tool and the
+   re-verify order **before** pushing. **Irreversible once published.**
+2. **The public-facing resolutions** — README `git clone` URL, npm `repository.url` /
+   `homepage`, and **npm provenance** (a private repo cannot generate it, which is why S38's
+   trusted publisher has never proved itself end to end).
+3. **A real `0.4.0` through CI** — the cheapest close on the trusted-publisher claim, and the
+   first release that can carry provenance.
+4. Then the **GTM proof pack**: record the measured **zero** downloads as `t0`; **never cite
+   the 304 `@ifelse.codes/core` self-downloads** — they are release-runner shaped.
 
-## Then
+## Also still open, untouched by S44
 
-- **The flip** — resolves the README `git clone`, npm `repository.url` and `homepage`, and
-  turns npm provenance on, in one move.
-
-## The two decisions only the founder can make
-
-- **D1 — how much internal process goes public?** `~146 files`. Option A (keep) keeps the
-  closeout gates working. **B and C break `check_session_coverage` / `check_task_ref` unless the
-  gates are rewritten first.**
-- **D4 — the personal-path scrub.** Tracked files carry `~/…`. **History is published
-  with the flip; this is irreversible after it.** Answer before, not after.
-
-## Also still open
-
-- **A real `0.4.0` through CI** — the cheapest close on the trusted-publisher claim.
-- **GTM proof pack** — record the measured **zero** downloads as `t0`; never cite the 304
-  `@ifelse.codes/core` self-downloads.
-- **S40's governance rows** — `required-crew` (now a **third** waiver; demands a handoff the
-  Session Loop never asks for), `check_ground_truth_no_code` passing **vacuously**, the cost
-  gate that greps "Cost Tracking", and **S16**.
-- **Seven pre-existing dead docs deps** S43 named but did not remove (framer-motion,
-  react-icons, @tanstack/react-query, zod, date-fns, @tailwindcss/typography, tw-animate-css) —
-  they did not die with the 43 components, so they were out of scope.
+- **Seven pre-existing dead docs deps** S43 named: `framer-motion`, `react-icons`,
+  `@tanstack/react-query`, `zod`, `date-fns`, `@tailwindcss/typography`, `tw-animate-css`.
+- **`minimumReleaseAgeExclude: stripe-replit-sync`** — same species as the D5 overrides, but
+  not an `overrides` entry, so requirement 11 did not reach it.
+- **S40's governance rows** — `required-crew` (three founder waivers), the vacuous
+  `check_ground_truth_no_code`, the cost gate that greps "Cost Tracking", and **S16**.
 - **Historical verify scripts are frozen** and several are unrunnable (01, 02, 03, 07, 31, 34,
-  36, 37, 38). The live pair is **39 / 42 / 43**.
+  36, 37, 38). The live set is **39 / 42 / 43 / 44**.
+- **A contract rewrite now fails closeout.** If S45 edits `prompts/45-*.md` after
+  `sessions/session-45-review.md` exists, `contract-freshness` turns red — append an amendment
+  instead of rewriting the requirement.
