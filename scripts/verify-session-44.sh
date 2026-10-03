@@ -13,7 +13,10 @@
 #   ai-files-describe-s43      -> ai-files-describe-s44   (this session)
 #   s42-gate-verbatim-goes-red -> s43-gate-verbatim-goes-red
 #   contract-at-head           -> same shape: prompts/44, requirements 1..14
-#   charts-format-only         -> UNCHANGED: S44 never touches the LOCKED dirs
+#   charts-format-only         -> charts-untouched (S44 makes no change under
+#                                 the LOCKED dirs at all, so "format-only" has
+#                                 nothing to judge — the claim becomes byte-
+#                                 identity with main, probed by a derived commit)
 #
 # §4.9 — the gate is expensive. VAJRA_GATE_SCOPE=fast skips ONLY the inherited
 # checks that cost the wall clock (fresh clone, browser QA, docs build, the
@@ -34,6 +37,11 @@ START=$(date +%s)
 # not have, or one that covers the whole gate, is a bug; gate_scope_switch
 # proves both directions and reads the MEASURED per-check timings this script
 # writes, so "fast is faster" is arithmetic rather than a claim.
+# `date +%s` is second-granular on macOS (no %N), which priced every fast-scope
+# check at 0s and made gate-scope-switch correctly report that "fast" removed
+# nothing. Milliseconds in, whole seconds out.
+now_ms() { perl -MTime::HiRes=time -e 'printf("%d", time()*1000)'; }
+
 resolve_scope() { case "${1:-}" in ""|full) echo full ;; fast) echo fast ;; *) return 1 ;; esac; }
 SCOPE="$(resolve_scope "${VAJRA_GATE_SCOPE:-}")" \
   || { echo "VAJRA_GATE_SCOPE must be full or fast (got '${VAJRA_GATE_SCOPE:-}')"; exit 2; }
@@ -72,12 +80,12 @@ run_check() {
     return 0
   fi
   local t0 t1 rc=0
-  t0=$(date +%s)
+  t0=$(now_ms)
   "$@" > "$LOG" 2>&1 || rc=$?
-  t1=$(date +%s)
+  t1=$(now_ms)
   # Measured, not asserted: gate_scope_switch reads this file to price the skip
   # list. A check nobody times is a check whose cost nobody can see.
-  printf '%s %s\n' "$NAME" "$((t1 - t0))" >> "$ARTIFACTS/timings.txt"
+  printf '%s %s\n' "$NAME" "$(( (t1 - t0) / 1000 ))" >> "$ARTIFACTS/timings.txt"
   if [ "$rc" -eq 0 ]; then
     RESULTS+=("$(printf '%-38s %s' "$NAME" PASS)"); PASS=$((PASS+1))
   else
@@ -285,30 +293,38 @@ run_check "no-machine-path-junk" bash -c '
 # about the diff, not a phrase, and it cannot pass vacuously.
 # Counterfactual (both demonstrated): hand-edit a locked chart file with a real
 # change -> RED; break the base ref -> RED.
-charts_format_only() {
+charts_untouched() {
   local base=main
   git rev-parse --verify --quiet "$base^{commit}" >/dev/null 2>&1 \
     || { echo "base '$base' does not resolve — cannot judge the LOCKED diff"; return 1; }
-  local files f tmp rc=0 n=0
+  local files
   files=$(git diff --name-only "$base"...HEAD -- \
     packages/core/src/charts/ packages/core/src/renderers/ packages/core/src/themes/ || true)
-  [ -n "$files" ] || { echo "no changes under the LOCKED dirs — the format-only claim is vacuous"; return 1; }
-  for f in $files; do
-    n=$((n+1))
-    tmp=$(mktemp)
-    if git show "$base:$f" 2>/dev/null | node_modules/.bin/prettier --stdin-filepath "$f" > "$tmp" 2>/dev/null; then
-      cmp -s "$tmp" "$f" \
-        || { echo "$f is NOT the Prettier transform of its base — a non-format edit rode along"; rc=1; }
-    else
-      echo "$f: prettier could not format the base copy"; rc=1
-    fi
-    rm -f "$tmp"
-  done
-  [ "$rc" -eq 0 ] || return 1
-  echo "$n changed files under the LOCKED dirs are each exactly the Prettier transform of $base"
+  if [ -n "$files" ]; then
+    echo "S44 changed files under the LOCKED dirs (charts/ renderers/ themes/ are LOCKED):"
+    echo "$files"; return 1
+  fi
+  # RE-EXPRESSED from S43's charts-format-only. That check REQUIRES a non-empty
+  # diff: S43 reformatted those dirs and had to prove the diff was exactly
+  # Prettier's transform. S44 touches none of them, so the format-only premise
+  # has nothing to judge and the inherited check called the clean tree
+  # "vacuous". The claim here is byte-identity with main.
+  #
+  # The counterfactual is DERIVED, not typed: take the newest commit in history
+  # that did touch those dirs and run the SAME command against it. A diff that
+  # could only ever print nothing would pass this check forever.
+  local c probe
+  c=$(git log --format=%H -1 -- packages/core/src/charts/ || true)
+  [ -n "$c" ] || { echo "no commit in history touched the LOCKED dirs — the probe cannot run"; return 1; }
+  git rev-parse --verify --quiet "$c^" >/dev/null 2>&1 \
+    || { echo "the probe commit ${c:0:8} has no parent — cannot diff it"; return 1; }
+  probe=$(git diff --name-only "$c^"...$c -- \
+    packages/core/src/charts/ packages/core/src/renderers/ packages/core/src/themes/ || true)
+  [ -n "$probe" ] || { echo "the probe found no change at ${c:0:8} either — the diff is broken, not the tree clean"; return 1; }
+  echo "LOCKED dirs byte-identical to $base; the same command reports $(echo "$probe" | wc -l | tr -d ' ') file(s) changed at ${c:0:8}"
   return 0
 }
-run_check "charts-format-only" charts_format_only
+run_check "charts-untouched" charts_untouched
 
 run_check "example-runs" bash -c '
   out="$(pnpm example 2>&1)" || { echo "$out" | tail -20; exit 1; }
@@ -434,7 +450,8 @@ run_check "test-count-propagated" bash -c '
   [ -z "$bad" ] || { echo "count is $n but these disagree:$bad"; exit 1; }
 
   # S41 exempts ITS OWN gate from this inventory, because it names the number
-  # only to explain the trap. The frozen demo-41/demo-42 legitimately still
+  # only to explain the trap. Each port extends the exemption to itself for the
+  # same reason: S44's gate carries those inherited comments verbatim. The frozen demo-41/demo-42 legitimately still
   # display 453 in their prose, so they belong in the expected SET rather than
   # in the exemptions. An exemption is for files that must NOT display it.
   expected=".ai/CONTINUATION-PROMPT.md
@@ -454,7 +471,7 @@ scripts/verify-session-39.sh"
           | grep -vE "^\.ai/(GT-REMEDIATIONS|handoffs|CHITRA)" \
           | grep -vE "^sessions/" \
           | grep -vE "^prompts/" \
-          | grep -vE "^scripts/verify-session-4[123]\.sh$" \
+          | grep -vE "^scripts/verify-session-4[1234]\.sh$" \
           | LC_ALL=C sort)
   if [ "$found" != "$expected" ]; then
     echo "count is $n; the set of files displaying it changed."
@@ -462,7 +479,7 @@ scripts/verify-session-39.sh"
     echo "  a new display site must be added to this check, or the stale site removed"
     exit 1
   fi
-  echo "canonical count $n: 13 declared sites agree, demo-43 derives it, and no other tracked file outside the exemptions displays it"'
+  echo "canonical count $n: 13 declared sites agree, demo-44 derives it, and no other tracked file outside the exemptions displays it"'
 
 # ═══════════════════════════════════════════════ S42 · group C: the deletions
 
@@ -551,15 +568,15 @@ replit_globs_match_workspace() {
 run_check "replit-globs-match-workspace" replit_globs_match_workspace
 # Scoped to build/config/script files on purpose. sessions/, prompts/ and the
 # two S41 audit documents are FROZEN: they record what past sessions found.
-# The four excluded scripts are the two gates and the two demos that must NAME
-# a deleted tree to do their job -- S41's gate hard-codes the path (that is the
-# coupling this session exists to prove), and the demos show before/after.
-# .ai/ is asserted separately by ai-names-no-deleted-tree, which carries its own
-# declared list.
-#
-# The first version of this list omitted demo-session-42.sh, which the gate then
-# flagged on 12 lines. The demo legitimately names every deleted tree; the
-# exclusion was the bug, not the demo.
+# A gate must name the tree it proved deleted in order to prove it, and a demo
+# shows before/after. So EVERY scripts/verify-session-*.sh and
+# scripts/demo-session-*.sh is exempt -- DISCOVERED from the index rather than
+# enumerated. The inherited list was enumerated (41, 42, 43) and it fell over
+# the first time a NEW gate appeared: S44 inherited it without itself, so the
+# S44 gate was flagged for quoting S42's own check bodies. Exempting by class
+# is the fix; the first version of this list omitted demo-session-42.sh and was
+# flagged on 12 lines for the same reason. .ai/ is asserted separately by
+# ai-names-no-deleted-tree, which carries its own declared list.
 #
 # A second version used the bare token `lib/`, which the review's replit.md
 # finding exposed as uselessly broad: it matched 50 shadcn imports of
@@ -568,13 +585,13 @@ run_check "replit-globs-match-workspace" replit_globs_match_workspace
 # the four lib/ packages and the workspace glob line — so a real reference is
 # still caught and a path that merely contains "lib" is not.
 no_live_ref_to_dead_trees() {
-  local hits
+  local hits ex
+  ex=$(git ls-files 'scripts/verify-session-*.sh' 'scripts/demo-session-*.sh' \
+       | sed 's|^|:!|' | tr '\n' ' ')
   hits=$(git grep -nE 'mockup-sandbox|api-server|@workspace/(db|api-)|attached_assets|@assets|lib/(api-spec|api-zod|api-client-react|db|integrations)|^[[:space:]]*- lib/\*' -- . \
     ':!sessions' ':!prompts' ':!.ai' \
     ':!code-cleanup-plan-session-41.md' ':!independent-audit-RESULT.md' \
-    ':!scripts/verify-session-41.sh' ':!scripts/demo-session-41.sh' \
-    ':!scripts/verify-session-42.sh' ':!scripts/demo-session-42.sh' \
-    ':!scripts/verify-session-44.sh' ':!scripts/demo-session-44.sh' || true)
+    $ex || true)
   [ -z "$hits" ] || { echo "$hits"; return 1; }
   echo "no build, config or script file references a deleted tree"
   return 0
@@ -787,7 +804,10 @@ oss_surface_at() {
   urls=$(echo "$readme" | grep -oE 'actions/workflows/[A-Za-z0-9_.-]+\.yml' | LC_ALL=C sort -u)
   [ -n "$urls" ] || { echo "README carries no CI badge"; return 1; }
   for u in $urls; do
-    wf="${u#actions/workflows/}"
+    # The badge URL is .../actions/workflows/ci.yml/...; the FILE is
+    # .github/workflows/ci.yml. Comparing a bare "ci.yml" against the repo root
+    # made this check fail on a badge that was correct all along.
+    wf=".github/workflows/${u#actions/workflows/}"
     if [ -n "$TREE" ]; then
       git cat-file -e "$TREE:$wf" 2>/dev/null || { echo "the badge points at $wf, which does not exist at $TREE"; return 1; }
     else
@@ -956,7 +976,7 @@ gate_scope_switch() {
   [ "$lines" -gt 0 ] || { echo "$tf records no checks"; return 1; }
   [ "$skipped" -gt 0 ] || { echo "the skip list costs 0 measured seconds — fast would not be faster"; return 1; }
   [ "$skipped" -lt "$total" ] || { echo "the skip list covers the entire gate"; return 1; }
-  echo "fast removes ${skipped}s of ${total}s measured across $lines checks ($((skipped * 100 / total))%) — prints it either way as wall-clock minutes"
+  echo "fast removes ${skipped}s of ${total}s measured across $lines checks ($((skipped * 100 / (total > 0 ? total : 1)))%) — prints it either way as wall-clock minutes"
 }
 run_check "gate-scope-switch" gate_scope_switch
 

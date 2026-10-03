@@ -61,7 +61,8 @@ printf '  %sBadges are claims. This one resolves to a file in this repo, and%s\n
 printf '        %sthe check reads every actions/workflows/*.yml URL out of the README%s\n' "$D" "$N"
 printf '        %sand asserts the file exists — on this branch and NOT on main.%s\n' "$D" "$N"
 BURL=$(grep -oE 'actions/workflows/[A-Za-z0-9_.-]+\.yml' README.md | head -1)
-if [ -n "$BURL" ] && [ -f "${BURL#actions/workflows/}" ]; then ok "badge -> ${BURL#actions/workflows/} (exists)"; else bad "no resolvable CI badge"; fi
+BFILE=".github/workflows/${BURL#actions/workflows/}"
+if [ -n "$BURL" ] && [ -f "$BFILE" ]; then ok "badge -> $BFILE (exists)"; else bad "no resolvable CI badge ($BURL)"; fi
 
 # ---------------------------------------------------------------- the decisions
 

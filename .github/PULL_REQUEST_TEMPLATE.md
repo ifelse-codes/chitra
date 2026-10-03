@@ -8,7 +8,8 @@
 
 - [ ] `pnpm run format:check` passes (CI runs it)
 - [ ] `pnpm --filter @ifelse.codes/chitra run typecheck` passes
-- [ ] `pnpm --filter @ifelse.codes/chitra run test` passes — **453** on `main`; a change that
+- [ ] `pnpm --filter @ifelse.codes/chitra run test` passes — the same count `main` reports;
+      a change that
       adds or removes a test says so in the description
 - [ ] `pnpm run build` passes from a clean state
 
