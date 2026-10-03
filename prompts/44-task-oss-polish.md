@@ -81,15 +81,22 @@ leaving it open. Four sessions later, **D1 and D4 still block the flip.**
    | **D1** | How much internal process goes public (~146 files: `.ai/`, `sessions/`, `prompts/`, `.claude/`, `reviewer/`, `darshan/`) | **A — keep all.** The honest-build story ships whole; `check_session_coverage` / `check_task_ref` keep working with no gate rework |
    | **D2** | `core.hooksPath .githooks` is **local config only** — a fresh clone gets no hooks, and no doc says so | **Documented**: `CONTRIBUTING.md` states that hooks are opt-in and gives the one-line install; `.claude/settings.json`'s hooks are named as firing for any Claude Code user who clones |
    | **D3/D6** | Track `playground/` and the `design-reference/*.html` mockups as demos, or ignore them? | **Ignore.** `.gitignore` already ignores them; they stay local and **untracked**, so the flip publishes neither |
-   | **D4** | `/Users/suman/…` in tracked files — **irreversible once published** | **Scrub the working tree**, all live occurrences, in one mechanical commit. See D4b below |
+   | **D4** | The founder's personal home path in tracked files — the `/Users/<name>/…` form and the path-encoded `-Users-<name>-` variant — **irreversible once published** | **Scrub the working tree**, every live occurrence, in one mechanical commit. See D4b below |
    | **D4b** | The same paths in **git history** (16 of 565 commits, earliest from S10) | **Not done here, recorded as pending.** Rewriting history changes every commit SHA — `.ai/` cites `main` at `49e1ee2`, PR merge history and every recorded ref move with it — so it is a pre-flip operation for S45, not a cleanup-commit. **Disclosed, not silently skipped** |
    | **D5** | `pnpm-workspace.yaml` `overrides` cruft (expo/ngrok/… not in the dependency graph) | **Stripped**, lockfile regenerated **in its own commit**, install + typecheck + suite green on both sides |
 
 8. **The D4 scrub is a tree change and must be provably mechanical.** Every replacement is
-   `/Users/suman` → `~`, nothing else. The gate must show that the scrub touched **only**
-   string content: no file added, no file deleted, no line count changed outside the
-   substitutions. **`git grep -n "/Users/suman" -- .` must exit non-zero at the end of this
-   session** — that is the check, and its counterfactual is reverting one occurrence.
+   the personal home prefix → `~`, and the path-encoded `-Users-…-` variant → `-home`;
+   nothing else. No file added, no file deleted, no line count changed outside those substitutions — the
+   diff must be readable in one pass and contain nothing but path text.
+   **The check is `git grep -nE '(/|-)Users[-/][a-z]+' -- .` exiting non-zero** at the end of
+   this session: it catches both spellings of the path, so rewording one of them cannot satisfy
+   it. Its counterfactual is restoring a single occurrence and going red.
+   **Disclosed consequence:** the same scrub edits `prompts/10-…` and `prompts/42-…`, which sit
+   in the *prompt half* of `canonical_inputs_sha` — so the recorded `Review-Inputs-SHA` for
+   **S10 and S42 no longer matches their contract's current bytes.** Those reviews are frozen
+   historical records that no live gate recomputes, and the edit is mechanical and
+   D4-mandated; it is stated here rather than discovered later.
 
 ### C · The two carried findings
 
