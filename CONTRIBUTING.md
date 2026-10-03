@@ -23,6 +23,31 @@ pnpm --filter @ifelse.codes/chitra run typecheck
 pnpm example
 ```
 
+## Toolchain
+
+| | Version | Where it comes from |
+| --- | --- | --- |
+| Node (this repo) | `>=26` | `.github/workflows/ci.yml` pins `NODE_VERSION: "26"` — CI is the only Node this toolchain is proven on |
+| pnpm (this repo) | `>=9.12.3` | `ci.yml` pins `PNPM_VERSION: "9.12.3"` and the lockfile is `v9.0` |
+| Node (`@ifelse.codes/chitra`, consumers) | `>=22` | **A support policy, not a test result.** Derived, never measured: the shipped source has **zero** `node:` builtins, **zero** runtime dependencies, and its newest syntax is optional chaining (ES2020); CI proves 26 and has never run 22. It says which Node lines the maintainer will treat as supported — not which ones have been executed |
+
+`engines` in `package.json` warns, it does not block (`engine-strict` is off).
+
+## Git hooks (opt-in)
+
+`core.hooksPath` is **local** git config. It is set in this checkout and in no clone:
+
+```bash
+git config core.hooksPath .githooks   # pre-commit + pre-push
+```
+
+A fresh clone runs **no hooks** until you run that. The guards are real (they block an
+autonomous commit and a push from a `session-NN-*` branch), but they are a convenience for
+whoever already has them configured, not a control over anyone who does not.
+
+Claude Code users: `.claude/settings.json` is tracked, so its hooks fire in any clone opened
+with Claude Code. They only guard `session-NN-*` branches and `main`.
+
 ## Project Structure
 
 ```
