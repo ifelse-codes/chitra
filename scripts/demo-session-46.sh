@@ -66,7 +66,7 @@ printf '  %sdecision recorded as D-REORDER in sessions/session-46-flip.md%s\n' "
 
 hdr "F3 · the manifest fields were never wrong, only unreachable"
 case_ "7 · bytes before, reachability after"
-printf '  %sbefore%s  homepage + repository.url already held the right values; the URL 404'd\n' "$D" "$N"
+printf '  %sbefore%s  homepage + repository.url already held the right values; the URL returned 404\n' "$D" "$N"
 printf '  %safter%s   same bytes, HTTP 200 — editing either field would be the failure\n' "$D" "$N"
 printf '            homepage       = %s\n' "$(node -p "require('./packages/core/package.json').homepage")"
 printf '            repository.url = %s\n' "$(node -p "require('./packages/core/package.json').repository.url")"
@@ -116,18 +116,70 @@ printf '  %s\n' "$(echo "$out" | grep -oE 'Test Files +[0-9]+ passed \([0-9]+\)|
 printf '  %s0 files under packages/core/src changed except version.ts%s\n' "$D" "$N"
 
 # --- Summary Table ---
-hdr "Summary"
+# Every cell below is the ANSWER TO A COMMAND. The cold review named this table the
+# session's fakest green while the cells were string literals: a row reading SHIPPED
+# with no probe behind it is a string, not an observation — it said SHIPPED while the
+# real gate was still red. Each `p_*` prints `ok` or the reason it cannot claim one.
+hdr "Summary — each status probed at run time, never typed"
 printf '\n'
+FAILS=0
+row() {
+  local label="$1"; shift; local why rc=0
+  why="$("$@" 2>/dev/null)" || rc=$?
+  if [ "$rc" -eq 0 ] && [ "$why" = ok ]; then printf '  %-34s %s\n' "$label" "SHIPPED"
+  else printf '  %-34s %s\n' "$label" "NOT PROVEN — ${why:-no output}"; FAILS=$((FAILS+1)); fi
+}
+p_p1() { local c
+  git grep -qE '(/|-)Users[-/][a-z]+' -- . && { echo "the tree still carries it"; return 1; }
+  for c in $(git rev-list HEAD); do
+    git grep -qE '(/|-)Users[-/][a-z]+' "$c" -- . 2>/dev/null && { echo "commit ${c:0:8} still carries it"; return 1; }
+  done
+  [ "$(git rev-list --count HEAD)" -gt 0 ] || { echo "no commits to scan"; return 1; }
+  echo ok
+}
+p_p2() { [ "$(gh api repos/ifelse-codes/chitra/private-vulnerability-reporting --jq .enabled 2>/dev/null)" = true ] && echo ok || echo "endpoint does not read enabled=true"; }
+p_f1() { [ "$(gh api repos/ifelse-codes/chitra --jq .private 2>/dev/null)" = false ] || { echo ".private is not false"; return 1; }
+         grep -q '| F1 | repo private |.*| `true` |' sessions/session-46-flip.md || { echo "no recorded pre-flip true row"; return 1; }; echo ok; }
+p_f2() { [ "$(curl -s -o /dev/null -w '%{http_code}' https://github.com/ifelse-codes/chitra)" = 200 ] || { echo "repo URL is not 200"; return 1; }
+         grep -q '| F2 | clone URL |.*| `404` |' sessions/session-46-flip.md || { echo "no recorded pre-flip 404 row"; return 1; }; echo ok; }
+p_f3() { local other; other=$(git diff "$(git merge-base main HEAD)"..HEAD -- packages/core/package.json | grep -E '^[+-]\s*"[a-z]' | grep -v '"version"' || true)
+         [ -z "$other" ] || { echo "a field other than version moved"; return 1; }
+         [ "$(node -p "require('./packages/core/package.json').homepage")" = "https://github.com/ifelse-codes/chitra" ] || { echo "homepage changed"; return 1; }
+         echo ok; }
+p_f4() { local t=.github/REPO-SETTINGS.md priv live
+         priv=$(grep -E '^\| `private` \|' "$t" | grep -oE '`(true|false)`' | head -1 | tr -d '`')
+         live=$(gh api repos/ifelse-codes/chitra --jq .private 2>/dev/null)
+         [ "$priv" = "$live" ] || { echo "table says private=$priv, live=$live"; return 1; }
+         grep -qiE '^\| private vulnerability reporting \|.*`enabled`' "$t" || { echo "reporting row does not read enabled"; return 1; }
+         echo ok; }
+p_f5() { [ "$(npm view @ifelse.codes/chitra version 2>/dev/null)" = 0.4.0 ] || { echo "npm latest is not 0.4.0"; return 1; }
+         [ -n "$(npm view @ifelse.codes/chitra@0.4.0 dist.attestations 2>/dev/null | tr -d '\n')" ] || { echo "0.4.0 carries no provenance"; return 1; }
+         [ -z "$(git diff "$(git merge-base main HEAD)"..HEAD --name-only -- .github/workflows/)" ] || { echo "a workflow changed"; return 1; }
+         echo ok; }
+p_f6() { local live
+         live=$(curl -s "https://api.npmjs.org/downloads/point/2020-01-01:$(date +%F)/@ifelse.codes/chitra" | node -pe 'try{JSON.parse(require("fs").readFileSync(0,"utf8")).downloads}catch(e){""}')
+         [ -n "$live" ] || { echo "downloads API gave nothing"; return 1; }
+         grep -qE "t0[^0-9]{0,40}${live}" .ai/STATE.md || { echo "STATE.md does not record t0 = $live"; return 1; }
+         if grep -qE 't0[^a-z]{0,25}zero' .ai/*.md; then echo "a baseline-is-zero claim survives in .ai/"; return 1; fi
+         echo ok; }
+p_cap() { local max=0 n c
+          for c in $(git rev-list "$(git merge-base main HEAD)"..HEAD); do
+            n=$(git show --numstat --format='' "$c" | grep -c . || true); [ "$n" -gt "$max" ] && max=$n
+          done
+          [ "$max" -le 3 ] || { echo "max $max files in one commit (cap 3)"; return 1; }
+          echo ok
+}
 printf '  %-34s %s\n' "Requirement" "Status"
 printf '  %-34s %s\n' "----------------------------------" "------"
-printf '  %-34s %s\n' "P1  home path out of history"      "SHIPPED (residual disclosed)"
-printf '  %-34s %s\n' "P2  private vulnerability reporting" "SHIPPED"
-printf '  %-34s %s\n' "F1  repository public"              "SHIPPED"
-printf '  %-34s %s\n' "F2  clone URL resolves (anon)"      "SHIPPED"
-printf '  %-34s %s\n' "F3  manifest fields unedited"       "SHIPPED"
-printf '  %-34s %s\n' "F4  REPO-SETTINGS re-derived"       "SHIPPED"
-printf '  %-34s %s\n' "F5  0.4.0 + provenance via CI"      "SHIPPED"
-printf '  %-34s %s\n' "F6  t0 baseline, not zero"          "SHIPPED"
-printf '  %-34s %s\n' "commits within the 3-file cap"      "$(max=0; for c in $(git rev-list main..HEAD); do n=$(git show --numstat --format='' "$c" | grep -c . || true); [ "$n" -gt "$max" ] && max=$n; done; echo "max $max")"
+row "P1  home path out of history"      p_p1
+row "P2  private vulnerability reporting" p_p2
+row "F1  repository public"              p_f1
+row "F2  clone URL resolves (anon)"      p_f2
+row "F3  manifest fields unedited"       p_f3
+row "F4  REPO-SETTINGS re-derived"       p_f4
+row "F5  0.4.0 + provenance via CI"      p_f5
+row "F6  t0 baseline, not zero"          p_f6
+row "commits within the 3-file cap"      p_cap
 printf '\n'
-ok "Session ${SESSION:-46} demo complete."
+if [ "$FAILS" -eq 0 ]; then ok "Session ${SESSION:-46} demo complete — every row probed."
+else bad "Session ${SESSION:-46} demo: $FAILS row(s) could not be re-derived"; exit 1; fi

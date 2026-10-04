@@ -1,82 +1,56 @@
-# chitra — Continuation Handoff (after S45)
+# chitra — Continuation Handoff (after S46)
 
-**Resume in a NEW chat (S46).** `.ai/SESSION` = 45; **`@ifelse.codes/chitra@0.3.0` is LIVE on npm**
-(`latest`); the repo is still **private**. `main` = the S44 merge `5a39c43` (**derive with
-`git rev-parse main`** — the `1b6c17d` this file carried for two sessions was S43's merge, and its own
-audit flagged it). **S45 was the mandatory 5-session ground-truth audit**, NO-CODE, and it **moved the
-public flip off this session** because `45 % 5 == 0` makes the audit mandatory and the guard blocks
-the one file `0.4.0` needs.
+**Resume in a NEW chat (S47).** `.ai/SESSION` = 46; **`@ifelse.codes/chitra@0.4.0` is LIVE on npm
+with provenance** (`latest`); the **repo is public** (`gh api repos/ifelse-codes/chitra --jq .private`
+→ `false`). `main` = the S46 merge **`86bc909`** (**derive with `git rev-parse main`** — every sha in
+this file is a citation, not a fact; re-derive before trusting it). **S46 was the public flip**: P1,
+P2, F1–F6 all discharged, contract never amended.
 
-> **The one thing to carry forward:** the flip now has a **contract, a session, and two named gates**.
-> `prompts/46-task-public-flip.md` carries **F1–F6** with their done-conditions, gated on **P1** (the
-> D4b history rewrite — `(/|-)Users[-/][a-z]+` in **1001** commit-file pairs across history and **0** in
-> the tree; **irreversible once the repo is public**) and **P2** (private vulnerability reporting,
-> 404, recorded `unknown`). **Decide P1's rewrite tool (`git filter-repo`) and its 5-step re-verify
-> order before the push** — that decision is the whole point of carrying it forward rather than
-> improvising it under time pressure.
+> **The one thing to carry forward:** the flip is done, so the repo's claims are now checkable by a
+> stranger — and one door is still not ours to close. **`refs/pull/*` is read-only on GitHub and 56
+> of 67 PR heads still expose the pre-rewrite home path**; P1's done-condition (reachable from `HEAD`)
+> is met and disclosed, but only a **GitHub support ticket** deletes those refs. That ticket plus
+> `sessions/session-45-ground-truth.md` § *Findings, ranked* is the S47 story.
 
 ## Where we are
 
-Detail: `sessions/session-45-ground-truth.md` (the audit, **overall 🔴**) +
-`sessions/session-45-summary.md` (fidelity map) + `sessions/session-45-review.md` (cold, **REJECT**)
-+ `.ai/STATE.md`.
+Detail: `sessions/session-46-flip.md` (decisions + before/after evidence) +
+`sessions/session-46-summary.md` (fidelity map) + `sessions/session-46-review.md` (cold pass) +
+`.ai/STATE.md`.
 
-| S45 delivered | State |
+| S46 delivered | State |
 |---|---|
-| the audit | **shipped** — 6 numbered probes + 2 retired, ~19 unlabelled; 🔴 overall |
-| `check_session_coverage` blindness | **found, 🔴** — sees only up to **S37**; every session since **S38** was squash-merged, and it has already missed `sessions/session-40-summary.md` being absent |
-| the cadence's absence from `AGENTS.md` | **found, 🔴** — `0` mentions in the three files every agent must read, which is *why* five documents mis-scheduled S45 |
-| S44's `REJECT` verdict | **found, 🔴** — the only canonical verdict line, so `check_review_attestation` reads `N/A` and **S44 carries no DECISION-003 attestation** |
-| the 3-file cap | **found, 🔴** — **17 of the last 60** commits breach it (S40 measured 8) and it is declared "Hook-enforced" |
-| 8 stale `.ai/` facts | **4 fixed in-session**, the rest carried; `KNOWLEDGE.md` was wrong about `main`'s range, the suite count, the pill's line number, and 2 of 3 tag SHAs |
-| the ledger | **9 rows added**, now **14 `DEFERRED` / 18 `DONE`**, reordered newest-first |
-| the flip's gates | **given an owner** — P1 and P2 are S46 preconditions |
-| `canonical_inputs_sha` | **computable** (it was *uncomputable* at S40) — but the value S45 published was **stale**; see below |
+| **P1** history rewrite | **shipped** — `git filter-repo` 2.47.0: **1001 → 0** (commit, file) pairs over **444** commits; tree `8167462…`, count and **367** tracked files unchanged; one force-push with `--no-verify` (pre-push hook blocks *any* `main` push), disclosed |
+| P1 residual | **owed** — `refs/pull/*` read-only (422), **56 of 67** PR heads still carry it → **support ticket** |
+| **P2** private reporting | **shipped** — `{"enabled":true}`; unsatisfiable before F1 (public-repo-only endpoint, proved against `octocat/Hello-World` with `admin: true`) → **D-REORDER** |
+| **F1/F2** | **shipped** — `true`→`false`, `404`→`200`, anonymous clone works; both `before` rows recorded |
+| **F3** | **shipped** — `homepage` + `repository.url` **unedited** (only `version` differs from `main`); the URL simply resolves now |
+| **F4** | **shipped** — every `REPO-SETTINGS` row re-probed; `SECURITY.md` / `CODE_OF_CONDUCT.md` stopped calling an established route a pre-flip task |
+| **F5** | **shipped** — `0.4.0` tagged on merged `main`, CI run `37217761468` published it via Trusted Publishing; **provenance on `0.4.0`, none on `0.3.0`**, **zero workflow edits** |
+| **F6** | **shipped** — `t0` = **119 lifetime downloads, none organic**, recorded in `.ai/STATE.md`, derived from the downloads API; the two `.ai/` files that still called the baseline zero were corrected |
+| a live gate | **fixed, not left red** — S44's `home-path-scrubbed` demanded a commit that still carries the path, which P1 made permanently unsatisfiable; proof moved to runtime-assembled samples + an inverted history walk |
 
-## S46 — the public flip
+## S47 — the candidate
 
-`prompts/46-task-public-flip.md`, requirements **F1–F6**, **gated on P1 and P2**. Full text, with
-done-conditions, in that file. In one line: *the repo stops being private and every claim it makes
-becomes checkable, with each remote fact proven by a recorded before **and** after.*
+`prompts/47-task-*.md` does not exist yet — write it at plan time. The spec is
+`sessions/session-45-ground-truth.md` § *Findings, ranked*, chiefly: **`check_session_coverage` is
+blind for S38–S44** (squash-merged subjects match nothing; newest belief **S37**; it already missed
+`sessions/session-40-summary.md` being absent), **the GT cadence is absent from `AGENTS.md`**
+(**vajra-owned** — disclose it, do not smuggle it), **S44's `REJECT` recorded as COMPLETE**, the
+**3-file cap unenforced by 17 of 60**, and the stale-fact class. Plus the **support ticket** above.
 
-Three things S46 must not get wrong, all of which this handoff used to get wrong:
+Alternatives: the **GTM proof pack** (F6 recorded `t0` only — benchmarks, channels, first organic
+signal), or **new product surface** (none since `c72cc14`, S09).
 
-1. **F3 is satisfied by NOT editing.** `repository.url` and `homepage` already hold correct values —
-   they were unreachable, not wrong. **Editing either field fails F3.**
-2. **Every remote fact needs a `before` row.** A visibility change leaves no trace in the tree, so a
-   flip with no recorded `before` fails: anyone can type `private: false` into a markdown table and
-   every gate here will agree.
-3. **`t0` is not zero.** `@ifelse.codes/chitra` has **119** lifetime downloads, all inside a 6-day
-   window starting on its publish day. The number is real; its *shape* disqualifies it as traction.
+## Three process facts worth inheriting
 
-## The bug worth inheriting
-
-**A derived figure published inside the session that keeps changing its population is stale by
-construction.** S45 computed `canonical_inputs_sha` once — when the attested diff was still empty —
-and pasted `40bd7929…` into six files; the real value from the next commit on was different, and
-`check_review_attestation` compares with **exact string equality**, so an ACCEPT carrying the pasted
-figure reads `MISMATCH`. Amendment **A3** states the rule. **Compute it after the last commit that can
-move it.** Corollary the cold review found: `.ai/GT-REMEDIATIONS.md` is the *only* one of the ten S45
-changed files inside the attestation, so **the ledger cannot contain the hash at all** — a file cannot
-be part of its own preimage. The authoritative value lives in the review artifact.
-
-## Also still open — the S47 candidate
-
-`sessions/session-45-ground-truth.md` § *Findings, ranked* is the specification. Chiefly:
-`check_session_coverage`'s blindness; the cadence's absence from `AGENTS.md` (**vajra-owned** — that
-half is a vajra-side change, disclosed not smuggled); S44's undisclosed `REJECT`; the unenforced
-3-file cap. Plus seven dead docs deps, `minimumReleaseAgeExclude: stripe-replit-sync`, S40's
-`required-crew` (now **five** waivers), the vacuous `check_ground_truth_no_code`, the cost gate that
-greps a heading, and **S16**.
-
-## Two process facts
-
-- **The cadence appeared in `0` of `AGENTS.md` / `SESSION-BOOT.md` / `TASK.md`.** If you add it, add
-  it to **`AGENTS.md`** — and note the probe must name its ref: the same grep reads `0` at `main` and
-  `0 / 5 / 4 / 1` at `HEAD`, because the finding gets copied into the files it measures (amendment A3-2).
-- **A contract rewrite now fails closeout.** If S46 edits `prompts/46-*.md` after
-  `sessions/session-46-review.md` exists, `contract-freshness` turns red — append an amendment instead.
-
-Historical verify scripts stay frozen (01, 02, 03, 07, 31, 34, 36, 37, 38). The live set is
-**39 / 42 / 43 / 44** — and note **36** numbered scripts exist, so that 4-item list is curation, not a
-derivation.
+1. **`==>` is the replacement separator in `git filter-repo`, not `=>`.** With `=>` the whole line
+   becomes one literal, matches nothing, and the rewrite silently changes nothing but every SHA —
+   measured, not guessed.
+2. **A counterfactual that requires history to keep a redacted value cannot survive the redaction.**
+   S44's gate demanded "some commit still matches"; after P1 the correct state fails it forever.
+   Prove a pattern against an **assembled** sample instead — and assemble it, because a literal
+   sample inside the gate's own source makes the tree scan flag the gate.
+3. **Vajra cannot verify helper provenance outside Claude Code.** `.ai/handoffs/session-46-tech-lead.md`
+   validates structurally but reads `unverifiable … gitBranch "session-18-heatmap-lock"`; the crew
+   gate's own message prescribes the path: `VAJRA_CLOSEOUT_WAIVER=<NN>` with a reason, at close.
