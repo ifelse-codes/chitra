@@ -5,14 +5,16 @@
 - **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge).
 - **Product:** **`@ifelse.codes/chitra@0.3.0`**, live on npm, **untouched** by this session.
 - **Contract:** `prompts/44-task-oss-polish.md` — at HEAD, plus `## Contract amendments` →
-  **A1** (D5's removal set: the real test is *does the override change resolution*, not *is the
-  package named in the lockfile*) and **A2–A4** (the cold review's D4b figures, the scrub's
-  `sessions/` edits, and requirement 10's own wording).
+  **A1…A8**: A1 the D5 removal set (the real test is *does the override change resolution*, not
+  *is the package named in the lockfile*), A2 the D4b figures, A3 the scrub's `sessions/` edits,
+  A4 requirement 10's own wording, A5/A6 pass 2's findings, A7 the correction of A6's premise,
+  A8 pass 4's findings. Read the section; do not trust this summary of it.
 - **Delivered:** 14 requirements in four groups.
   - **OSS surface (1–6):** `SECURITY.md` (supported versions, private disclosure, explicit
     no-SLA/no-bounty scope that includes the release pipeline), `CODE_OF_CONDUCT.md`
     (Contributor Covenant 2.1 + enforcement ladder, **no invented mailbox** — private reports
-    route through the one channel that reaches the maintainers), `.github/ISSUE_TEMPLATE/`
+    route through GitHub's private reporting *if it is switched on*, which
+    `.github/REPO-SETTINGS.md` records rather than this file claiming), `.github/ISSUE_TEMPLATE/`
     (bug + feature forms, `config.yml` with blank issues off and three real contact links),
     `.github/PULL_REQUEST_TEMPLATE.md`, a **CI badge** pointing at `ci.yml`, **coverage enforced**
     in the `core` job (`test:coverage` replaces the plain `Test` step — suite still runs once),

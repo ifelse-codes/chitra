@@ -116,9 +116,9 @@ finished building:
 | finding | what was wrong | fixed in |
 | --- | --- | --- |
 | **the fakest green** (medium) | `gate-scope-switch` printed "*fast removes 86% of this gate's own wall clock*" as a **measured** figure. It was not: it picked the timings file with the most lines and kept the old one **on a tie** — and every full run writes the same number of lines, so the number was frozen at the first full run ever made. The reviewer's own full run measured **73%** while the gate still printed 86% | selection is newest-first and prints its source run; `pick_timings_file` is extracted and driven over a fixture, so "newest wins" is a fact the check can lose on (below) |
-| **the pass-1 review was never committed** (medium) | `contract-freshness` clause (a) resolves the commit that **first added** the review file and fails closed without one — pass 1's report was left untracked, so the N1 rule this session ships had no attested feed for one commit | amendment **A5.2** discloses it; pass 3's report is committed, and every amendment after it is checkable |
+| **the pass-1 review was never committed** (medium) | `contract-freshness` clause (a) resolves the commit that **first added** the review file and fails closed without one — pass 1's report was left untracked, so the N1 rule this session ships had no attested feed for one commit | amendment **A5.2** discloses it. Its own remedy sentence was written before the fact and was **false when written** — pass 4 caught that, and the correction is **A8.1**: the report is committed *after* the amendments it is checked against, and the way to verify it is `git log --diff-filter=A -- sessions/session-44-review.md`, not a sentence in this map |
 | **req 13 violated by the F2 fix** (medium) | while correcting "16 of 565", four `.ai/` files carried fresh typed counts — "~146 process files" (truth: every tracked process file, `git ls-files … \| wc -l`) and "~30 changed files / ~14 commits" | each site now names the command instead of the number |
-| **`A1`-only leftovers** (low/med) | `.ai/TASK.md` and `.ai/ROADMAP.md` still said the contract carries only **A1**; `SESSION-BOOT.md` was right | both corrected to A1–A4 |
+| **`A1`-only leftovers** (low/med) | `.ai/TASK.md` and `.ai/ROADMAP.md` still said the contract carries only **A1**; `SESSION-BOOT.md` was right | corrected — and **again** after pass 3, which found two files had been left at A1–A4 while the contract was already at A1–A7. They now read **A1…A8**, and the last amendment is A8, which is the only way that stays true |
 | **two docs pointed at a closed door** (low/med) | `blank_issues_enabled: false`, yet `SECURITY.md` told a reporter to "say so in a **public** issue" and the CoC sent every non-secret report to an issue — a route that does not exist for anyone outside the maintainers | amended **A6**; both docs route to Discussions/private reporting, and `oss-surface-present` now fails on any doc that sends the reader to the tracker while blank issues are off (the pattern is broader than the word "open", because the defective sentence never used it) |
 | **M4 half-fixed** (low/med) | HEAD was one commit ahead of `origin` when pass 2 looked | pushed |
 | **stale pointer** (low) | `CONTRIBUTING.md` cited `verify-session-43.sh#contributing-coverage-numbers-real`; the live check is in the S44 gate | corrected, with the reason |
@@ -158,6 +158,34 @@ clause forbade the one true sentence while permitting the two false ones.
 
 Pass 3 independently re-confirmed pass 2's fixes, including that **the pre-fix selection logic
 fails the new fixture** and that the live figure moved 86% → 71% and names its run.
+
+## Cold review, pass 4: **REJECT** — and the fakest green was a sentence about my own compliance
+
+**11 SHIPPED · 3 PARTIAL · 0 NOT-BUILT.** Pass 4 did what a reviewer is for:
+
+| finding | what was wrong | fixed in |
+| --- | --- | --- |
+| **a false sentence of mine** (high) | amendment **A5.2** claimed "pass 3's report is committed, and every amendment after it is checkable". No review report was committed — and `verify-closeout.sh 44` said so itself: `contract-freshness` **FAIL**, *"no commit in history adds sessions/session-44-review.md — freshness cannot be evaluated (fail closed)"*. A false claim about compliance, inside the amendment that discloses non-compliance | **A8.1** replaces the sentence with the **command** that proves it, and the report is committed after the amendments it is checked against. A promise cannot be audited; `git log --diff-filter=A -- sessions/session-44-review.md` can |
+| **the same unverified claim, five places** (high) | A7 fixed the two prose docs; "routes private reports through the one private channel that reaches maintainers" also survived in `STATE.md`, `TASK.md`, `ROADMAP.md` and the demo — and `gh api …/private-vulnerability-reporting` returns 404, which is also what an account without admin access gets | **A8.2** — all four now name it a route, not a promise, and point at the recorded settings |
+| **an invariant wider than the gate** (med) | `REPO-SETTINGS.md` claimed the gate "reads the two `has_` rows"; it reads one, plus `blank_issues_enabled` from `config.yml` | **A8.3** — the file states exactly what is enforced and requires future widenings to update that paragraph in the same commit |
+| **the route a visitor clicks first** (med) | the advisories contact link offered `security/advisories/new` with no hedge — the one link that may 404, and the reason req 3 came back PARTIAL | **A8.4** — it carries the same hedge as the docs, including what to do when it fails |
+| **typed counts again** (med/low) | the map's gate-run count was stale by one run; the demo printed `15 tracked files` as a literal under a header naming derived counts | **A8.6** — both derive: `run-meta.txt` globbed, `git show --numstat` on the commit `git log -G` selects |
+| **the amendment list going stale** (med) | two files still said the contract carries **A1–A4** when it carried A1–A7 | **A8** — all three now read **A1…A8**, with the last amendment being A8, which is the only way that stays true |
+
+Pass 4 also re-derived the settings itself (`has_discussions: false` and the two others match the
+record) and found **A7.4's D4b/D4 slip**, corrected in **A8.5**.
+
+- 🔴 **This session has now been rejected four times, and the last two rejections were of my own
+  fixes.** Passes 3 and 4 did not find new work; they found that work I had just done was built on
+  an untrue premise (A6's "closed tracker") and then claimed, in writing, that a gate was
+  satisfied when it was not (A5.2). The correction is not a better sentence — it is that every
+  claim about this repo's own compliance now names the **command** that verifies it, and the
+  claims about remote state name the **recorded setting** plus the command that re-derives it.
+  Anyone reading this map should treat a bare assertion about compliance the same way pass 4 did.
+- 🟠 **The map is one review behind by construction.** Its amendments section is complete through
+  **A8**; a fifth pass that demands A9 would leave the map's own summary of the amendment list
+  stale again — which is the same defect it has now been caught for twice, and the reason A8 is
+  written to be the last rather than to be exhaustive.
 
 ## Honest gaps
 
@@ -212,8 +240,8 @@ stays 453) · **0** lockfile changes (the D5 regen produced an empty diff — re
 **0** releases · **0** npm secrets · **0** new recurring infra (coverage rides the existing
 `core` job; no coverage service) · **1** `--no-verify` commit for the 15-file mechanical scrub,
 authorised by the contract because the 3-file atomic cap cannot express it · gate runs: **13
-fast + 13 full + 1 untimed**, a count read out of `.ai/verify/session-44/*/run-meta.txt` rather
-than remembered — the last of each green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
+fast + full runs**, counted with `ls -1d .ai/verify/session-44/*/ | grep -v latest | wc -l` and
+`grep -ho '^scope=[a-z]*' .ai/verify/session-44/*/run-meta.txt | sort | uniq -c` — the last of each green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
 vary with load; every run's own figure is in its `run-meta.txt`), with the
 red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
 plan) · npm cost $0.
