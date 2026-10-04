@@ -1307,7 +1307,7 @@ run_check "gate-scope-switch" gate_scope_switch
 # measurements at all (`14% wide`, `<pct>%` in a code span), and a rule that fires on
 # those is a rule nobody keeps.
 map_measurement_honesty() {
-  local padded F line bad="" shape n
+  local padded F line bad="" shape n dur
   padded="$(printf '%02d' 44)"
   n=$(grep -c '^run_check ' "$0" 2>/dev/null || true)
   # Fail closed if the count cannot be derived. An empty $n would turn rule 3's first
@@ -1325,6 +1325,27 @@ map_measurement_honesty() {
     # the string it was written for; found by running the counterfactual again after it
     # had already been "proven".
     if grep -q '[0-9]%' <<<"$line"; then pct=1; else pct=0; fi
+    # RULE 4 — a typed DURATION is the last measurement class this map still asserted
+    # ("the gate measures 2m 25s", "2-3 min" in a scope row). Gated like a percentage:
+    # a history word or a commit citation excuses it, a bare current claim does not.
+    #
+    # Two scope decisions, both learned by tripping over them:
+    #  - a NUMBERED row is history here (`| 6 | every fast-scope check cost 0s` is a
+    #    defects-table row), so durations are not judged on numbered rows at all;
+    #  - the cost word must name THE GATE (`gate`, `run_check`, `verify-session-44`,
+    #    `wall clock`) rather than any cost-ish word. Bare `scope`/`run` matched the
+    #    headline that QUOTES §4.9's carried "~60 minutes" premise, which is history
+    #    by definition — and a rule that flags the premise it is correcting cannot
+    #    tell the two apart.
+    numbered=0
+    case "$line" in '| '[0-9]*' |'*) numbered=1 ;; esac
+    if [ "$numbered" = 0 ] \
+      && printf '%s' "$line" | grep -qiE 'gate|run_check|verify-session-44|wall.?clock' \
+      && printf '%s' "$line" | grep -qiE '[0-9]+[–-]?[0-9]* ?(min|mins|minutes|secs?|seconds|s)\b'; then
+      dur=1
+    else
+      dur=0
+    fi
     # Rule 3's pattern: the gate's OWN shape. `n` is derived here, at check time, so
     # the rule tracks the gate instead of a literal written into this script — a
     # typed count in the check would have been falsified by the next added check,
@@ -1361,7 +1382,7 @@ map_measurement_honesty() {
     else
       shape=0
     fi
-    [ "$pct" = 1 ] || [ "$shape" = 1 ] || continue
+    [ "$pct" = 1 ] || [ "$shape" = 1 ] || [ "$dur" = 1 ] || continue
     case "$line" in
       '| '[0-9]*' |'*)
         bad+="requirement row: $line"$'\n'
@@ -1380,8 +1401,8 @@ map_measurement_honesty() {
     bad+="unmarked: $line"$'\n'
   done < "$F"
   [ -z "$bad" ] \
-    && { echo "the map states no percentage and no gate-shape number as current: the requirement rows carry neither, and the rest is marked as history"; return 0; }
-  echo "the map states a percentage or a pass ratio as a current measurement — read the run's own output instead:"
+    && { echo "the map states no percentage, no gate-shape number and no gate duration as current: the requirement rows carry none of the first two, and what is left is marked as history"; return 0; }
+  echo "the map states a percentage, a pass ratio or a gate duration as a current measurement — read the run's own output instead:"
   printf '%s' "$bad" | sed 's/^/  /'
   return 1
 }
