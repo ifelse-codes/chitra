@@ -870,7 +870,7 @@ oss_surface_at() {
     # unhedged - the same promise in the place a reporter is most likely to read it.
     if echo "$body" | grep -q 'security/advisories'; then
       echo "$body" | grep -qiE 'does not work|not exist|may not exist|is pending|if private reporting|if this repository has private reporting' \
-        || { echo "$d links the private advisories route with no hedge, while .github/REPO-SETTINGS.md records that route's status as unknown — say what to do when the link fails${TREE:+ at $TREE}"; return 1; }
+        || { echo "$d links the private advisories route with no hedge — .github/REPO-SETTINGS.md records that route's status (and no offline gate can read it), so say what to do when the link fails${TREE:+ at $TREE}"; return 1; }
     fi
   done
   pr=$(rd .github/PULL_REQUEST_TEMPLATE.md); [ -n "$pr" ] || { echo "PR template missing"; return 1; }
@@ -966,22 +966,36 @@ run_check "engines-derived" engines_derived
 
 # ═══════════════════════════════════════ S44 · the decisions (req 7-8, 11)
 
-# req 8 — D4. The same command, run twice: clean on the live tree, and matching
-# on the NEWEST commit that still carries the path — which is derived by walking
-# history, not typed. A pattern that matches nothing anywhere is a broken
-# pattern, not a clean tree; that is the counterfactual.
+# req 8 — D4. Two invariants: the live tree carries no home path, and neither does
+# any commit reachable from HEAD.
+#
+# The counterfactual used to be a history match — the NEWEST commit still carrying
+# the path, derived by walking history. S46's P1 (the approved `git filter-repo`
+# rewrite, recorded in sessions/session-46-flip.md) deleted every one of those
+# commits, so "find a matching commit" is now permanently unsatisfiable: the check
+# would report a broken pattern for the correct state. A pattern that matches
+# nothing ANYWHERE is still a broken pattern, so the proof moved to a synthetic
+# sample — true positive and true negative — and the history walk inverted from
+# "must find one" to "must find none".
 home_path_scrubbed() {
-  local pat='(/|-)Users[-/][a-z]+' c found=""
+  local pat='(/|-)Users[-/][a-z]+' u='Users' c
   if git grep -nE "$pat" -- .; then
     echo "^ a personal home path is still tracked"; return 1
   fi
+  # The samples are assembled from a variable: this file must never contain the very
+  # literal the tree scan above looks for, or the check fails on its own source.
+  if ! printf '/%s/example/rep\n' "$u" | grep -qE "$pat"; then
+    echo "pattern fails a true positive (assembled home path) — broken pattern, not a clean tree"; return 1
+  fi
+  if printf '/var/home/someone\nC:\\%s\\me\n' "$u" | grep -qE "$pat"; then
+    echo "pattern matches a path that is not a macOS/dash home path — too broad to mean anything"; return 1
+  fi
   for c in $(git rev-list HEAD); do
-    if git grep -qE "$pat" "$c" -- . 2>/dev/null; then found="$c"; break; fi
+    if git grep -qE "$pat" "$c" -- . 2>/dev/null; then
+      echo "commit ${c:0:8} still carries a home path — reachable history is not clean"; return 1
+    fi
   done
-  [ -n "$found" ] || { echo "no commit in history matches the pattern — the pattern is broken, not the tree clean"; return 1; }
-  local n; n=$(git grep -cE "$pat" "$found" -- . | awk -F: '{s+=$NF} END {print s+0}')
-  [ "$n" -gt 0 ] || { echo "the pattern matched nothing even on ${found:0:8}"; return 1; }
-  echo "tree clean; the same command finds $n occurrences on the newest pre-scrub commit ${found:0:8}"
+  echo "tree clean; history clean over $(git rev-list HEAD | wc -l | tr -d ' ') commits; pattern proven true-positive and true-negative on assembled samples"
 }
 run_check "home-path-scrubbed" home_path_scrubbed
 

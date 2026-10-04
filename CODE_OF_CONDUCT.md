@@ -70,7 +70,10 @@ is worse than no address at all, and a placeholder address is a lie.
 **If the Security tab offers no private reporting, there is no private channel here**, and this
 file will not pretend otherwise. In that case open a **bug report** through the form with nothing
 but "a conduct report is pending, please arrange a private route" — no names, no details — and
-your report will be taken from there. Arranging that route is recorded as a pre-flip task.
+your report will be taken from there. That route **is** established on this repository as of the
+public flip (session 46); the row and the command that re-derives it are in
+[`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md), and if the Security tab shows no private
+reporting, treat the fallback above as the route.
 
 All complaints will be reviewed and investigated promptly and fairly. All community leaders
 are obligated to respect the privacy and security of the reporter of any incident.
