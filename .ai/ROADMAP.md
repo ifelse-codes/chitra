@@ -53,7 +53,7 @@ if not, they go, and the one-liner becomes true.**
 | Item | Why it stays open |
 |---|---|
 | §4.3 — `ai-names-no-deleted-tree` is a membership check and **cannot catch a lie inside a listed file** | The reviewer judged it an **acceptable disclosed limit**, and I agree: the alternative it rejected was a prose-coupled check this repo has refused repeatedly. Its intended failure mode is demonstrated — a new mention site turns the gate red and forces a human. Revisit only if it costs something real |
-| `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, **and now S42**. Three waivers is a decision, four is a burial. It is **S44 decision work beside D2** |
+| `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, S42, **and now S44 — four**. The row used to read "it is **S44 decision work beside D2**", inside a table headed *deliberately NOT scheduled*, and S44 completed in October without touching it; `STATE.md` still listed it open. **Corrected in S45: this is S47 work, not S44's.** It demands a tech-lead handoff that `AGENTS.md`'s 9-step Session Loop never asks for, so it polices a step the constitution does not contain |
 
 ## Backlog (not yet scheduled)
 - ✅ **Session 42 (S42) — cleanup Batch 2: dead weight** (branch `session-42-dead-weight`,
@@ -115,12 +115,50 @@ if not, they go, and the one-liner becomes true.**
   stripped with a zero-delta lockfile regen**. **N1** closed with a rule in `reviewer/SKILL.md` +
   a pure `contract-freshness` core in `verify-closeout.sh`; **§4.9** with `VAJRA_GATE_SCOPE` +
   per-check timings. Product untouched: **453/453**, no file under `packages/core/src/`.
-- ⬜ **Session 45 (S45) — the public flip.** One move resolves: the README `git clone` URL, npm
-  `repository.url` / `homepage`, **npm provenance** (a private repo cannot generate it), a real
-  **`0.4.0`** through the trusted-publisher runway, and **D4b** — the history rewrite that purges
-  the home path from every commit reachable from `HEAD` (**irreversible; every recorded SHA
-  moves**). Then the GTM
-  proof pack, with the measured **zero** downloads as its `t0`.
+- ✅ **Session 45 (S45) — the mandatory ground-truth audit (NO-CODE, `45 % 5 == 0`)**,
+  contract `prompts/45-task-public-flip.md`, audit `sessions/session-45-ground-truth.md`.
+  **COMPLETE, 🔴.** **27 probes, 3 retired** (the retired ones are listed in the artifact — a retired
+  probe quietly dropped is how a count becomes a fiction); ledger **14 `DEFERRED` / 18 `DONE`** after
+  nine S45 rows, each with its re-probe; **0** product-code changes; **453/453** untouched.
+  **Why an audit and not the flip:** `hook-ground-truth-guard.sh` (L3) blocks every write outside
+  `sessions/ .ai/ prompts/ *.md`, and the flip's `0.4.0` needs `packages/core/src/version.ts`. The
+  roadmap had scheduled S45 as "the public flip" and **five tracked documents did so without one of
+  them computing `45 % 5`** — because the cadence appears in **0** of `AGENTS.md` / `SESSION-BOOT.md` /
+  `TASK.md`.
+  **Four material findings, and every one is a check that reports green while doing nothing:**
+  `check_session_coverage` reads its population from `git log --merges` + a `session-NN-slug` regex,
+  so since **S38** — all squash-merged — its newest belief is **S37**: blind for 7 sessions, and it
+  has already cost a record (`sessions/session-40-summary.md` absent for a merged session, **the S16
+  failure re-occurring inside the S16 remediation**); the **cadence is in no file an agent must
+  read**; **S44's only canonical verdict is `REJECT`**, which makes `check_review_attestation` read
+  `N/A` — so **S44 carries no DECISION-003 attestation** — while `STATE.md` recorded it COMPLETE; the
+  **3-file cap** is breached by **17 of the last 60** commits (S40 measured 8) and is declared
+  "Hook-enforced", though squash merges never run a local hook. Plus **8 stale facts** across `.ai/`.
+  **The shape underneath all of it: a population defined by prose instead of derived from the thing
+  it governs** — five instances, three of them checks. `check_verify_demo_scripts` is the counter-
+  example: it reads `N % 5`, declines honestly, passes nothing vacuously.
+  **Closed by the session, not by prose:** `canonical_inputs_sha` is now computable (`40bd7929…`) —
+  commit the contract on a `-closeout` branch, which is the only commit exemption a NO-CODE session
+  has — and the flip's two gates gained an owner.
+- ⬜ **Session 46 (S46) — the public flip.** Contract `prompts/46-task-public-flip.md`, requirements
+  **F1–F6**: repo public (F1), README `git clone` URL resolving (F2), npm `repository.url` /
+  `homepage` resolving **without being edited** (F3 — both fields are *already* correct and were
+  merely unreachable; editing them fails F3), `.github/REPO-SETTINGS.md` re-derived post-flip (F4), a
+  real **`0.4.0` + npm provenance through CI unattended** (F5 — the asymmetry against `0.3.0`, which
+  has no provenance because it shipped from a private repo, *is* the proof; **no workflow change is
+  needed**), and the GTM baseline as `t0` = **zero** (F6). **Gated on two preconditions that until
+  S45 had no owner:** **P1** — the D4b history rewrite, `(/|-)Users[-/][a-z]+` in **1001**
+  (commit, file) pairs across history and **0** in the tree, **irreversible once the repo is public**,
+  so S46 must record the tool (`git filter-repo`) and a 5-step re-verify order *before* the push; and
+  **P2** — private vulnerability reporting (404, recorded `unknown`), a founder-only setting.
+- 🔜 **Session 47 (S47) candidate — make the governance gates able to fail.** A **different story from
+  the flip**, deliberately not folded into it: fixing `verify-closeout.sh` in the same session that
+  makes the repo public would put the public surface and its gates in one unreviewable commit. Ranked
+  list with severities in `sessions/session-45-ground-truth.md` § *Findings, ranked*; dispositions in
+  `.ai/GT-REMEDIATIONS.md`'s S45 section. Headline: **`check_session_coverage` cannot see S38–S44**,
+  the **cadence is absent from `AGENTS.md`** (which is **vajra-owned**, so that half is a vajra-side
+  change — disclosed, not smuggled), **S44's `REJECT` is recorded as COMPLETE**, and the **3-file cap
+  is unenforced by 17/60 commits**.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
