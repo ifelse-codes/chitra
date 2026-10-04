@@ -444,6 +444,56 @@ counts as derived, and the fidelity map printed a typed gate-run count that was 
 one run. Both now derive: `git show --numstat` on the commit `git log -G` selects, and
 `run-meta.txt` globbed.
 
+### A9 — pass 5: the last three "fixed" claims that were not, and one that could not be true yet
+
+Pass 5 of the S44 cold review returned **REJECT** (11 SHIPPED · 3 PARTIAL · 0 NOT-BUILT). Its
+fakest green was the *scope* of a gate clause: the comment in `oss-surface-present` stated an
+invariant as a class ("no public doc may route to a channel the recorded settings say is off")
+while the code looped over four filenames, and `bug-report.yml` was doing exactly what the class
+forbids, unhedged.
+
+**A9.1 — three "fixed" claims were not fixed.** The sweep that corrected "the closeout runs
+`full`" touched the gate header and one document; `.ai/STATE.md` and `.ai/KNOWLEDGE.md` still
+carried the phrase this amendment's own A4 declares untrue. The sweep that hedged the
+private-reporting route fixed the two prose docs, then `A8.2` fixed four more, and
+`.ai/KNOWLEDGE.md` still said "routes private reports through GitHub private reporting" — six
+files carried the claim, not five. And `A8.4` hedged `config.yml`'s contact link while
+`bug-report.yml`'s inline link — the one a reporter is most likely to read — stayed unhedged. All
+three are corrected. **The lesson is recorded rather than the fixes**: a sweep described as
+"all sites" is a claim about a set nobody enumerated, and two of the three were wrong.
+
+**A9.2 — the route clause now names its scope, and a third clause closes the hole.** The loop
+covers the four public docs **and** the three issue-template files, with the exclusions stated
+(`.ai/` records name a channel while qualifying it in the same sentence; `REPO-SETTINGS.md` must
+be able to name a channel to record that it is off). A third clause requires any file that offers
+`security/advisories/new` to hedge it in the same file, because that route's status is recorded
+as **unknown**. Each clause is proven red against the wording pass 5 found.
+
+**A9.3 — A8.1's remedy sentence could not be true when it was written.** A8.1 says the review
+report "is committed after the amendments it is checked against". At the moment A8 landed, no
+report was committed, so the sentence described an intention as a fact — the same species of
+error pass 4 found in A5.2. Corrected record: the ordering is the mechanism, and the fact to
+check is `git log --all --diff-filter=A -- sessions/session-44-review.md` returning a commit.
+**A9.2's** wording is deliberately not of that kind.
+
+**A9.4 — A8's "the only way that stays true" is retracted.** No phrasing of an amendment list
+stays true by itself; the A1…A8 references stay right because each pass re-checks them, and two
+have now been caught going stale. The honest form is the list plus the rule that a stale list is
+a finding.
+
+**A9.5 — this map quoted a range the runs falsify.** The headline said the skip-list share has
+"moved between 71% and 80%"; the full runs on disk print 60%, 66%, 78% and one of pass 5's own
+runs printed 87%. The denominator is wall clock on a loaded machine, so the share is a
+measurement of that machine at that moment and nothing more. No figure or range is typed here
+now — each run's own number is in its `gate-scope-switch.log`, beside the run directory it came
+from.
+
+**A9.6 — an untracked local dashboard carried a home path.** `project-status.html` sat in the
+working tree, untracked and unignored, containing `/Users/<name>/…` — invisible to
+`no-machine-path-junk` because that gate greps tracked files, and one `git add` from being
+published. It stays on disk (it is someone's local work) and is now ignored next to the other
+local HTML reports, with the reason written down rather than left to be rediscovered.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder
