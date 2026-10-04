@@ -936,7 +936,7 @@ run_check "overrides-gone" overrides_gone
 # '## Git hooks (opt-in)' section). A check that also passed on main would prove
 # nothing about this session.
 founder_decisions_at() {
-  local TREE="${1:-}" d con gi hits=""
+  local TREE="${1:-}" d l con gi hits=""
   rd() { if [ -n "$TREE" ]; then git show "$TREE:$1" 2>/dev/null; else cat "$1" 2>/dev/null; fi; }
   lsat() { if [ -n "$TREE" ]; then git ls-tree -r --name-only "$TREE" -- "$1"; else git ls-files -- "$1"; fi; }
 
@@ -968,9 +968,14 @@ founder_decisions_at() {
   # D3/D6 = ignore: nothing under playground/ or design-reference/ may be in the
   # index, and .gitignore must ignore both directories WHOLE — the five partial
   # patterns that were there before are exactly how they ended up half-tracked.
-  # Append with an explicit newline: `$( )` strips the trailing one, so the two
-  # listings would otherwise fuse and `grep -c .` reported 10 instead of 11.
-  for d in playground design-reference; do hits+="$(lsat "$d")"$'\n'; done
+  # Append with an explicit newline — but ONLY when there is something to append:
+  # `$( )` strips the trailing one, so plain concatenation fused the two listings
+  # and reported 10 instead of 11, while appending unconditionally left a bare
+  # newline when both were empty and reported "still tracked" with no files.
+  for d in playground design-reference; do
+    l=$(lsat "$d")
+    if [ -n "$l" ]; then hits+="$l"$'\n'; fi
+  done
   [ -z "$hits" ] || { echo "D3/D6 broken: still tracked${TREE:+ at $TREE}:"; echo "$hits" | sed 's/^/  /'; return 1; }
   gi=$(rd .gitignore)
   for d in design-reference/ playground/; do
@@ -989,14 +994,17 @@ founder_decisions_at() {
 }
 founder_decisions_covered() {
   founder_decisions_at "" || return 1
-  local out rc=0 hits="" d
+  local out rc=0 hits="" d l
   out=$(founder_decisions_at main 2>&1) || rc=$?
   [ "$rc" -ne 0 ] || { echo "the identical check passes on main, where none of this exists — it proves nothing"; return 1; }
   # Name BOTH halves main fails, not just the first one to fire: D3/D6 is the
   # decision THIS session changed, so the counterfactual has to show that one red
   # too. (Same branch-scoped shape as oss-surface-present: on main after the merge
   # this gate is historical and no longer run, like every prior session's.)
-  for d in playground design-reference; do hits+="$(git ls-tree -r --name-only main -- "$d")"$'\n'; done
+  for d in playground design-reference; do
+    l=$(git ls-tree -r --name-only main -- "$d")
+    if [ -n "$l" ]; then hits+="$l"$'\n'; fi
+  done
   [ -n "$hits" ] || { echo "main tracks nothing under playground/ or design-reference/ — nothing here is being changed, so the counterfactual is a claim"; return 1; }
   echo "counterfactual: RED on main twice over — $(head -1 <<<"$out"); plus $(grep -c . <<<"$hits") files still tracked under playground/ or design-reference/"
 }
