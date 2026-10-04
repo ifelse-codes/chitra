@@ -607,13 +607,32 @@ its rule was percentages only.
    not `$n` by definition. Only the "N checks" / "N PASS" phrasing keeps the word-list escape,
    where a marker is doing real work.
 
-Two bugs were found while proving this, both mine and both the same species as defects passes 2
-through 7 caught in this delivery:
+**A12.3 — and the rule stayed broken after I "proved" it.** Two more defects in the same check,
+found only by re-running a counterfactual that had already passed:
+
+- the percentage test was a `case` pattern, `*[0-9]%)`, whose closing paren **anchors it to
+  end-of-line** — so "The gate measures 73% of its own wall clock." never matched, and the sentence
+  this check exists to catch sailed through. It is a regex test now.
+- the "a history word excuses it" rule was laundered by the map's own account of what the check
+  used to do: the line had to name `[0-9]%` to describe the old rule, and the check flagged the
+  description. Escaped **structurally** — a line that cites a commit SHA is about that commit —
+  because a word list has now been laundered three times in this session (`said`, `was`, `old`,
+  `typed`).
+
+The pattern across A12.1–A12.3 is worth more than any of the individual fixes: **every one of these
+rules shipped "green" while being unable to fail on the sentence it was written for**, and each was
+caught by re-running the counterfactual rather than by reading the code. The gate's own lesson about
+patterns that "match nothing" is not a rule about regexes — it is a rule about believing a green
+result you have not re-earned.
+
+**A12.2 — pass 8's nits.** The history word list no longer contains `was` or `old` — pass 8 showed
+they launder a current claim through the word *thresholds*. `SECURITY.md` said "If it off". The
+map's header named A1–A4 while the contract carried A1–A12.
 
 - the first version used `printf '%s' "$line" | grep -q`, and under `set -o pipefail` the SIGPIPE
   from `grep -q` exiting early made **every** long line read as "no match" — the check passed on
   precisely the lines it exists to catch. Every such pipe in this gate is a here-string now, and
-  the reason is written at the site.
+  the reason is written at the site;
 - the harness I used to prove the rule could not run, because it read `$0` from a stub file with no
   checks, which made `$n` empty and the rule degenerate. A rule that cannot be reasoned about from
   its own harness is not a rule.

@@ -1318,10 +1318,13 @@ map_measurement_honesty() {
   F="sessions/session-${padded}-summary.md"
   [ -f "$F" ] || { echo "no fidelity map at $F — requirement 14 asks for one"; return 1; }
   while IFS= read -r line; do
-    case "$line" in
-      *'[0-9]%'*|*[0-9]%) pct=1 ;;
-      *) pct=0 ;;
-    esac
+    # A REGEX test, not a `case` pattern: `case "$line" in *'[0-9]%'*|*[0-9]%)` only
+    # matches a line ENDING in a percentage, because the closing paren terminates the
+    # pattern. So "The gate measures 73% of its own wall clock." — the exact sentence
+    # this check exists to catch — sailed through. Another rule that could not fail on
+    # the string it was written for; found by running the counterfactual again after it
+    # had already been "proven".
+    if grep -q '[0-9]%' <<<"$line"; then pct=1; else pct=0; fi
     # Rule 3's pattern: the gate's OWN shape. `n` is derived here, at check time, so
     # the rule tracks the gate instead of a literal written into this script — a
     # typed count in the check would have been falsified by the next added check,
@@ -1342,6 +1345,14 @@ map_measurement_honesty() {
     # the map's own phrase "not typed here": the cell that denies typing a number was
     # itself using a word the list read as history.
     if grep -qE "(^|[^0-9A-Za-z])$n([^0-9A-Za-z]|\$)" <<<"$line"; then
+      # A line that cites a commit SHA is making a historical statement — this very
+      # gate's rule fired on the map's quotation of pass 8's finding, which names the
+      # current count precisely because it is talking about the commit that changed it.
+      # Structural escape (a SHA), not a word list: "said"/"was" have laundered claims
+      # twice in this session, and a commit reference is checkable rather than worded.
+      if grep -qE '(^|[^0-9a-zA-Z])[0-9a-f]{7,40}([^0-9a-zA-Z]|$)' <<<"$line"; then
+        continue
+      fi
       bad+="gate check count $n stated as current: $line"$'\n'
       continue
     fi
@@ -1360,6 +1371,11 @@ map_measurement_honesty() {
     # (fall through to the history-word test for a percentage or an "N checks"/"N PASS"
     # phrasing; the current-check-count case was already handled above)
     grep -qiE 'printed|frozen|moved|quote|typed|said|observed|reviewer|earlier|caught|promised|used to|no longer' <<<"$line" \
+      && continue
+    # Second structural escape, same shape as the SHA one above: a line citing a commit
+    # is about that commit. This rule caught the map's own account of what this check
+    # used to match, which had to name the old rule to describe it.
+    grep -qE '(^|[^0-9a-zA-Z])[0-9a-f]{7,40}([^0-9a-zA-Z]|$)' <<<"$line" \
       && continue
     bad+="unmarked: $line"$'\n'
   done < "$F"
