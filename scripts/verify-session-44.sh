@@ -1113,14 +1113,19 @@ run_check "contract-freshness-teeth" freshness_teeth
 # path, or nothing + rc 1 if none qualifies. $1 = directory to scan (defaults to
 # the real artifacts dir) so the caller can drive it over a fixture — that is how
 # `gate-scope-switch` proves the selection is newest-first instead of asserting it.
+# A candidate must ALSO be COMPLETE — one line per check this gate declares.
+# Without that, the run in progress is "the newest" while it is still being written,
+# and the ratio it yields depends on how many checks happened to finish before this
+# one (measured: 80% mid-run against 73% for the finished run beside it).
 pick_timings_file() {
-  local root="${1:-.ai/verify/session-44}" f
+  local root="${1:-.ai/verify/session-44}" f want
+  want=$(grep -c '^run_check ' "$0")
   local files=("$root"/*/timings.txt) i
   for (( i = ${#files[@]} - 1; i >= 0; i-- )); do
     f="${files[i]}"
     [ -f "$f" ] || continue
     case "$f" in */latest/*) continue ;; esac
-    [ "$(wc -l < "$f" | tr -d ' ')" -gt 0 ] || continue
+    [ "$(wc -l < "$f" | tr -d ' ')" -eq "$want" ] || continue
     awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
       || continue
     printf '%s\n' "$f"
@@ -1165,29 +1170,35 @@ gate_scope_switch() {
   # Selection is now newest-first (pick_timings_file), the figure is printed with
   # its source, and the fixtures below drive that function so "newest wins" is a
   # fact the check can lose on rather than a comment.
-  local fx="$ARTIFACTS/scope-selftest" got d
-  rm -rf "$fx"; mkdir -p "$fx"/{20000101T000000Z,20100101T000000Z,20100101T000001Z,latest}
-  # Two FULL runs with the SAME line count — the exact tie that froze the figure
-  # at the oldest one — plus a NEWER fast-only run, which prices nothing and must
-  # be passed over, plus a `latest` directory, which is not a run at all.
+  local fx="$ARTIFACTS/scope-selftest" got d want skip1 k
+  rm -rf "$fx"; mkdir -p "$fx"/{20000101T000000Z,20100101T000000Z,20100101T000001Z,20100101T000002Z,latest}
+  # Two COMPLETE full runs with the SAME line count — the exact tie that froze the
+  # figure at the oldest one — plus a newer fast-only run and a half-written full
+  # run, neither of which may be priced, plus a `latest` directory, which is not a
+  # run at all. Every file must contain a check `fast` would skip, or nothing
+  # qualifies and the fixture proves nothing.
+  want=$(grep -c '^run_check ' "$0"); set -- $FAST_SKIP; skip1="$1"
   for d in 20000101T000000Z 20100101T000000Z; do
-    { local k=0; while [ "$k" -lt 4 ]; do
-        for s in $FAST_SKIP; do printf '%s %s\n' "$s" 1; done; k=$((k+1)); done
-      } > "$fx/$d/timings.txt"
+    : > "$fx/$d/timings.txt"
+    for k in $(seq 1 "$want"); do
+      if [ "$k" -eq 1 ]; then printf '%s 5\n' "$skip1" >> "$fx/$d/timings.txt"
+      else printf 'core-tests 1\n' >> "$fx/$d/timings.txt"; fi
+    done
   done
+  head -3 "$fx/20100101T000000Z/timings.txt" > "$fx/20100101T000002Z/timings.txt"
   printf 'core-tests 7\nprettier-adopted 7\n' > "$fx/20100101T000001Z/timings.txt"
   : > "$fx/latest/timings.txt"
   got=$(pick_timings_file "$fx" 2>/dev/null || true)
   case "$got" in
     */20100101T000000Z/timings.txt) : ;;
-    *) echo "selection is wrong: got '${got:-<none>}' — a tie must take the NEWEST full run, and a fast-only or latest/ file must be passed over"; rm -rf "$fx"; return 1 ;;
+    *) echo "selection is wrong: got '${got:-<none>}' — a tie must take the NEWEST COMPLETE full run, and a fast-only, half-written or latest/ file must be passed over"; rm -rf "$fx"; return 1 ;;
   esac
   rm -rf "$fx"
   tf=$(pick_timings_file || true)
-  [ -n "$tf" ] || { echo "no FULL run's timings yet — run this gate once with VAJRA_GATE_SCOPE=full"; return 1; }
+  [ -n "$tf" ] || { echo "no COMPLETE full run's timings yet — finish one with VAJRA_GATE_SCOPE=full"; return 1; }
   # If this run's own file is NOT the one being priced, say so next to the number
   # instead of letting an older run's timings stand in for it silently.
-  local src="the newest full run on disk"
+  local src="the newest COMPLETE full run on disk (this run is still being written)"
   [ "$tf" = "$ARTIFACTS/timings.txt" ] && src="this run"
   while read -r name secs; do
     [ -n "$name" ] || continue
