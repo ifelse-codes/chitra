@@ -139,10 +139,14 @@ live on npm, and the repo around it is still **private**.
   carry the flip forward) plus the plan approval, which carried the commit approval; **11
   requirements**; **27 probes, 3 retired**; **0** product-code changes under `packages/core/`; **0**
   new product tests (453 stays 453); **0** lockfile changes; **0** releases; **0** npm secrets; **0**
-  new recurring infrastructure; **$0** npm cost. **6 commits, every one under the 3-file cap** —
-  which is worth stating plainly rather than hiding behind, since this session's own finding is that
-  the cap is breached by **17 of the last 60** commits on `main`. *(The first draft of this line read
-  "Three commits" — true at no instant, because it was written in the fifth.)*
+  new recurring infrastructure; **$0** npm cost. **16 commits, 14 files, every one inside the 3-file cap**
+  (verified per commit, not asserted: `git rev-list main..HEAD | while read c; do git show --numstat
+  --format='' "$c" | grep -c .; done` → max **3**) — which is worth stating plainly rather than hiding
+  behind, since this session's own finding is that the cap is breached by **17 of the last 60**
+  commits on `main`. **Six of the sixteen commits exist only because a gate or the cold review caught
+  this session's own work**, which is the honest cost line: the finding was not free, and it was paid
+  in the currency the audit is about. *(An earlier draft of this line read "Three commits", then "6";
+  both were true at no instant. Derive it.)*
   cap. Token/`$` cost **unmeasured** (billed to the founder's plan) — the correct honest reading.
   Delivery size derived, never typed: `git diff --shortstat main...HEAD`, `git rev-list --count HEAD`.
 - S44: one session, 6 founder decisions, 14 requirements, **plus a follow-up PR (#66) after eight
