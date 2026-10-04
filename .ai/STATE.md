@@ -47,7 +47,10 @@ live on npm, and the repo around it is still **private**.
   (`gh repo view --json isPrivate` → `true`); npm `latest` → `0.3.0`.
 - **The NO-CODE claim rests on the diff, read directly** — never on `check_ground_truth_no_code`,
   which diffs an empty range and returns `OK`:
-  `git diff --name-only main...HEAD` → four files, all `.md`; the non-`.md` filter returns **nothing**.
+  `git diff --name-only main...HEAD` → every changed file is inside `sessions/`, `.ai/`, `prompts/`
+  or is `*.md`; the non-`.md` filter returns **nothing**. *(The first draft of this line read "four
+  files" — derived at the third of six commits and never re-derived, which is the defect this
+  session's own audit is about. Count it, do not carry it forward.)*
 
 ## What Is In Progress
 - **S45 is complete** (the audit, the ledger, the carry-forward, the `.ai/` re-sync, the fidelity map,
@@ -73,7 +76,9 @@ live on npm, and the repo around it is still **private**.
   squash-merged, so no local hook runs. The breach count grew across exactly the four multi-file
   cleanup sessions, i.e. **the rule degrades in proportion to how much legitimate work a session does.**
 - 🔴 **Eight stale facts across `.ai/`**, four of them one recurring class: `main` = `1b6c17d` in
-  **five** files (live `5a39c43`); S44 still "in-progress" (merged); the D4b red claims `main` matches
+  **six** files (`STATE.md`, `SESSION-BOOT.md` ×2, `TASK.md`, `CONTINUATION-PROMPT.md`, and S44's
+  contract) — **all six corrected in this session**; S44 still "in-progress" (merged); the D4b red
+  claims `main` matches
   `(/|-)Users[-/][a-z]+` when the **tree** has **0** and only **history** has carriers; "live set
   39/42/43/44" against **36** numbered scripts; `KNOWLEDGE.md` "452 tests" (live **453**) and its pill
   citation `App.tsx` L550/L570 (live **L927**); "main hosts S00–S39" (live **S44**); and **2 of 3**
@@ -134,7 +139,10 @@ live on npm, and the repo around it is still **private**.
   carry the flip forward) plus the plan approval, which carried the commit approval; **11
   requirements**; **27 probes, 3 retired**; **0** product-code changes under `packages/core/`; **0**
   new product tests (453 stays 453); **0** lockfile changes; **0** releases; **0** npm secrets; **0**
-  new recurring infrastructure; **$0** npm cost. Three commits, all `*.md` and all under the 3-file
+  new recurring infrastructure; **$0** npm cost. **6 commits, every one under the 3-file cap** —
+  which is worth stating plainly rather than hiding behind, since this session's own finding is that
+  the cap is breached by **17 of the last 60** commits on `main`. *(The first draft of this line read
+  "Three commits" — true at no instant, because it was written in the fifth.)*
   cap. Token/`$` cost **unmeasured** (billed to the founder's plan) — the correct honest reading.
   Delivery size derived, never typed: `git diff --shortstat main...HEAD`, `git rev-list --count HEAD`.
 - S44: one session, 6 founder decisions, 14 requirements, **plus a follow-up PR (#66) after eight

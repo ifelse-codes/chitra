@@ -225,7 +225,12 @@ if not, they go, and the one-liner becomes true.**
   **The vision verdict came back 🟡, not 🔴, after two founder corrections recorded in the
   audit:** nothing has been released-and-marketed, so the **adoption baseline of zero is the
   correct pre-launch reading** — the finding is that the number had *never been read*
-  (`@ifelse.codes/core`'s 304 downloads are 0 for the 9 days before its publish and all land
+  (`@ifelse.codes/core`'s downloads are 0 for the 9 days before its publish and all land in a
+  5-day window after it — **S45 re-probed: 318 lifetime, not 304** — and
+  `@ifelse.codes/chitra` is **not** unindexed either: **119** lifetime, all inside a 6-day window
+  from its own publish day, so the same disqualification applies. **`t0` is therefore "119
+  downloads, none organic", never "zero"** — S45's cold review falsified the zero premise and
+  strengthened the shape argument);
   in the 5 days after, release-runner shaped; `@ifelse.codes/chitra` is unindexed by the npm
   downloads API entirely). And **the repo goes public after a code cleanup** — so today's
   404s (README's `git clone`, npm `repository.url`, npm `homepage`) are a known, sequenced

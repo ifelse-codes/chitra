@@ -27,7 +27,9 @@
 > Re-read from live facts at S45, not copied from S44's prose. Every figure below is derived.
 
 - `.ai/SESSION` = 45. **S44 is merged** — `main` = `5a39c43` == `origin/main`, both PRs in. Five
-  tracked files still cited `1b6c17d`; corrected in this session's `.ai/` re-sync.
+  tracked files still cited `1b6c17d` (six sites); **all six corrected in this session's `.ai/`
+  re-sync** — including `.ai/CONTINUATION-PROMPT.md`, which the cold review caught still stale after
+  the first pass claimed it fixed.
 - **Product untouched:** **453/453** tests in **23** files (`packages/core/tests/`). No file under
   `packages/core/` changed. The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm; repo still
   **private** (`gh repo view --json isPrivate` → `true`).
