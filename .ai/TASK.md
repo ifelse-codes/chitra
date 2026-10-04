@@ -31,7 +31,7 @@
   - Plus **eight stale facts** across `.ai/`, four of them the class `KNOWLEDGE.md:111` diagnosed in
     2026 and shipped no cure for.
 - **Closed by this session, not by prose:** the ledger's row 8 — committing the contract on a
-  `-closeout` branch made `canonical_inputs_sha` computable (`40bd7929…3a48ea4`; *uncomputable* at
+  `-closeout` branch made `canonical_inputs_sha` computable (`898b65c3…a43060`; *uncomputable* at
   S40), which was the precondition for `review-inputs-attested`. And row 7 — **the flip's two gates
   now have an owner**.
 - **The counterfactual:** the NO-CODE claim rests on `git diff --name-only main...HEAD` read
