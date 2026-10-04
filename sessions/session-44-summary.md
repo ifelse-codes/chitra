@@ -19,7 +19,7 @@ The carried finding said the gate costs ~60 minutes and needs an opt-out. I buil
 | `fast` (`VAJRA_GATE_SCOPE=fast`) | 42 | **42 PASS, exit 0**, 6 `SKIP` | **~1 min** |
 
 The skip list's own price, read out of the gate's per-check timings and printed by
-`gate-scope-switch` itself, has been between **73% and 80%** of measured check time across the
+`gate-scope-switch` itself, has moved between **71% and 80%** of measured check time across the
 full runs in this session's artifacts. It is **not** quoted as one number here, because it moves:
 `git rev-list`-style honesty applies to percentages too, and the exact figure of every run lives
 in its own `.ai/verify/session-44/<timestamp>/run-meta.txt` and `gate-scope-switch.log`.
@@ -49,7 +49,7 @@ description that did not survive measurement).
 | 7 | D1–D6 answered and recorded | **SHIPPED** | `6024e0d` (D4), `9d88882` (D5), `589a196` (D4b + A1). **And made checkable:** `a58a26b` untracked the 11 files D3/D6 says stay local, `dc6b4dc` added `founder-decisions-covered`, which asserts D1 (six process dirs still tracked), D2 (the `## Git hooks (opt-in)` section + install line + `.claude/settings.json` hooks) and D3/D6 (nothing tracked, whole-directory ignore rules) — green here, **red on `main` for both halves**. A decision with no gate is a claim; pass 1 proved it |
 | 8 | D4 scrub, provably mechanical | **SHIPPED** | `6024e0d`: 15 files, `numstat` N/N on every one, nothing added or deleted. `home-path-scrubbed` greps the live tree **and** runs the same pattern against the newest pre-scrub commit derived from history — a pattern that matched nothing would fail, not pass |
 | 9 | N1: rule + a gate that can go red | **SHIPPED** | `d75a23a` + `dc6b4dc`. `reviewer/SKILL.md` (amend, never rewrite) + `contract-freshness` in `verify-closeout.sh`, split into **two pure functions**. Clause (a): `contract-freshness-teeth` extracts the body and runs it twice — **green on S43**, **red on S42**, naming the commit it then proves touches the contract. Clause (b): pass 1 found it could **not go red** (N2, below); the teeth check now drives it in *both* line orders against synthetic reviews, and the pre-fix logic is reproduced as rc=0 where the contract demands 1 |
-| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — **73–80%** of measured check time across the full runs on disk, never quoted as one number because it moves (pass 2 found the old fixed 86%). `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
+| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — **71–80%** of measured check time across the full runs on disk, never quoted as one number because it moves (pass 2 found the old fixed 86%). `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
 | 11 | D5 overrides stripped, own-commit regen | **SHIPPED** | `9d88882` + `589a196`. **81 → 0**; `pnpm install --lockfile-only` left `pnpm-lock.yaml` byte-identical, then full install, `--frozen-lockfile`, typecheck and **453/453** all exit 0. A1 records why the removal set is 81, not the 11 the literal wording named |
 | 12 | Re-prove the product from live facts | **SHIPPED** | Gate: `fresh-clone-build-no-env`, `core-tests` (453), `core-typecheck`, `root-typecheck`, `coverage-gate-passes`, `contributing-coverage-numbers-real`, `example-runs`, `chart-drift`, `browser-qa-catalog-pages` — all PASS |
 | 13 | Re-sync `.ai/`; counts derived, not typed | **SHIPPED** | `37511d0`, `daf9c4c`, `9efc28c`. `ai-files-describe-s44`, `ai-names-no-deleted-tree`, `test-count-propagated` |
@@ -175,8 +175,8 @@ kept on disk and only untracked) · **0** product-code changes · **0** new prod
 stays 453) · **0** lockfile changes (the D5 regen produced an empty diff — recorded as A1) ·
 **0** releases · **0** npm secrets · **0** new recurring infra (coverage rides the existing
 `core` job; no coverage service) · **1** `--no-verify` commit for the 15-file mechanical scrub,
-authorised by the contract because the 3-file atomic cap cannot express it · gate runs: **8
-fast + 8 full + 1 untimed**, a count read out of `.ai/verify/session-44/*/run-meta.txt` rather
+authorised by the contract because the 3-file atomic cap cannot express it · gate runs: **13
+fast + 13 full + 1 untimed**, a count read out of `.ai/verify/session-44/*/run-meta.txt` rather
 than remembered — the last of each green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
 vary with load; every run's own figure is in its `run-meta.txt`), with the
 red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
