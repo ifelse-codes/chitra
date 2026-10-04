@@ -19,6 +19,9 @@
     "url": "https://github.com/ifelse-codes/chitra.git"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "exports": {
     ".": {

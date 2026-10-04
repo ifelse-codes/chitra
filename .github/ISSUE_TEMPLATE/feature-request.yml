@@ -1,0 +1,46 @@
+name: Feature request
+description: A new chart type, a new output mode, or a change to an existing one.
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The project takes one dependency: **none**. A request that needs a runtime dependency
+        will be declined, so please say up front if yours does.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to show?
+      description: The data and the reading you need, before the shape you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like instead?
+      description: A sketch of the output — paste text, glyphs render fine in an issue.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried with the charts that already exist?
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - New chart type
+        - Change to an existing chart
+        - Agent output (toPlain / toJSON)
+        - Documentation
+        - Build / CI / tooling
+    validations:
+      required: true
+  - type: checkboxes
+    id: contributing
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to open a pull request for this.

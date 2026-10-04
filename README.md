@@ -11,6 +11,7 @@ logs, and the language models reading them.
 [![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![dependencies: 0](https://img.shields.io/badge/dependencies-0-brightgreen)](packages/core/package.json)
 [![charts: 20](https://img.shields.io/badge/charts-20-blue)](packages/core/README.md)
+[![CI](https://github.com/ifelse-codes/chitra/actions/workflows/ci.yml/badge.svg)](https://github.com/ifelse-codes/chitra/actions/workflows/ci.yml)
 [![tests: 453 passing](https://img.shields.io/badge/tests-453%20passing-brightgreen)](packages/core/tests)
 
 [Docs](https://chitra.iifelse.com) · [Chart gallery](https://chitra.iifelse.com) · [AI data reference](https://chitra.iifelse.com/ai-data) · [API reference](packages/core/README.md)
@@ -76,7 +77,9 @@ git clone https://github.com/ifelse-codes/chitra.git
 cd chitra && pnpm install && pnpm --filter @ifelse.codes/chitra build
 ```
 
-Requires Node.js 18+ and any Unicode-capable terminal.
+Requires Node.js 26+ and any Unicode-capable terminal — the repo's `engines` floor and
+what CI runs. CONTRIBUTING records the published package's own support policy and which
+of the two numbers is measured.
 
 ## Quickstart
 

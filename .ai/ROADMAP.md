@@ -46,7 +46,7 @@ if not, they go, and the one-liner becomes true.**
 | # | Finding | Why S44 |
 |---|---|---|
 | **N1** | **The contract was rewritten between review passes**, so the attestation's freshness guarantee no longer covers this session. `prompts/` is outside the attested *diff*, but the contract is the attested *preimage*'s first half — so documenting a required-crew skip **invalidates the acceptance documenting it**. Two closeout checks in conflict | Needs a rule plus almost certainly a change to `verify-closeout.sh` / `reviewer/SKILL.md`. That is governance change work and belongs beside **D2**, not inside a cleanup session |
-| **§4.9** | The gate now costs **~60 minutes** — it transitively runs S41's entire 24-check gate, the suite ~5×, and two clone installs, now plus a docs build and a Playwright run. Measured by the reviewer | It is a **growing** cost on the repo's load-bearing artifact. Price it against the sessions it slows; a `VAJRA_SKIP_*`-style opt-out for the counterfactual half is the obvious candidate |
+| **§4.9** | **RESOLVED at S44 — and the premise did not hold.** The carried claim was ~60 minutes; the gate measures **~2–3 minutes** in full scope (derive today's figure with `bash scripts/verify-session-44.sh`, which prints its own wall clock). S44 shipped `VAJRA_GATE_SCOPE=fast|full`, per-check timings, and a check that fails if the skip list is empty, covers a check S44 owns, or names something this gate does not run | The growing-cost risk is answered by a priced opt-out rather than deferred; the historical claim is kept in the contract's §4.9 for the record |
 
 ### → recorded, deliberately NOT scheduled
 
@@ -95,7 +95,32 @@ if not, they go, and the one-liner becomes true.**
   re-expresses it as `charts-format-only`. Product untouched: 453 tests unchanged, LOCKED dirs
   reformat-only. **Also corrected: Prettier lowered v8 statement/line coverage 96.11 → 94.27
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
-- ⬜ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions.**  See `.ai/TASK.md` and `.ai/CONTINUATION-PROMPT.md`: `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, CI badge, coverage job, `engines`, and decisions **D1–D6**. **Then the public flip.**
+- ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
+  (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendments
+  **A1…A12** — A12 is the last; an amendment list typed here goes stale the moment the next pass
+  adds one, which is what passes 2 and 3 each caught it doing).
+  **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
+  **no invented mailbox** — private reports route through GitHub's private reporting *if it is
+  switched on*, per `.github/REPO-SETTINGS.md`), `.github/ISSUE_TEMPLATE/` (2 forms +
+  `config.yml`), a PR template, a **CI badge**
+  read out of the README and matched against a file that must exist, **coverage enforced** in the
+  `core` job (`test:coverage` replaces the plain `Test` step, suite still runs once, no coverage
+  service), and **`engines` derived from what `ci.yml` pins** (repo `>=26`/`>=9.12.3`; package
+  `>=22` disclosed in CONTRIBUTING as a support policy, not a test result).
+  **The six decisions, answered:** **D1 = A** (publish every tracked process file —
+  `git ls-files .ai prompts sessions reviewer .claude darshan | wc -l`, never a typed count),
+  **D2** documented
+  in CONTRIBUTING, **D3/D6 = ignore**, **D4 = scrub** (15 files, one mechanical commit, `--no-verify`
+  under the contract's authorisation), **D4b = recorded for the flip**, **D5 = all 81 `overrides`
+  stripped with a zero-delta lockfile regen**. **N1** closed with a rule in `reviewer/SKILL.md` +
+  a pure `contract-freshness` core in `verify-closeout.sh`; **§4.9** with `VAJRA_GATE_SCOPE` +
+  per-check timings. Product untouched: **453/453**, no file under `packages/core/src/`.
+- ⬜ **Session 45 (S45) — the public flip.** One move resolves: the README `git clone` URL, npm
+  `repository.url` / `homepage`, **npm provenance** (a private repo cannot generate it), a real
+  **`0.4.0`** through the trusted-publisher runway, and **D4b** — the history rewrite that purges
+  the home path from every commit reachable from `HEAD` (**irreversible; every recorded SHA
+  moves**). Then the GTM
+  proof pack, with the measured **zero** downloads as its `t0`.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live

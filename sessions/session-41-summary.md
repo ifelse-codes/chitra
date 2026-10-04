@@ -29,7 +29,7 @@ is the builder's own account; the independent verdict is `sessions/session-41-re
 | 10 | Root build no longer needs a pre-built `dist` | **SHIPPED** | `fresh-clone-build-no-env`: clone → `--frozen-lockfile` install → `pnpm run build` with `PORT`/`BASE_PATH` unset → **exit 0** |
 | 11 | Vite configs do not throw without `PORT` | **SHIPPED** | both configs default to `5000` / `/`; `PORT=0` still fails loudly |
 | 12 | Workspace globs all match a real directory | **SHIPPED** | `lib/integrations/*` removed; the check parses only the `packages:` block |
-| 13 | Machine-path junk deleted, rest gitignored | **SHIPPED** | 4 files deleted (one a 277 KB transcript with `/Users/REDACTED/…`); undecided work **gitignored**, not deleted and not tracked |
+| 13 | Machine-path junk deleted, rest gitignored | **SHIPPED** | 4 files deleted (one a 277 KB transcript with `~/…`); undecided work **gitignored**, not deleted and not tracked |
 | X | Cross-cutting: the canonical test count | **SHIPPED** | `test-count-propagated` **discovers** its own inventory by grepping the tree for the derived number and fails if a tracked file displays it undeclared. Proven: a planted `docs-scratch.md` was named; removing it went green |
 | A1 | Assumption 1 — Batch 1 only | **SHIPPED** | Batches 2–4 are roadmap items **S42, S43, S44**, each with scope and gate |
 | A2 | Assumption 2 — the flip is not in S41 | **SHIPPED** | the repo is still private; D1–D6 recorded, not guessed |

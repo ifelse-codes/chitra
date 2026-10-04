@@ -43,6 +43,34 @@ fed** and **how it is framed**, not from the word "QA":
 
 ---
 
+## The contract is frozen for the duration of a review cycle (N1, S44)
+
+**The rule:** once `prompts/NN-*.md` has been fed to a cold reviewer, it does not change until
+closeout. A specification the subject of the review can edit between passes is an *output*, not
+an input — and `check_review_attestation` recomputes `sha256(prompt ‖ diff)` from whatever the
+contract says **now**, so a rewrite between a REJECT and the ACCEPT silently rebinds the
+attestation to a spec that already contains its own rebuttal. The miss is laundered out of the
+requirement text, and every gate keeps agreeing.
+
+- **Corrections are appended**, under a `## Contract amendments` heading, numbered `A1`, `A2`, …
+  each naming the requirement it touches and the evidence that forced it. The requirement's own
+  text is never rewritten in place — a correction that rewrites the requirement it failed is the
+  defect, not the fix.
+- **If a mid-cycle correction is genuinely unavoidable**, the next pass records
+  `**Review-Inputs-SHA-Pass-1:** <64-hex>` (the first feed's hash) alongside the final
+  `**Review-Inputs-SHA:**`, and says so in prose. The two hashes differ only with an amendments
+  section to explain it.
+- **Enforced by `check_contract_freshness`** in `scripts/verify-closeout.sh`: it fails when any
+  commit after the one that first added `sessions/session-NN-review.md` changes the contract, and
+  when a Pass-1 hash differs with no amendments section. Its body is **pure**, so the S44 gate
+  extracts it and runs it against another session to prove it can go green *and* red.
+
+**Honest limit:** the rule cannot see a contract edit squashed into the very commit that adds the
+review — that is what the Pass-1 hash is for, and past that, authorship is procedural (this
+skill's cold pass), not structural.
+
+---
+
 ## The procedure (6 steps)
 
 1. **Extract requirements — from EVERY requirement-bearing section**, not just "Deliverables". Number them.

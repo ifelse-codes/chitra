@@ -149,7 +149,7 @@ printf '  %-34s %s%s\n' "commits"                 "$(git rev-list --count main..
 
 printf '\n%s%sNot built here — named, so it cannot be smuggled in:%s\n' "$B" "$Y" "$N"
 printf '  %sBatch 4 (S44)%s  OSS templates, coverage job, engines — and founder decisions D1–D6\n' "$D" "$N"
-printf '  %sthe flip%s      after S44. D1 (what goes public) and D4 (the /Users/REDACTED path scrub, irreversible once published) are yours.\n' "$D" "$N"
+printf '  %sthe flip%s      after S44. D1 (what goes public) and D4 (the ~ path scrub, irreversible once published) are yours.\n' "$D" "$N"
 printf '  %suntouched%s    pnpm-workspace overrides (D5, needs its own regen), the historical verify/demo pairs, all frozen history.\n' "$D" "$N"
 printf '  %sproduct%s      every file under packages/core/src/charts, renderers and themes is reformat-only; charts-format-only proves it.\n' "$D" "$N"
 

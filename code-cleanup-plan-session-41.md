@@ -149,7 +149,7 @@ scripts/build-audit-html.mjs   # unless promoted to tracked
 ```
 
 None of these contain secrets (scanned). `.commandcode/settings.json` contains
-**machine-specific absolute paths** (`/Users/REDACTED/...`) and long permission strings —
+**machine-specific absolute paths** (`~/...`) and long permission strings —
 must never be committed.
 
 ---
@@ -217,7 +217,7 @@ must never be committed.
   `actions/workflows/ci.yml` status badge).
 
 ### E9 — personal paths in tracked files (privacy scrub)
-`/Users/REDACTED/...` appears in:
+`~/...` appears in:
 - `.ai/handoffs/session-20-tech-lead.md:4`
 - `prompts/10-task-line-chart.md:4`
 - `sessions/session-25-summary.md:79`
