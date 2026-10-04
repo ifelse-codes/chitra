@@ -97,7 +97,7 @@ if not, they go, and the one-liner becomes true.**
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
 - ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
   (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendments
-  **A1…A11** — A11 is the last; an amendment list typed here goes stale the moment the next pass
+  **A1…A12** — A12 is the last; an amendment list typed here goes stale the moment the next pass
   adds one, which is what passes 2 and 3 each caught it doing).
   **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
   **no invented mailbox** — private reports route through GitHub's private reporting *if it is

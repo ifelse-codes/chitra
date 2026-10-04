@@ -3,7 +3,9 @@
 **Session:** cleanup Batch 4 — OSS polish + the founder decisions D1–D6 (code session)
 **Contract:** `prompts/44-task-oss-polish.md`, committed at `11a86ff` (the first commit, before
 any work) and amended — never rewritten — under its own `## Contract amendments`: **A1** at
-`589a196` (D5's removal set is all 81), **A2–A4** at `3b8ec6f` (the cold review's F2, M1, M2/M3).
+`589a196` (D5's removal set is all 81), **A2–A4** at `3b8ec6f` (the cold review's F2, M1, M2/M3),
+and **A5…A11** appended across the seven review passes that followed — read the section for the
+list; this summary has now been caught going stale three times.
 **Branch:** `session-44-oss-polish` from `main` `1b6c17d` (S43 merge). **PR #65.**
 **Delivery size: derive it** (`git rev-list --count main..HEAD`, `git diff --shortstat
 main...HEAD`) — pass 3 found the typed commit count already stale, in the same document
@@ -15,10 +17,15 @@ see *pass 1* below.
 The carried finding said the gate costs ~60 minutes and needs an opt-out. I built the opt-out
 **and measured**, and the premise was wrong by roughly 20×:
 
-| scope | checks | result | wall clock |
+| scope | shape | result | wall clock |
 | --- | --- | --- | --- |
-| `full` (default) | 48 | **48 PASS, exit 0** | **~2–3 min** |
-| `fast` (`VAJRA_GATE_SCOPE=fast`) | 42 | **42 PASS, exit 0**, 6 `SKIP` | **~1 min** |
+| `full` (default) | every check (`grep -c '^run_check ' scripts/verify-session-44.sh`; **no number here**) | **all green, exit 0** | **~2–3 min** |
+| `fast` (`VAJRA_GATE_SCOPE=fast`) | the same checks minus the skip list | **all green, exit 0**, the skip list `SKIP` | **~1 min** |
+
+Neither the check count nor a pass ratio is written down, because both move the moment a check is
+added — and the commit that added pass 7's fix is exactly what falsified the numbers this table
+used to carry. Read the live figures from the run itself: the gate prints `scope=… checks=… pass=…
+fail=…` at the end of every run.
 
 The skip list's own price is read out of the gate's per-check timings and printed by
 `gate-scope-switch` itself, which prints **no figure here** — not a number and not a range.
@@ -232,8 +239,8 @@ Pass 6 also independently confirmed — and that is worth more than another fix 
 append-only from `68662bf`, A9.1's three claims are true at HEAD, all three route clauses go red
 on wording a reader would plausibly write, pass 2's fixture genuinely rejects the pre-fix
 selection logic, the settings record matches live `gh api`, the untracked-home-path class is
-closed, and M4 holds. It ran the gate (48/48 full in 123s; 42/42 fast in 25s), the suite (453/453
-in 23 files) and the closeout.
+closed, and M4 holds. It ran the gate in both scopes and the suite (453/453
+in 23 files) and the closeout, and recorded its own figures rather than quoting this map's.
 
 ## Cold review, pass 7: **REJECT** — one material finding, and it was the string A10.1 promised was gone
 
@@ -266,6 +273,42 @@ counted.
 Pass 7 independently rebuilt pass 2's fixture and ran the **old** picker against it (picks the
 oldest run; the fixture forbids it), re-derived the settings from `gh api`, and confirmed the
 freeze at **0 deletions / 272 insertions** from `68662bf`.
+
+## Cold review, pass 8: **REJECT** — the fix for pass 7's finding is what falsified the map
+
+**13 SHIPPED · 1 PARTIAL · 0 NOT-BUILT.** One material finding, and it is the sharpest thing any
+pass has said about this session:
+
+> The cause is exact and one commit old: `git show <c>:scripts/verify-session-44.sh | grep -c
+> '^run_check '` gives 48 at `9cfa4f6` and 49 at `f0c04e2` — the commit that added
+> `map-measurements-honest`, i.e. **the fix for pass 7's material finding, is what falsified the
+> map's headline numbers.** Same defect as A10.2 and F2, in the document whose newest gate exists
+> to prevent it.
+
+The map's headline typed `48` / `48 PASS` and `42` / `42 PASS`. Adding a check moved both, and
+`map-measurements-honest` matched `[0-9]%` only, so nothing could go red.
+
+**Rule 3** is the answer, and it took three attempts — which are recorded because the attempts are
+the lesson (**A12.1**):
+
+1. banning `N/N` anywhere in the map fired on the suite's own `453/453`, which is immutable and is
+   the delivery's evidence — a rule like that has to be deleted, not obeyed;
+2. flagging the gate's check count, typed as a literal in the check, is wrong the same way the map
+   was — so `$n` is **derived at check time**, and the check fails closed if it cannot derive it;
+3. letting a history word excuse the count laundered the map's own "**not typed here**" through the
+   word `typed` — so the derived count has **no escape hatch**: a historical sentence names the
+   *old* count, which by definition is not `$n`.
+
+Two of my own bugs surfaced while proving it, both the species passes 2–7 kept catching: the first
+version used `printf | grep -q`, and under `pipefail` the SIGPIPE made **every** long line read as
+"no match" — the check passed on exactly the lines it exists to catch; and the harness I proved it
+with could not run, because an empty `$n` made the rule degenerate.
+
+Pass 8 also rebuilt `pick_timings_file`'s fixture outside the gate in four directions (current →
+newest complete; pre-A11 → the oldest, which the fixture rejects; each trap caught by its own
+guard; the in-progress run unpriceable), confirmed the freeze is append-only with **zero removed
+lines** across eight later prompt commits, and drove the route clauses red on eight plausible
+phrasings while leaving the right advice legal.
 
 ## Honest gaps
 
@@ -323,7 +366,8 @@ authorised by the contract because the 3-file atomic cap cannot express it · ga
 `ls -1d .ai/verify/session-44/*/ | grep -v latest | wc -l`, split by scope with
 `grep -ho '^scope=[a-z]*' .ai/verify/session-44/*/run-meta.txt | sort | uniq -c`, and **not typed
 here** — pass 6 found this sentence reproduced from neither command it named — the last of each
-green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
+green, both scopes in ~1–3 min (the pass ratios are not typed here; every run prints its own —
+seconds
 vary with load; every run's own figure is in its `run-meta.txt`), with the
 red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
 plan) · npm cost $0.
