@@ -7,6 +7,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 > Nothing yet.
 
+## [0.4.0]
+
+### Changed
+- **Published from the public repository, so this release carries npm provenance —
+  `0.3.0` and every earlier version do not.** npm generates provenance only for a public
+  GitHub repository, so the asymmetry is the evidence of the flip, not a workflow change:
+  `release.yml` is untouched and still publishes with `npm publish` and no `--provenance`
+  flag.
+- **No source change.** `packages/core/src` is byte-identical to `0.3.0`; the tests are
+  still 453 in 23 files. This version exists because the release event (the repository
+  becoming public) happened after `0.3.0`.
+
 ## [0.3.0]
 
 ### Changed

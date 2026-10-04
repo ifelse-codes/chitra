@@ -1,6 +1,6 @@
 {
   "name": "@ifelse.codes/chitra",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "chitra — beautiful, zero-dependency terminal charts for CLIs and agents. Braille-rendered text charts with toPlain()/toJSON() agent output.",
   "keywords": [
     "terminal",
