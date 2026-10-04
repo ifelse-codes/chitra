@@ -69,9 +69,10 @@ if [ -n "$BURL" ] && [ -f "$BFILE" ]; then ok "badge -> $BFILE (exists)"; else b
 hdr "The six decisions, answered and recorded"
 
 case_ "5 · D1 / D3-D6 — publish everything, ignore the local demos, strip D5"
-printf '  %sD1 = A: all ~146 process files go public, so the closeout gates keep%s\n' "$D" "$N"
-printf '        %sworking with no rework. D3/D6: playground/ and the design%s\n' "$D" "$N"
-printf '        %smockups stay gitignored and untracked. D5: the overrides go.%s\n' "$D" "$N"
+printf '  %sD1 = A: every tracked process file goes public (%s of them), so the%s\n' "$D" "$(git ls-files .ai prompts sessions reviewer .claude darshan | wc -l | tr -d ' ')" "$N"
+printf '        %scloseout gates keep working with no rework.%s\n' "$D" "$N"
+printf '        %sD3/D6: playground/ and the design mockups stay gitignored and%s\n' "$D" "$N"
+printf '        %suntracked. D5: the overrides go.%s\n' "$D" "$N"
 OV=$(git show main:pnpm-workspace.yaml | awk '/^overrides:/{f=1;next} f&&/^  /{n++} END{print n+0}')
 OV_NOW=$(awk '/^overrides:/{f=1;next} f&&/^  /{n++} END{print n+0}' pnpm-workspace.yaml)
 [ "$OV_NOW" = "0" ] && ok "overrides removed: $OV -> $OV_NOW, lockfile unchanged (zero delta)" \

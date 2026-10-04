@@ -35,9 +35,10 @@ Detail: `sessions/session-44-summary.md` + `sessions/session-44-review.md` + `.a
 1. **History rewrite first (D4b).** The tracked tree is clean; **`main` still carries the
    home path** (the scrub touched this branch only), so the purge is still required — and it
    moves **every** commit reachable from `HEAD`, which `git rev-list --count HEAD` derives.
-   `.ai/` cites `main` at
-   `49e1ee2`, PR merge history and every recorded ref move with it. Decide the tool and the
-   re-verify order **before** pushing. **Irreversible once published.**
+   `.ai/` and `prompts/` cite `main`
+   by SHA in several records (S42's merge `49e1ee2` among them — check `git rev-parse main`
+   rather than trusting a citation), and PR merge history and every recorded ref move with it.
+   Decide the tool and the re-verify order **before** pushing. **Irreversible once published.**
 2. **The public-facing resolutions** — README `git clone` URL, npm `repository.url` /
    `homepage`, and **npm provenance** (a private repo cannot generate it, which is why S38's
    trusted publisher has never proved itself end to end).

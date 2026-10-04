@@ -24,7 +24,9 @@
 - **Deleted in S43 (2026-10-03): the dead weight inside the docs app.** 53 unused shadcn
   components (`artifacts/chitra-docs/src/components/ui/`), the 36 devDependencies that served
   only them, the three `@replit/*` Vite plugins (config, manifest, and workspace catalog), and
-  the `lint` script in `packages/core`. `main` (S42's merge `49e1ee2`) retains all of it.
+  the `lint` script in `packages/core`. The S42 merge named as `49e1ee2` in the S43 records
+  retains all of it (derive the current `main` with `git rev-parse main`; the citation is
+  history, not a live value).
 
 ## Stack & tooling
 - pnpm workspaces (pnpm 9.12). CI uses Node **26** (`.github/workflows/ci.yml` +
