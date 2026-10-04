@@ -780,11 +780,12 @@ run_check "prettier-adopted" prettier_adopted
 # being weak, because the same code has to fail on the pre-S44 tree.
 
 oss_surface_at() {
-  local TREE="${1:-}" sec coc bug feat cfg pr readme urls u wf
+  local TREE="${1:-}" sec coc bug feat cfg pr readme urls u wf body bad_line
   rd() { if [ -n "$TREE" ]; then git show "$TREE:$1" 2>/dev/null; else cat "$1" 2>/dev/null; fi; }
   sec=$(rd SECURITY.md); [ -n "$sec" ] || { echo "SECURITY.md missing${TREE:+ at $TREE}"; return 1; }
   echo "$sec" | grep -q "## Reporting a vulnerability" || { echo "SECURITY.md has no disclosure section"; return 1; }
-  echo "$sec" | grep -qi "no SLA" || { echo "SECURITY.md states no support promise"; return 1; }
+  echo "$sec" | grep -qi "no SLA" \
+    || { echo "LABEL, not fact: SECURITY.md no longer says there is no support promise (the wording may change; the disclosure may not)"; return 1; }
   echo "$sec" | grep -q "## Supported versions" || { echo "SECURITY.md has no supported-versions table"; return 1; }
   coc=$(rd CODE_OF_CONDUCT.md); [ -n "$coc" ] || { echo "CODE_OF_CONDUCT.md missing"; return 1; }
   echo "$coc" | grep -q "Contributor Covenant" || { echo "not the Contributor Covenant"; return 1; }
@@ -799,6 +800,28 @@ oss_surface_at() {
   feat=$(rd .github/ISSUE_TEMPLATE/feature-request.yml); [ -n "$feat" ] || { echo "feature request form missing"; return 1; }
   cfg=$(rd .github/ISSUE_TEMPLATE/config.yml); [ -n "$cfg" ] || { echo "issue template config missing"; return 1; }
   echo "$cfg" | grep -q "blank_issues_enabled: false" || { echo "blank issues are still enabled"; return 1; }
+  # Pass 2 (cold review, finding 11): with blank issues disabled, the issue tracker
+  # is not a route that exists for anyone outside the maintainers — yet SECURITY.md
+  # sent a reporter there ("say so in a **public** issue") and the CoC sent every
+  # non-secret conduct report and every "ask for a private channel" request there
+  # too. A doc that points at a closed door is worse than no route. Offline and
+  # falsifiable: when blank issues are OFF, no public doc may DIRECT a reader to
+  # the tracker. The pattern deliberately covers more than the word "open" — the
+  # defective SECURITY.md sentence never said "open" at all, and a check that
+  # missed it would have been the same fakest-green species as the defect. A
+  # sentence that only PROHIBITS it ("do not open a public issue") must stay legal,
+  # or the gate would punish the right advice.
+  if echo "$cfg" | grep -q "blank_issues_enabled: false"; then
+    for d in SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md README.md; do
+      body=$(rd "$d")
+      [ -n "$body" ] || continue
+      bad_line=$(echo "$body" \
+        | grep -niE '(open|file|raise|create|start)(ing|s)? (a |an )?(new |public |github |blank )?issue|in a \*\*public\*\* issue|a (public|github) issue|issue asking' \
+        | grep -viE 'do not|don.t|never|cannot|can not|no public issue' || true)
+      [ -z "$bad_line" ] \
+        || { echo "$d directs the reader to the issue tracker, but blank_issues_enabled is false:${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
+    done
+  fi
   pr=$(rd .github/PULL_REQUEST_TEMPLATE.md); [ -n "$pr" ] || { echo "PR template missing"; return 1; }
   readme=$(rd README.md); [ -n "$readme" ] || { echo "README missing"; return 1; }
   urls=$(echo "$readme" | grep -oE 'actions/workflows/[A-Za-z0-9_.-]+\.yml' | LC_ALL=C sort -u)
@@ -864,8 +887,14 @@ engines_derived() {
     || { echo "packages/core declares no engines.node"; return 1; }
   [ "$rnode" = ">=$node_v" ] || { echo "root engines.node is $rnode, ci.yml pins $node_v"; return 1; }
   [ "$rpnpm" = ">=$pnpm_v" ] || { echo "root engines.pnpm is $rpnpm, ci.yml pins $pnpm_v"; return 1; }
+  # Pass 2 (cold review, finding 9) on a pattern worth naming: these checks mix
+  # FACT assertions (the floor equals the pin) with LABEL assertions (the doc says
+  # out loud that the number is policy, not a measurement). Mixed, a rewording can
+  # turn the check red while the fact is untouched, and the message then blames the
+  # wrong thing. Keep the label assertions, but say plainly that only the wording
+  # moved.
   grep -q "support policy, not a test result" CONTRIBUTING.md \
-    || { echo "CONTRIBUTING does not disclose the package floor as policy"; return 1; }
+    || { echo "LABEL, not fact: CONTRIBUTING no longer discloses that the package floor is a support policy (the number can stay as it is)"; return 1; }
   grep -q "$cnode" CONTRIBUTING.md || { echo "CONTRIBUTING does not state the package floor ($cnode)"; return 1; }
   # F1 (S44 cold review): README claimed "Requires Node.js 18+" while the repo pins 26,
   # so the public repo carried two consumer floors at once. The README's own floor must
@@ -1080,12 +1109,32 @@ freshness_teeth() {
 }
 run_check "contract-freshness-teeth" freshness_teeth
 
+# The NEWEST run's timings file that actually prices the skip list. Prints the
+# path, or nothing + rc 1 if none qualifies. $1 = directory to scan (defaults to
+# the real artifacts dir) so the caller can drive it over a fixture — that is how
+# `gate-scope-switch` proves the selection is newest-first instead of asserting it.
+pick_timings_file() {
+  local root="${1:-.ai/verify/session-44}" f
+  local files=("$root"/*/timings.txt) i
+  for (( i = ${#files[@]} - 1; i >= 0; i-- )); do
+    f="${files[i]}"
+    [ -f "$f" ] || continue
+    case "$f" in */latest/*) continue ;; esac
+    [ "$(wc -l < "$f" | tr -d ' ')" -gt 0 ] || continue
+    awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
+      || continue
+    printf '%s\n' "$f"
+    return 0
+  done
+  return 1
+}
+
 # req 10 — §4.9. The switch resolves three ways (an invalid scope is rejected),
 # the skip list names only checks this gate really runs, it never covers a check
 # this session owns, and — the counterfactual — the measured seconds it removes
 # are > 0 and < the whole gate, read out of the timings this script just wrote.
 gate_scope_switch() {
-  local s tf="" total=0 skipped=0 name secs lines=0 cnt f
+  local s tf="" total=0 skipped=0 name secs lines=0 f
   [ "$(resolve_scope)" = full ] || { echo "the default scope is not full"; return 1; }
   [ "$(resolve_scope fast)" = fast ] || { echo "fast does not resolve"; return 1; }
   resolve_scope bogus >/dev/null 2>&1 && { echo "an invalid scope is accepted"; return 1; }
@@ -1100,24 +1149,46 @@ gate_scope_switch() {
     if gate_skips fast "$s"; then echo "fast would skip $s, which this session owns"; return 1; fi
   done
   # The timings have to come from a FULL run: fast never runs a check it skips,
-  # so a fast run's file contains none of these names and prices nothing. Two
-  # traps found by running it — (a) picking by line count alone tied 41 = 41
-  # between the current run and the previous fast one, and `sort -rn`'s
-  # last-resort comparison put "latest/" above a timestamp, so it read the OLD
-  # run and reported 0; (b) `latest` is a symlink, so it can name a run that is
-  # not the one in progress. Selection is therefore: real dirs only, and the
-  # file must actually contain a check fast would skip.
-  local best=0
-  for f in .ai/verify/session-44/*/timings.txt; do
-    [ -f "$f" ] || continue
-    case "$f" in */latest/*) continue ;; esac
-    cnt=$(wc -l < "$f" | tr -d ' ')
-    [ "$cnt" -gt 0 ] || continue
-    awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
-      || continue
-    if [ "$cnt" -gt "$best" ]; then best=$cnt; tf=$f; fi
+  # so a fast run's file contains none of these names and prices nothing. Three
+  # traps, all found by running it —
+  #  (a) picking by line count alone tied 41 = 41 between the current run and the
+  #      previous fast one, and `sort -rn`'s last-resort comparison put "latest/"
+  #      above a timestamp, so it read the OLD run and reported 0;
+  #  (b) `latest` is a symlink, so it can name a run that is not the one in
+  #      progress;
+  #  (c) taking the file with the MOST lines and keeping the old one on a tie
+  #      froze the figure at the FIRST full run ever made — every full run writes
+  #      the same number of lines, so `[ "$cnt" -gt "$best" ]` can never replace
+  #      the oldest. A cold review measured 73% on a later full run while this
+  #      line still printed 86%: a number that cannot move, describing a run
+  #      nobody was looking at. That is the fakest green of the whole delivery.
+  # Selection is now newest-first (pick_timings_file), the figure is printed with
+  # its source, and the fixtures below drive that function so "newest wins" is a
+  # fact the check can lose on rather than a comment.
+  local fx="$ARTIFACTS/scope-selftest" got d
+  rm -rf "$fx"; mkdir -p "$fx"/{20000101T000000Z,20100101T000000Z,20100101T000001Z,latest}
+  # Two FULL runs with the SAME line count — the exact tie that froze the figure
+  # at the oldest one — plus a NEWER fast-only run, which prices nothing and must
+  # be passed over, plus a `latest` directory, which is not a run at all.
+  for d in 20000101T000000Z 20100101T000000Z; do
+    { local k=0; while [ "$k" -lt 4 ]; do
+        for s in $FAST_SKIP; do printf '%s %s\n' "$s" 1; done; k=$((k+1)); done
+      } > "$fx/$d/timings.txt"
   done
+  printf 'core-tests 7\nprettier-adopted 7\n' > "$fx/20100101T000001Z/timings.txt"
+  : > "$fx/latest/timings.txt"
+  got=$(pick_timings_file "$fx" 2>/dev/null || true)
+  case "$got" in
+    */20100101T000000Z/timings.txt) : ;;
+    *) echo "selection is wrong: got '${got:-<none>}' — a tie must take the NEWEST full run, and a fast-only or latest/ file must be passed over"; rm -rf "$fx"; return 1 ;;
+  esac
+  rm -rf "$fx"
+  tf=$(pick_timings_file || true)
   [ -n "$tf" ] || { echo "no FULL run's timings yet — run this gate once with VAJRA_GATE_SCOPE=full"; return 1; }
+  # If this run's own file is NOT the one being priced, say so next to the number
+  # instead of letting an older run's timings stand in for it silently.
+  local src="the newest full run on disk"
+  [ "$tf" = "$ARTIFACTS/timings.txt" ] && src="this run"
   while read -r name secs; do
     [ -n "$name" ] || continue
     total=$((total + secs)); lines=$((lines + 1))
@@ -1128,7 +1199,11 @@ gate_scope_switch() {
   # sharing one variable there reported 41+47=88 "checks" on the second run.)
   [ "$skipped" -gt 0 ] || { echo "the skip list costs 0 measured seconds — fast would not be faster"; return 1; }
   [ "$skipped" -lt "$total" ] || { echo "the skip list covers the entire gate"; return 1; }
-  echo "fast removes ${skipped}s ($((skipped / 60))m$((skipped % 60))s) of ${total}s ($((total / 60))m$((total % 60))s) measured across $lines checks — $((skipped * 100 / (total > 0 ? total : 1)))% of this gate's own wall clock"
+  # The percentage is of THIS GATE's measured check time, not of the wall clock it
+  # prints at the end (which includes gate setup and the summary rewrite) — so say
+  # "measured check time" and name the run, rather than letting 86% stand as a claim
+  # about a two-minute wall clock that includes everything else.
+  echo "fast removes ${skipped}s ($((skipped / 60))m$((skipped % 60))s) of ${total}s ($((total / 60))m$((total % 60))s) measured across $lines checks — $((skipped * 100 / (total > 0 ? total : 1)))% of this gate's measured check time (priced from $src: $(basename "$(dirname "$tf")"))"
 }
 run_check "gate-scope-switch" gate_scope_switch
 
