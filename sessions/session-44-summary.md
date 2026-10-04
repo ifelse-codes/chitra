@@ -5,8 +5,10 @@
 any work) and amended — never rewritten — under its own `## Contract amendments`: **A1** at
 `589a196` (D5's removal set is all 81), **A2–A4** at `3b8ec6f` (the cold review's F2, M1, M2/M3).
 **Branch:** `session-44-oss-polish` from `main` `1b6c17d` (S43 merge). **PR #65.**
-**28 commits · 49 files changed · 10 added · 11 deleted · 0 lockfile changes.** The 11
-deletions are D3/D6 being made true — see *pass 1* below.
+**Delivery size: derive it** (`git rev-list --count main..HEAD`, `git diff --shortstat
+main...HEAD`) — pass 3 found the typed commit count already stale, in the same document
+that had just explained why typed counts rot. **11 deletions** are D3/D6 being made true —
+see *pass 1* below.
 
 ## The headline: §4.9's "~60 minutes" does not reproduce — the gate measures ~2–3 minutes
 
@@ -128,6 +130,35 @@ mechanical (15 files, N/N numstat), the N1 gate is green on S43 and red on S42 *
 commit that answers it**, and req 6's derivation facts hold (zero `node:` builtins, zero
 runtime deps, no post-ES2020 syntax).
 
+## Cold review, pass 3: **REJECT** again — my own fix was built on a false premise
+
+Pass 3 was given the pass-1 and pass-2 claims to re-verify and the same permission to reject.
+**10 SHIPPED · 4 PARTIAL · 0 NOT-BUILT.** It found the most serious thing in this session, and it
+was mine:
+
+> I documented as fact that "`blank_issues_enabled: false` means the issue tracker is not a route
+> that exists for anyone outside the maintainers", wrote a gate clause enforcing that, and then
+> **rerouted both public docs to GitHub Discussions — which is off.**
+
+`gh api repos/ifelse-codes/chitra --jq .has_discussions` → **`false`**. I moved readers from one
+closed door to another while writing an amendment that called the first door closed, and the
+clause forbade the one true sentence while permitting the two false ones.
+
+| finding | what was wrong | fixed in |
+| --- | --- | --- |
+| **A6's premise** (high) | the clause enforced a false invariant across four public docs | amended **A7**: the invariant is now *no doc may route to a channel the recorded settings say is off*, checked offline against a new tracked record, `.github/REPO-SETTINGS.md`, which holds each setting **with the command that re-derives it**. Both clauses proven red on the old wording, green on the new |
+| **the CoC's routes** (high) | it named two routes and neither was established; one ("reaches the maintainers directly") was an unverified claim | both docs now state plainly that the private channel may not exist, and give the only honest fallback — a report with no detail, asking for a private route. Recorded as a **pre-flip task for S45** in `.ai/STATE.md`, because it is a repository setting, not a file |
+| **the freeze claim** (med) | "the freeze is clean" was asserted unqualified; `909eaa4` rewrote req 7's D4 row and req 8's body **before** the first feed and before the N1 rule existed | **A7.4** discloses it; the map's claim is scoped to `68662bf..HEAD` |
+| **A4's "closeout runs full"** (med) | the sentence A4 declares untrue survived in the gate header, `STATE.md` and `KNOWLEDGE.md` | all three now say what is enforced: the default is `full`, and nothing ever *invokes* the gate with a scope |
+| **a typed count, again** (med) | the map said "28 commits" (actual: more) — in the document that had just explained why typed counts rot | the map derives its own size now |
+| **the demo's typed count** (med) | `demo-session-44.sh` printed "~146 process files" under a header claiming counts are derived | it counts `git ls-files` at run time |
+| **the fixture's error message** (low/med) | two of its four traps were caught by the completeness guard, not the guards the message named | each trap now exercises its own guard; the message names only what it checks |
+| **`main` cited at `49e1ee2`** (low) | that is the S42 merge as named in the S43 records; `main` is `1b6c17d` | **A7.3** — the `.ai/`/`prompts/` records cite `main` by SHA, several times, and any citation moves in a rewrite; read `git rev-parse main` |
+| **invented mailbox** (low) | the check ran on the CoC only; requirement 1 forbids one in `SECURITY.md` too | both files, one rule, proven red by injecting `security@example.com` |
+
+Pass 3 independently re-confirmed pass 2's fixes, including that **the pre-fix selection logic
+fails the new fixture** and that the live figure moved 86% → 71% and names its run.
+
 ## Honest gaps
 
 - 🔴 **D4b is not done, by decision.** The **tree** is clean; **`main` still carries the home
@@ -145,11 +176,16 @@ runtime deps, no post-ES2020 syntax).
 - 🟠 **`gate-scope-switch` fails closed without a full run's timings.** It reads the gate's own
   `timings.txt`, which is gitignored local state: a fresh clone gets an instruction, not a
   green. Same class as the `latest` symlinks; disclosed rather than softened.
-- 🟠 **Requirement 3's "routes that actually exist" is still only partly checkable.** The new
-  assertion proves no doc sends a reader to a door the repo has closed — that is a static fact
-  and it is enforced. Whether `https://chitra.iifelse.com` and the npm page resolve is a
-  **network** fact, which no offline gate can own; pass 2 resolved both by hand and the
-  advisories link needs the repo flipped first. Left as a named limit, not claimed as covered.
+- 🟠 **Requirement 3's "routes that actually exist" is now enforced against a *recorded* fact, not
+  a live one.** `.github/REPO-SETTINGS.md` holds `has_issues`, `has_discussions`, `private` and
+  the blank-issues rule with the `gh api` command that re-derives each, and `oss-surface-present`
+  fails if a public doc routes to a channel recorded as off. That catches a stale *document*; it
+  cannot catch a setting that changed after the record was written. The record is dated and the
+  commands are printed in it, so the failure mode is "nobody re-derived it", not "the gate
+  believes it".
+- 🟠 **Whether `https://chitra.iifelse.com` and the npm page resolve is a network fact**, which no
+  offline gate can own; pass 2 resolved both by hand. The advisories link additionally needs the
+  feature enabled, which is now a named pre-flip task.
 - 🟠 **`minimumReleaseAgeExclude: stripe-replit-sync`** is the same species of Replit-scaffold
   cruft D5 removed, but it is not an `overrides` entry, so req 11 did not reach it. Named in
   A1 rather than smuggled in.
@@ -169,9 +205,9 @@ runtime deps, no post-ES2020 syntax).
 ## Cost Tracking
 
 One opencode session · **5 ballots + plan approval** (D1, D4, D4b, the D2/D3/D5/D6 bundle, the
-N1 + §4.9 scope) with commits pre-approved · **14 requirements** · **28 commits** · **49 files
-changed** · **10 added, 11 deleted** (the deletions are D3/D6 made true; the files were
-kept on disk and only untracked) · **0** product-code changes · **0** new product tests (453
+N1 + §4.9 scope) with commits pre-approved · **14 requirements** · delivery size derived as
+above, never typed · **11 deleted** (D3/D6 made true; the files were kept on disk and only
+untracked) · **0** product-code changes · **0** new product tests (453
 stays 453) · **0** lockfile changes (the D5 regen produced an empty diff — recorded as A1) ·
 **0** releases · **0** npm secrets · **0** new recurring infra (coverage rides the existing
 `core` job; no coverage service) · **1** `--no-verify` commit for the 15-file mechanical scrub,
