@@ -43,14 +43,16 @@ Please include:
 
 If private reporting is **not** enabled on this repository, this project has **no private
 channel**: it publishes no mailbox, no other channel a repository can offer is switched on, and
-the issue tracker is public once the repository is. None of those is acceptable for an exploit,
+the issue tracker is public. None of those is acceptable for an exploit,
 so say so plainly rather than inventing a route.
 
 **What to do instead:** open a **bug report** through the form under
 `.github/ISSUE_TEMPLATE/` with nothing but the statement that a security report is pending and
 a request for a private channel — no version, no reproduction, no detail that would let anyone
-else exploit it. The report is read before anything is asked for again, and enabling private
-reporting is a pre-flip task already recorded in `.ai/STATE.md`.
+else exploit it. The report is read before anything is asked for again. Private reporting **is**
+enabled on this repository as of the public flip (session 46): if the Security tab shows no
+*Report a vulnerability* button, the switch has been turned off again — the row and the command
+that re-derives it are in [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md).
 
 The repository settings this depends on are recorded, with the command that re-derives each,
 in [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md). Check them before trusting a route
