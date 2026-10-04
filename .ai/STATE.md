@@ -46,8 +46,10 @@ session from going public.
   `contract-freshness` in `verify-closeout.sh`, with a **pure** core that the session gate
   extracts and runs against two real sessions: green on S43's untouched contract, red on S42's
   (rewritten by this session's own D4 scrub), naming the offending commit.
-- **§4.9 — the gate prices itself.** `VAJRA_GATE_SCOPE=fast|full` (default **full**, closeout
-  runs full) drops only the inherited checks that cost wall clock, and marks them `SKIP`. Every
+- **§4.9 — the gate prices itself.** `VAJRA_GATE_SCOPE=fast|full` (default **full** — and the
+  default is what is *enforced*: nothing ever invokes the gate with a scope, which is A4's
+  correction of the contract's own wording) drops only the inherited checks that cost wall clock,
+  and marks them `SKIP`. Every
   check now writes its own seconds, so the claim "fast is faster" is arithmetic over measured
   timings instead of a number copied out of a review.
 - **Product, re-observed:** **453/453** tests in 23 files; root typecheck exit 0;

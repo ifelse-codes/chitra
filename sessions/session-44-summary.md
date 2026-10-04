@@ -21,10 +21,12 @@ The carried finding said the gate costs ~60 minutes and needs an opt-out. I buil
 | `fast` (`VAJRA_GATE_SCOPE=fast`) | 42 | **42 PASS, exit 0**, 6 `SKIP` | **~1 min** |
 
 The skip list's own price, read out of the gate's per-check timings and printed by
-`gate-scope-switch` itself, has moved between **71% and 80%** of measured check time across the
-full runs in this session's artifacts. It is **not** quoted as one number here, because it moves:
-`git rev-list`-style honesty applies to percentages too, and the exact figure of every run lives
-in its own `.ai/verify/session-44/<timestamp>/run-meta.txt` and `gate-scope-switch.log`.
+`gate-scope-switch` itself, and it is **not** quoted here as a number or a range: across the full
+runs in this session's artifacts it has printed values from **60% to 87%**, because the
+denominator is wall clock on a loaded machine. Every run's own figure is in its
+`.ai/verify/session-44/<timestamp>/gate-scope-switch.log`, and the check prints which run it
+priced. Pass 5 rejected an earlier version of this sentence for quoting `71–80%` — a range is
+still a claim about runs nobody looked at.
 
 The first version of that line said **86%** and this map repeated it as a measured fact for two
 commits. It was not: the selection kept the **oldest** full run on a tie, so the percentage was
@@ -51,7 +53,7 @@ description that did not survive measurement).
 | 7 | D1–D6 answered and recorded | **SHIPPED** | `6024e0d` (D4), `9d88882` (D5), `589a196` (D4b + A1). **And made checkable:** `a58a26b` untracked the 11 files D3/D6 says stay local, `dc6b4dc` added `founder-decisions-covered`, which asserts D1 (six process dirs still tracked), D2 (the `## Git hooks (opt-in)` section + install line + `.claude/settings.json` hooks) and D3/D6 (nothing tracked, whole-directory ignore rules) — green here, **red on `main` for both halves**. A decision with no gate is a claim; pass 1 proved it |
 | 8 | D4 scrub, provably mechanical | **SHIPPED** | `6024e0d`: 15 files, `numstat` N/N on every one, nothing added or deleted. `home-path-scrubbed` greps the live tree **and** runs the same pattern against the newest pre-scrub commit derived from history — a pattern that matched nothing would fail, not pass |
 | 9 | N1: rule + a gate that can go red | **SHIPPED** | `d75a23a` + `dc6b4dc`. `reviewer/SKILL.md` (amend, never rewrite) + `contract-freshness` in `verify-closeout.sh`, split into **two pure functions**. Clause (a): `contract-freshness-teeth` extracts the body and runs it twice — **green on S43**, **red on S42**, naming the commit it then proves touches the contract. Clause (b): pass 1 found it could **not go red** (N2, below); the teeth check now drives it in *both* line orders against synthetic reviews, and the pre-fix logic is reproduced as rc=0 where the contract demands 1 |
-| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — **71–80%** of measured check time across the full runs on disk, never quoted as one number because it moves (pass 2 found the old fixed 86%). `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
+| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — a share of measured check time that **moves run to run** (60–87% observed; pass 2 found the old figure frozen at 86%, pass 5 caught this map re-quoting a range), so no figure is typed here and the check names the run it priced. `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
 | 11 | D5 overrides stripped, own-commit regen | **SHIPPED** | `9d88882` + `589a196`. **81 → 0**; `pnpm install --lockfile-only` left `pnpm-lock.yaml` byte-identical, then full install, `--frozen-lockfile`, typecheck and **453/453** all exit 0. A1 records why the removal set is 81, not the 11 the literal wording named |
 | 12 | Re-prove the product from live facts | **SHIPPED** | Gate: `fresh-clone-build-no-env`, `core-tests` (453), `core-typecheck`, `root-typecheck`, `coverage-gate-passes`, `contributing-coverage-numbers-real`, `example-runs`, `chart-drift`, `browser-qa-catalog-pages` — all PASS |
 | 13 | Re-sync `.ai/`; counts derived, not typed | **SHIPPED** | `37511d0`, `daf9c4c`, `9efc28c`. `ai-files-describe-s44`, `ai-names-no-deleted-tree`, `test-count-propagated` |
@@ -175,17 +177,34 @@ fails the new fixture** and that the live figure moved 86% → 71% and names its
 Pass 4 also re-derived the settings itself (`has_discussions: false` and the two others match the
 record) and found **A7.4's D4b/D4 slip**, corrected in **A8.5**.
 
-- 🔴 **This session has now been rejected four times, and the last two rejections were of my own
-  fixes.** Passes 3 and 4 did not find new work; they found that work I had just done was built on
-  an untrue premise (A6's "closed tracker") and then claimed, in writing, that a gate was
-  satisfied when it was not (A5.2). The correction is not a better sentence — it is that every
-  claim about this repo's own compliance now names the **command** that verifies it, and the
-  claims about remote state name the **recorded setting** plus the command that re-derives it.
-  Anyone reading this map should treat a bare assertion about compliance the same way pass 4 did.
+## Cold review, pass 5: **REJECT** — the fakest green was the *scope* of my own gate clause
+
+**11 SHIPPED · 3 PARTIAL · 0 NOT-BUILT.** Its fakest green: `oss-surface-present` stated its
+invariant as a **class** in the comment ("no public doc may route to a channel the recorded
+settings say is off") while the code looped over **four filenames** — and
+`.github/ISSUE_TEMPLATE/bug-report.yml` was doing exactly what the class forbids, unhedged.
+
+| finding | what was wrong | fixed in |
+| --- | --- | --- |
+| **three "fixed" claims that were not** (high) | the "closeout runs `full`" sweep touched the gate header and one document, leaving the phrase in `STATE.md` and `KNOWLEDGE.md`; the private-route sweep missed `KNOWLEDGE.md` — **six** files carried the claim, not five; the advisories hedge covered `config.yml` and not `bug-report.yml` | **A9.1** — all three corrected, and the lesson recorded: a sweep described as "all sites" is a claim about a set nobody enumerated, and two of three were wrong |
+| **the clause's scope** (high) | comment said a class, code said four files | **A9.2** — the loop now names the four public docs **and** the three issue-template files, states its exclusions, and a **third clause** requires any file offering `security/advisories/new` to hedge it in the same file, because that route's recorded status is *unknown* |
+| **the range this map quoted** (med) | "moved between 71% and 80%" — the full runs on disk read 60%, 66% and 78%, and one of pass 5's own runs printed **87%** | **A9.5** — no figure or range is typed here; the share is wall clock on a loaded machine, and each run's own number sits in its own log |
+| **A8.1's remedy could not be true yet** (residual) | it described the review's future commit as a fact — the same species pass 4 found in A5.2 | **A9.3** — the ordering is the mechanism; the fact is the `git log --diff-filter=A` command |
+| **"the only way that stays true"** (residual) | retracted: no phrasing of an amendment list stays true by itself | **A9.4** |
+| **an untracked home path** (residual) | `project-status.html` sat untracked *and unignored* carrying `/Users/<name>/…` — invisible to a gate that greps tracked files, one `git add` from being published | kept on disk, now ignored beside the other local HTML reports |
+
+- 🔴 **This session has been rejected five times, and the last three rejections were of my own
+  fixes.** Passes 3, 4 and 5 found no new work; they found work I had *just* done — built on an
+  untrue premise (**A6**'s "closed tracker"), or claimed in writing when it was not true
+  (**A5.2**, **A8.1**), or narrower than the invariant its own comment described (**A9.2**). The
+  correction is not better sentences. It is: every claim about this repo's own compliance names
+  the **command** that verifies it; every claim about remote state names the **recorded setting**
+  and the command that re-derives it; and every sweep over "all sites" either enumerates them or
+  says how it enumerated them. Read any bare assertion in this map the way pass 4 read one.
 - 🟠 **The map is one review behind by construction.** Its amendments section is complete through
-  **A8**; a fifth pass that demands A9 would leave the map's own summary of the amendment list
-  stale again — which is the same defect it has now been caught for twice, and the reason A8 is
-  written to be the last rather than to be exhaustive.
+  **A9**; a pass that demands A10 leaves the map's summary of the amendment list stale again —
+  which is the defect it has now been caught for twice, and the reason the list appears in three
+  `.ai/` files that each pass re-checks rather than in one place that nobody re-reads.
 
 ## Honest gaps
 

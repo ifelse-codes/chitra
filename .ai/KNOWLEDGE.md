@@ -390,10 +390,13 @@
   every `actions/workflows/*.yml` URL out of `README.md` and requires the file to exist — run
   against `main` the same code fails, which is how the counterfactual is demonstrated without
   breaking anything.
-- **There is no contact mailbox for this project, and that is deliberate.** The CoC routes
-  private reports through GitHub private reporting and says why in the file. Never add a
+- **There is no contact mailbox for this project, and that is deliberate.** The CoC and
+  `SECURITY.md` point at GitHub's private reporting **as a route, not as a promise** — whether it
+  is switched on is a repository setting recorded, with the command that re-derives it, in
+  `.github/REPO-SETTINGS.md`, and both files say what to do when it is not. Never add a
   `conduct@` or `security@` that nobody reads: a placeholder address is a lie, and
-  `oss-surface-present` fails on any email address in `CODE_OF_CONDUCT.md`.
+  `oss-surface-present` now fails on any email address in **either** `CODE_OF_CONDUCT.md` **or**
+  `SECURITY.md` (S44 cold review 4 widened it; it had covered the CoC alone).
 - **Coverage thresholds are enforced by CI as of S44.** `ci.yml#core` runs
   `pnpm --filter @ifelse.codes/chitra run test:coverage` in place of the plain `Test` step —
   the suite runs **once**, under v8, and the four thresholds in `vitest.config.ts` can fail the
@@ -423,6 +426,9 @@
   now fails closeout.
 - **The gate can be run fast, and it says which one it ran.** `VAJRA_GATE_SCOPE=fast` skips only
   the inherited wall-clock checks (fresh clone, Playwright, docs build, the repeated coverage
-  runs) and marks them `SKIP`; the default and the closeout run are `full`. Every check writes
-  its seconds to `timings.txt`, so the cost is measured per check rather than repeated from a
-  review.
+  runs) and marks them `SKIP`. The default is `full`, and the default is all that is enforced:
+  nothing ever invokes the gate with a scope, and the contract's "the closeout runs `full`" is the
+  sentence **A4** declares untrue — `check_verify_demo_scripts` asserts the default instead.
+  Every check writes its seconds to `timings.txt`, so the cost is measured per check rather than
+  repeated from a review; `gate-scope-switch` prices the skip list from the newest **complete** run
+  and prints which run it used.
