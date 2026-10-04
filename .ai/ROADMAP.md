@@ -97,10 +97,12 @@ if not, they go, and the one-liner becomes true.**
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
 - ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
   (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendments
-  **A1–A4**).
+  **A1…A8** — A8 is the last; an amendment list typed here goes stale the moment the next pass
+  adds one, which is what passes 2 and 3 each caught it doing).
   **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
-  **no invented mailbox** — private reports route through the one channel that reaches the
-  maintainers), `.github/ISSUE_TEMPLATE/` (2 forms + `config.yml`), a PR template, a **CI badge**
+  **no invented mailbox** — private reports route through GitHub's private reporting *if it is
+  switched on*, per `.github/REPO-SETTINGS.md`), `.github/ISSUE_TEMPLATE/` (2 forms +
+  `config.yml`), a PR template, a **CI badge**
   read out of the README and matched against a file that must exist, **coverage enforced** in the
   `core` job (`test:coverage` replaces the plain `Test` step, suite still runs once, no coverage
   service), and **`engines` derived from what `ci.yml` pins** (repo `>=26`/`>=9.12.3`; package

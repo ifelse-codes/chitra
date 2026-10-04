@@ -17,7 +17,9 @@ session from going public.
   template, and a **CI badge whose URL is read out of the README and matched against a file that
   must exist** — the same assertion run against `main` fails, which is the counterfactual.
 - **No invented contact address anywhere.** The project publishes no mailbox, so the CoC says
-  so and routes private reports through the one private channel that reaches maintainers. A
+  so and points at GitHub's private reporting **as the route, not as a promise it makes** —
+  whether that route is switched on is a repository setting recorded (with the command that
+  re-derives it) in `.github/REPO-SETTINGS.md`, and the docs say what to do when it is not. A
   `conduct@` nobody reads would be worse than none, and a placeholder would be a lie.
 - **Coverage is enforced, not merely configured.** `vitest.config.ts` has carried four
   thresholds since S41 (statements 90 / branches 85 / functions 85 / lines 90 — the *measured*

@@ -41,9 +41,11 @@ if grep -q "## Reporting a vulnerability" SECURITY.md; then ok "disclosure route
 
 case_ "2 · a code of conduct nobody can hide behind"
 printf '  %sContributor Covenant 2.1, plus the four-step enforcement ladder.%s\n' "$D" "$N"
-printf '        %sThe project publishes no mailbox, so the file says so and routes%s\n' "$D" "$N"
-printf '        %sprivate reports through the one private channel that DOES reach%s\n' "$D" "$N"
-printf '        %sthe maintainers. A conduct@ nobody reads is worse than none.%s\n' "$D" "$N"
+printf '        %sThe project publishes no mailbox, so the file says so and points at%s\n' "$D" "$N"
+printf '        %sGitHub private reporting AS A ROUTE, not as a promise - whether it%s\n' "$D" "$N"
+printf '        %sis switched on is recorded in .github/REPO-SETTINGS.md, and the%s\n' "$D" "$N"
+printf '        %sfile says what to do when it is not. A conduct@ nobody reads%s\n' "$D" "$N"
+printf '        %sis worse than none.%s\n' "$D" "$N"
 if [ -s CODE_OF_CONDUCT.md ]; then ok "CODE_OF_CONDUCT.md present"; else bad "CODE_OF_CONDUCT.md missing"; fi
 if grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' CODE_OF_CONDUCT.md
 then bad "an email address the project does not own is printed"; else ok "no invented contact address"; fi
@@ -84,13 +86,17 @@ case_ "6 · D4 — the personal home path, out of the tracked tree"
 # Derived, never typed (req 13): how many commits a rewrite would move, and
 # whether `main` still carries the path at all — if it does not, D4b is moot.
 N_COMMITS=$(git rev-list --count HEAD)
+# The scrub is the newest commit whose diff still carries the path — derived, so the
+# demo cannot claim a file count that the history does not have (S44 cold review 4).
+SCRUB_COMMIT=$(git log --format=%H -G'(/|-)Users[-/][a-z]+' -- . | head -1)
+SCRUB_FILES=$(git show --numstat --format= "$SCRUB_COMMIT" 2>/dev/null | grep -c . || echo '?')
 PAT='(/|-)Users[-/][a-z]+'
 if git grep -qE "$PAT" main -- . 2>/dev/null; then
   D4B_CARRIES="main still carries the path, so the rewrite is still required"
 else
   D4B_CARRIES="main is clean — no history rewrite left to do"
 fi
-printf '  %s15 tracked files carried the founder%s\n' "$D" "$N"
+printf '  %s%s tracked files carried the founder%s\n' "$D" "$SCRUB_FILES" "$N"
 printf '        %shome path, including the path-encoded spelling in a handoff.%s\n' "$D" "$N"
 printf '        %sOne mechanical commit: every occurrence -> ~ / -home, no line%s\n' "$D" "$N"
 printf '        %sadded or removed. History is D4b: rewriting moves every commit%s\n' "$D" "$N"
