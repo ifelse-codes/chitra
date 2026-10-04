@@ -57,7 +57,7 @@ description that did not survive measurement).
 | 7 | D1–D6 answered and recorded | **SHIPPED** | `6024e0d` (D4), `9d88882` (D5), `589a196` (D4b + A1). **And made checkable:** `a58a26b` untracked the 11 files D3/D6 says stay local, `dc6b4dc` added `founder-decisions-covered`, which asserts D1 (six process dirs still tracked), D2 (the `## Git hooks (opt-in)` section + install line + `.claude/settings.json` hooks) and D3/D6 (nothing tracked, whole-directory ignore rules) — green here, **red on `main` for both halves**. A decision with no gate is a claim; pass 1 proved it |
 | 8 | D4 scrub, provably mechanical | **SHIPPED** | `6024e0d`: 15 files, `numstat` N/N on every one, nothing added or deleted. `home-path-scrubbed` greps the live tree **and** runs the same pattern against the newest pre-scrub commit derived from history — a pattern that matched nothing would fail, not pass |
 | 9 | N1: rule + a gate that can go red | **SHIPPED** | `d75a23a` + `dc6b4dc`. `reviewer/SKILL.md` (amend, never rewrite) + `contract-freshness` in `verify-closeout.sh`, split into **two pure functions**. Clause (a): `contract-freshness-teeth` extracts the body and runs it twice — **green on S43**, **red on S42**, naming the commit it then proves touches the contract. Clause (b): pass 1 found it could **not go red** (N2, below); the teeth check now drives it in *both* line orders against synthetic reviews, and the pre-fix logic is reproduced as rc=0 where the contract demands 1 |
-| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — a share of measured check time that **moves run to run** (60–87% observed; pass 2 found the old figure frozen at 86%, pass 5 caught this map re-quoting a range), so no figure is typed here and the check names the run it priced. `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
+| 10 | §4.9: scope switch, measured | **SHIPPED** | `b9d8791` + `e62808c` + `51bf7c3`. `gate-scope-switch` unit-tests the switch, requires every skip-list name to be a real check, forbids skipping anything S44 owns, and prices the list from measured per-check timings — a share of measured check time that **moves run to run**, so no figure is typed here: pass 2 found the old figure frozen at one value, pass 5 caught this map re-quoting a range, and pass 7 caught the range still sitting in *this very cell* while A10.1 promised it was gone. The check names the run it priced; read the number there. `pick_timings_file` takes the newest **complete** run, prints which run it priced, and is driven over a fixture so the selection can go red. `check_verify_demo_scripts` also asserts the default is `full` (pass 1, M3) |
 | 11 | D5 overrides stripped, own-commit regen | **SHIPPED** | `9d88882` + `589a196`. **81 → 0**; `pnpm install --lockfile-only` left `pnpm-lock.yaml` byte-identical, then full install, `--frozen-lockfile`, typecheck and **453/453** all exit 0. A1 records why the removal set is 81, not the 11 the literal wording named |
 | 12 | Re-prove the product from live facts | **SHIPPED** | Gate: `fresh-clone-build-no-env`, `core-tests` (453), `core-typecheck`, `root-typecheck`, `coverage-gate-passes`, `contributing-coverage-numbers-real`, `example-runs`, `chart-drift`, `browser-qa-catalog-pages` — all PASS |
 | 13 | Re-sync `.ai/`; counts derived, not typed | **SHIPPED** | `37511d0`, `daf9c4c`, `9efc28c`. `ai-files-describe-s44`, `ai-names-no-deleted-tree`, `test-count-propagated` |
@@ -234,6 +234,38 @@ on wording a reader would plausibly write, pass 2's fixture genuinely rejects th
 selection logic, the settings record matches live `gh api`, the untracked-home-path class is
 closed, and M4 holds. It ran the gate (48/48 full in 123s; 42/42 fast in 25s), the suite (453/453
 in 23 files) and the closeout.
+
+## Cold review, pass 7: **REJECT** — one material finding, and it was the string A10.1 promised was gone
+
+**12 SHIPPED · 2 PARTIAL · 0 NOT-BUILT.** Pass 7 found **one** material item. It is quoted here
+verbatim because the whole point is what it says about this map:
+
+> **A10.1 is the fakest green:** it announces a *rule* ("a remedy sentence is subject to the rule
+> it announces") and discharges it with a prose promise about its own bytes. **No gate can go red
+> because the map quotes a figure.** Fourth instance of the class (A5.2 → A8.1 → A9.5 → A10.1).
+
+The requirement-10 evidence cell still printed the range, inside the sentence that said no figure
+was typed there. Three passes had "fixed that" before — **A5.2** claimed a commit that was not
+made, **A8.1** described a future commit as a fact, **A9.5** promised no figure and printed two —
+and in three of those four cases nothing could have gone red, because nothing checks prose against
+itself.
+
+**So the fix is a gate, not a sentence.** `map-measurements-honest` (below) makes the class
+enforceable, and the first version of that rule — "a percentage must carry a history word" — was
+**too loose**: pass 7's exact string sits in a cell saying "moves run to run", so the word list
+waved it through. The same species as the clause that forbade the word "open" and missed a
+sentence that never used it. The requirement rows now get the blunt structural rule — **no
+percentage inside `| 1 |` … `| 14 |`** — and the word list keeps only the prose around them.
+
+**A11.2** takes pass 7's nits: `ROADMAP.md`'s carried §4.9 row no longer quotes the ~60-minute
+premise this session measured; `SECURITY.md` qualifies the private-reporting switch *before*
+promising what the channel does; the route clause catches "Report this in a public issue" (the one
+ordinary phrasing its verb list missed); the demo's template count carries a comment saying it is
+counted.
+
+Pass 7 independently rebuilt pass 2's fixture and ran the **old** picker against it (picks the
+oldest run; the fixture forbids it), re-derived the settings from `gh api`, and confirmed the
+freeze at **0 deletions / 272 insertions** from `68662bf`.
 
 ## Honest gaps
 

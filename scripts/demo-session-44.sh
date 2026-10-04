@@ -56,8 +56,10 @@ printf '        %sexpected-vs-actual; a feature form that asks about dependencie
 printf '        %sup front (the package ships zero); blank issues off, with the%s\n' "$D" "$N"
 printf '        %sdocs and npm links that resolve; the security link hedged in%s\n' "$D" "$N"
 printf '        %sthe file, because .github/REPO-SETTINGS.md records it as unknown.%s\n' "$D" "$N"
+# Counted, never typed: the demo's own header claims its counts are derived (S44 cold review
+# pass 7), and the expected value is the number of tracked template files requirement 3 asks for.
 T=$(git ls-files '.github/ISSUE_TEMPLATE/*' '.github/PULL_REQUEST_TEMPLATE.md' | wc -l | tr -d ' ')
-[ "$T" = "4" ] && ok "4 template files tracked" || bad "expected 4 template files, found $T"
+[ "$T" = "4" ] && ok "$T template files tracked" || bad "expected 4 template files, found $T"
 
 case_ "4 · a CI badge that points at the workflow that runs"
 printf '  %sBadges are claims. This one resolves to a file in this repo, and%s\n' "$D" "$N"

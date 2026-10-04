@@ -46,7 +46,7 @@ if not, they go, and the one-liner becomes true.**
 | # | Finding | Why S44 |
 |---|---|---|
 | **N1** | **The contract was rewritten between review passes**, so the attestation's freshness guarantee no longer covers this session. `prompts/` is outside the attested *diff*, but the contract is the attested *preimage*'s first half — so documenting a required-crew skip **invalidates the acceptance documenting it**. Two closeout checks in conflict | Needs a rule plus almost certainly a change to `verify-closeout.sh` / `reviewer/SKILL.md`. That is governance change work and belongs beside **D2**, not inside a cleanup session |
-| **§4.9** | The gate now costs **~60 minutes** — it transitively runs S41's entire 24-check gate, the suite ~5×, and two clone installs, now plus a docs build and a Playwright run. Measured by the reviewer | It is a **growing** cost on the repo's load-bearing artifact. Price it against the sessions it slows; a `VAJRA_SKIP_*`-style opt-out for the counterfactual half is the obvious candidate |
+| **§4.9** | **RESOLVED at S44 — and the premise did not hold.** The carried claim was ~60 minutes; the gate measures **~2–3 minutes** in full scope (derive today's figure with `bash scripts/verify-session-44.sh`, which prints its own wall clock). S44 shipped `VAJRA_GATE_SCOPE=fast|full`, per-check timings, and a check that fails if the skip list is empty, covers a check S44 owns, or names something this gate does not run | The growing-cost risk is answered by a priced opt-out rather than deferred; the historical claim is kept in the contract's §4.9 for the record |
 
 ### → recorded, deliberately NOT scheduled
 
@@ -97,7 +97,7 @@ if not, they go, and the one-liner becomes true.**
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
 - ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
   (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendments
-  **A1…A10** — A10 is the last; an amendment list typed here goes stale the moment the next pass
+  **A1…A11** — A11 is the last; an amendment list typed here goes stale the moment the next pass
   adds one, which is what passes 2 and 3 each caught it doing).
   **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
   **no invented mailbox** — private reports route through GitHub's private reporting *if it is
