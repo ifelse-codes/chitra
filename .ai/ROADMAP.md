@@ -113,7 +113,8 @@ if not, they go, and the one-liner becomes true.**
 - ⬜ **Session 45 (S45) — the public flip.** One move resolves: the README `git clone` URL, npm
   `repository.url` / `homepage`, **npm provenance** (a private repo cannot generate it), a real
   **`0.4.0`** through the trusted-publisher runway, and **D4b** — the history rewrite that purges
-  the home path from all 565 commits (**irreversible; every recorded SHA moves**). Then the GTM
+  the home path from every commit reachable from `HEAD` (**irreversible; every recorded SHA
+  moves**). Then the GTM
   proof pack, with the measured **zero** downloads as its `t0`.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),

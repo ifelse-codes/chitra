@@ -66,8 +66,10 @@ session from going public.
   (contract requirement 7, `sessions/session-44-summary.md`, and here), not left in a transcript.
 
 ## What Is Broken / Incomplete
-- 🔴 **D4b — the git history still carries the home path.** 16 of 565 commits, earliest from
-  S10. **The tree is clean; history is not.** A rewrite changes every commit SHA — `.ai/` cites
+- 🔴 **D4b — the git history still carries the home path.** `main` still matches
+  `(/|-)Users[-/][a-z]+`, earliest carrier S10 (the scrub is branch-side only). **Derive, never
+  type:** `git rev-list --count HEAD` is how many commits a rewrite moves. **The tree is clean;
+  history is not.** A rewrite changes every commit SHA — `.ai/` cites
   `main` at `49e1ee2`, PR merge history and every recorded ref move with it — so it is a
   pre-flip operation for **S45**, not a cleanup commit. **Irreversible once published.**
 - 🔴 **The public flip still has no date.** S45 resolves the README `git clone` URL, npm
