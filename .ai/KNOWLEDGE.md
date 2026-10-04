@@ -106,11 +106,17 @@
 - **Moot since S42, kept as history:** `lib/api-spec/openapi.yaml` `info.title` had to stay `Api`
   (changing it broke the orval-generated import paths). The spec and everything generated from it
   were deleted in S42; nothing imports them now.
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S39
-  (latest merge PR #59, `ba6cf6f`). **Read `main`'s real range, don't copy it** — this line
-  has now been wrong twice: it said S00–S08 (S35), was corrected to S00–S34 in S36, and
-  drifted to S00–S37 by S40. No guard protects it. The newest tag is `v0.3.0` at `f4ff6ef9`
-  (S39); `v0.1.0` is at `802ffc7` and `v0.2.0` at `76d21f3`, all pushed, none stale.
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S44
+  (latest merge PR #66, `5a39c43`). **Read `main`'s real range, don't copy it** — this line
+  has now been wrong four times: it said S00–S08 (S35), was corrected to S00–S34 in S36,
+  drifted to S00–S37 by S40, and to S00–S39 by S44. No guard protects it. Derive it with
+  `git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1`
+  — and note **why the narrow pattern is required**: without the two-digit-and-colon anchor the
+  command also matches commit text like `Vajra S144 dogfood`, and returns 144. Separately,
+  **do not** read `main`'s range from `git log --merges`, which is what `check_session_coverage` does
+  and which stops at **S37** because every session since S38 was squash-merged. The newest tag is `v0.3.0` at `87dafe2`
+  (S39); `v0.1.0` is at `802ffc7` and `v0.2.0` at `9495fa7`, all pushed, none stale.
+  *(S45 corrected two of these three tag SHAs — `f4ff6ef9` and `76d21f3` were both wrong.)*
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -204,8 +210,9 @@
   centering (needs a centering wrapper); per-tile font shrink loops backfire —
   fixed type + exact line budgets won. Legends are the density floor (donut/pie
   need 6 rows for 6 services; heatmap header + N).
-- **Suite is 452 tests** (`tests/composability.test.ts` +7 covers the contract).
-  `pnpm run lint` unrunnable — eslint binary not installed (pre-existing).
+- **Suite is 453 tests** (`tests/composability.test.ts` +7 covers the contract). Derive with
+  `cd packages/core && pnpm vitest run --reporter=dot`; the 23 files live in `packages/core/tests/`,
+  **not** under `src/`. `pnpm run lint` unrunnable — eslint binary not installed (pre-existing).
 - **Research spikes (no code):** TUI landscape — Ratatui's measure/render split
   + constraint layout (Length/Min/Max/Ratio/Fill, kasuari) is the model to
   steal; `ansi-to-tui` (official, truecolor) bridges Chitra ANSI → Ratatui
@@ -223,8 +230,9 @@
   stale `v*` exists — `release.yml` publishes on any `v*` push.
 - **Live deploy unfrozen (S31 order lifted):** `wrangler pages deploy dist/public
   --project-name=chitra --branch=main`; this makes the S33 `/ai-data` page live.
-- **Docs-hero pills are truthful now:** `v0.3.0 · npm` (S39) and `452` tests
-  (`artifacts/chitra-docs/src/App.tsx` L550 / L570). S38 fixed the pill to `v0.1.0` while the
+- **Docs-hero pills are truthful now:** `v0.3.0 · npm` (S39) and `453` tests
+  (`artifacts/chitra-docs/src/App.tsx` **L927**; it was cited as L550/L570 here through
+  S44, and the count as `452` — both wrong until S45). S38 fixed the pill to `v0.1.0` while the
   manifest said `0.2.0`; S39 corrected the text. `verify-session-39.sh#hero-pill-matches-version`
   now *derives* the expected value from the manifest, so a bump without a pill edit goes red
   — the pill is still a JSX literal, but it can no longer silently drift.
