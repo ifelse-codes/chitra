@@ -286,7 +286,7 @@ pass has said about this session:
 > to prevent it.
 
 The map's headline typed `48` / `48 PASS` and `42` / `42 PASS`. Adding a check moved both, and
-`map-measurements-honest` matched `[0-9]%` only, so nothing could go red.
+the check added at `f0c04e2` matched `[0-9]%` only, so nothing could go red.
 
 **Rule 3** is the answer, and it took three attempts — which are recorded because the attempts are
 the lesson (**A12.1**):
@@ -303,6 +303,17 @@ Two of my own bugs surfaced while proving it, both the species passes 2–7 kept
 version used `printf | grep -q`, and under `pipefail` the SIGPIPE made **every** long line read as
 "no match" — the check passed on exactly the lines it exists to catch; and the harness I proved it
 with could not run, because an empty `$n` made the rule degenerate.
+
+**Then it stayed broken after I had "proven" it** (**A12.3**), which is the part worth keeping. The
+percentage test was a `case` pattern whose closing paren anchored it to end-of-line, so *"The gate
+measures 73% of its own wall clock"* — the exact sentence the check exists to catch — sailed
+through. And the history-word rule was laundered by the map's own account of what the check used
+to match, which had to name `[0-9]%` to describe the old rule. Both are fixed structurally (a
+regex; a commit-SHA citation as the escape).
+
+**The pattern across A12.1–A12.3 is the finding:** every one of these rules shipped **green while
+being unable to fail on the sentence it was written for**, and each was caught by re-running a
+counterfactual rather than by reading the code. A green you have not re-earned is decoration.
 
 Pass 8 also rebuilt `pick_timings_file`'s fixture outside the gate in four directions (current →
 newest complete; pre-A11 → the oldest, which the fixture rejects; each trap caught by its own
