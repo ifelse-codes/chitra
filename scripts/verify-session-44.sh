@@ -262,6 +262,10 @@ run_check "fresh-clone-build-no-env" bash -c '
 
 # ═══════════════════════════════════════════════ inherited from S41 · the product
 
+# A proxy, deliberately: the count itself is asserted exactly in
+# `test-count-propagated`, which reads it out of the suite rather than out of prose. Matching
+# the 45x family here keeps this check about "the suite ran and nothing was dropped", and the
+# wider pattern means adding tests does not require editing it (pass 6).
 run_check "core-tests" bash -c "pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -qE 'Tests +45[0-9] passed'"
 run_check "core-typecheck"        bash -c "pnpm --filter @ifelse.codes/chitra run typecheck"
 run_check "root-typecheck"        bash -c "pnpm run typecheck"
@@ -829,6 +833,9 @@ oss_surface_at() {
   # are excluded deliberately - they name a channel while qualifying it in the same
   # sentence, which is what A8.2 forced them to do. REPO-SETTINGS.md is the record
   # itself and must be able to name a channel in order to record that it is off.
+  # .github/PULL_REQUEST_TEMPLATE.md is excluded on a narrower claim: it names no
+  # route at all today, and a PR template that starts pointing at one must be added
+  # here in the same commit - not asserted in a comment.
   local sset
   sset=$(rd .github/REPO-SETTINGS.md)
   [ -n "$sset" ] || { echo ".github/REPO-SETTINGS.md is missing - the routes in the public docs have nothing to be checked against"; return 1; }
@@ -843,7 +850,7 @@ oss_surface_at() {
       # An issue route is fine as long as it names the form; "open a new issue" is
       # not, because with blank issues off there is no untemplated new-issue page.
       bad_line=$(echo "$body" \
-        | grep -niE '(open|file|raise|create|start)(ing|s)? (a |an )?(new |public |github |blank |untemplated )?issue|in a \*\*public\*\* issue' \
+        | grep -niE '(open|file|raise|create|start|report|submit|log|post|drop|leave)(ing|s)? (a |an )?(new |public |github |blank |untemplated )?issue|in a \*\*public\*\* issue' \
         | grep -viE 'do not|don.t|never|cannot|can not|no public issue|bug report|feature request|bug form|ISSUE_TEMPLATE|form|mailbox is' || true)
       [ -z "$bad_line" ] \
         || { echo "$d routes the reader to an issue without naming a form, but blank_issues_enabled is false (an untemplated issue cannot be opened):${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
@@ -1397,11 +1404,12 @@ run_check "browser-qa-catalog-pages" browser_qa_catalog_pages
   c=prompts/44-task-oss-polish.md
   [ -f "$c" ] || { echo "the contract is missing"; return 1; }
   git ls-files --error-unmatch -- "$c" >/dev/null 2>&1 || { echo "the contract is untracked"; return 1; }
-  # Every numbered requirement 1..10 must be present AS A HEADING, and the set of
-  # numbers found must be exactly 1..10 - no gaps, and nothing standing in for a
+  # Every numbered requirement 1..14 must be present AS A HEADING, and the set of
+  # numbers found must be exactly 1..14 - no gaps, and nothing standing in for a
   # missing one. Scoped to the Scope section on purpose: the Assumptions block
   # also carries items numbered 1 and 2, and counting those would make the set
-  # 1..10,1,2 and the comparison meaningless.
+  # 1..14,1,2 and the comparison meaningless. (This comment said 1..10 while the
+  # code compared 1..14 for most of the session - pass 6; the code was right.)
   found=$(awk '/^## Scope/{f=1;next} /^## /{f=0} f' "$c" \
           | grep -oE '^[0-9]+\. \*\*' | grep -oE '^[0-9]+' | LC_ALL=C sort -n | tr '\n' ' ')
   want=$(seq 1 14 | tr '\n' ' ')

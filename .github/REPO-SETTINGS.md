@@ -28,11 +28,19 @@ Recorded 2026-10-04 on `session-44-oss-polish`:
 - **Private reporting is not established.** Until that row reads `enabled`, this project has no
   route a reporter can be certain of, and the docs say so instead of inventing one.
 
-## What the gate actually checks — no more
+## What the gate actually checks — and what it does not
 
-`oss-surface-present` reads exactly two of these facts: the `has_discussions` row above, and
-`blank_issues_enabled` from `.github/ISSUE_TEMPLATE/config.yml` (tracked, so a gate can read it
-directly). It fails when a public doc routes to a channel those two record as off. It does **not**
-read the `private` row, the `has_issues` row, or the private-reporting row — that status is
-`unknown`, and no offline gate can resolve it. Anyone extending this check must widen this
-paragraph in the same commit, or the file will advertise an invariant the gate does not keep.
+`oss-surface-present` enforces three offline clauses, and nothing else about these settings:
+
+1. the `has_discussions` row above — if it reads `false`, no reader-facing file may mention
+   Discussions;
+2. `blank_issues_enabled` from `.github/ISSUE_TEMPLATE/config.yml` — if `false`, a reader-facing
+   file that sends someone to an issue must name a form;
+3. any reader-facing file offering `security/advisories/new` must hedge it in the same file,
+   because that route's status is the **unknown** row above.
+
+It does **not** read the `private` row, the `has_issues` row, or the private-reporting row, and
+no offline gate can resolve the last one. It does not check whether the docs and npm links
+resolve — that is a network fact, checked by hand, not by this gate. Anyone extending these
+clauses must widen this paragraph in the same commit, or this file will advertise an invariant
+the gate does not keep; pass 5 caught exactly that.

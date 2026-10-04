@@ -54,7 +54,8 @@ case_ "3 · issue forms and a PR template"
 printf '  %sA bug form that demands a reproduction, a version, a terminal and%s\n' "$D" "$N"
 printf '        %sexpected-vs-actual; a feature form that asks about dependencies%s\n' "$D" "$N"
 printf '        %sup front (the package ships zero); blank issues off, with the%s\n' "$D" "$N"
-printf '        %sdocs / npm / security routes that actually resolve.%s\n' "$D" "$N"
+printf '        %sdocs and npm links that resolve; the security link hedged in%s\n' "$D" "$N"
+printf '        %sthe file, because .github/REPO-SETTINGS.md records it as unknown.%s\n' "$D" "$N"
 T=$(git ls-files '.github/ISSUE_TEMPLATE/*' '.github/PULL_REQUEST_TEMPLATE.md' | wc -l | tr -d ' ')
 [ "$T" = "4" ] && ok "4 template files tracked" || bad "expected 4 template files, found $T"
 
