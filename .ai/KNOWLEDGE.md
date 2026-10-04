@@ -409,8 +409,10 @@
   package name appears in the lockfile.
 - **The founder's home path is gone from the tracked tree and NOT from history (D4/D4b).**
   The tree check is `git grep -nE '(/|-)Users[-/][a-z]+' -- .` — it matches both spellings, so
-  rewording one of them cannot satisfy it. History still carries it in 16 of 565 commits;
-  purging it moves every recorded SHA and belongs to the flip session.
+  rewording one of them cannot satisfy it. `main` still matches that pattern, so the purge is
+  still required; a rewrite moves **every** commit reachable from `HEAD` (derive the count with
+  `git rev-list --count HEAD` — never repeat one, requirement 13) and belongs to the flip
+  session.
 - **A contract is frozen for the duration of a review cycle (N1).** Corrections are appended
   under `## Contract amendments`, numbered, each naming the requirement and the evidence; the
   requirement text is never rewritten. Enforced by `contract-freshness` in

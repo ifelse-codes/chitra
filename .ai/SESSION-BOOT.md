@@ -4,9 +4,11 @@
 - **Number:** 44 — cleanup **Batch 4: OSS polish + the founder decisions D1–D6**, code session.
 - **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge, == `origin/main`).
 - **Contract:** `prompts/44-task-oss-polish.md`, committed at HEAD — with
-  **`## Contract amendments` → A1**, the session's own demonstration that a contract is amended
-  and never rewritten (the N1 rule this session ships).
-- **Gate:** `scripts/verify-session-44.sh`, a **port** of `verify-session-43.sh`, **47 checks**,
+  **`## Contract amendments` → A1…A4**, the session's own demonstration that a contract is
+  amended and never rewritten (the N1 rule this session ships): A1 = D5's removal set, A2 =
+  D4b's typed figures, A3 = the scrub's `sessions/` edits, A4 = requirement 10's own prose.
+- **Gate:** `scripts/verify-session-44.sh`, a **port** of `verify-session-43.sh` — count the
+  checks with `grep -c '^run_check ' scripts/verify-session-44.sh`, never from prose — plus
   `VAJRA_GATE_SCOPE=fast|full` (default **full**), wall-clock printed either way.
 - **The story:** a stranger landing on the public repo finds the things an OSS project is
   supposed to have — a security policy, a code of conduct with a route that exists, issue and
@@ -31,7 +33,9 @@
   81 and not the 11 the requirement's literal wording named.
 - **The personal home path is out of the tracked tree** — 15 files, one mechanical commit,
   `/Users/<name>` → `~` and `-Users-<name>-` → `-home`. **Git history still carries it**:
-  16 of 565 commits, earliest from S10 → **D4b, the flip session**.
+  `main` still matches the pattern, so a rewrite is still required — it moves every commit
+  reachable from `HEAD` (`git rev-list --count HEAD`, derived not typed), earliest carrier S10
+  → **D4b, the flip session**.
 - **The gate is a PORT of `verify-session-43.sh`.** Re-expressed by this session's changes:
   `ai-files-describe-s43` → `-s44`, `contract-at-head` → `prompts/44` + requirements 1…14 +
   the amendments section, `s42-gate-verbatim-goes-red` → **`s43-gate-verbatim-goes-red`**
@@ -46,7 +50,8 @@
 - **Number:** 45 — **the public flip.** It resolves, in one move: the README `git clone` URL,
   npm `repository.url` / `homepage`, npm **provenance** (which a private repo cannot generate),
   a real **`0.4.0`** through the trusted-publisher runway, and **D4b** — the git-history rewrite
-  that removes the home path from all 565 commits (**irreversible; every recorded SHA moves**).
+  that removes the home path from every commit reachable from `HEAD` (**irreversible; every
+  recorded SHA moves**).
 - Also open, untouched: the **seven dead docs deps** S43 named (`framer-motion`, `react-icons`,
   `@tanstack/react-query`, `zod`, `date-fns`, `@tailwindcss/typography`, `tw-animate-css`),
   `minimumReleaseAgeExclude: stripe-replit-sync` (same species as D5, not an `overrides` entry),

@@ -30,8 +30,10 @@ Detail: `sessions/session-44-summary.md` + `sessions/session-44-review.md` + `.a
 
 ## S45 — the public flip
 
-1. **History rewrite first (D4b).** The tracked tree is clean; **16 of 565 commits still carry
-   the home path**. Purging history changes **every** commit SHA — `.ai/` cites `main` at
+1. **History rewrite first (D4b).** The tracked tree is clean; **`main` still carries the
+   home path** (the scrub touched this branch only), so the purge is still required — and it
+   moves **every** commit reachable from `HEAD`, which `git rev-list --count HEAD` derives.
+   `.ai/` cites `main` at
    `49e1ee2`, PR merge history and every recorded ref move with it. Decide the tool and the
    re-verify order **before** pushing. **Irreversible once published.**
 2. **The public-facing resolutions** — README `git clone` URL, npm `repository.url` /
