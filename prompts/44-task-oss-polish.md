@@ -494,6 +494,54 @@ working tree, untracked and unignored, containing `/Users/<name>/…` — invisi
 published. It stays on disk (it is someone's local work) and is now ignored next to the other
 local HTML reports, with the reason written down rather than left to be rediscovered.
 
+### A10 — pass 6: three findings in the honesty layer, and a correction to A9.5
+
+Pass 6 returned **REJECT** with **13 SHIPPED · 1 PARTIAL · 0 NOT-BUILT** — the first pass to find
+only material items in one place and no new work at all. All three findings are about how this
+session *describes* itself, which is where every remaining defect now lives.
+
+**A10.1 — A9.5 was false in the same sentence that stated it, twice.** A9.5 promised the map
+would quote no figure or range, and the map typed `60% to 87%` and `(60–87% observed)` — the
+second **in the very sentence denying the practice**. It also misdescribed the denominator:
+`gate-scope-switch` computes the share over the **sum of the gate's measured per-check seconds**,
+not over the wall clock it prints at the end (setup and the summary rewrite are in neither), and
+the check's own comment says exactly that. Corrected record: no figure and no range appears
+anywhere in the map; the share's denominator is measured per-check time; the seconds are
+themselves wall-clock measurements, which is why the share moves with load; and each run's own
+number lives in its own `gate-scope-switch.log`. **The rule this amendment adds:** a remedy
+sentence is itself subject to the rule it announces. "We no longer print X" is a printed claim
+about X and has to survive the same check as everything else — and when it does not, the fix is
+to delete the number, not to widen the number.
+
+**A10.2 — a count that reproduced from neither command it named.** The map's gate-run tally said
+"13 fast + full runs" beside two `grep`/`ls` commands; today those commands print a different
+number in both directions. Requirement 13 says counts are derived and A8.6 claimed this one was
+fixed. It now states the commands and no number.
+
+**A10.3 — the unhedged route claim, one level up.** `.ai/STATE.md`, `.ai/TASK.md` and the demo
+still described `.github/ISSUE_TEMPLATE/config.yml`'s three contact links as ones that "resolve" —
+while `REPO-SETTINGS.md` records the advisories route's status as **unknown** and the map's own
+gap note says it needs the feature enabled. A9.1 swept the *unhedged promise* out of six files
+and missed the *unhedged claim of resolution* in three more. All three now name two links
+resolved by hand and the third hedged rather than promised.
+
+**A10.4 — the cheap nits pass 6 listed, fixed rather than deferred.** The route clause's verb
+list now includes `report`, `submit`, `log`, `post`, `drop` and `leave` (the ordinary ways a
+reader reaches for an issue); the scope comment names the one tracked file deliberately excluded
+(`.github/PULL_REQUEST_TEMPLATE.md`) and says a template that starts naming a route must be added
+in the same commit; `.github/REPO-SETTINGS.md` lists all three clauses and what none of them
+checks; a comment claiming requirements `1..10` while the code compared `1..14` says so and notes
+the code was right; and the `core-tests` count proxy carries a comment saying what it really is —
+a family match, with the exact count asserted in `test-count-propagated`.
+
+**A10.5 — what pass 6 confirmed independently, recorded because five rejections are a fact about
+the process, not only about the work.** The freeze is append-only from `68662bf`; A9.1's three
+claims are true at HEAD; all three route clauses go red on wording a reader would plausibly
+write; pass 2's fixture genuinely rejects the pre-fix selection logic (pre-fix picks the **oldest**
+run, current picks the newest complete); the settings record matches live `gh api` output; the
+untracked-home-path class is closed; M4 holds. Pass 6 ran the gate itself (48/48 full, 123s;
+42/42 fast, 25s), the suite (453/453 in 23 files) and the closeout.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder

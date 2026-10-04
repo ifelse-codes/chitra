@@ -4,14 +4,15 @@
 - **Number:** 44 — cleanup **Batch 4: OSS polish + the founder decisions D1–D6**, code session.
 - **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge, == `origin/main`).
 - **Contract:** `prompts/44-task-oss-polish.md`, committed at HEAD — with
-  **`## Contract amendments` → A1…A9**, the session's own demonstration that a contract is
+  **`## Contract amendments` → A1…A10**, the session's own demonstration that a contract is
   amended and never rewritten (the N1 rule this session ships): A1 = D5's removal set, A2 =
   D4b's typed figures, A3 = the scrub's `sessions/` edits, A4 = requirement 10's own prose,
   A5/A6 = pass 2's findings (a frozen percentage, four counts typed while fixing F2, the docs'
   closed door), A7 = A6's own false premise and the settings that decide which door is open,
   A8 = pass 4's findings (a false sentence of mine, and the same claim in five more files),
-  A9 = pass 5's (three sweeps that did not cover what they claimed). Read the list, never a
-  summary of it — three passes have now caught this file's version of the list going stale.
+  A9 = pass 5's (three sweeps that did not cover what they claimed), A10 = pass 6's (a
+  remedy clause false in the sentence stating it). Read the list, never a summary of it —
+  four passes have now caught this file's version of the list going stale.
 - **Gate:** `scripts/verify-session-44.sh`, a **port** of `verify-session-43.sh` — count the
   checks with `grep -c '^run_check ' scripts/verify-session-44.sh`, never from prose — plus
   `VAJRA_GATE_SCOPE=fast|full` (default **full**), wall-clock printed either way.
