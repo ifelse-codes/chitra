@@ -1,69 +1,67 @@
 # Session Boot
 
 ## Current Session
-- **Number:** 44 — cleanup **Batch 4: OSS polish + the founder decisions D1–D6**, code session.
-- **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge, == `origin/main`).
-- **Contract:** `prompts/44-task-oss-polish.md`, committed at HEAD — with
-  **`## Contract amendments` → A1…A12**, the session's own demonstration that a contract is
-  amended and never rewritten (the N1 rule this session ships): A1 = D5's removal set, A2 =
-  D4b's typed figures, A3 = the scrub's `sessions/` edits, A4 = requirement 10's own prose,
-  A5/A6 = pass 2's findings (a frozen percentage, four counts typed while fixing F2, the docs'
-  closed door), A7 = A6's own false premise and the settings that decide which door is open,
-  A8 = pass 4's findings (a false sentence of mine, and the same claim in five more files),
-  A9 = pass 5's (three sweeps that did not cover what they claimed), A10 = pass 6's (a
-  remedy clause false in the sentence stating it), A11 = pass 7's (the same class a fourth
-  time, and the gate that finally covers it), A12 = pass 8's (the fix that falsified the map,
-  and the rule that took three attempts). Read the list, never a summary of it — six passes have
-  now caught this file's version of the list going stale.
-- **Gate:** `scripts/verify-session-44.sh`, a **port** of `verify-session-43.sh` — count the
-  checks with `grep -c '^run_check ' scripts/verify-session-44.sh`, never from prose — plus
-  `VAJRA_GATE_SCOPE=fast|full` (default **full**), wall-clock printed either way.
-- **The story:** a stranger landing on the public repo finds the things an OSS project is
-  supposed to have — a security policy, a code of conduct with a route that exists, issue and
-  PR templates, a CI badge pointing at the workflow that runs, a coverage bar CI actually
-  enforces, a stated Node floor — and none of the founder's home path, dead config overrides,
-  or unanswered governance questions.
+- **Number:** 45 — **the mandatory 5-session ground-truth audit** (`45 % 5 == 0`), **NO-CODE**;
+  the public flip carries to S46.
+- **Branch:** `session-45-ground-truth-closeout`, from `main` `5a39c43` (the S44 merge — PR #65, then
+  #66. Derive with `git rev-parse main`; the `1b6c17d` the pre-session files cited is S43's merge).
+- **Why the suffix matters:** `CONSTRAINTS.yaml`'s
+  `ground_truth_commit_exempt_branch_suffixes: [-closeout, -enforcement]` is the only thing that lets
+  a NO-CODE session commit at all — and a contract **not** at `HEAD` makes `canonical_inputs_sha`
+  uncomputable, so `check_review_attestation` could only ever read `BLOCK`. On this branch it computes:
+  `bash scripts/verify-closeout.sh --inputs-sha 45` → `40bd7929…3a48ea4` (at S40: *uncomputable*).
+- **Contract:** `prompts/45-task-public-flip.md` — 11 requirements in four groups: **A** the audit,
+  **B** the ledger, **C** the carry-forward, **D** proof and closeout. **No amendments yet** — the N1
+  freeze attaches when the cold review starts, not before.
+- **Gate:** **none, and none is owed.** `check_verify_demo_scripts` reads `[ "$((N % 5))" -eq 0 ]` and
+  returns `N/A — no session scripts expected`, so a ground-truth session requires no
+  `verify-session-45.sh` / `demo-session-45.sh`. It could not write them anyway: the GT guard blocks
+  every path outside `sessions/ .ai/ prompts/ *.md`, and `.sh` is not in that set. **This check is the
+  counter-example to this session's central finding** — it knows its own scope and declines honestly
+  instead of passing vacuously.
+- **The story:** the constitution is audited on the session before the repo goes public — because the
+  flip makes every vision, roadmap and state sentence in it falsifiable by a stranger, and five
+  sessions of unreviewed prose is what it would be falsified on.
 
 ## Repo State Snapshot
-> Re-read from live facts at S44 boot, not copied from S43's prose.
+> Re-read from live facts at S45, not copied from S44's prose. Every figure below is derived.
 
-- `.ai/SESSION` = 44. S43 was **merged** when this session started: `main` = `1b6c17d`
-  (the S43 merge) == `origin/main` at branch time.
-- **Product untouched:** **453/453** tests in 23 files; root typecheck exit 0; `pnpm example`
-  runs; `gen:charts:check` green. 20 charts / 3 renderers / 7 themes / 0 runtime deps. The
-  package is **`@ifelse.codes/chitra@0.3.0`**, live on npm. Repo still **private**.
-- **Coverage is now enforced, not merely configured.** `vitest.config.ts` has carried four
-  thresholds since S41 that **nothing ran**; `ci.yml`'s `core` job runs `test:coverage` in
-  place of the plain `Test` step — the suite still runs **once**, under v8.
-- **All 81 `pnpm-workspace.yaml` `overrides` are gone** and the lockfile did not move: the
-  regen's result is a **zero delta** (`git diff main...HEAD -- pnpm-lock.yaml` is empty), which
-  is why there is no lockfile commit of its own. Amendment A1 records why the removal set is
-  81 and not the 11 the requirement's literal wording named.
-- **The personal home path is out of the tracked tree** — 15 files, one mechanical commit,
-  `/Users/<name>` → `~` and `-Users-<name>-` → `-home`. **Git history still carries it**:
-  `main` still matches the pattern, so a rewrite is still required — it moves every commit
-  reachable from `HEAD` (`git rev-list --count HEAD`, derived not typed), earliest carrier S10
-  → **D4b, the flip session**.
-- **The gate is a PORT of `verify-session-43.sh`.** Re-expressed by this session's changes:
-  `ai-files-describe-s43` → `-s44`, `contract-at-head` → `prompts/44` + requirements 1…14 +
-  the amendments section, `s42-gate-verbatim-goes-red` → **`s43-gate-verbatim-goes-red`**
-  (extracts S43's REAL `ai-files-describe-s43` body and asserts it exits non-zero here, because
-  that check hard-codes S43's branch and session number).
-- **The two carried findings are fixed, not recorded:** **N1** gets a rule in
-  `reviewer/SKILL.md` plus `contract-freshness` in `verify-closeout.sh` (pure core, extracted by
-  the gate and run against two real sessions); **§4.9** gets `VAJRA_GATE_SCOPE` plus per-check
-  timings, so "fast is faster" is arithmetic on measured seconds.
+- `.ai/SESSION` = 45. **S44 is merged** — `main` = `5a39c43` == `origin/main`, both PRs in. Five
+  tracked files still cited `1b6c17d`; corrected in this session's `.ai/` re-sync.
+- **Product untouched:** **453/453** tests in **23** files (`packages/core/tests/`). No file under
+  `packages/core/` changed. The package is **`@ifelse.codes/chitra@0.3.0`**, live on npm; repo still
+  **private** (`gh repo view --json isPrivate` → `true`).
+- **The audit's four material findings are all checks that report green while doing nothing:**
+  - `check_session_coverage` reads its population from `git log --merges` + a `session-NN-slug` regex;
+    every session from **S38** on was **squash-merged**, so its newest belief is **S37**. Blind for
+    **7** sessions, and it has already cost a record — `sessions/session-40-summary.md` is **absent**
+    for a merged session. **The S16 failure, inside the S16 remediation.**
+  - The **GT cadence** appears in **0** of `AGENTS.md` / `SESSION-BOOT.md` / `TASK.md`. That is the
+    direct cause of this session's collision: five documents named S45 "the public flip", none
+    computed `45 % 5`.
+  - **S44's only canonical verdict is `REJECT`** → `check_review_attestation` reads `N/A` and passes
+    vacuously → **S44 has no DECISION-003 attestation**, while `STATE.md` recorded it COMPLETE.
+  - The **3-file cap** is breached by **17 of the last 60** commits (S40: **8**) and is declared
+    "Hook-enforced", though squash merges never run a local hook.
+- **The pattern underneath all four:** a check or claim whose **population is defined by prose rather
+  than derived from the thing it governs**. Five instances, three of them checks.
+- **The flip's two gates are no longer ownerless.** `prompts/46-task-public-flip.md` carries **P1**
+  (D4b: `(/|-)Users[-/][a-z]+` in **1001** commit-file pairs across history, **0** in the tree) and
+  **P2** (private vulnerability reporting, 404) as preconditions, with P1's tool choice and a
+  **5-step re-verify order** to be recorded *before* the push. **P1 is irreversible once public.**
 
 ## Next Session
-- **Number:** 45 — **the public flip.** It resolves, in one move: the README `git clone` URL,
-  npm `repository.url` / `homepage`, npm **provenance** (which a private repo cannot generate),
-  a real **`0.4.0`** through the trusted-publisher runway, and **D4b** — the git-history rewrite
-  that removes the home path from every commit reachable from `HEAD` (**irreversible; every
-  recorded SHA moves**).
-- Also open, untouched: the **seven dead docs deps** S43 named (`framer-motion`, `react-icons`,
-  `@tanstack/react-query`, `zod`, `date-fns`, `@tailwindcss/typography`, `tw-animate-css`),
-  `minimumReleaseAgeExclude: stripe-replit-sync` (same species as D5, not an `overrides` entry),
-  `required-crew` (three founder waivers), the vacuous `check_ground_truth_no_code`, the cost
-  gate that greps a heading, disposition **S16**, and the **GTM proof pack** (record the measured
-  **zero** downloads as `t0`; never cite the 304 `@ifelse.codes/core` self-downloads).
+- **Number:** 46 — **the public flip.** `prompts/46-task-public-flip.md`, requirements **F1–F6**:
+  visibility public (F1), the clone URL resolving (F2), npm `repository.url` / `homepage` resolving
+  **without being edited** (F3 — they are already correct and were merely unreachable), `.github/
+  REPO-SETTINGS.md` re-derived (F4), **`0.4.0` + npm provenance released by CI unattended** (F5),
+  and the GTM baseline as `t0` = zero (F6). **Gated on P1 and P2.**
+- **Two founder decisions due at S46's plan:** P1's rewrite tool (`git filter-repo` recommended) and
+  its re-verify order; and P2, which only the founder can change.
+- **Leading S47 candidate — a different story, deliberately not folded into the flip:** the audit's
+  11 findings, chiefly `check_session_coverage`'s blindness, the cadence's absence from `AGENTS.md`,
+  and S44's undisclosed REJECT. Ranked list with severities in
+  `sessions/session-45-ground-truth.md` § *Findings, ranked*. Fixing `verify-closeout.sh` in the same
+  session that makes the repo public would put the public surface and its gates in one unreviewable
+  commit.
 - Open in a **new chat** (one session per chat).
