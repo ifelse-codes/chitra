@@ -384,6 +384,66 @@ before the N1 rule existed. It is not a freeze violation — the rule applies fr
 but "the freeze is clean" is only true for `68662bf..HEAD`, and this map used to say so without
 the qualifier. It says it with the qualifier now.
 
+### A8 — pass 4: a sentence of mine was false when I wrote it, and the same unverified claim lived in five places
+
+Pass 4 of the S44 cold review returned **REJECT** (11 SHIPPED · 3 PARTIAL · 0 NOT-BUILT) and its
+highest finding is the kind no gate can catch: **A5.2's remedy sentence was false at the moment it
+was committed.**
+
+**A8.1 — "pass 3's report is committed" was not.** A5.2 wrote that the remedy for the uncommitted
+pass-1 review was that a later report would be committed. No report was committed: `git log
+--all --diff-filter=A -- sessions/session-44-review.md` was empty, and the gate shipped for
+exactly this purpose said so out loud — `verify-closeout.sh 44` →
+`contract-freshness`: *"no commit in history adds sessions/session-44-review.md — freshness cannot
+be evaluated (fail closed)."* A false claim about my own compliance, in the amendment that
+discloses a compliance failure, is worth more than the failure: it would have made a reader trust
+the N1 machinery on the strength of a sentence with nothing behind it.
+
+**Corrected record, and it is a mechanism rather than a promise:** the review report is committed
+**after** the amendments it is checked against, and the fact to check is
+
+```
+git log --all --diff-filter=A -- sessions/session-44-review.md   # must name a commit
+```
+
+If that command is empty, `contract-freshness` fails closed — which is the behaviour, not a bug.
+The sentence this replaces was unverifiable; the command cannot be.
+
+**A8.2 — the unverified private-channel claim lived in five places, not one.** A7 corrected
+`CODE_OF_CONDUCT.md` and `SECURITY.md`. The claim *"routes private reports through the one private
+channel that reaches maintainers"* — which `gh api
+repos/ifelse-codes/chitra/private-vulnerability-reporting` cannot confirm, since it returns 404 to
+an account without admin access just as it would if the feature were off — also survived in
+`.ai/STATE.md`, `.ai/TASK.md`, `.ai/ROADMAP.md` and `scripts/demo-session-44.sh`. All four now
+name the route as a **route, not a promise**, and point at `.github/REPO-SETTINGS.md` for whether
+it is switched on. A correction that fixes the file a reader is most likely to check, and leaves
+the four others claiming the thing, is a correction that has not happened.
+
+**A8.3 — `.github/REPO-SETTINGS.md` advertised an invariant wider than the gate keeps.** Its
+closing line claimed the gate "reads the two `has_` rows"; it reads **one** row from that file
+(`has_discussions`) plus `blank_issues_enabled` from `config.yml`, and cannot read the
+private-reporting row at all. The file now states exactly what is checked and requires any future
+widening to update that paragraph in the same commit. A recorded fact with a command beside it is
+still a claim; the sentence describing what enforces it is a claim about this repo, and it was
+too big.
+
+**A8.4 — the advisories contact link promised a channel the same repo records as unknown.**
+`.github/ISSUE_TEMPLATE/config.yml` offered `security/advisories/new` with no hedge, so the one
+route a first-time visitor is most likely to click was the one that may 404. It now carries the
+same hedge as the two prose docs, including what to do when the link does not work. This is what
+left requirement 3 PARTIAL in pass 4.
+
+**A8.5 — correction to A7.4.** A7.4 said `909eaa4` rewrote requirement 7's **D4b** row. It
+rewrote the **D4** row; the D4b row was unchanged context. Substance is unaffected — one in-place
+rewrite of requirement 7's decision table and requirement 8's body, before the first cold feed and
+before the N1 rule existed, disclosed rather than smuggled — and the qualifier `68662bf..HEAD` on
+the freeze claim stands, verified independently in pass 4.
+
+**A8.6 — the demo printed the scrub's file count as a literal** under a header that names derived
+counts as derived, and the fidelity map printed a typed gate-run count that was already stale by
+one run. Both now derive: `git show --numstat` on the commit `git log -G` selects, and
+`run-meta.txt` globbed.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder

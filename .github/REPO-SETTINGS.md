@@ -28,5 +28,11 @@ Recorded 2026-10-04 on `session-44-oss-polish`:
 - **Private reporting is not established.** Until that row reads `enabled`, this project has no
   route a reporter can be certain of, and the docs say so instead of inventing one.
 
-Gate: `oss-surface-present` reads the two `has_` rows above and fails if a public doc routes to
-a channel recorded as off.
+## What the gate actually checks — no more
+
+`oss-surface-present` reads exactly two of these facts: the `has_discussions` row above, and
+`blank_issues_enabled` from `.github/ISSUE_TEMPLATE/config.yml` (tracked, so a gate can read it
+directly). It fails when a public doc routes to a channel those two record as off. It does **not**
+read the `private` row, the `has_issues` row, or the private-reporting row — that status is
+`unknown`, and no offline gate can resolve it. Anyone extending this check must widen this
+paragraph in the same commit, or the file will advertise an invariant the gate does not keep.
