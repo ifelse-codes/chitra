@@ -327,6 +327,63 @@ directs the reader to the tracker while blank issues are off — with the patter
 broader than the word "open", because the defective sentence never used it. A sentence that
 only **prohibits** a public issue stays legal; the gate must not punish the right advice.
 
+### A7 — A6's premise was wrong: `blank_issues_enabled: false` does not close the tracker
+
+Pass 3 of the S44 cold review returned **REJECT** again and found that **A6 fixed the defect by
+assuming something untrue**, which is worse than the defect. What I wrote down as fact:
+
+> with blank issues disabled, the issue tracker is not a route that exists for anyone outside
+> the maintainers
+
+Not so. `blank_issues_enabled: false` removes only the **blank** template from the new-issue
+page; the bug and feature forms requirement 3 shipped still accept a report from an outside
+contributor. So the clause built on that premise forbade the one true sentence and permitted the
+two false ones — and the "fix" it drove rerouted both docs to **GitHub Discussions**, which
+`gh api repos/ifelse-codes/chitra --jq .has_discussions` reports as **`false`**. I had moved
+readers from one closed door to another while writing an amendment that called the first one
+closed.
+
+**Verified facts, recorded with the command that re-derives each**, now tracked in
+[`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md) (S44 cold review, pass 3):
+
+| setting | value |
+| --- | --- |
+| `private` | `true` — the flip is S45's job; nothing here is reachable by an outsider yet |
+| `has_issues` | `true` |
+| `blank_issues_enabled` | `false` — forms only, no untemplated issue |
+| `has_discussions` | **`false`** |
+| private vulnerability reporting | **unknown** — the API path returns 404, which is also what a caller without admin access gets, so it cannot distinguish "off" from "not permitted to ask" |
+
+**What ships instead of A6's clause.** The invariant is *no public doc may route to a channel
+the recorded settings say is off*, and `oss-surface-present` now checks two offline facts: with
+blank issues off, a doc that sends the reader to an issue must name a **form**; and while
+`has_discussions` is recorded `false`, no public doc may mention Discussions at all (the setting
+is documented in `REPO-SETTINGS.md`, where it belongs). Both are proven red against the old
+wording and green against the new, in both directions.
+
+**A7.1 — the consequence the docs now state plainly.** Because private reporting is not
+established and the repository publishes no mailbox, this project may have **no private channel**
+after the flip. `SECURITY.md` and `CODE_OF_CONDUCT.md` say that instead of inventing one, and
+give the only honest fallback: a report containing no detail, asking for a private route.
+**Enabling private vulnerability reporting is therefore a pre-flip task for S45**, recorded in
+`.ai/STATE.md` beside D4b — it is a repository setting, not a file this session can change.
+
+**A7.2 — requirement 1's invented-mailbox rule covered only the CoC.** Requirement 1 forbids
+inventing a contact address in `SECURITY.md` too — the file most likely to grow a `security@`
+the day someone wants one. The check now runs on both files.
+
+**A7.3 — the contract's own D4b row cites `main` at `49e1ee2`.** That is the S42 merge as named
+in the S43 records; `main` is now `1b6c17d`. The row above is frozen, so it is corrected here:
+the `.ai/` and `prompts/` records cite `main` **by SHA**, several of them, and any of those
+citations moves in a rewrite. Read the live value with `git rev-parse main`; do not trust a
+citation, including this one.
+
+**A7.4 — disclosed, pre-feed:** `909eaa4` (the gate's first commit) rewrote requirement 7's D4b
+row and requirement 8's body in place, and it did so **before** the first cold review feed and
+before the N1 rule existed. It is not a freeze violation — the rule applies from the first feed —
+but "the freeze is clean" is only true for `68662bf..HEAD`, and this map used to say so without
+the qualifier. It says it with the qualifier now.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder

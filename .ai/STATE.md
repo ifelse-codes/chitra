@@ -69,12 +69,23 @@ session from going public.
 - 🔴 **D4b — the git history still carries the home path.** `main` still matches
   `(/|-)Users[-/][a-z]+`, earliest carrier S10 (the scrub is branch-side only). **Derive, never
   type:** `git rev-list --count HEAD` is how many commits a rewrite moves. **The tree is clean;
-  history is not.** A rewrite changes every commit SHA — `.ai/` cites
-  `main` at `49e1ee2`, PR merge history and every recorded ref move with it — so it is a
-  pre-flip operation for **S45**, not a cleanup commit. **Irreversible once published.**
+  history is not.** A rewrite changes every commit SHA: `.ai/` and `prompts/` cite `main`
+  by SHA in several records (S42's merge `49e1ee2` among them), PR merge history and every
+  recorded ref move with it — derive the current one with `git rev-parse main` rather than
+  trusting any of those citations — so this is a pre-flip operation for **S45**, not a
+  cleanup commit. **Irreversible once published.**
 - 🔴 **The public flip still has no date.** S45 resolves the README `git clone` URL, npm
   `repository.url` / `homepage`, and **npm provenance** (a private repo cannot generate it) in
   one move — and the cheapest close on the trusted-publisher claim is a real **`0.4.0`**.
+- 🔴 **Pre-flip task from the cold review: private vulnerability reporting is not established.**
+  `SECURITY.md` and `CODE_OF_CONDUCT.md` both route confidential reports to GitHub's private
+  reporting, and the settings live outside this repo: no mailbox is published, Discussions are
+  **off** (`has_discussions: false`), and `gh api repos/ifelse-codes/chitra/private-vulnerability-reporting`
+  returns 404 — which is also what a caller without admin access gets, so it cannot distinguish
+  "off" from "not permitted to ask". **Both docs say plainly that the private channel may not
+  exist**, and the settings are recorded with re-derive commands in `.github/REPO-SETTINGS.md`.
+  Enabling it is a repository setting only the founder can change, so it belongs to **S45**
+  beside D4b, not to a cleanup commit.
 - 🟠 **A contract rewrite now has a consequence, including for history.** The D4 scrub edited
   `prompts/10-…` and `prompts/42-…`, which sit in the *prompt half* of `canonical_inputs_sha`,
   so **S10's and S42's recorded `Review-Inputs-SHA` no longer match their contracts' current

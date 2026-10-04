@@ -53,22 +53,24 @@ account, or acting as an appointed representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
 project maintainers **privately** through the channel the reporter already has:
 
-- **For anything that does not need to stay secret**, use GitHub **Discussions** —
-  <https://github.com/ifelse-codes/chitra/discussions>. This repository sets
-  `blank_issues_enabled: false`, so an issue is not a door that exists for anyone outside the
-  maintainers; the bug and feature forms under `.github/ISSUE_TEMPLATE/` are for issues the
-  maintainers file.
+- **For anything that does not need to stay secret**, open a **bug report** or a **feature
+  request** using the forms under `.github/ISSUE_TEMPLATE/`. Those forms are the route: this
+  repository sets `blank_issues_enabled: false`, so an untemplated "new issue" is not available,
+  and not every channel a repository can have is switched on. Which ones are is recorded, with
+  the command that re-derives each, in
+  [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md) — read that before you pick a route.
 - **For anything that does need to stay secret** — harassment, a person's safety, or a
   report about a maintainer — use GitHub's private reporting:
-  **_Security_ → _Report a vulnerability_.** It is the only private channel this repository
-  publishes, it reaches the maintainers directly, and a conduct report sent there is read by
-  the same people who read security reports.
+  **_Security_ → _Report a vulnerability_.** A conduct report sent there is read by the same
+  people who read security reports.
 
 This project publishes no mailbox. That is deliberate: a `conduct@` address nobody monitors
-is worse than no address at all, and a placeholder address is a lie. If you need a private
-route and the Security tab is not available, say so in Discussions and it will be arranged
-before your report is asked for again — your report does not have to be posted publicly
-while you wait.
+is worse than no address at all, and a placeholder address is a lie.
+
+**If the Security tab offers no private reporting, there is no private channel here**, and this
+file will not pretend otherwise. In that case open a **bug report** through the form with nothing
+but "a conduct report is pending, please arrange a private route" — no names, no details — and
+your report will be taken from there. Arranging that route is recorded as a pre-flip task.
 
 All complaints will be reviewed and investigated promptly and fairly. All community leaders
 are obligated to respect the privacy and security of the reporter of any incident.
