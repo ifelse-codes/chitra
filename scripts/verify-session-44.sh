@@ -867,6 +867,13 @@ engines_derived() {
   grep -q "support policy, not a test result" CONTRIBUTING.md \
     || { echo "CONTRIBUTING does not disclose the package floor as policy"; return 1; }
   grep -q "$cnode" CONTRIBUTING.md || { echo "CONTRIBUTING does not state the package floor ($cnode)"; return 1; }
+  # F1 (S44 cold review): README claimed "Requires Node.js 18+" while the repo pins 26,
+  # so the public repo carried two consumer floors at once. The README's own floor must
+  # be the engines floor — same number, not merely not-lower.
+  local rdnode
+  rdnode=$(grep -oE 'Node\.js [0-9]+' README.md | head -1 | grep -oE '[0-9]+')
+  [ -n "$rdnode" ] || { echo "README states no Node.js floor at all"; return 1; }
+  [ "$rdnode" = "$node_v" ] || { echo "README claims Node.js $rdnode+ while engines and ci.yml say >=$node_v — two floors in the public repo"; return 1; }
   if grep -q '"packageManager"' package.json; then
     echo "packageManager was added — pnpm/action-setup already takes version from ci.yml (and would reject both)"; return 1
   fi
@@ -918,6 +925,73 @@ overrides_gone() {
 }
 run_check "overrides-gone" overrides_gone
 
+# req 7 — D1, D2, D3/D6 are ANSWERED, and the answer must be the state of the
+# tree. Only D4 and D5 had a gate until the cold review (N1): four decisions were
+# recorded that no check could contradict, and the one that mattered was FALSE —
+# main still tracks 11 files under playground/ and design-reference/ while the
+# record said the flip publishes neither.
+#
+# Every assertion is run twice: against the working tree (must pass) and against
+# `main` (must FAIL — main still half-tracks both directories and has no
+# '## Git hooks (opt-in)' section). A check that also passed on main would prove
+# nothing about this session.
+founder_decisions_at() {
+  local TREE="${1:-}" d con gi hits=""
+  rd() { if [ -n "$TREE" ]; then git show "$TREE:$1" 2>/dev/null; else cat "$1" 2>/dev/null; fi; }
+  lsat() { if [ -n "$TREE" ]; then git ls-tree -r --name-only "$TREE" -- "$1"; else git ls-files -- "$1"; fi; }
+
+  # D1 = keep all: the six process dirs stay in the index — the closeout's own
+  # check_session_coverage / check_task_ref read them, so losing one is not
+  # cosmetic.
+  for d in .ai sessions prompts .claude reviewer darshan; do
+    [ -n "$(lsat "$d")" ] || { echo "D1 broken: $d is not tracked${TREE:+ at $TREE}"; return 1; }
+  done
+
+  # D2 = documented: CONTRIBUTING must say the hooks are opt-in AND hand over the
+  # one-line install, and .claude/settings.json must still declare its hooks.
+  con=$(rd CONTRIBUTING.md)
+  printf '%s\n' "$con" | grep -q '^## Git hooks (opt-in)' \
+    || { echo "D2 broken: CONTRIBUTING has no '## Git hooks (opt-in)' section${TREE:+ at $TREE}"; return 1; }
+  printf '%s\n' "$con" | grep -q 'git config core.hooksPath .githooks' \
+    || { echo "D2 broken: CONTRIBUTING gives no hooks install line"; return 1; }
+  printf '%s' "$(rd .claude/settings.json)" | grep -q '"hooks"' \
+    || { echo "D2 broken: .claude/settings.json declares no hooks"; return 1; }
+
+  # D3/D6 = ignore: nothing under playground/ or design-reference/ may be in the
+  # index, and .gitignore must ignore both directories WHOLE — the five partial
+  # patterns that were there before are exactly how they ended up half-tracked.
+  for d in playground design-reference; do hits="$hits$(lsat "$d")"; done
+  [ -z "$hits" ] || { echo "D3/D6 broken: still tracked${TREE:+ at $TREE}:"; echo "$hits" | sed 's/^/  /'; return 1; }
+  gi=$(rd .gitignore)
+  for d in design-reference/ playground/; do
+    printf '%s\n' "$gi" | grep -qx "$d" \
+      || { echo "D3/D6 broken: .gitignore has no whole-directory rule '$d'${TREE:+ at $TREE}"; return 1; }
+  done
+  if [ -z "$TREE" ]; then
+    # The live form: git honours an ignore rule only for a file it does not track,
+    # so each probe fails for EITHER half of the bug — tracked, or not ignored.
+    git check-ignore -q design-reference/mudra-chart.html \
+      || { echo "D3/D6 broken: design-reference/mudra-chart.html is not ignored+untracked"; return 1; }
+    git check-ignore -q playground/sre-dashboard/sre-server.ts \
+      || { echo "D3/D6 broken: playground/sre-dashboard/sre-server.ts is not ignored+untracked"; return 1; }
+  fi
+  return 0
+}
+founder_decisions_covered() {
+  founder_decisions_at "" || return 1
+  local out rc=0 hits="" d
+  out=$(founder_decisions_at main 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || { echo "the identical check passes on main, where none of this exists — it proves nothing"; return 1; }
+  # Name BOTH halves main fails, not just the first one to fire: D3/D6 is the
+  # decision THIS session changed, so the counterfactual has to show that one red
+  # too. (Same branch-scoped shape as oss-surface-present: on main after the merge
+  # this gate is historical and no longer run, like every prior session's.)
+  for d in playground design-reference; do hits="$hits$(git ls-tree -r --name-only main -- "$d")"; done
+  [ -n "$hits" ] || { echo "main tracks nothing under playground/ or design-reference/ — nothing here is being changed, so the counterfactual is a claim"; return 1; }
+  echo "counterfactual: RED on main twice over — $(printf '%s' "$out" | head -1); plus $(printf '%s' "$hits" | grep -c .) files still tracked under playground/ or design-reference/"
+}
+run_check "founder-decisions-covered" founder_decisions_covered
+
 # ══════════════════════════════════ S44 · the carried findings (req 9-10)
 
 # req 9 — N1. Extract the PURE core out of the live closeout gate and run it in
@@ -926,10 +1000,14 @@ run_check "overrides-gone" overrides_gone
 # scrub) red, naming a commit which must then be shown to touch the contract.
 freshness_teeth() {
   local body rc=0 out h
-  body=$(awk '/^contract_freshness_core\(\) \{/{f=1} f{print} f&&/^\}/{exit}' scripts/verify-closeout.sh)
+  # Everything between the first PURE helper and check_contract_freshness: the
+  # two helpers plus the core, so clause (b) can be driven directly (S44 N2).
+  body=$(awk '/^contract_freshness_declared_mismatch\(\) \{/{f=1} f && /^check_contract_freshness\(\) \{/{exit} f{print}' scripts/verify-closeout.sh)
   [ -n "$body" ] || { echo "contract_freshness_core not found in scripts/verify-closeout.sh"; return 1; }
   eval "$body"
   type contract_freshness_core >/dev/null 2>&1 || { echo "the extracted body defined nothing"; return 1; }
+  type contract_freshness_declared_change >/dev/null 2>&1 \
+    || { echo "the clause-(b) helper was not extracted"; return 1; }
   out=$(N=43 contract_freshness_core 2>&1) || rc=$?
   [ "$rc" -eq 0 ] || { echo "S43 should be GREEN (contract untouched since its review), got: $out"; return 1; }
   rc=0; out=$(N=42 contract_freshness_core 2>&1) || rc=$?
@@ -941,6 +1019,46 @@ freshness_teeth() {
   git log -1 --format=%H "$h" -- "prompts/42-task-*.md" | grep -q "^$h" \
     || { echo "the commit the check blames does not touch the contract: $h"; return 1; }
   echo "green on S43's untouched contract, red + commit-named on S42's rewritten one ($h)"
+
+  # Clause (b), which clause (a) cannot reach: `first..HEAD` deliberately skips
+  # the commit that ADDS the review, so the case reviewer/SKILL.md's own
+  # "Honest limit" names — a contract edit carried by that very commit — is
+  # defended here alone. It must work in EITHER line order: N2's defect was that
+  # the final hash was matched unanchored, so a Pass-1 line printed first made
+  # the two hashes compare equal and this clause returned 0 where the contract
+  # demands 1. Synthetic reviews, so no historical file is touched.
+  if ! (
+    set -u
+    t=$(mktemp) || { echo "mktemp failed"; exit 1; }
+    trap 'rm -f "$t"' EXIT
+    H1=$(printf '%064d' 1); H2=$(printf '%064d' 2)
+    noamd="prompts/43-task-docs-weight.md"   # really has no amendments section
+    amd="prompts/44-task-oss-polish.md"       # really has one
+    [ -s "$noamd" ] || { echo "$noamd missing"; exit 1; }
+    [ -s "$amd" ]   || { echo "$amd missing"; exit 1; }
+    for v in first last; do
+      if [ "$v" = first ]; then
+        printf '**Review-Inputs-SHA-Pass-1:** %s\n**Review-Inputs-SHA:** %s\n' "$H1" "$H2" > "$t"
+      else
+        printf '**Review-Inputs-SHA:** %s\n**Review-Inputs-SHA-Pass-1:** %s\n' "$H2" "$H1" > "$t"
+      fi
+      rc=0; o=$(contract_freshness_declared_change "$t" "$noamd") || rc=$?
+      [ "$rc" -eq 1 ] || { echo "clause (b) went GREEN with Pass-1 $v and a contract with no amendments (rc=$rc): $o"; exit 1; }
+      printf '%s\n' "$o" | grep -q "no '## Contract amendments' section" \
+        || { echo "clause (b) failed for the wrong reason on Pass-1 $v: $o"; exit 1; }
+    done
+    printf '**Review-Inputs-SHA-Pass-1:** %s\n**Review-Inputs-SHA:** %s\n' "$H1" "$H2" > "$t"
+    rc=0; o=$(contract_freshness_declared_change "$t" "$amd") || rc=$?
+    [ "$rc" -eq 0 ] || { echo "a declared change WITH an amendments section must be accepted, got rc=$rc: $o"; exit 1; }
+    printf '**Review-Inputs-SHA-Pass-1:** %s\n**Review-Inputs-SHA:** %s\n' "$H1" "$H1" > "$t"
+    contract_freshness_declared_change "$t" "$noamd" >/dev/null \
+      || { echo "two identical hashes were read as a declared change"; exit 1; }
+    printf '**Review-Inputs-SHA:** %s\n' "$H1" > "$t"
+    contract_freshness_declared_change "$t" "$noamd" >/dev/null \
+      || { echo "a review with no Pass-1 declaration was read as a declared change"; exit 1; }
+    echo "clause (b): RED with Pass-1 first AND Pass-1 last when no amendments section exists, accepted when one does, green on matching/absent hashes"
+    exit 0
+  ); then return 1; fi
 }
 run_check "contract-freshness-teeth" freshness_teeth
 
@@ -959,7 +1077,8 @@ gate_scope_switch() {
       || { echo "FAST_SKIP names '$s', which is not a check in this gate"; return 1; }
   done
   for s in oss-surface-present coverage-enforced-in-ci engines-derived home-path-scrubbed \
-           overrides-gone contract-freshness-teeth s43-gate-verbatim-goes-red contract-at-head; do
+           overrides-gone founder-decisions-covered contract-freshness-teeth \
+           s43-gate-verbatim-goes-red contract-at-head; do
     if gate_skips fast "$s"; then echo "fast would skip $s, which this session owns"; return 1; fi
   done
   # The timings have to come from a FULL run: fast never runs a check it skips,

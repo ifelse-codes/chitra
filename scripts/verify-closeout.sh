@@ -225,7 +225,14 @@ check_verify_demo_scripts() {
   { [ -f "$D" ] && [ -s "$D" ]; } || missing+=("$D")
 
   if [ "${#missing[@]}" -eq 0 ]; then
-    echo "OK: $V + $D both present and non-empty." >> "$LOG"; ok "$NAME"; return
+    # A4 (S44 cold review M3): requirement 10 says "the closeout still runs full",
+    # which was true only by default — nothing invoked the gate at all. What is
+    # actually enforceable here is the DEFAULT: the switch resolves "" and "full"
+    # to full and rejects anything else, so no value can quietly make the
+    # evidence run cheap.
+    grep -qF 'resolve_scope() { case "${1:-}" in ""|full) echo full' "$V" \
+      || { echo "FAIL: $V no longer defaults VAJRA_GATE_SCOPE to full." >> "$LOG"; bad "$NAME"; return; }
+    echo "OK: $V + $D both present and non-empty; the gate's scope default is full." >> "$LOG"; ok "$NAME"; return
   fi
 
   for m in "${missing[@]}"; do echo "MISSING: $m" >> "$LOG"; done
@@ -410,6 +417,39 @@ check_review_attestation() {
 # PURE on purpose: no ok/bad, no $ARTIFACTS. The S44 gate extracts this body and
 # runs it against another session to prove it can go green AND red — a check only
 # its own author can run is a check nobody can audit.
+# PURE (S44 cold review N2): does the review DECLARE a first-feed inputs hash
+# that differs from the final one? The final hash must be matched with the same
+# ANCHORED pattern `check_review_attestation` uses — an unanchored
+# 'Review-Inputs-SHA' also matches 'Review-Inputs-SHA-Pass-1:', so a review that
+# prints the Pass-1 line FIRST made `final` equal `pass1`, the two compared
+# equal, and clause (b) never fired: it went green exactly where the contract
+# says it must go red. Whether a gate passes must not depend on which of two
+# lines was typed first.
+contract_freshness_declared_mismatch() {
+  local review="${1:-}" pass1 final
+  [ -s "$review" ] || return 1
+  pass1="$(grep -m1 'Review-Inputs-SHA-Pass-1' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
+  final="$(grep -m1 -iE '^[*_[:space:]]*Review-Inputs-SHA[*_[:space:]]*:' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
+  [ -n "$pass1" ] || return 1
+  [ -n "$final" ]  || return 1
+  [ "$pass1" != "$final" ]
+}
+
+# PURE: clause (b) exactly as requirement 9 words it — a declared first-feed
+# change is acceptable only when the contract carries a '## Contract amendments'
+# section that explains it. Returns 0 (fresh) / 1 (stale) and prints why.
+contract_freshness_declared_change() {
+  local review="${1:-}" prompt="${2:-}"
+  contract_freshness_declared_mismatch "$review" || return 0
+  grep -q '^## Contract amendments' "$prompt" 2>/dev/null || {
+    echo "the review declares a first-feed inputs hash that differs from the final one,"
+    echo "but ${prompt:-the contract} has no '## Contract amendments' section explaining the change."
+    echo "A mid-cycle rewrite that is neither appended nor declared is the N1 defect."
+    return 1; }
+  echo "mid-cycle correction declared (Pass-1 != final) and explained by an amendments section"
+  return 0
+}
+
 contract_freshness_core() {
   local n="${N:-}"
   [ -n "$n" ] || { echo "N unresolved"; return 1; }
@@ -437,17 +477,9 @@ contract_freshness_core() {
     echo "  the requirement they failed is never rewritten in place."
     return 1
   fi
-  local pass1 final
-  pass1="$(grep -m1 'Review-Inputs-SHA-Pass-1' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
-  final="$(grep -m1 'Review-Inputs-SHA' "$review" 2>/dev/null | grep -oE '[0-9a-f]{64}' | head -1 || true)"
-  if [ -n "$pass1" ] && [ -n "$final" ] && [ "$pass1" != "$final" ]; then
-    grep -q '^## Contract amendments' "$prompt" || {
-      echo "the review declares a first-feed inputs hash that differs from the final one,"
-      echo "but $prompt has no '## Contract amendments' section explaining the change."
-      echo "A mid-cycle rewrite that is neither appended nor declared is the N1 defect."
-      return 1; }
-    echo "mid-cycle correction declared (Pass-1 != final) and explained by an amendments section"
-  fi
+  # Clause (b), extracted into two PURE functions above so the teeth check can
+  # drive it with synthetic reviews in either line order (S44 cold review N2).
+  contract_freshness_declared_change "$review" "$prompt" || return 1
   echo "contract untouched since the commit that added the review ($first)"
   return 0
 }

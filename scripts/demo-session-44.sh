@@ -80,12 +80,20 @@ if git diff --stat main...HEAD -- pnpm-lock.yaml | grep -q .
 then bad "pnpm-lock.yaml moved — A1 records a zero delta"; else ok "pnpm-lock.yaml byte-identical to main"; fi
 
 case_ "6 · D4 — the personal home path, out of the tracked tree"
+# Derived, never typed (req 13): how many commits a rewrite would move, and
+# whether `main` still carries the path at all — if it does not, D4b is moot.
+N_COMMITS=$(git rev-list --count HEAD)
+PAT='(/|-)Users[-/][a-z]+'
+if git grep -qE "$PAT" main -- . 2>/dev/null; then
+  D4B_CARRIES="main still carries the path, so the rewrite is still required"
+else
+  D4B_CARRIES="main is clean — no history rewrite left to do"
+fi
 printf '  %s15 tracked files carried the founder%s\n' "$D" "$N"
 printf '        %shome path, including the path-encoded spelling in a handoff.%s\n' "$D" "$N"
 printf '        %sOne mechanical commit: every occurrence -> ~ / -home, no line%s\n' "$D" "$N"
-printf '        %sadded or removed. History is D4b: rewriting 565 commits moves%s\n' "$D" "$N"
-printf '        %severy recorded SHA, so it belongs to the flip session.%s\n' "$D" "$N"
-PAT='(/|-)Users[-/][a-z]+'
+printf '        %sadded or removed. History is D4b: rewriting moves every commit%s\n' "$D" "$N"
+printf '        %sreachable from HEAD — %s of them — so it belongs to the flip session.%s\n' "$D" "$N_COMMITS" "$N"
 LEFT=$(git grep -cE "$PAT" -- . 2>/dev/null | wc -l | tr -d ' ')
 FOUND=$(for c in $(git rev-list HEAD); do if git grep -qE "$PAT" "$c" -- . 2>/dev/null; then echo "$c"; break; fi; done)
 N_HITS=$(git grep -cE "$PAT" "$FOUND" -- . 2>/dev/null | awk -F: '{s+=$NF} END {print s+0}')
@@ -164,7 +172,7 @@ row 3  "issue forms + PR template"                       oss-surface-present
 row 4  "CI badge on the workflow that runs"              oss-surface-present
 row 5  "coverage enforced in CI"                         coverage-enforced-in-ci
 row 6  "engines where they are provable"                 engines-derived
-row 7  "D1-D6 answered and recorded"                     overrides-gone home-path-scrubbed
+row 7  "D1-D6 answered and recorded"                     founder-decisions-covered overrides-gone home-path-scrubbed
 row 8  "D4 scrub, provably mechanical"                   home-path-scrubbed
 row 9  "N1: rule + a gate that can go red"               contract-freshness-teeth
 row 10 "§4.9: scope switch, measured"                    gate-scope-switch
@@ -198,8 +206,8 @@ printf '  %-34s %s%s\n' "commits"                 "$(git rev-list --count main..
 
 printf '\n%s%sNot built here — named, so it cannot be smuggled in:%s\n' "$B" "$Y" "$N"
 printf '  %sthe flip%s      S45: README clone URL, npm repository/homepage, provenance, and D4b (the history rewrite).\n' "$D" "$N"
-printf '  %sD4b%s           16 of 565 commits still carry the path; rewriting them moves every recorded SHA.\n' "$D" "$N"
+printf '  %sD4b%s           pending: %s commits reachable from HEAD would move; %s.\n' "$D" "$N" "$N_COMMITS" "$D4B_CARRIES"
 printf '  %sdead deps%s     the seven docs dependencies S43 named but did not remove — a weight session, not this one.\n' "$D" "$N"
-printf '  %sproduct%s       no file under packages/core/src is touched by this session; charts-format-only proves it.\n' "$D" "$N"
+printf '  %sproduct%s       no file under packages/core/src is touched by this session; charts-untouched proves it.\n' "$D" "$N"
 
 printf '\n'
