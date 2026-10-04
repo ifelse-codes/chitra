@@ -84,7 +84,7 @@ MISMATCH`. It asserted *that a number is computable*, which was true, while the 
 not the number any gate computes. **This was the one requirement the whole `-closeout` branch strategy
 exists to serve.**
 
-**Fixed:** re-derived **after** the last attested-set commit → `898b65c3…a43060`, propagated to all six
+**Fixed:** re-derived **after** the last attested-set commit → `2d95c863…3e401`, propagated to all six
 sites; the rule recorded as amendment **A3**; and the ledger's cell **unpinned**, because the ledger is
 the only one of the ten changed files inside the attested preimage — **a file cannot contain its own
 hash.**
@@ -106,7 +106,7 @@ is that stale numbers are the disease.**
 
 | Finding | Fix | Evidence |
 |---|---|---|
-| Stale hash in 6 files | re-derived after the last attested-set commit | `bash scripts/verify-closeout.sh --inputs-sha 45` → `898b65c3…a43060`, re-run after the citing commits and **unchanged** |
+| Stale hash in 6 files | re-derived after the last attested-set commit | `bash scripts/verify-closeout.sh --inputs-sha 45` → `2d95c863…3e401`, re-run after the citing commits and **unchanged** |
 | Ledger cannot hold the hash | cell unpinned; command + rule instead | `GT-REMEDIATIONS.md` row 8 |
 | Cadence probe falsifies itself | probe now names its ref (`git show main:…`) | amendment **A3-2**; `0` at `main`, disclosed as `0/5/4/1` at `HEAD` |
 | Adoption baseline asserted, not run | re-run with commands | **119** lifetime, first non-zero **2026-09-29 = 89** = the `0.3.0` publish day; `core` **318**. Amendment **A2**; **F6** rewritten — `t0` is *119 downloads, none organic* |
