@@ -12,15 +12,15 @@ main...HEAD`) — pass 3 found the typed commit count already stale, in the same
 that had just explained why typed counts rot. **11 deletions** are D3/D6 being made true —
 see *pass 1* below.
 
-## The headline: §4.9's "~60 minutes" does not reproduce — the gate measures ~2–3 minutes
+## The headline: §4.9's "~60 minutes" does not reproduce — run it and read the clock
 
 The carried finding said the gate costs ~60 minutes and needs an opt-out. I built the opt-out
 **and measured**, and the premise was wrong by roughly 20×:
 
 | scope | shape | result | wall clock |
 | --- | --- | --- | --- |
-| `full` (default) | every check (`grep -c '^run_check ' scripts/verify-session-44.sh`; **no number here**) | **all green, exit 0** | **~2–3 min** |
-| `fast` (`VAJRA_GATE_SCOPE=fast`) | the same checks minus the skip list | **all green, exit 0**, the skip list `SKIP` | **~1 min** |
+| `full` (default) | every check (`grep -c '^run_check ' scripts/verify-session-44.sh`; **no number here**) | **all green, exit 0** | **printed by the run** — see `run-meta.txt` |
+| `fast` (`VAJRA_GATE_SCOPE=fast`) | the same checks minus the skip list | **all green, exit 0**, the skip list `SKIP` | **printed by the run** — see `run-meta.txt` |
 
 Neither the check count nor a pass ratio is written down, because both move the moment a check is
 added — and the commit that added pass 7's fix is exactly what falsified the numbers this table
@@ -377,11 +377,9 @@ authorised by the contract because the 3-file atomic cap cannot express it · ga
 `ls -1d .ai/verify/session-44/*/ | grep -v latest | wc -l`, split by scope with
 `grep -ho '^scope=[a-z]*' .ai/verify/session-44/*/run-meta.txt | sort | uniq -c`, and **not typed
 here** — pass 6 found this sentence reproduced from neither command it named — the last of each
-green, both scopes in ~1–3 min (the pass ratios are not typed here; every run prints its own —
-seconds
-vary with load; every run's own figure is in its `run-meta.txt`), with the
-red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
-plan) · npm cost $0.
+green in both scopes (no ratio and no duration typed here — every run prints its own, in its
+`run-meta.txt`), with the red runs left on disk where they can be read · token cost unmeasured
+(billed to the founder's plan) · npm cost $0.
 
 Counts above are as of this map's own commit (the review commit follows it, so the delivery
 total is `git diff --shortstat main...HEAD`, not a number typed here); the +/- line was dropped
