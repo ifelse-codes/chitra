@@ -305,11 +305,11 @@ version used `printf | grep -q`, and under `pipefail` the SIGPIPE made **every**
 with could not run, because an empty `$n` made the rule degenerate.
 
 **Then it stayed broken after I had "proven" it** (**A12.3**), which is the part worth keeping. The
-percentage test was a `case` pattern whose closing paren anchored it to end-of-line, so *"The gate
-measures 73% of its own wall clock"* — the exact sentence the check exists to catch — sailed
-through. And the history-word rule was laundered by the map's own account of what the check used
-to match, which had to name `[0-9]%` to describe the old rule. Both are fixed structurally (a
-regex; a commit-SHA citation as the escape).
+percentage test was a `case` pattern whose closing paren anchored it to end-of-line, so the
+counterfactual sentence quoted here — *"the gate measures <n>% of its own wall clock"* — sailed
+through, at `44d598a`. And the history-word rule was laundered by the map's own account of what
+the check used to match, which had to name the old rule to describe it. Both are fixed
+structurally (a regex; a commit-SHA citation as the escape).
 
 **The pattern across A12.1–A12.3 is the finding:** every one of these rules shipped **green while
 being unable to fail on the sentence it was written for**, and each was caught by re-running a
