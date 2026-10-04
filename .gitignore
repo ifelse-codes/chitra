@@ -28,12 +28,18 @@ coverage/
 .commandcode/
 .freebuff/
 command-code-session-*.html
+# A local status dashboard carrying this machine's absolute paths (found untracked by
+# the S44 cold review, pass 5). Same class as the line above: real local work, never
+# a delivery artifact, and the kind of file that leaks a home path if it is ever
+# `git add`-ed by accident.
+project-status.html
 
-# Untracked design mockups and scratch dashboards. These are real work, not junk,
-# but whether they ship as tracked demos is founder decision D3 — until it is
-# answered they stay local rather than half-tracked.
-design-reference/*.html
-design-reference/*.md
-playground/buffy-dashboard/
-playground/*.html
-playground/field-test-prompt.md
+# Design mockups and scratch dashboards — founder decision D3/D6, answered "ignore"
+# at S44. Until it was answered these were HALF-tracked: the .gitignore rules above
+# covered only some patterns while the 3 mockups and the sre-dashboard subtree sat
+# in the index, so a flip would have published them despite the decision saying they
+# stay local (S44 cold review N1). They are now untracked (files kept on disk) and
+# these two rules cover both directories whole, so "ignore" is the state and not an
+# aspiration. Gate: `founder-decisions-covered` in scripts/verify-session-44.sh.
+design-reference/
+playground/

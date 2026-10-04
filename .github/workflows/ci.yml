@@ -40,8 +40,13 @@ jobs:
       # bump forgot to re-run the generator.
       - name: VERSION in src matches the manifest
         run: node scripts/sync-version.mjs --check
-      - name: Test
-        run: pnpm --filter @ifelse.codes/chitra run test
+      # S44 req. 5: the suite still runs exactly once — but under v8, so the thresholds
+      # in vitest.config.ts (statements 90 / branches 85 / functions 85 / lines 90: the
+      # measured floor set in S41, not an aspiration) can fail the build instead of
+      # sitting in a config nothing ran. `test:coverage` is `vitest run --coverage` —
+      # same runner, same 453 tests, thresholds enforced.
+      - name: Test (coverage, thresholds enforced)
+        run: pnpm --filter @ifelse.codes/chitra run test:coverage
       - name: Typecheck
         run: pnpm --filter @ifelse.codes/chitra run typecheck
       - name: Build dist (ESM + CJS + .d.ts)

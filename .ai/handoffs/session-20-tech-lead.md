@@ -1,7 +1,7 @@
 ---
 role: tech-lead
 session: 20
-agent: claude-code-subagent (unverifiable: no Claude Code project history at /Users/suman/.commandcode/projects/-Users-suman-playground-chitra)
+agent: claude-code-subagent (unverifiable: no Claude Code project history at ~/.commandcode/projects/-home-playground-chitra)
 source-sha: 016ad20cbaf83179583035d441d5da5f250031fd523aa6f6ff55ebe066b933c3
 captured: 2026-09-09T17:40:54Z
 cost_usd: null

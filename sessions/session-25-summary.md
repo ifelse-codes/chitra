@@ -76,7 +76,7 @@ Contract: `prompts/25-task-histogram-mudra.md` (one of the two cold-review
 inputs). Atomic, ≤3 files each:
 
 ```bash
-V=25; cd /Users/suman/playground/chitra && git checkout session-25-histogram-mudra
+V=25; cd ~/playground/chitra && git checkout session-25-histogram-mudra
 git add packages/core/src/charts/histogram.ts packages/core/tests/histogram.test.ts packages/core/README.md && VAJRA_ALLOW_COMMIT=$V git commit -m "S25: lock histogram to reference language"
 git add artifacts/chitra-docs/src/data/charts.ts artifacts/chitra-docs/src/data/ansi-charts.json && VAJRA_ALLOW_COMMIT=$V git commit -m "S25: regenerated docs previews"
 git add scripts/verify-session-25.sh scripts/demo-session-25.sh prompts/25-task-histogram-mudra.md && VAJRA_ALLOW_COMMIT=$V git commit -m "S25: verify + demo + prompt"

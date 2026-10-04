@@ -164,7 +164,7 @@ proves discipline, never fidelity.
 - **The 43 unused shadcn components**, Prettier, the `lint` script pointing at an eslint nobody
   installed → **S43**.
 - **`SECURITY.md`, `CODE_OF_CONDUCT.md`, templates, badges, `engines`** → **S44**.
-- **Founder decisions D1–D6**, including **D4** (the `/Users/suman/…` personal-path scrub) which
+- **Founder decisions D1–D6**, including **D4** (the `~/…` personal-path scrub) which
   is **irreversible once published** → **S44**, before the flip.
 - **The public flip itself** → after S44.
 - **`pnpm-workspace.yaml`'s ~140 lines of `overrides`** for packages not in the dependency graph
