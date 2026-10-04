@@ -96,7 +96,8 @@ if not, they go, and the one-liner becomes true.**
   reformat-only. **Also corrected: Prettier lowered v8 statement/line coverage 96.11 → 94.27
   with no behaviour change** (v8 counts source lines); CONTRIBUTING updated and disclosed.
 - ✅ **Session 44 (S44) — cleanup Batch 4: OSS polish + the founder decisions**
-  (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendment **A1**).
+  (branch `session-44-oss-polish`, contract `prompts/44-task-oss-polish.md` + amendments
+  **A1–A4**).
   **COMPLETE.** 14 requirements: `SECURITY.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1,
   **no invented mailbox** — private reports route through the one channel that reaches the
   maintainers), `.github/ISSUE_TEMPLATE/` (2 forms + `config.yml`), a PR template, a **CI badge**
@@ -104,7 +105,9 @@ if not, they go, and the one-liner becomes true.**
   `core` job (`test:coverage` replaces the plain `Test` step, suite still runs once, no coverage
   service), and **`engines` derived from what `ci.yml` pins** (repo `>=26`/`>=9.12.3`; package
   `>=22` disclosed in CONTRIBUTING as a support policy, not a test result).
-  **The six decisions, answered:** **D1 = A** (publish all ~146 process files), **D2** documented
+  **The six decisions, answered:** **D1 = A** (publish every tracked process file —
+  `git ls-files .ai prompts sessions reviewer .claude darshan | wc -l`, never a typed count),
+  **D2** documented
   in CONTRIBUTING, **D3/D6 = ignore**, **D4 = scrub** (15 files, one mechanical commit, `--no-verify`
   under the contract's authorisation), **D4b = recorded for the flip**, **D5 = all 81 `overrides`
   stripped with a zero-delta lockfile regen**. **N1** closed with a rule in `reviewer/SKILL.md` +

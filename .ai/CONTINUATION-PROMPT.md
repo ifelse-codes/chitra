@@ -6,7 +6,9 @@ branch `session-44-oss-polish` is the work just done.
 
 > **The one thing to carry forward:** the founder decisions are **answered**, and the answers
 > live in the contract, `sessions/session-44-summary.md` and `.ai/STATE.md` — not in a
-> transcript. **D1 = A** (publish all ~146 process files), **D2** documented in CONTRIBUTING,
+> transcript. **D1 = A** (publish every tracked process file — count them with `git ls-files .ai prompts
+> sessions reviewer .claude darshan | wc -l`; do not type the number), **D2** documented in
+> CONTRIBUTING,
 > **D3/D6 = ignore**, **D4 = the tree is scrubbed**, **D4b = history is not, and that is yours
 > to schedule**, **D5 = all 81 `overrides` removed with a zero-delta lockfile**. The product was
 > not touched: **453 green**, and no file under `packages/core/src/` changed.

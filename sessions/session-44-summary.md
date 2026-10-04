@@ -90,9 +90,32 @@ is a legitimate answer. It was the answer. Neither PARTIAL survived reading:
 | **F2** — a typed figure that does not reproduce | "16 of 565 commits" appears in seven places; neither number derives (`461` reachable from `HEAD`, `585` across all refs, `367` whose tree matches, `11` whose diff touches a line) | `3b8ec6f` — **A2** records the real derivations; every surviving site derives instead |
 | **M4** — CI green on the pushed tip, not on HEAD | The branch was one commit ahead of `origin` | pushed before pass 2 |
 
-Pass 2 re-ran the whole review against the corrected diff under a fresh inputs hash. A review
-that cannot return REJECT is not a review, so pass 1's rejection is recorded here rather than
-quietly overwritten.
+Pass 2 re-ran the whole review against the corrected diff under a fresh inputs hash. It also
+returned **REJECT** — see below. A review that cannot return REJECT is not a review, so both
+rejections are recorded here rather than quietly overwritten.
+
+## Cold review, pass 2: **REJECT** again — the fakest green was my own
+
+Pass 2 was given the same cold inputs (contract + delivery diff), the six pass-1 claims to
+verify, and permission to reject. It did, and it was right about something I had just
+finished building:
+
+| finding | what was wrong | fixed in |
+| --- | --- | --- |
+| **the fakest green** (medium) | `gate-scope-switch` printed "*fast removes 86% of this gate's own wall clock*" as a **measured** figure. It was not: it picked the timings file with the most lines and kept the old one **on a tie** — and every full run writes the same number of lines, so the number was frozen at the first full run ever made. The reviewer's own full run measured **73%** while the gate still printed 86% | selection is newest-first and prints its source run; `pick_timings_file` is extracted and driven over a fixture, so "newest wins" is a fact the check can lose on (below) |
+| **the pass-1 review was never committed** (medium) | `contract-freshness` clause (a) resolves the commit that **first added** the review file and fails closed without one — pass 1's report was left untracked, so the N1 rule this session ships had no attested feed for one commit | amendment **A5.2** discloses it; pass 3's report is committed, and every amendment after it is checkable |
+| **req 13 violated by the F2 fix** (medium) | while correcting "16 of 565", four `.ai/` files carried fresh typed counts — "~146 process files" (truth: every tracked process file, `git ls-files … \| wc -l`) and "~30 changed files / ~14 commits" | each site now names the command instead of the number |
+| **`A1`-only leftovers** (low/med) | `.ai/TASK.md` and `.ai/ROADMAP.md` still said the contract carries only **A1**; `SESSION-BOOT.md` was right | both corrected to A1–A4 |
+| **two docs pointed at a closed door** (low/med) | `blank_issues_enabled: false`, yet `SECURITY.md` told a reporter to "say so in a **public** issue" and the CoC sent every non-secret report to an issue — a route that does not exist for anyone outside the maintainers | amended **A6**; both docs route to Discussions/private reporting, and `oss-surface-present` now fails on any doc that sends the reader to the tracker while blank issues are off (the pattern is broader than the word "open", because the defective sentence never used it) |
+| **M4 half-fixed** (low/med) | HEAD was one commit ahead of `origin` when pass 2 looked | pushed |
+| **stale pointer** (low) | `CONTRIBUTING.md` cited `verify-session-43.sh#contributing-coverage-numbers-real`; the live check is in the S44 gate | corrected, with the reason |
+| **phrase-coupled clauses** (low) | two fact-based checks also grep for a disclosure phrase, so rewording a doc can turn a check red while the fact is untouched | the label assertions now say in their message that only the wording moved |
+
+Pass 2 also confirmed, independently: the contract freeze is clean (**0 deletions** in the
+numbered requirements from `68662bf` to HEAD; A1–A4 are genuine appends), the D4 scrub is
+mechanical (15 files, N/N numstat), the N1 gate is green on S43 and red on S42 **naming the
+commit that answers it**, and req 6's derivation facts hold (zero `node:` builtins, zero
+runtime deps, no post-ES2020 syntax).
 
 ## Honest gaps
 
@@ -111,6 +134,11 @@ quietly overwritten.
 - 🟠 **`gate-scope-switch` fails closed without a full run's timings.** It reads the gate's own
   `timings.txt`, which is gitignored local state: a fresh clone gets an instruction, not a
   green. Same class as the `latest` symlinks; disclosed rather than softened.
+- 🟠 **Requirement 3's "routes that actually exist" is still only partly checkable.** The new
+  assertion proves no doc sends a reader to a door the repo has closed — that is a static fact
+  and it is enforced. Whether `https://chitra.iifelse.com` and the npm page resolve is a
+  **network** fact, which no offline gate can own; pass 2 resolved both by hand and the
+  advisories link needs the repo flipped first. Left as a named limit, not claimed as covered.
 - 🟠 **`minimumReleaseAgeExclude: stripe-replit-sync`** is the same species of Replit-scaffold
   cruft D5 removed, but it is not an `overrides` entry, so req 11 did not reach it. Named in
   A1 rather than smuggled in.
