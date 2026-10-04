@@ -137,7 +137,7 @@ if not, they go, and the one-liner becomes true.**
   **The shape underneath all of it: a population defined by prose instead of derived from the thing
   it governs** — five instances, three of them checks. `check_verify_demo_scripts` is the counter-
   example: it reads `N % 5`, declines honestly, passes nothing vacuously.
-  **Closed by the session, not by prose:** `canonical_inputs_sha` is now computable (`40bd7929…`) —
+  **Closed by the session, not by prose:** `canonical_inputs_sha` is now computable (`898b65c3…`) —
   commit the contract on a `-closeout` branch, which is the only commit exemption a NO-CODE session
   has — and the flip's two gates gained an owner.
 - ⬜ **Session 46 (S46) — the public flip.** Contract `prompts/46-task-public-flip.md`, requirements

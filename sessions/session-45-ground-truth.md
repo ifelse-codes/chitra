@@ -337,7 +337,7 @@ it; `DEFERRED` requires reason + expiry or `check_gt_remediations` blocks closeo
 | 8 — cost gate greps a heading | **CONFIRMED**; and the S44 cost line is now demonstrably incomplete | **DEFERRED** → S46 **H2**. expiry 2026-10-31 |
 | 9 — two "hook-enforced"/`true` claims false | **CONFIRMED and worsened**: 8 → **17** of 60 commits; `.session-owner` still gitignored at chat `12` | **DEFERRED** → S46 **E1**. expiry 2026-10-31 |
 | 10 — GT no-code backstop blind | **CONFIRMED** — and this session declined to rely on it (§Method) | **DEFERRED** → S46. expiry 2026-10-31 |
-| 11 — closeout unsatisfiable in NO-CODE | **HALF-CLOSED, by this session.** The `required-crew` half stands; the `review-inputs-attested` half is **closed** — committing the contract on a `-closeout` branch made `canonical_inputs_sha` computable: `40bd7929…3a48ea4` | **DONE** (partial) + **DEFERRED** remainder → S46 |
+| 11 — closeout unsatisfiable in NO-CODE | **HALF-CLOSED, by this session.** The `required-crew` half stands; the `review-inputs-attested` half is **closed** — committing the contract on a `-closeout` branch made `canonical_inputs_sha` computable: `898b65c3…a43060` | **DONE** (partial) + **DEFERRED** remainder → S46 |
 | S40 row 7 (second half) — commit the artifact on a `-closeout` branch | **CLOSED** — this session runs on `session-45-ground-truth-closeout`, which is what `CONSTRAINTS.yaml`'s `ground_truth_commit_exempt_branch_suffixes` exists for | **DONE** |
 
 **Rows closed by this session: 1 partial + 1. Rows re-confirmed: 6.** No row was closed by prose.
