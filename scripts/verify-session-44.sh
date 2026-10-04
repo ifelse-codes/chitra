@@ -21,8 +21,10 @@
 # §4.9 — the gate is expensive. VAJRA_GATE_SCOPE=fast skips ONLY the inherited
 # checks that cost the wall clock (fresh clone, browser QA, docs build, the
 # duplicate suite/coverage runs) and marks them SKIP; every check this session
-# owns still runs. Default is full, closeout runs full, and the elapsed minutes
-# are printed either way. See gate_scope_switch for the measured counterfactual.
+# owns still runs. Default is full — which is what `check_verify_demo_scripts`
+# asserts, since nothing ever *invokes* this script with a scope (A4) — and the
+# elapsed minutes are printed either way. See gate_scope_switch for the measured
+# counterfactual.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -791,37 +793,62 @@ oss_surface_at() {
   echo "$coc" | grep -q "Contributor Covenant" || { echo "not the Contributor Covenant"; return 1; }
   echo "$coc" | grep -q "## Enforcement" || { echo "no enforcement section"; return 1; }
   # A contact nobody owns is worse than no contact — req 2 forbids a placeholder.
-  if echo "$coc" | grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'; then
-    echo "CODE_OF_CONDUCT.md prints an email address this project does not own"; return 1
-  fi
+  # Pass 3 (finding 10): this ran on the CoC only, while requirement 1 forbids an
+  # invented mailbox just as plainly in SECURITY.md — the file most likely to
+  # grow one the day someone wants a security@ route. Both files, one rule.
+  for d in CODE_OF_CONDUCT.md SECURITY.md; do
+    body=$(rd "$d"); [ -n "$body" ] || continue
+    if echo "$body" | grep -qE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'; then
+      echo "$d prints an email address this project does not own"; return 1
+    fi
+  done
   echo "$coc" | grep -qi "private reporting" || { echo "CoC names no private route"; return 1; }
   bug=$(rd .github/ISSUE_TEMPLATE/bug-report.yml); [ -n "$bug" ] || { echo "bug report form missing"; return 1; }
   echo "$bug" | grep -q "label: Reproduction" || { echo "bug form has no reproduction field"; return 1; }
   feat=$(rd .github/ISSUE_TEMPLATE/feature-request.yml); [ -n "$feat" ] || { echo "feature request form missing"; return 1; }
   cfg=$(rd .github/ISSUE_TEMPLATE/config.yml); [ -n "$cfg" ] || { echo "issue template config missing"; return 1; }
   echo "$cfg" | grep -q "blank_issues_enabled: false" || { echo "blank issues are still enabled"; return 1; }
-  # Pass 2 (cold review, finding 11): with blank issues disabled, the issue tracker
-  # is not a route that exists for anyone outside the maintainers — yet SECURITY.md
-  # sent a reporter there ("say so in a **public** issue") and the CoC sent every
-  # non-secret conduct report and every "ask for a private channel" request there
-  # too. A doc that points at a closed door is worse than no route. Offline and
-  # falsifiable: when blank issues are OFF, no public doc may DIRECT a reader to
-  # the tracker. The pattern deliberately covers more than the word "open" — the
-  # defective SECURITY.md sentence never said "open" at all, and a check that
-  # missed it would have been the same fakest-green species as the defect. A
-  # sentence that only PROHIBITS it ("do not open a public issue") must stay legal,
-  # or the gate would punish the right advice.
-  if echo "$cfg" | grep -q "blank_issues_enabled: false"; then
-    for d in SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md README.md; do
-      body=$(rd "$d")
-      [ -n "$body" ] || continue
+  # Pass 2 found the docs pointing at a channel the repo had closed; pass 3 found
+  # that MY fix pointed them at a channel that is also closed, and that the premise
+  # behind the clause was wrong. The truth, recorded with the command that re-derives
+  # it in .github/REPO-SETTINGS.md: `blank_issues_enabled: false` does NOT close the
+  # tracker - it removes only the *blank* template, and the bug/feature forms req 3
+  # shipped still accept an outside report. Discussions, on the other hand, are off.
+  # So the invariant is not "no doc may mention issues", it is "no doc may route to
+  # a channel the recorded settings say is off". Two clauses, both offline:
+  #   (a) with blank issues off, a doc that sends the reader to an issue must name a
+  #       form/template - the reader cannot open an untemplated one;
+  #   (b) if REPO-SETTINGS records has_discussions: false, no public doc may route to
+  #       Discussions.
+  # A sentence that only PROHIBITS a public issue stays legal; the gate must not
+  # punish the right advice.
+  local sset
+  sset=$(rd .github/REPO-SETTINGS.md)
+  [ -n "$sset" ] || { echo ".github/REPO-SETTINGS.md is missing — the routes in the public docs have nothing to be checked against"; return 1; }
+  local blank="off"
+  echo "$cfg" | grep -q "blank_issues_enabled: false" && blank="off"
+  for d in SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md README.md; do
+    body=$(rd "$d")
+    [ -n "$body" ] || continue
+    if [ "$blank" = off ]; then
+      # An issue route is fine as long as it names the form; "open a new issue" is
+      # not, because with blank issues off there is no untemplated new-issue page.
       bad_line=$(echo "$body" \
-        | grep -niE '(open|file|raise|create|start)(ing|s)? (a |an )?(new |public |github |blank )?issue|in a \*\*public\*\* issue|a (public|github) issue|issue asking' \
-        | grep -viE 'do not|don.t|never|cannot|can not|no public issue' || true)
+        | grep -niE '(open|file|raise|create|start)(ing|s)? (a |an )?(new |public |github |blank |untemplated )?issue|in a \*\*public\*\* issue' \
+        | grep -viE 'do not|don.t|never|cannot|can not|no public issue|bug report|feature request|bug form|ISSUE_TEMPLATE|form|mailbox is' || true)
       [ -z "$bad_line" ] \
-        || { echo "$d directs the reader to the issue tracker, but blank_issues_enabled is false:${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
-    done
-  fi
+        || { echo "$d routes the reader to an issue without naming a form, but blank_issues_enabled is false (an untemplated issue cannot be opened):${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
+    fi
+    if echo "$sset" | grep -qE '^\| *`has_discussions` \| *\*\*`false`\*\*'; then
+      # With the channel off, a public doc has no business naming it at all: every
+      # phrasing ("post it in a discussion", "Discussions are off", a bare link) is
+      # either a route to nowhere or noise, and the setting itself is already
+      # recorded where it belongs — .github/REPO-SETTINGS.md.
+      bad_line=$(echo "$body" | grep -niE 'discussion' || true)
+      [ -z "$bad_line" ] \
+        || { echo "$d mentions Discussions, which .github/REPO-SETTINGS.md records as has_discussions: false:${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
+    fi
+  done
   pr=$(rd .github/PULL_REQUEST_TEMPLATE.md); [ -n "$pr" ] || { echo "PR template missing"; return 1; }
   readme=$(rd README.md); [ -n "$readme" ] || { echo "README missing"; return 1; }
   urls=$(echo "$readme" | grep -oE 'actions/workflows/[A-Za-z0-9_.-]+\.yml' | LC_ALL=C sort -u)
@@ -1173,10 +1200,11 @@ gate_scope_switch() {
   local fx="$ARTIFACTS/scope-selftest" got d want skip1 k
   rm -rf "$fx"; mkdir -p "$fx"/{20000101T000000Z,20100101T000000Z,20100101T000001Z,20100101T000002Z,latest}
   # Two COMPLETE full runs with the SAME line count — the exact tie that froze the
-  # figure at the oldest one — plus a newer fast-only run and a half-written full
-  # run, neither of which may be priced, plus a `latest` directory, which is not a
-  # run at all. Every file must contain a check `fast` would skip, or nothing
-  # qualifies and the fixture proves nothing.
+  # figure at the oldest one — plus, newer than both, a run that prices nothing and a
+  # half-written one, neither of which may be used, plus a `latest` directory, which is
+  # not a run at all. Each of the four rejections is exercised by its own guard; pass 3
+  # noted that two of them were previously caught by the completeness test instead, so
+  # the message named guards the fixture never reached.
   want=$(grep -c '^run_check ' "$0"); set -- $FAST_SKIP; skip1="$1"
   for d in 20000101T000000Z 20100101T000000Z; do
     : > "$fx/$d/timings.txt"
@@ -1186,12 +1214,15 @@ gate_scope_switch() {
     done
   done
   head -3 "$fx/20100101T000000Z/timings.txt" > "$fx/20100101T000002Z/timings.txt"
-  printf 'core-tests 7\nprettier-adopted 7\n' > "$fx/20100101T000001Z/timings.txt"
+  # 20100101T000001Z: COMPLETE length but no fast-skipped check in it — a fast run
+  # can never be that long, but the guard that rejects it is the "prices nothing"
+  # one, and the fixture should exercise that guard rather than the completeness one.
+  { local k2=0; while [ "$k2" -lt "$want" ]; do printf 'core-tests 1\n'; k2=$((k2+1)); done; } > "$fx/20100101T000001Z/timings.txt"
   : > "$fx/latest/timings.txt"
   got=$(pick_timings_file "$fx" 2>/dev/null || true)
   case "$got" in
     */20100101T000000Z/timings.txt) : ;;
-    *) echo "selection is wrong: got '${got:-<none>}' — a tie must take the NEWEST COMPLETE full run, and a fast-only, half-written or latest/ file must be passed over"; rm -rf "$fx"; return 1 ;;
+    *) echo "selection is wrong: got '${got:-<none>}' — expected the NEWEST COMPLETE run that prices the skip list; a file that prices nothing, is half-written, or sits under latest/ must be passed over"; rm -rf "$fx"; return 1 ;;
   esac
   rm -rf "$fx"
   tf=$(pick_timings_file || true)

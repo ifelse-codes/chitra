@@ -39,15 +39,20 @@ Please include:
 2. a reproduction — a short script that triggers it is worth more than a description;
 3. what you expected and what happened.
 
-If private reporting is not enabled on this repository, the maintainers have not turned it
-on, and there is no second private channel to fall back on: this project publishes no
-mailbox, and `.github/ISSUE_TEMPLATE/config.yml` sets `blank_issues_enabled: false`, so a
-visitor cannot open an issue either. That is a real gap in this project's configuration.
+If private reporting is **not** enabled on this repository, this project has **no private
+channel**: it publishes no mailbox, no other channel a repository can offer is switched on, and
+the issue tracker is public once the repository is. None of those is acceptable for an exploit,
+so say so plainly rather than inventing a route.
 
-Keep the report off the public record anyway. A GitHub **discussion** reaches the
-maintainers without being an issue and without publishing a vulnerability notice — use
-<https://github.com/ifelse-codes/chitra/discussions> if that page exists, and if it does
-not, wait for a channel to be opened rather than posting the details publicly.
+**What to do instead:** open a **bug report** through the form under
+`.github/ISSUE_TEMPLATE/` with nothing but the statement that a security report is pending and
+a request for a private channel — no version, no reproduction, no detail that would let anyone
+else exploit it. The report is read before anything is asked for again, and enabling private
+reporting is a pre-flip task already recorded in `.ai/STATE.md`.
+
+The repository settings this depends on are recorded, with the command that re-derives each,
+in [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md). Check them before trusting a route
+in this file.
 
 **Please do not open a public issue for a suspected vulnerability.**
 
