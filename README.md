@@ -77,7 +77,9 @@ git clone https://github.com/ifelse-codes/chitra.git
 cd chitra && pnpm install && pnpm --filter @ifelse.codes/chitra build
 ```
 
-Requires Node.js 18+ and any Unicode-capable terminal.
+Requires Node.js 26+ and any Unicode-capable terminal — the repo's `engines` floor and
+what CI runs. CONTRIBUTING records the published package's own support policy and which
+of the two numbers is measured.
 
 ## Quickstart
 

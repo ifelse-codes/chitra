@@ -211,6 +211,61 @@ and that *is* the evidence that this session regenerated it and nothing moved.
 stripe-replit-sync` is the same species of Replit-scaffold cruft but is not an `overrides`
 entry, so requirement 11 does not reach it. Named here rather than smuggled in.
 
+### A2 — requirement 7, D4b: the "16 of 565" figure was typed and does not reproduce
+
+Named by the S44 cold review **F2**. The D4b row above carries two counts nobody can
+re-derive. Measured on this branch:
+
+| derivation | value |
+| --- | --- |
+| `git rev-list --count HEAD` — commits a rewrite would move | **461** |
+| `git rev-list --count --all` | **585** |
+| commits whose **tree** matches `(/\|-)Users[-/][a-z]+` | **367 of 461** |
+| commits whose **diff** touches a matching line (`git log -G`) | **11 of 461** |
+
+"565" is `--all` minus this branch's commits as they stood at plan time, which is why it
+drifted; "16" has no derivation at all. The row's other claim — **earliest from S10** — is
+true: `45cd37e`, "docs(s10): session prompt — reference-lock the line chart".
+
+**Corrected record:** D4b is still pending; a rewrite moves every commit reachable from
+`HEAD`; `main` still carries the path, so the rewrite is still required; the earliest
+carrier is `45cd37e` (S10). The counts are derived where they are used —
+`scripts/demo-session-44.sh` prints them from git instead of repeating literals — because
+requirement 13 says surviving counts are derived, not typed. The row above is not
+rewritten; that is the point of this section.
+
+### A3 — requirement 13 vs requirement 8: the scrub's `sessions/` edits
+
+Named by the S44 cold review **M1**. Requirement 13 says "the frozen `sessions/` and old
+`prompts/` are not edited"; requirement 8 mandates scrubbing "every live occurrence".
+Read literally they contradict. Requirement 8 won — it is the one with a check — and its
+disclosed-consequence paragraph names only the two `prompts/` files. It also edits
+**five** session records, each a one-for-one path substitution, all inside `6024e0d`:
+`sessions/session-{25,26,41,42}-summary.md` and `sessions/session-40-review.md`.
+
+Recorded so the omission is a disclosure and not a discovery. No gate re-reads those
+bytes: `check_review_attestation` is `$N`-scoped and the ledger hashes the recorded
+attestation string, not the file.
+
+### A4 — requirement 10's own description: one clone install, and no code path runs the gate
+
+Two phrases in requirement 10 are not what the gate does (S44 cold review **M2**, **M3**):
+
+- **"the two clone installs"** — this gate contains exactly **one** `git clone`
+  (`fresh-clone-build-no-env`). The other clone sites sit in
+  `verify-session-41/42/43.sh`, which it does not invoke: `s39-suite-still-green` runs
+  `verify-session-39.sh`, which has no clone. The skip list itself is real, measured and
+  correct; "two" was not.
+- **"the closeout still runs `full`"** — `verify-closeout.sh` never invokes the gate. It
+  asserts the two scripts exist (`check_verify_demo_scripts`), so no code path could run
+  them with `fast`. The sentence was true by default only. What is enforced: the default
+  is `full`, `resolve_scope` rejects anything else, and `gate-scope-switch` asserts both —
+  so `VAJRA_GATE_SCOPE=fast` is not set anywhere in the repo.
+
+Neither changes what ships: the skip list is priced from measured per-check timings and
+the gate prints its own wall clock in both scopes. Requirement 10's text stands and is
+corrected here.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder
