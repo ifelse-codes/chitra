@@ -40,8 +40,14 @@ Please include:
 3. what you expected and what happened.
 
 If private reporting is not enabled on this repository, the maintainers have not turned it
-on — say so in a **public** issue and it will be treated as a bug in the project's own
-configuration, not as an invalid report.
+on, and there is no second private channel to fall back on: this project publishes no
+mailbox, and `.github/ISSUE_TEMPLATE/config.yml` sets `blank_issues_enabled: false`, so a
+visitor cannot open an issue either. That is a real gap in this project's configuration.
+
+Keep the report off the public record anyway. A GitHub **discussion** reaches the
+maintainers without being an issue and without publishing a vulnerability notice — use
+<https://github.com/ifelse-codes/chitra/discussions> if that page exists, and if it does
+not, wait for a channel to be opened rather than posting the details publicly.
 
 **Please do not open a public issue for a suspected vulnerability.**
 

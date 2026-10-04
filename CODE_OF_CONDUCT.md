@@ -53,7 +53,11 @@ account, or acting as an appointed representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
 project maintainers **privately** through the channel the reporter already has:
 
-- **For anything that does not need to stay secret**, open a GitHub issue.
+- **For anything that does not need to stay secret**, use GitHub **Discussions** —
+  <https://github.com/ifelse-codes/chitra/discussions>. This repository sets
+  `blank_issues_enabled: false`, so an issue is not a door that exists for anyone outside the
+  maintainers; the bug and feature forms under `.github/ISSUE_TEMPLATE/` are for issues the
+  maintainers file.
 - **For anything that does need to stay secret** — harassment, a person's safety, or a
   report about a maintainer — use GitHub's private reporting:
   **_Security_ → _Report a vulnerability_.** It is the only private channel this repository
@@ -62,8 +66,9 @@ project maintainers **privately** through the channel the reporter already has:
 
 This project publishes no mailbox. That is deliberate: a `conduct@` address nobody monitors
 is worse than no address at all, and a placeholder address is a lie. If you need a private
-route and the Security tab is not available, open an issue asking for one and it will be
-arranged before your report is asked for again.
+route and the Security tab is not available, say so in Discussions and it will be arranged
+before your report is asked for again — your report does not have to be posted publicly
+while you wait.
 
 All complaints will be reviewed and investigated promptly and fairly. All community leaders
 are obligated to respect the privacy and security of the reporter of any incident.
