@@ -20,13 +20,17 @@ The carried finding said the gate costs ~60 minutes and needs an opt-out. I buil
 | `full` (default) | 48 | **48 PASS, exit 0** | **~2–3 min** |
 | `fast` (`VAJRA_GATE_SCOPE=fast`) | 42 | **42 PASS, exit 0**, 6 `SKIP` | **~1 min** |
 
-The skip list's own price, read out of the gate's per-check timings and printed by
-`gate-scope-switch` itself, and it is **not** quoted here as a number or a range: across the full
-runs in this session's artifacts it has printed values from **60% to 87%**, because the
-denominator is wall clock on a loaded machine. Every run's own figure is in its
-`.ai/verify/session-44/<timestamp>/gate-scope-switch.log`, and the check prints which run it
-priced. Pass 5 rejected an earlier version of this sentence for quoting `71–80%` — a range is
-still a claim about runs nobody looked at.
+The skip list's own price is read out of the gate's per-check timings and printed by
+`gate-scope-switch` itself, which prints **no figure here** — not a number and not a range.
+Pass 5 rejected a range quoted from the artifacts, and pass 6 rejected the replacement for
+typing a wider range in the very sentence that promised not to: the share moves run to run, and
+every run's own number is in its own `.ai/verify/session-44/<timestamp>/gate-scope-switch.log`
+next to the run directory it priced. Read it there.
+
+One correction pass 6 forced, about what that share is a share *of*: the denominator is the sum
+of the gate's **measured per-check seconds**, not the wall clock it prints at the end — setup and
+the summary rewrite are in neither. Those seconds are still wall-clock measurements, so the share
+varies with machine load; that is why it is quoted nowhere.
 
 The first version of that line said **86%** and this map repeated it as a measured fact for two
 commits. It was not: the selection kept the **oldest** full run on a tie, so the percentage was
@@ -120,7 +124,7 @@ finished building:
 | **the fakest green** (medium) | `gate-scope-switch` printed "*fast removes 86% of this gate's own wall clock*" as a **measured** figure. It was not: it picked the timings file with the most lines and kept the old one **on a tie** — and every full run writes the same number of lines, so the number was frozen at the first full run ever made. The reviewer's own full run measured **73%** while the gate still printed 86% | selection is newest-first and prints its source run; `pick_timings_file` is extracted and driven over a fixture, so "newest wins" is a fact the check can lose on (below) |
 | **the pass-1 review was never committed** (medium) | `contract-freshness` clause (a) resolves the commit that **first added** the review file and fails closed without one — pass 1's report was left untracked, so the N1 rule this session ships had no attested feed for one commit | amendment **A5.2** discloses it. Its own remedy sentence was written before the fact and was **false when written** — pass 4 caught that, and the correction is **A8.1**: the report is committed *after* the amendments it is checked against, and the way to verify it is `git log --diff-filter=A -- sessions/session-44-review.md`, not a sentence in this map |
 | **req 13 violated by the F2 fix** (medium) | while correcting "16 of 565", four `.ai/` files carried fresh typed counts — "~146 process files" (truth: every tracked process file, `git ls-files … \| wc -l`) and "~30 changed files / ~14 commits" | each site now names the command instead of the number |
-| **`A1`-only leftovers** (low/med) | `.ai/TASK.md` and `.ai/ROADMAP.md` still said the contract carries only **A1**; `SESSION-BOOT.md` was right | corrected — and **again** after pass 3, which found two files had been left at A1–A4 while the contract was already at A1–A7. They now read **A1…A8**, and the last amendment is A8, which is the only way that stays true |
+| **`A1`-only leftovers** (low/med) | `.ai/TASK.md` and `.ai/ROADMAP.md` still said the contract carries only **A1**; `SESSION-BOOT.md` was right | corrected — and **again** after pass 3, which found two files had been left at A1–A4 while the contract was already at A1–A7. They now name the list up to the last amendment — and pass 5 retracted my claim that any phrasing of it "stays true": it stays right because each pass re-checks it |
 | **two docs pointed at a closed door** (low/med) | `blank_issues_enabled: false`, yet `SECURITY.md` told a reporter to "say so in a **public** issue" and the CoC sent every non-secret report to an issue — a route that does not exist for anyone outside the maintainers | amended **A6**; both docs route to Discussions/private reporting, and `oss-surface-present` now fails on any doc that sends the reader to the tracker while blank issues are off (the pattern is broader than the word "open", because the defective sentence never used it) |
 | **M4 half-fixed** (low/med) | HEAD was one commit ahead of `origin` when pass 2 looked | pushed |
 | **stale pointer** (low) | `CONTRIBUTING.md` cited `verify-session-43.sh#contributing-coverage-numbers-real`; the live check is in the S44 gate | corrected, with the reason |
@@ -172,7 +176,7 @@ fails the new fixture** and that the live figure moved 86% → 71% and names its
 | **an invariant wider than the gate** (med) | `REPO-SETTINGS.md` claimed the gate "reads the two `has_` rows"; it reads one, plus `blank_issues_enabled` from `config.yml` | **A8.3** — the file states exactly what is enforced and requires future widenings to update that paragraph in the same commit |
 | **the route a visitor clicks first** (med) | the advisories contact link offered `security/advisories/new` with no hedge — the one link that may 404, and the reason req 3 came back PARTIAL | **A8.4** — it carries the same hedge as the docs, including what to do when it fails |
 | **typed counts again** (med/low) | the map's gate-run count was stale by one run; the demo printed `15 tracked files` as a literal under a header naming derived counts | **A8.6** — both derive: `run-meta.txt` globbed, `git show --numstat` on the commit `git log -G` selects |
-| **the amendment list going stale** (med) | two files still said the contract carries **A1–A4** when it carried A1–A7 | **A8** — all three now read **A1…A8**, with the last amendment being A8, which is the only way that stays true |
+| **the amendment list going stale** (med) | two files still said the contract carries **A1–A4** when it carried A1–A7 | **A8** — all three name the list up to the last amendment. Pass 5 retracted my "the only way that stays true" (see **A9.4**): no phrasing stays true by itself, the list stays right because each pass re-checks it |
 
 Pass 4 also re-derived the settings itself (`has_discussions: false` and the two others match the
 record) and found **A7.4's D4b/D4 slip**, corrected in **A8.5**.
@@ -205,6 +209,31 @@ settings say is off") while the code looped over **four filenames** — and
   **A9**; a pass that demands A10 leaves the map's summary of the amendment list stale again —
   which is the defect it has now been caught for twice, and the reason the list appears in three
   `.ai/` files that each pass re-checks rather than in one place that nobody re-reads.
+
+## Cold review, pass 6: **REJECT** — 13 SHIPPED · 1 PARTIAL, and every finding in the honesty layer
+
+The first pass to find **no new work at all**. All three material findings are about how this
+session describes itself — which is where every remaining defect now lives.
+
+| finding | what was wrong | fixed in |
+| --- | --- | --- |
+| **the remedy was false in the sentence stating it** (high, req 10) | **A9.5** promised the map would quote no figure or range; the map typed `60% to 87%` and `(60–87% observed)` — the second **inside the sentence denying the practice**. It also misdescribed the denominator: the share is over the **sum of measured per-check seconds**, not the gate's printed wall clock, as the check's own comment says | **A10.1** — no figure and no range appears anywhere; the denominator is stated correctly; and the rule added: *a remedy sentence is subject to the rule it announces* — "we no longer print X" is a printed claim about X, and when it fails, the fix is to delete the number, not widen it |
+| **a count that reproduced from neither command it named** (med, req 13) | "13 fast + full runs" sat beside two commands that today print different numbers in both directions; A8.6 had claimed this count was fixed | **A10.2** — the commands stay, the number goes |
+| **the unhedged claim of resolution** (med, reqs 3 + 13) | `STATE.md`, `TASK.md` and the demo still called `config.yml`'s three contact links ones that "resolve", while the settings record the advisories route as **unknown**. A9.1 swept the *promise* out of six files and missed the *claim of resolution* in three more | **A10.3** — all three name two links resolved by hand and the third hedged |
+
+**A10.4** takes pass 6's seven nits rather than deferring them: the route clause's verb list now
+covers `report`/`submit`/`log`/`post`/`drop`/`leave`; the scope comment names the one tracked file
+deliberately excluded (the PR template) and says what must happen if it ever names a route;
+`REPO-SETTINGS.md` lists all three clauses *and what none of them checks*; a comment claiming
+requirements `1..10` while the code compared `1..14` now says so and notes the code was right;
+the `core-tests` count proxy carries a comment saying what it really is.
+
+Pass 6 also independently confirmed — and that is worth more than another fix — that the freeze is
+append-only from `68662bf`, A9.1's three claims are true at HEAD, all three route clauses go red
+on wording a reader would plausibly write, pass 2's fixture genuinely rejects the pre-fix
+selection logic, the settings record matches live `gh api`, the untracked-home-path class is
+closed, and M4 holds. It ran the gate (48/48 full in 123s; 42/42 fast in 25s), the suite (453/453
+in 23 files) and the closeout.
 
 ## Honest gaps
 
@@ -258,9 +287,11 @@ untracked) · **0** product-code changes · **0** new product tests (453
 stays 453) · **0** lockfile changes (the D5 regen produced an empty diff — recorded as A1) ·
 **0** releases · **0** npm secrets · **0** new recurring infra (coverage rides the existing
 `core` job; no coverage service) · **1** `--no-verify` commit for the 15-file mechanical scrub,
-authorised by the contract because the 3-file atomic cap cannot express it · gate runs: **13
-fast + full runs**, counted with `ls -1d .ai/verify/session-44/*/ | grep -v latest | wc -l` and
-`grep -ho '^scope=[a-z]*' .ai/verify/session-44/*/run-meta.txt | sort | uniq -c` — the last of each green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
+authorised by the contract because the 3-file atomic cap cannot express it · gate runs: counted by
+`ls -1d .ai/verify/session-44/*/ | grep -v latest | wc -l`, split by scope with
+`grep -ho '^scope=[a-z]*' .ai/verify/session-44/*/run-meta.txt | sort | uniq -c`, and **not typed
+here** — pass 6 found this sentence reproduced from neither command it named — the last of each
+green, **42/42** in ~1 min and **48/48** in ~2–3 min (seconds
 vary with load; every run's own figure is in its `run-meta.txt`), with the
 red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
 plan) · npm cost $0.

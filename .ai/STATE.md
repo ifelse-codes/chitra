@@ -13,7 +13,9 @@ session from going public.
 - **The OSS surface exists and every part of it can be checked.** `SECURITY.md` (supported
   versions, private disclosure route, explicit no-SLA / no-bounty / latest-only policy, release
   pipeline in scope), `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1 + enforcement ladder),
-  two issue forms plus `config.yml` (blank issues off, three contact links that resolve), a PR
+  two issue forms plus `config.yml` (blank issues off, three contact links — the docs and npm
+  links resolve; the advisories one is hedged in the file itself, because
+  `.github/REPO-SETTINGS.md` records that route's status as **unknown**), a PR
   template, and a **CI badge whose URL is read out of the README and matched against a file that
   must exist** — the same assertion run against `main` fails, which is the counterfactual.
 - **No invented contact address anywhere.** The project publishes no mailbox, so the CoC says
