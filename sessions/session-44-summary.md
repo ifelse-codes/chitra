@@ -138,7 +138,8 @@ stays 453) · **0** lockfile changes (the D5 regen produced an empty diff — re
 `core` job; no coverage service) · **1** `--no-verify` commit for the 15-file mechanical scrub,
 authorised by the contract because the 3-file atomic cap cannot express it · gate runs: **8
 fast + 8 full + 1 untimed**, a count read out of `.ai/verify/session-44/*/run-meta.txt` rather
-than remembered — the last of each green, **42/42 in 27s** and **48/48 in 2m17s**, with the
+than remembered — the last of each green, **42/42** in ~27s and **48/48** in ~2m15s (seconds
+vary with load; every run's own figure is in its `run-meta.txt`), with the
 red runs left on disk where they can be read · token cost unmeasured (billed to the founder's
 plan) · npm cost $0.
 
