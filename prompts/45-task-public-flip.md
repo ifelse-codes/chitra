@@ -189,10 +189,74 @@ leaves no trace in the tree, so a flip with no recorded `before` fails** — oth
 
 ## Contract amendments
 
-_None yet. Corrections are **appended here**, numbered `A1`, `A2`, …, each naming the requirement it
-touches and the evidence that forced it. The requirement's own text is never rewritten in place — a
-correction that rewrites the requirement it failed is the defect, not the fix (`reviewer/SKILL.md`, N1;
-enforced by `contract_freshness` in `scripts/verify-closeout.sh`)._
+### A1 — requirement 1: `CONSTRAINTS.yaml` lists **two** constitution questions, not three
+
+Requirement 1 says "the **three** constitution questions from `CONSTRAINTS.yaml`", and this
+contract repeats "three" in its *Why this session is an audit* section. The file lists **two**:
+
+```
+$ sed -n '67,71p' .ai/CONSTRAINTS.yaml
+  constitution_questions:
+    - Is any rule now blocking the vision instead of protecting it?
+    - Did this audit's own mechanism have a blind spot? (meta-check)
+```
+
+The requirement's own text is left standing. What the audit does instead is disclosed: §F answers both
+of the file's questions and then adds a third it marks **`(implied)`** — *is the cadence's absence
+from `AGENTS.md` a rule or an oversight?* That question is not in `CONSTRAINTS.yaml`, and it is the
+one that produced the session's second-ranked finding, so dropping it would lose the finding's
+reasoning. **The defect the reviewer named is real — the contract's "three" was never derived from
+the file it cites — and the honest repair is a correction that names it, not a silent resolution.**
+
+### A2 — requirements 3 and 6: the session's own evidentiary bar, broken by the session
+
+Requirement 3 sets the bar: *a finding whose number cannot be re-derived from the command printed
+beside it is not a finding.* The cold review found three places where this session did the thing it
+audited:
+
+1. **"27 probes" has no population.** Only **8** probe labels (`P6 P7 P12 P13 P20 P23 P28 P30`) exist
+   in the artifact; `P1`/`P2` are preconditions, not probes, and two of the eight are retired. Nothing
+   derives 27. This is §I's own thesis — *a population defined by prose* — committed in the same file.
+2. **The cadence probe reads `0` at `main` and `0 / 5 / 4 / 1` at `HEAD`**, because the finding was
+   copied into `SESSION-BOOT.md` and `TASK.md`, which are two of the three files it measures. The
+   finding reproduces its own disease one layer down.
+3. **The adoption-baseline re-probe was asserted, not run — and both halves are false.**
+   `@ifelse.codes/chitra` is **not** unindexed: `119` lifetime downloads, first non-zero **2026-09-29
+   (89)** — the same day `0.3.0` was published (`npm view … time` → `2026-09-29T13:30:46.739Z`).
+   `@ifelse.codes/core` is **318** lifetime, not 304. **This is the finding that matters**, because it
+   hands S46's **F6** a falsified premise ("`t0` = the measured zero").
+
+**What survives, and why the correction is not a retreat:** the *shape* argument is untouched and in
+fact strengthened. All **119** land inside the **6-day window starting on the publish day**, so they
+are release-runner and founder shaped — exactly what `STATE.md` always said about `core`'s 304. So
+**"never cite these as traction" holds**, while **"the baseline is zero" does not**. F6's `t0` is
+corrected from *zero* to **119 downloads, none organic**, with the deriving command attached.
+
+### A3 — requirements 9 and 11: a derived figure must be re-derived after the last commit that changes its population
+
+This session published `canonical_inputs_sha` = `40bd7929…3a48ea4` in **six** files, from the commit
+where the attested diff was still **empty**. The correct value was `5b5664d2…cfe326` from the moment
+`.ai/GT-REMEDIATIONS.md` landed. `check_review_attestation` compares with **exact string equality**, so
+an ACCEPT carrying the published figure would read `BLOCK: attestation MISMATCH`.
+
+**The rule the failure teaches, and the reason this amendment exists rather than a fix:** a derived
+figure is a function of a *population*, and publishing it inside the same session that keeps changing
+that population guarantees staleness. So: **compute it after the last commit that can move it, never
+before — and treat "I derived this once" as a defect, not a method.**
+
+Two disclosures the same inspection forces, because the hash's own exclusions are narrower than a
+reader would assume:
+
+- **The attested diff excludes nearly the whole delivery.** `canonical_inputs_sha` excludes
+  `sessions/`, `prompts/`, `.ai/STATE.md`, `.ai/SESSION-BOOT.md`, `.ai/SESSION`, `.ai/TASK.md`,
+  `.ai/ROADMAP.md`, `.ai/KNOWLEDGE.md`, `.ai/verify`, `.ai/.session-owner`. Of this session's ten
+  changed files, **only `.ai/GT-REMEDIATIONS.md` is inside the attestation.** The audit artifact, the
+  S46 carry-forward, `ROADMAP`, `STATE`, `KNOWLEDGE`, `SESSION`, `SESSION-BOOT` and `TASK` are all
+  outside it. DECISION-003 binds the contract to the ledger, not to the delivery.
+- **Consequently the hash is stable against the last two commits.** The summary and the review both
+  live in `sessions/`, which is excluded — so the figure can be computed once, after the final
+  non-`sessions/` commit, and will still verify at closeout. That is a property of the exclusions, and
+  it is stated here so the next session does not have to rediscover it.
 
 ---
 

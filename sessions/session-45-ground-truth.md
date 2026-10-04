@@ -21,8 +21,14 @@ Every finding below is a **probe**: a command, its live output, and the output t
 The bar S40 set and this session holds: **a finding whose number cannot be re-derived from the command
 printed beside it is not a finding.**
 
-**27 probes run, 3 retired.** Retired probes are listed, because a retired probe that is quietly
-dropped is how a count becomes a fiction:
+**The probe population, stated so it can be counted.** This artifact carries **6 numbered probes** —
+**P12, P13, P20, P23, P28, P30** — plus **2 retired** ones (**P6**, **P7**). `P1`/`P2` are
+*preconditions*, not probes. The session ran roughly **19 further verification commands** that are
+**not individually labelled** — which is itself the defect the cold review caught: an earlier draft of
+this line read *"27 probes, 3 retired"*, and **nothing in the file derives 27**, so it was a number
+typed into a document whose whole thesis is that typed numbers are the disease. **Corrected here, and
+the correction is the finding** — recorded as amendment **A3-1**. Retired probes are listed, because a
+retired probe that is quietly dropped is how a count becomes a fiction:
 
 | Retired | Why |
 |---|---|
@@ -51,12 +57,19 @@ $ git diff --name-only main...HEAD -- . ':(exclude)sessions' ':(exclude)prompts'
 > neither the constitution nor the session-boot file nor the task pointer — the three documents every
 > agent is required to read before acting.**
 
-| File | mentions of the cadence / `N % 5` |
+| File | mentions of the cadence / `N % 5` **at `main`** |
 |---|---|
 | `.ai/AGENTS.md` — **"Every AI agent MUST read this file"** | **0** |
 | `.ai/SESSION-BOOT.md` | **0** |
 | `.ai/TASK.md` | **0** |
 | `.ai/CONSTRAINTS.yaml` | 1 (`ground_truth_every_n_sessions: 5`) |
+
+> **The probe must name its ref, and this is amendment A3-2.** Run against **`HEAD`** the same grep
+> reads **`0 / 5 / 4 / 1`** — because this finding was then copied into `SESSION-BOOT.md` and
+> `TASK.md`, which are two of the three files it measures. **A probe that measures a file the same
+> session then edits reports its own remediation.** `git show main:.ai/TASK.md | grep -ciE …` is the
+> form that holds. **This finding therefore reproduces its own disease one layer down** — §I's warning
+> about populations defined by prose, committed by the session that wrote §I.
 
 The consequence is not hypothetical — it is this session:
 
@@ -257,7 +270,8 @@ compressed sentence; S41's is absent.
 
 **Token/`$` cost is recorded as "unmeasured (billed to the founder's plan)"** — that is the correct
 honest reading and needs no invention. **But a cost line that under-reports its own session's second
-half is not a measurement.** Measured figures for S45: **27 probes, 3 retired**, one session, zero
+half is not a measurement.** Measured figures for S45: **6 numbered probes + 2 retired** (§Method), one
+session, zero
 product-code changes, zero releases, zero npm secrets, $0.
 
 **Verdict: 🟠 — the form is right, the S44 figure is not.**
@@ -270,7 +284,7 @@ rather than derived from the thing it governs.**
 | Site | Population defined by | Result |
 |---|---|---|
 | `check_session_coverage` | `git log --merges` + a subject regex | 7 sessions invisible |
-| `STATE.md` "live set 39/42/43/44" | a hand-kept list of 4 | 28 scripts unclassified |
+| `STATE.md` "live set 39/42/43/44" | a hand-kept list of 4 | 36 numbered scripts exist → **32** unclassified |
 | `KNOWLEDGE.md` main range | typed, guarded by nothing | wrong 4× since S35 |
 | `check_ground_truth_no_code` | `merge-base..HEAD` | empty range → `OK` |
 | `check_cost_tracking` | `grep 'Cost Tracking'` | any text passes, incl. a lie |
@@ -317,7 +331,7 @@ it; `DEFERRED` requires reason + expiry or `check_gt_remediations` blocks closeo
 
 | S40 row | Re-probe | Disposition |
 |---|---|---|
-| 1 — adoption baseline never read | registry still reports `@ifelse.codes/chitra` unindexed; 304 `@ifelse.codes/core` downloads unchanged | **DEFERRED** → S46 req **F6**. reason: needs a publish to measure. expiry 2026-10-31 |
+| 1 — adoption baseline never read | **S40's premise is FALSIFIED, not confirmed.** `@ifelse.codes/chitra` is **not** unindexed: **119** lifetime downloads, first non-zero **2026-09-29 = 89** — the day `0.3.0` was published (`npm view … time` → `2026-09-29T13:30:46.739Z`), then 15 / 6 / 5 / 4 / 0. `@ifelse.codes/core` is **318** lifetime, not 304 | **DEFERRED** → S46 req **F6**, whose `t0` is corrected from *zero* to **119 downloads, none organic**. reason: needs a publish to measure. expiry 2026-10-31 |
 | 4 — S16 vanished, no gate can see it | **CONFIRMED and worse** — `74b3c17` parked, nothing on `main`, and the detecting gate is itself blind (§G) | **DEFERRED** → S46 **G1**. expiry 2026-10-31 |
 | 5 — `required-crew` structurally wrong | **CONFIRMED**; S44 recorded a **4th** waiver; roadmap still assigns it to a completed session | **DEFERRED** → S46 **B1**. expiry 2026-10-31 |
 | 8 — cost gate greps a heading | **CONFIRMED**; and the S44 cost line is now demonstrably incomplete | **DEFERRED** → S46 **H2**. expiry 2026-10-31 |

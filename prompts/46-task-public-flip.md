@@ -25,7 +25,7 @@ public** — so the decision is made *before* the push, never after.
 
 | # | Prerequisite | State at S45 (derived) | Done-condition |
 |---|---|---|---|
-| **P1** | **D4b — the home path out of every commit reachable from `HEAD`** | `git rev-list --count HEAD` → **443** commits. `(/|-)Users[-/][a-z]+` matches **0** files in the tree at `main` and at `HEAD`, but **1001** (commit, file) pairs across history; earliest carrier S10 | the pattern matches **nothing** in **any** commit reachable from `HEAD`, re-derived by walking `git rev-list HEAD` |
+| **P1** | **D4b — the home path out of every commit reachable from `HEAD`** | `(/|-)Users[-/][a-z]+` matches **0** files in the tree at `main` and at `HEAD`, but **1001** (commit, file) pairs across history; earliest carrier S10. The commit count a rewrite moves was **443 at S45's audit** — **derive it, never trust that figure**, it moves with every commit: `git rev-list --count HEAD` | the pattern matches **nothing** in **any** commit reachable from `HEAD`, re-derived by walking `git rev-list HEAD` |
 | **P2** | **Private vulnerability reporting established** | `gh api repos/ifelse-codes/chitra/private-vulnerability-reporting` → **404**; `.github/REPO-SETTINGS.md` records the row **`unknown`** ("also what a caller without admin access gets", so it cannot distinguish off from not-allowed-to-ask). `SECURITY.md` and `CODE_OF_CONDUCT.md` both hedge it — a **closed door with honest signage**, not a lie | the row reads `enabled`, re-derived by the command already recorded beside it |
 
 > **Correction carried from the S44 handoff, which is stale on this point:** it reads *"`main` still
@@ -73,9 +73,16 @@ no tmux, no passkey, no `NODE_AUTH_TOKEN`**; `0.4.0` **carries provenance and `0
 `--provenance` flag, because npm attaches provenance automatically once the repo is public
 (`release.yml:100–103`).
 
-**F6 — GTM baseline recorded as `t0` = the measured zero.** With the command that derives it.
-**Never cite the 304 `@ifelse.codes/core` lifetime downloads** — release-runner and founder shaped,
-all inside a 5-day window starting on the publish day.
+**F6 — GTM baseline recorded as `t0`, and the baseline is NOT zero.** Corrected by S45's cold review,
+which falsified the premise this requirement inherited. `@ifelse.codes/chitra` **is** indexed:
+**119** lifetime downloads, first non-zero **2026-09-29 = 89** — the same day `0.3.0` was published
+(`npm view @ifelse.codes/chitra time` → `2026-09-29T13:30:46.739Z`), then 15 / 6 / 5 / 4 / 0.
+`@ifelse.codes/core` is **318** lifetime, not 304. **So record `t0` as _119 downloads, none organic_**
+— the whole figure lands inside a 6-day window that begins on the publish day, which is the
+release-runner shape — and derive it with
+`curl -s "https://api.npmjs.org/downloads/point/2020-01-01:$(date +%F)/@ifelse.codes/chitra"`.
+**Never cite either package's downloads as traction, and never write "zero":** the number is real, its
+*shape* is what disqualifies it.
 
 **Also owed by S46, because the audit found the gates unowned:** record **P1's tool and re-verify
 order** as a decision before the push, and record **P2's** outcome in F4's table.
