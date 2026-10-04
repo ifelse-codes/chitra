@@ -542,6 +542,47 @@ run, current picks the newest complete); the settings record matches live `gh ap
 untracked-home-path class is closed; M4 holds. Pass 6 ran the gate itself (48/48 full, 123s;
 42/42 fast, 25s), the suite (453/453 in 23 files) and the closeout.
 
+### A11 — pass 7: one material finding, and the gate that finally covers the class
+
+Pass 7 returned **REJECT** (12 SHIPPED · 2 PARTIAL · 0 NOT-BUILT) with **one** material finding,
+and it was the string **A10.1** had promised was gone: the requirement-10 evidence cell still
+printed the range, *inside the sentence that said no figure was typed there*.
+
+**A11.1 — A10.1 was false, for the fourth time in one class.** A5.2 claimed a commit that was not
+made; A8.1 described a future commit as a fact; A9.5 promised no figure and printed two; A10.1
+promised no figure anywhere in the map and left one in its own evidence cell. Three of those four
+were "we have fixed the thing" sentences, and **nothing could go red for any of them** — because
+no gate can check prose against itself.
+
+**What changes is not the sentence.** The new check **`map-measurements-honest`** makes the class
+enforceable, and it is deliberately structural rather than clever:
+
+1. **No percentage may appear inside a requirement row** — `| 1 |` … `| 14 |`. Those rows are the
+   delivery's current claims; history lives in this map's own pass sections.
+2. Elsewhere in the map, a percentage must carry a word that marks it as history (`printed`,
+   `frozen`, `moved`, `quote`, `typed`, `said`, `observed`, `reviewer`, `earlier`, `old`,
+   `caught`, `promised`, `was`).
+
+Rule 2 alone was tried first and **was too loose**: pass 7's exact string sits in a cell that
+says "moves run to run", so a history-word list waved it through — the same defect as the gate
+that forbade the word "open" and missed a sentence that never used it. A rule that cannot fail on
+the string it was written for is not a rule, so the requirement rows got the blunt structural
+rule and the word list kept only the prose around them. Both directions are proven: the pass-7
+cell re-injected goes red, a legitimate history quote stays green, and a bare "the gate measures
+73% of its wall clock" goes red.
+
+The check is registered in `gate_scope_switch`'s owned list, so `VAJRA_GATE_SCOPE=fast` cannot
+skip the thing that exists to catch claims like the ones passes 4 to 6 found.
+
+**A11.2 — pass 7's residual nits, taken rather than deferred.** `.ai/ROADMAP.md`'s carried §4.9
+row still quoted the **~60 minutes** premise this session measured and replaced — it now records
+the resolution and points at the command that prints today's figure. `SECURITY.md` qualifies the
+private-reporting switch **before** promising what the channel does, which is the order a careful
+reader needs. The route clause's verb list now allows two intervening words, so "Report this in a
+public issue" is caught (it was the one ordinary phrasing the list missed). The demo's template
+count carries the comment its twin got. A10.1's "anywhere in the map" is narrowed to what the check
+actually enforces, since the pass-history quotes of `86%` are history and are allowed.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder

@@ -850,7 +850,7 @@ oss_surface_at() {
       # An issue route is fine as long as it names the form; "open a new issue" is
       # not, because with blank issues off there is no untemplated new-issue page.
       bad_line=$(echo "$body" \
-        | grep -niE '(open|file|raise|create|start|report|submit|log|post|drop|leave)(ing|s)? (a |an )?(new |public |github |blank |untemplated )?issue|in a \*\*public\*\* issue' \
+        | grep -niE '(open|file|raise|create|start|report|submit|log|post|drop|leave|put|note|tell)(ing|s)?( [a-z]+){0,2} (a |an )?(new |public |github |blank |untemplated |this )?issue|in a \*\*public\*\* issue' \
         | grep -viE 'do not|don.t|never|cannot|can not|no public issue|bug report|feature request|bug form|ISSUE_TEMPLATE|form|mailbox is' || true)
       [ -z "$bad_line" ] \
         || { echo "$d routes the reader to an issue without naming a form, but blank_issues_enabled is false (an untemplated issue cannot be opened):${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
@@ -1164,19 +1164,23 @@ run_check "contract-freshness-teeth" freshness_teeth
 # path, or nothing + rc 1 if none qualifies. $1 = directory to scan (defaults to
 # the real artifacts dir) so the caller can drive it over a fixture — that is how
 # `gate-scope-switch` proves the selection is newest-first instead of asserting it.
-# A candidate must ALSO be COMPLETE — one line per check this gate declares.
-# Without that, the run in progress is "the newest" while it is still being written,
-# and the ratio it yields depends on how many checks happened to finish before this
-# one (measured: 80% mid-run against 73% for the finished run beside it).
+# A candidate must ALSO be COMPLETE, and completeness is judged by ORDER, not by
+# counting: a finished run recorded the gate's LAST declared check, because
+# run_check calls run top to bottom. Counting lines looked equivalent and was not —
+# it made every run before a new check was added incomplete, so adding one cost two
+# full gate runs before this check could pass. The last check's name is derived from
+# this script, so it moves with the gate and needs no edit here.
 pick_timings_file() {
-  local root="${1:-.ai/verify/session-44}" f want
-  want=$(grep -c '^run_check ' "$0")
+  local root="${1:-.ai/verify/session-44}" f last
+  last=$(grep '^run_check ' "$0" | tail -1 | sed -E 's/^run_check "([^"]+)".*/\1/')
+  [ -n "$last" ] || return 1
   local files=("$root"/*/timings.txt) i
   for (( i = ${#files[@]} - 1; i >= 0; i-- )); do
     f="${files[i]}"
     [ -f "$f" ] || continue
     case "$f" in */latest/*) continue ;; esac
-    [ "$(wc -l < "$f" | tr -d ' ')" -eq "$want" ] || continue
+    [ "$(wc -l < "$f" | tr -d ' ')" -gt 0 ] || continue
+    awk -v last="$last" '$1==last{found=1} END{exit (found?0:1)}' "$f" || continue
     awk -v names="$FAST_SKIP" 'BEGIN{n=split(names,a," ")} {for(i=1;i<=n;i++) if($1==a[i]) c++} END{exit (c==0)}' "$f" \
       || continue
     printf '%s\n' "$f"
@@ -1201,7 +1205,7 @@ gate_scope_switch() {
   done
   for s in oss-surface-present coverage-enforced-in-ci engines-derived home-path-scrubbed \
            overrides-gone founder-decisions-covered contract-freshness-teeth \
-           s43-gate-verbatim-goes-red contract-at-head; do
+           map-measurements-honest s43-gate-verbatim-goes-red contract-at-head; do
     if gate_skips fast "$s"; then echo "fast would skip $s, which this session owns"; return 1; fi
   done
   # The timings have to come from a FULL run: fast never runs a check it skips,
@@ -1221,32 +1225,34 @@ gate_scope_switch() {
   # Selection is now newest-first (pick_timings_file), the figure is printed with
   # its source, and the fixtures below drive that function so "newest wins" is a
   # fact the check can lose on rather than a comment.
-  local fx="$ARTIFACTS/scope-selftest" got d want skip1 k
+  local fx="$ARTIFACTS/scope-selftest" got d skip1 k last
   rm -rf "$fx"; mkdir -p "$fx"/{20000101T000000Z,20100101T000000Z,20100101T000001Z,20100101T000002Z,latest}
-  # Two COMPLETE full runs with the SAME line count — the exact tie that froze the
-  # figure at the oldest one — plus, newer than both, a run that prices nothing and a
-  # half-written one, neither of which may be used, plus a `latest` directory, which is
-  # not a run at all. Each of the four rejections is exercised by its own guard; pass 3
-  # noted that two of them were previously caught by the completeness test instead, so
-  # the message named guards the fixture never reached.
-  want=$(grep -c '^run_check ' "$0"); set -- $FAST_SKIP; skip1="$1"
+  # Two COMPLETE full runs that TIE — the exact case that froze the figure at the oldest
+  # one — plus, newer than both, a run that records the last check but prices nothing and
+  # a half-written one, neither of which may be used, plus a `latest` directory, which is
+  # not a run at all. Each rejection is exercised by its own guard; pass 3 noted that two
+  # of them were previously caught by the completeness test instead, so the message named
+  # guards the fixture never reached.
+  last=$(grep '^run_check ' "$0" | tail -1 | sed -E 's/^run_check "([^"]+)".*/\1/')
+  set -- $FAST_SKIP; skip1="$1"
   for d in 20000101T000000Z 20100101T000000Z; do
     : > "$fx/$d/timings.txt"
-    for k in $(seq 1 "$want"); do
-      if [ "$k" -eq 1 ]; then printf '%s 5\n' "$skip1" >> "$fx/$d/timings.txt"
-      else printf 'core-tests 1\n' >> "$fx/$d/timings.txt"; fi
-    done
+    for k in $(seq 1 14); do printf 'core-tests 1\n' >> "$fx/$d/timings.txt"; done
+    printf '%s 5\n' "$skip1" >> "$fx/$d/timings.txt"
+    printf '%s 3\n' "$last" >> "$fx/$d/timings.txt"
   done
-  head -3 "$fx/20100101T000000Z/timings.txt" > "$fx/20100101T000002Z/timings.txt"
-  # 20100101T000001Z: COMPLETE length but no fast-skipped check in it — a fast run
-  # can never be that long, but the guard that rejects it is the "prices nothing"
-  # one, and the fixture should exercise that guard rather than the completeness one.
-  { local k2=0; while [ "$k2" -lt "$want" ]; do printf 'core-tests 1\n'; k2=$((k2+1)); done; } > "$fx/20100101T000001Z/timings.txt"
+  # 20100101T000001Z: records the last check (so it is complete) but prices nothing — the
+  # guard that rejects it is the "prices the skip list" one, not the completeness one.
+  { for k in $(seq 1 14); do printf 'core-tests 1\n'; done; printf '%s 3\n' "$last"; } \
+    > "$fx/20100101T000001Z/timings.txt"
+  # 20100101T000002Z: half-written — has the skip-list price but never reached the last check.
+  { for k in $(seq 1 3); do printf 'core-tests 1\n'; done; printf '%s 5\n' "$skip1"; } \
+    > "$fx/20100101T000002Z/timings.txt"
   : > "$fx/latest/timings.txt"
   got=$(pick_timings_file "$fx" 2>/dev/null || true)
   case "$got" in
     */20100101T000000Z/timings.txt) : ;;
-    *) echo "selection is wrong: got '${got:-<none>}' — expected the NEWEST COMPLETE run that prices the skip list; a file that prices nothing, is half-written, or sits under latest/ must be passed over"; rm -rf "$fx"; return 1 ;;
+    *) echo "selection is wrong: got '${got:-<none>}' — expected the NEWEST COMPLETE run that prices the skip list; a file that prices nothing, never reached the last check, or sits under latest/ must be passed over"; rm -rf "$fx"; return 1 ;;
   esac
   rm -rf "$fx"
   tf=$(pick_timings_file || true)
@@ -1272,6 +1278,52 @@ gate_scope_switch() {
   echo "fast removes ${skipped}s ($((skipped / 60))m$((skipped % 60))s) of ${total}s ($((total / 60))m$((total % 60))s) measured across $lines checks — $((skipped * 100 / (total > 0 ? total : 1)))% of this gate's measured check time (priced from $src: $(basename "$(dirname "$tf")"))"
 }
 run_check "gate-scope-switch" gate_scope_switch
+
+# req 13 + A10.1 — the map may not state a measurement as current. Pass 7's one material
+# finding was `sessions/session-44-summary.md` still printing the exact range A10.1 said
+# was gone, in the very cell whose sentence promised it was not: four passes (A5.2 →
+# A8.1 → A9.5 → A10.1) of "we fixed that", and no gate could go red, because nothing can
+# check prose against itself. This check is that something.
+#
+# Two rules, and the first is structural because the second proved too loose:
+#   (1) NO percentage at all inside the requirement rows — `| 1 |` … `| 14 |`. That table
+#       is the delivery's current claims, and history lives in this map's own pass
+#       sections. Pass 7's finding was exactly a range inside row 10, and a
+#       "does this sentence look historical?" word list let it through twice (the cell
+#       says "moves run to run", which is a history word).
+#   (2) Elsewhere in the map, a percentage must carry a word marking it as history —
+#       printed / frozen / moved / quote / typed / said / observed / reviewer / earlier /
+#       old / caught / promised / was. A bare "the gate measures 73% of its wall clock"
+#       fails whatever else is true about it.
+#
+# Scope: the map only. The `.ai/` records legitimately carry percentages that are not
+# measurements at all (`14% wide`, `<pct>%` in a code span), and a rule that fires on
+# those is a rule nobody keeps.
+map_measurement_honesty() {
+  local padded F line bad=""
+  padded="$(printf '%02d' 44)"
+  F="sessions/session-${padded}-summary.md"
+  [ -f "$F" ] || { echo "no fidelity map at $F — requirement 14 asks for one"; return 1; }
+  while IFS= read -r line; do
+    case "$line" in *[0-9]%*) ;; *) continue ;; esac
+    case "$line" in
+      '| '[0-9]*' |'*)
+        bad+="requirement row: $line"$'\n'
+        continue
+        ;;
+    esac
+    printf '%s' "$line" \
+      | grep -qiE 'printed|frozen|moved|quote|typed|said|observed|reviewer|earlier|old|caught|promised|was' \
+      && continue
+    bad+="unmarked: $line"$'\n'
+  done < "$F"
+  [ -z "$bad" ] \
+    && { echo "the map states no percentage as a current measurement: the requirement rows carry none at all, and the rest is marked as history"; return 0; }
+  echo "the map states a percentage as a current measurement — read the run's own log instead:"
+  printf '%s' "$bad" | sed 's/^/  /'
+  return 1
+}
+run_check "map-measurements-honest" map_measurement_honesty
 
 # ═══════════════════════════════════════════ S44 · the counterfactual (req 14)
 
