@@ -949,22 +949,32 @@ founder_decisions_at() {
 
   # D2 = documented: CONTRIBUTING must say the hooks are opt-in AND hand over the
   # one-line install, and .claude/settings.json must still declare its hooks.
+  # NOTE: every test below is a HERE-STRING, not `printf | grep -q`. This gate runs
+  # under `set -o pipefail`, and `grep -q` exits the moment it matches — so the
+  # printf on the left of the pipe can take SIGPIPE and the pipeline reports 141,
+  # which the `||` reads as "no match". That is exactly how this check first failed
+  # on a settings.json that does contain "hooks".
   con=$(rd CONTRIBUTING.md)
-  printf '%s\n' "$con" | grep -q '^## Git hooks (opt-in)' \
+  [ -n "$con" ] || { echo "D2 broken: CONTRIBUTING.md unreadable (cwd $(pwd), TREE='${TREE}')"; return 1; }
+  grep -q '^## Git hooks (opt-in)' <<<"$con" \
     || { echo "D2 broken: CONTRIBUTING has no '## Git hooks (opt-in)' section${TREE:+ at $TREE}"; return 1; }
-  printf '%s\n' "$con" | grep -q 'git config core.hooksPath .githooks' \
+  grep -q 'git config core.hooksPath .githooks' <<<"$con" \
     || { echo "D2 broken: CONTRIBUTING gives no hooks install line"; return 1; }
-  printf '%s' "$(rd .claude/settings.json)" | grep -q '"hooks"' \
-    || { echo "D2 broken: .claude/settings.json declares no hooks"; return 1; }
+  local js; js=$(rd .claude/settings.json)
+  [ -n "$js" ] || { echo "D2 broken: .claude/settings.json is unreadable (cwd $(pwd), TREE='${TREE}')"; return 1; }
+  grep -q '"hooks"' <<<"$js" \
+    || { echo "D2 broken: .claude/settings.json declares no hooks (${#js} bytes read)"; return 1; }
 
   # D3/D6 = ignore: nothing under playground/ or design-reference/ may be in the
   # index, and .gitignore must ignore both directories WHOLE — the five partial
   # patterns that were there before are exactly how they ended up half-tracked.
-  for d in playground design-reference; do hits="$hits$(lsat "$d")"; done
+  # Append with an explicit newline: `$( )` strips the trailing one, so the two
+  # listings would otherwise fuse and `grep -c .` reported 10 instead of 11.
+  for d in playground design-reference; do hits+="$(lsat "$d")"$'\n'; done
   [ -z "$hits" ] || { echo "D3/D6 broken: still tracked${TREE:+ at $TREE}:"; echo "$hits" | sed 's/^/  /'; return 1; }
   gi=$(rd .gitignore)
   for d in design-reference/ playground/; do
-    printf '%s\n' "$gi" | grep -qx "$d" \
+    grep -qx "$d" <<<"$gi" \
       || { echo "D3/D6 broken: .gitignore has no whole-directory rule '$d'${TREE:+ at $TREE}"; return 1; }
   done
   if [ -z "$TREE" ]; then
@@ -986,9 +996,9 @@ founder_decisions_covered() {
   # decision THIS session changed, so the counterfactual has to show that one red
   # too. (Same branch-scoped shape as oss-surface-present: on main after the merge
   # this gate is historical and no longer run, like every prior session's.)
-  for d in playground design-reference; do hits="$hits$(git ls-tree -r --name-only main -- "$d")"; done
+  for d in playground design-reference; do hits+="$(git ls-tree -r --name-only main -- "$d")"$'\n'; done
   [ -n "$hits" ] || { echo "main tracks nothing under playground/ or design-reference/ — nothing here is being changed, so the counterfactual is a claim"; return 1; }
-  echo "counterfactual: RED on main twice over — $(printf '%s' "$out" | head -1); plus $(printf '%s' "$hits" | grep -c .) files still tracked under playground/ or design-reference/"
+  echo "counterfactual: RED on main twice over — $(head -1 <<<"$out"); plus $(grep -c . <<<"$hits") files still tracked under playground/ or design-reference/"
 }
 run_check "founder-decisions-covered" founder_decisions_covered
 
@@ -1044,7 +1054,7 @@ freshness_teeth() {
       fi
       rc=0; o=$(contract_freshness_declared_change "$t" "$noamd") || rc=$?
       [ "$rc" -eq 1 ] || { echo "clause (b) went GREEN with Pass-1 $v and a contract with no amendments (rc=$rc): $o"; exit 1; }
-      printf '%s\n' "$o" | grep -q "no '## Contract amendments' section" \
+      grep -q "no '## Contract amendments' section" <<<"$o" \
         || { echo "clause (b) failed for the wrong reason on Pass-1 $v: $o"; exit 1; }
     done
     printf '**Review-Inputs-SHA-Pass-1:** %s\n**Review-Inputs-SHA:** %s\n' "$H1" "$H2" > "$t"
