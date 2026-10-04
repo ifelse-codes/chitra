@@ -140,17 +140,20 @@ if not, they go, and the one-liner becomes true.**
   **Closed by the session, not by prose:** `canonical_inputs_sha` is now computable (`2d95c863…`) —
   commit the contract on a `-closeout` branch, which is the only commit exemption a NO-CODE session
   has — and the flip's two gates gained an owner.
-- ⬜ **Session 46 (S46) — the public flip.** Contract `prompts/46-task-public-flip.md`, requirements
-  **F1–F6**: repo public (F1), README `git clone` URL resolving (F2), npm `repository.url` /
-  `homepage` resolving **without being edited** (F3 — both fields are *already* correct and were
-  merely unreachable; editing them fails F3), `.github/REPO-SETTINGS.md` re-derived post-flip (F4), a
-  real **`0.4.0` + npm provenance through CI unattended** (F5 — the asymmetry against `0.3.0`, which
-  has no provenance because it shipped from a private repo, *is* the proof; **no workflow change is
-  needed**), and the GTM baseline as `t0` = **zero** (F6). **Gated on two preconditions that until
-  S45 had no owner:** **P1** — the D4b history rewrite, `(/|-)Users[-/][a-z]+` in **1001**
-  (commit, file) pairs across history and **0** in the tree, **irreversible once the repo is public**,
-  so S46 must record the tool (`git filter-repo`) and a 5-step re-verify order *before* the push; and
-  **P2** — private vulnerability reporting (404, recorded `unknown`), a founder-only setting.
+- ✅ **Session 46 (S46) — the public flip — DONE, 2026-10-04.** Contract
+  `prompts/46-task-public-flip.md`, requirements **F1–F6**: repo public (F1), README `git clone` URL resolving (F2), npm `repository.url` /
+  `homepage` resolving **without being edited** (F3 — both fields were *already* correct and were
+  merely unreachable; **their bytes are unchanged**, only `version` differs from `main`),
+  `.github/REPO-SETTINGS.md` re-derived post-flip (F4), a real **`0.4.0` + npm provenance through CI
+  unattended** (F5 — run `37217761468`, `0.4.0` carries a sigstore provenance statement and `0.3.0`
+  does not, **with no file under `.github/workflows/` changed**), and the GTM baseline as `t0` =
+  **119 downloads, none organic** (F6 — S45's cold review falsified the `zero` premise: the number is
+  real, its *shape* disqualifies it). **Both preconditions discharged:** **P1** — `git filter-repo`
+  2.47.0 took **1001 → 0** (commit, file) pairs across **444** commits with the tree, count and
+  tracked-file count preserved, then one disclosed force-push; **residual:** GitHub's read-only
+  `refs/pull/*` still exposes the old blobs in **56 of 67** PR heads — a support ticket is owed.
+  **P2** — `{"enabled":true}`, which was impossible before F1 (public-repo-only endpoint, proved
+  against a public control), so the founder reordered F1 → P2 instead of waiving it.
 - 🔜 **Session 47 (S47) candidate — make the governance gates able to fail.** A **different story from
   the flip**, deliberately not folded into it: fixing `verify-closeout.sh` in the same session that
   makes the repo public would put the public surface and its gates in one unreviewable commit. Ranked
@@ -158,7 +161,9 @@ if not, they go, and the one-liner becomes true.**
   `.ai/GT-REMEDIATIONS.md`'s S45 section. Headline: **`check_session_coverage` cannot see S38–S44**,
   the **cadence is absent from `AGENTS.md`** (which is **vajra-owned**, so that half is a vajra-side
   change — disclosed, not smuggled), **S44's `REJECT` is recorded as COMPLETE**, and the **3-file cap
-  is unenforced by 17/60 commits**.
+  is unenforced by 17/60 commits**. **Rides along from S46:** file the GitHub support ticket to
+  delete `refs/pull/*` and GC the unreachable pre-rewrite objects — the only remaining home-path
+  exposure, and only GitHub can remove it (`DELETE` → `422 refs/pull/* is read-only`).
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
