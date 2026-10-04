@@ -4,9 +4,10 @@
 
 - **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge).
 - **Product:** **`@ifelse.codes/chitra@0.3.0`**, live on npm, **untouched** by this session.
-- **Contract:** `prompts/44-task-oss-polish.md` — at HEAD, plus `## Contract amendments` → **A1**
-  (D5's removal set: the real test is *does the override change resolution*, not *is the package
-  named in the lockfile*).
+- **Contract:** `prompts/44-task-oss-polish.md` — at HEAD, plus `## Contract amendments` →
+  **A1** (D5's removal set: the real test is *does the override change resolution*, not *is the
+  package named in the lockfile*) and **A2–A4** (the cold review's D4b figures, the scrub's
+  `sessions/` edits, and requirement 10's own wording).
 - **Delivered:** 14 requirements in four groups.
   - **OSS surface (1–6):** `SECURITY.md` (supported versions, private disclosure, explicit
     no-SLA/no-bounty scope that includes the release pipeline), `CODE_OF_CONDUCT.md`
@@ -17,7 +18,8 @@
     in the `core` job (`test:coverage` replaces the plain `Test` step — suite still runs once),
     and **`engines`** derived from what `ci.yml` pins (repo `>=26` / pnpm `>=9.12.3`; package
     `>=22` **disclosed in CONTRIBUTING as a support policy, not a test result**).
-  - **Decisions (7–8):** **D1 = A** (publish all ~146 process files), **D2** documented in
+  - **Decisions (7–8):** **D1 = A** (publish every tracked process file — derive it with
+    `git ls-files .ai prompts sessions reviewer .claude darshan | wc -l`), **D2** documented in
     `CONTRIBUTING` (hooks are local config; a clone gets none), **D3/D6 = ignore**
     (`playground/` and the mockups stay untracked), **D4 = scrub** (15 files, one mechanical
     commit, `--no-verify` under the contract's own authorisation because the 3-file cap cannot

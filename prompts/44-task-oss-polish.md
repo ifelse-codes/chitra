@@ -266,6 +266,67 @@ Neither changes what ships: the skip list is priced from measured per-check timi
 the gate prints its own wall clock in both scopes. Requirement 10's text stands and is
 corrected here.
 
+### A5 — pass 2 of the cold review: a frozen figure, an uncommitted review, and two counts this session typed anyway
+
+Pass 2 of the S44 cold review also returned **REJECT**. Four of its findings amend this
+contract; the rest are fixed in the delivery. Nothing above is rewritten.
+
+**A5.1 — A2's own table is typed, and two of its four figures had already moved** (pass-2
+finding 7). A2 was written to stop typing counts, and then typed four of them. The table is
+a **snapshot at `3b8ec6f`**; the derivations are the commands, and they are the part that
+stays true:
+
+| quantity | derivation (not a number) |
+| --- | --- |
+| commits a rewrite moves | `git rev-list --count HEAD` |
+| commits across every ref | `git rev-list --count --all` |
+| commits whose tree matches the path | `git log --format=%H --all -- . \| wc -l` with the tree grep below |
+| commits whose diff touches it | `git log -G'(/\|-)Users[-/][a-z]+' --format=%H --all \| wc -l` |
+| whether the rewrite is still needed | `git grep -qE '(/\|-)Users[-/][a-z]+' main -- .` |
+
+The pattern that matches both spellings is `(/|-)Users[-/][a-z]+`. Within one session the
+first two of those numbers already drifted by nine commits — which is the whole argument
+for deriving them at the point of use (`scripts/demo-session-44.sh` does) instead of printing
+a table of literals. **A2's numbers should be read as "measured at `3b8ec6f`", not as
+current.**
+
+**A5.2 — the pass-1 review was never committed** (pass-2 finding 2). `contract-freshness`
+clause (a) resolves the commit that **first added** `sessions/session-44-review.md` and fails
+closed when no commit adds it. Pass 1's report was written and read but left untracked, so at
+the moment A2–A4 were appended there was no attested feed for clause (a) to protect — the rule
+this session ships was, for one commit, unfalsifiable. The rule was not weakened: pass 3's
+report is committed, and every amendment after it is checkable against it. Disclosed rather
+than papered over, because "we shipped the N1 rule and then skipped its first step" is exactly
+the kind of sentence that only survives if it is written down.
+
+**A5.3 — requirement 13 was violated by the fix for F2.** Four `.ai/` files carried counts
+written while correcting A2: "~146 process files" (the tracked figure) and "~30 changed
+files / ~14 commits" (the delivery's size). Both are gone; each site now names the command
+that produces the number. Requirement 13 needed no amendment — it was obeyed late, not
+reinterpreted.
+
+**A5.4 — requirement 10's headline figure was frozen at the first full run** (pass-2 finding
+1, which the reviewer named the fakest green of the delivery). `gate-scope-switch` picked the
+timings file with the most lines and kept the old one on a tie; every full run writes the same
+number of lines, so the "measured" percentage could never change from the first run that
+ever produced it. A full run 80 minutes later measured **73%** while the gate printed **86%**.
+Fixed by selecting newest-first, by printing the source run beside the number, and by giving
+the selection a fixture (`gate-scope-switch`) so "newest wins" is a fact the check can lose on.
+
+### A6 — the four docs the reviewer found pointing at a closed door
+
+Named by pass-2 finding 11. `.github/ISSUE_TEMPLATE/config.yml` sets
+`blank_issues_enabled: false`, so for anyone outside the maintainers the issue tracker is not
+a door — yet `SECURITY.md` told a reporter to "say so in a **public** issue", and
+`CODE_OF_CONDUCT.md` sent every non-secret conduct report, and every request for a private
+channel, to an issue. Requirement 3 asks for issue forms and templates; it does not ask the
+public docs to invent a route that the repo has closed. Both docs now route to GitHub
+Discussions or to private reporting, and say plainly what does not exist. `oss-surface-present`
+now fails if any of `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `README.md`
+directs the reader to the tracker while blank issues are off — with the pattern deliberately
+broader than the word "open", because the defective sentence never used it. A sentence that
+only **prohibits** a public issue stays legal; the gate must not punish the right advice.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder

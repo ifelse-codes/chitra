@@ -124,8 +124,8 @@ session from going public.
 ## Cost Tracking
 - S44 measured: one opencode session; **6** founder decisions in-chat (D1, D4, D4b, the
   D2/D3/D5/D6 bundle, and the N1 + §4.9 scope — five ballots) plus the plan approval, which
-  carried the blanket commit approval; **14 requirements** across ~30 changed files and ~14
-  commits; **0** product-code changes under `packages/core/src/`; **0** new product tests
+  carried the blanket commit approval; **14 requirements** across a delivery whose size is derived,
+  never typed (`git diff --shortstat main...HEAD`, `git rev-list --count main..HEAD`); **0** product-code changes under `packages/core/src/`; **0** new product tests
   (453 stays 453); **0** lockfile changes — the D5 regen produced an empty diff, recorded as
   amendment A1; **0** releases; **0** npm secrets touched; **0** new recurring infrastructure
   (the coverage bar rides inside the existing `core` CI job; no coverage service). One
