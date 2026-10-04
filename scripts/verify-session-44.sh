@@ -814,23 +814,32 @@ oss_surface_at() {
   # it in .github/REPO-SETTINGS.md: `blank_issues_enabled: false` does NOT close the
   # tracker - it removes only the *blank* template, and the bug/feature forms req 3
   # shipped still accept an outside report. Discussions, on the other hand, are off.
-  # So the invariant is not "no doc may mention issues", it is "no doc may route to
-  # a channel the recorded settings say is off". Two clauses, both offline:
-  #   (a) with blank issues off, a doc that sends the reader to an issue must name a
+  # So the invariant is not "no doc may mention issues", it is "no reader-facing file
+  # may route to a channel the recorded settings say is off". Two clauses, both offline:
+  #   (a) with blank issues off, a file that sends the reader to an issue must name a
   #       form/template - the reader cannot open an untemplated one;
-  #   (b) if REPO-SETTINGS records has_discussions: false, no public doc may route to
-  #       Discussions.
+  #   (b) if REPO-SETTINGS records has_discussions: false, no reader-facing file may
+  #       mention Discussions at all.
   # A sentence that only PROHIBITS a public issue stays legal; the gate must not
   # punish the right advice.
+  # SCOPE, stated rather than implied - pass 5 named this comment's "no public doc" a
+  # class while the code was four filenames, and then found bug-report.yml doing exactly
+  # what the class forbids, unhedged. Every file a reader can see that names a route is
+  # now listed: the four public docs plus the three issue-template files. `.ai/` records
+  # are excluded deliberately - they name a channel while qualifying it in the same
+  # sentence, which is what A8.2 forced them to do. REPO-SETTINGS.md is the record
+  # itself and must be able to name a channel in order to record that it is off.
   local sset
   sset=$(rd .github/REPO-SETTINGS.md)
-  [ -n "$sset" ] || { echo ".github/REPO-SETTINGS.md is missing — the routes in the public docs have nothing to be checked against"; return 1; }
-  local blank="off"
-  echo "$cfg" | grep -q "blank_issues_enabled: false" && blank="off"
-  for d in SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md README.md; do
+  [ -n "$sset" ] || { echo ".github/REPO-SETTINGS.md is missing - the routes in the public docs have nothing to be checked against"; return 1; }
+  local blank="no"
+  echo "$cfg" | grep -q "blank_issues_enabled: false" && blank="yes"
+  for d in SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md README.md \
+           .github/ISSUE_TEMPLATE/config.yml .github/ISSUE_TEMPLATE/bug-report.yml \
+           .github/ISSUE_TEMPLATE/feature-request.yml; do
     body=$(rd "$d")
     [ -n "$body" ] || continue
-    if [ "$blank" = off ]; then
+    if [ "$blank" = yes ]; then
       # An issue route is fine as long as it names the form; "open a new issue" is
       # not, because with blank issues off there is no untemplated new-issue page.
       bad_line=$(echo "$body" \
@@ -840,13 +849,21 @@ oss_surface_at() {
         || { echo "$d routes the reader to an issue without naming a form, but blank_issues_enabled is false (an untemplated issue cannot be opened):${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
     fi
     if echo "$sset" | grep -qE '^\| *`has_discussions` \| *\*\*`false`\*\*'; then
-      # With the channel off, a public doc has no business naming it at all: every
+      # With the channel off, a reader-facing file has no business naming it: every
       # phrasing ("post it in a discussion", "Discussions are off", a bare link) is
       # either a route to nowhere or noise, and the setting itself is already
       # recorded where it belongs — .github/REPO-SETTINGS.md.
       bad_line=$(echo "$body" | grep -niE 'discussion' || true)
       [ -z "$bad_line" ] \
         || { echo "$d mentions Discussions, which .github/REPO-SETTINGS.md records as has_discussions: false:${TREE:+ at $TREE}"; echo "$bad_line" | sed 's/^/  /'; return 1; }
+    fi
+    #   (c) the advisories route is a route whose status REPO-SETTINGS records as
+    # unknown, so any file that offers it must hedge it in the same file. Pass 5:
+    # A8.4 hedged config.yml's contact link and left bug-report.yml's inline link
+    # unhedged - the same promise in the place a reporter is most likely to read it.
+    if echo "$body" | grep -q 'security/advisories'; then
+      echo "$body" | grep -qiE 'does not work|not exist|may not exist|is pending|if private reporting|if this repository has private reporting' \
+        || { echo "$d links the private advisories route with no hedge, while .github/REPO-SETTINGS.md records that route's status as unknown — say what to do when the link fails${TREE:+ at $TREE}"; return 1; }
     fi
   done
   pr=$(rd .github/PULL_REQUEST_TEMPLATE.md); [ -n "$pr" ] || { echo "PR template missing"; return 1; }

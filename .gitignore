@@ -28,6 +28,11 @@ coverage/
 .commandcode/
 .freebuff/
 command-code-session-*.html
+# A local status dashboard carrying this machine's absolute paths (found untracked by
+# the S44 cold review, pass 5). Same class as the line above: real local work, never
+# a delivery artifact, and the kind of file that leaks a home path if it is ever
+# `git add`-ed by accident.
+project-status.html
 
 # Design mockups and scratch dashboards — founder decision D3/D6, answered "ignore"
 # at S44. Until it was answered these were HALF-tracked: the .gitignore rules above

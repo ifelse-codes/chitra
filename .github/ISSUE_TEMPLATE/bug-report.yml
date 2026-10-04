@@ -6,8 +6,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the report. **Suspected vulnerability? Stop — use
-        [the private security report](https://github.com/ifelse-codes/chitra/security/advisories/new) instead.**
+        Thanks for the report. **Suspected vulnerability? Stop** — use
+        [the private security report](https://github.com/ifelse-codes/chitra/security/advisories/new)
+        **if this repository has private reporting switched on.** If that link does not work, the
+        private channel does not exist yet: leave a bug report containing only "a security report
+        is pending" and a request for a private route — no version, no reproduction, no detail.
+        Never post exploit details publicly. The settings behind this are recorded in
+        `.github/REPO-SETTINGS.md`.
   - type: input
     id: version
     attributes:
