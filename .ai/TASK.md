@@ -5,10 +5,11 @@
 - **Branch:** `session-44-oss-polish`, from `main` `1b6c17d` (the S43 merge).
 - **Product:** **`@ifelse.codes/chitra@0.3.0`**, live on npm, **untouched** by this session.
 - **Contract:** `prompts/44-task-oss-polish.md` — at HEAD, plus `## Contract amendments` →
-  **A1…A10**: A1 the D5 removal set (the real test is *does the override change resolution*, not
+  **A1…A11**: A1 the D5 removal set (the real test is *does the override change resolution*, not
   *is the package named in the lockfile*), A2 the D4b figures, A3 the scrub's `sessions/` edits,
   A4 requirement 10's own wording, A5/A6 pass 2's findings, A7 the correction of A6's premise,
-  A8 pass 4's findings, A9 pass 5's, A10 pass 6's. Read the section; do not trust this summary of it.
+  A8 pass 4's findings, A9 pass 5's, A10 pass 6's, A11 pass 7's. Read the section; do not
+  trust this summary of it.
 - **Delivered:** 14 requirements in four groups.
   - **OSS surface (1–6):** `SECURITY.md` (supported versions, private disclosure, explicit
     no-SLA/no-bounty scope that includes the release pipeline), `CODE_OF_CONDUCT.md`
