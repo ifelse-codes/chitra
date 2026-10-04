@@ -32,7 +32,7 @@ stability guarantee. Old releases are not patched: fix, publish, upgrade.
 **If this repository has private reporting switched on, use it: the _Security_ tab → _Report a
 vulnerability_.** A report sent that way reaches the maintainers and is not disclosed until a
 fix is published. Whether the switch is on is a repository setting recorded, with the command that
-re-derives it, in [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md) — read that first. If it
+re-derives it, in [`.github/REPO-SETTINGS.md`](.github/REPO-SETTINGS.md) — read that first. If it is
 off, see "If private reporting is not enabled" below before you send anything.
 
 Please include:

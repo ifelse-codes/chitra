@@ -1285,41 +1285,87 @@ run_check "gate-scope-switch" gate_scope_switch
 # A8.1 → A9.5 → A10.1) of "we fixed that", and no gate could go red, because nothing can
 # check prose against itself. This check is that something.
 #
-# Two rules, and the first is structural because the second proved too loose:
+# Three rules, and the first is structural because the second proved too loose:
 #   (1) NO percentage at all inside the requirement rows — `| 1 |` … `| 14 |`. That table
 #       is the delivery's current claims, and history lives in this map's own pass
 #       sections. Pass 7's finding was exactly a range inside row 10, and a
 #       "does this sentence look historical?" word list let it through twice (the cell
 #       says "moves run to run", which is a history word).
-#   (2) Elsewhere in the map, a percentage must carry a word marking it as history —
-#       printed / frozen / moved / quote / typed / said / observed / reviewer / earlier /
-#       old / caught / promised / was. A bare "the gate measures 73% of its wall clock"
-#       fails whatever else is true about it.
+#   (2) Elsewhere in the map, a percentage must carry a word marking it as history.
+#   (3) A typed GATE SHAPE — a `N/N` pass ratio or "N checks" — is treated the same way
+#       pass 8 treated the map's headline table: the commit that added pass 7's own fix
+#       (`map-measurements-honest`) is what made the map's typed 48/42 wrong, so the
+#       numbers that describe the gate's own shape are the numbers a fix invalidates.
+#       Inside a requirement row they are banned outright; elsewhere they need a history
+#       word like a percentage does.
+#
+# The history word list excludes `was` and `old`: pass 8 showed they launder a current
+# claim ("thresholds" contains "old"), so a word that appears inside an ordinary technical
+# term is not a marker of anything.
 #
 # Scope: the map only. The `.ai/` records legitimately carry percentages that are not
 # measurements at all (`14% wide`, `<pct>%` in a code span), and a rule that fires on
 # those is a rule nobody keeps.
 map_measurement_honesty() {
-  local padded F line bad=""
+  local padded F line bad="" shape n
   padded="$(printf '%02d' 44)"
+  n=$(grep -c '^run_check ' "$0" 2>/dev/null || true)
+  # Fail closed if the count cannot be derived. An empty $n would turn rule 3's first
+  # alternative into "any two non-alphanumeric characters", which fires on every bold
+  # marker in the file — a rule that cannot be reasoned about is worse than none.
+  case "$n" in ''|*[!0-9]*) echo "cannot derive this gate's check count from $0 — rule 3 would be meaningless"; return 1 ;; esac
+  [ "$n" -gt 0 ] || { echo "this gate declares no checks"; return 1; }
   F="sessions/session-${padded}-summary.md"
   [ -f "$F" ] || { echo "no fidelity map at $F — requirement 14 asks for one"; return 1; }
   while IFS= read -r line; do
-    case "$line" in *[0-9]%*) ;; *) continue ;; esac
+    case "$line" in
+      *'[0-9]%'*|*[0-9]%) pct=1 ;;
+      *) pct=0 ;;
+    esac
+    # Rule 3's pattern: the gate's OWN shape. `n` is derived here, at check time, so
+    # the rule tracks the gate instead of a literal written into this script — a
+    # typed count in the check would have been falsified by the next added check,
+    # which is exactly what happened to the map's own headline table. Two parts: the
+    # gate's current check count appearing as a bare number anywhere in the map, and
+    # any "N checks" / "N PASS" phrasing. The suite's `453/453` is NOT in scope —
+    # that count is immutable for this session and is the delivery's own evidence,
+    # and a rule that fired on it would have to be deleted rather than obeyed.
+    # HERE-STRING, not `printf | grep -q`: this gate runs under `set -o pipefail`,
+    # grep -q exits the instant it matches, the printf on the left takes SIGPIPE,
+    # and the pipeline then reports 141 — which an `if` reads as "no match". That
+    # made this check silently pass on exactly the lines it exists to catch.
+    #
+    # Two halves, and only the second has an escape hatch. The FIRST — the gate's
+    # CURRENT check count appearing as a bare number — cannot be excused by a
+    # history word, because a historical sentence would name the OLD count and the
+    # old count is not $n by definition. A word list here was tried and laundered by
+    # the map's own phrase "not typed here": the cell that denies typing a number was
+    # itself using a word the list read as history.
+    if grep -qE "(^|[^0-9A-Za-z])$n([^0-9A-Za-z]|\$)" <<<"$line"; then
+      bad+="gate check count $n stated as current: $line"$'\n'
+      continue
+    fi
+    if grep -qE '[0-9]+ (checks|PASS)\b' <<<"$line"; then
+      shape=1
+    else
+      shape=0
+    fi
+    [ "$pct" = 1 ] || [ "$shape" = 1 ] || continue
     case "$line" in
       '| '[0-9]*' |'*)
         bad+="requirement row: $line"$'\n'
         continue
         ;;
     esac
-    printf '%s' "$line" \
-      | grep -qiE 'printed|frozen|moved|quote|typed|said|observed|reviewer|earlier|old|caught|promised|was' \
+    # (fall through to the history-word test for a percentage or an "N checks"/"N PASS"
+    # phrasing; the current-check-count case was already handled above)
+    grep -qiE 'printed|frozen|moved|quote|typed|said|observed|reviewer|earlier|caught|promised|used to|no longer' <<<"$line" \
       && continue
     bad+="unmarked: $line"$'\n'
   done < "$F"
   [ -z "$bad" ] \
-    && { echo "the map states no percentage as a current measurement: the requirement rows carry none at all, and the rest is marked as history"; return 0; }
-  echo "the map states a percentage as a current measurement — read the run's own log instead:"
+    && { echo "the map states no percentage and no gate-shape number as current: the requirement rows carry neither, and the rest is marked as history"; return 0; }
+  echo "the map states a percentage or a pass ratio as a current measurement — read the run's own output instead:"
   printf '%s' "$bad" | sed 's/^/  /'
   return 1
 }

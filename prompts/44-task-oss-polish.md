@@ -583,6 +583,45 @@ public issue" is caught (it was the one ordinary phrasing the list missed). The 
 count carries the comment its twin got. A10.1's "anywhere in the map" is narrowed to what the check
 actually enforces, since the pass-history quotes of `86%` are history and are allowed.
 
+### A12 — pass 8: the fix for pass 7's finding is what falsified the map, and the check caught it only after two attempts
+
+Pass 8 returned **REJECT** (13 SHIPPED · 1 PARTIAL · 0 NOT-BUILT) with **one** material finding:
+the map's headline table typed the gate's shape as `48` checks / `48 PASS` and `42` / `42 PASS`,
+and **the commit that added pass 7's fix is what falsified them** — `map-measurements-honest` took
+the gate from 48 checks to 49 and 42 to 43. The same defect as F2 and A10.2, in the one document
+whose newest check exists to prevent exactly that, and `map-measurements-honest` could not see it:
+its rule was percentages only.
+
+**A12.1 — the gate's own shape is now part of `map-measurements-honest`, and it took three attempts to make the rule real.** Recorded because the attempts are the lesson:
+
+1. **Rule 3, first attempt:** ban `N/N` and "N checks" anywhere in the map. It fired on the suite's
+   own `453/453` — immutable, and the delivery's evidence — so the rule would have had to be
+   deleted rather than obeyed. Narrowed to the gate's shape.
+2. **Second attempt:** flag the gate's current check count, typed as a literal in the check.
+   Wrong in the same way as the map: the literal is falsified by the next check added, which is
+   the event the rule exists to catch. `$n` is now **derived at check time**
+   (`grep -c '^run_check ' "$0"`), and the check fails closed if it cannot derive it.
+3. **Third attempt:** let a "history word" excuse the count, as rules 1–2 do. The map's own cell
+   saying **"not typed here"** was laundered by the word `typed`. So the derived count has **no
+   escape hatch at all** — a historical sentence would name the *old* count, and the old count is
+   not `$n` by definition. Only the "N checks" / "N PASS" phrasing keeps the word-list escape,
+   where a marker is doing real work.
+
+Two bugs were found while proving this, both mine and both the same species as defects passes 2
+through 7 caught in this delivery:
+
+- the first version used `printf '%s' "$line" | grep -q`, and under `set -o pipefail` the SIGPIPE
+  from `grep -q` exiting early made **every** long line read as "no match" — the check passed on
+  precisely the lines it exists to catch. Every such pipe in this gate is a here-string now, and
+  the reason is written at the site.
+- the harness I used to prove the rule could not run, because it read `$0` from a stub file with no
+  checks, which made `$n` empty and the rule degenerate. A rule that cannot be reasoned about from
+  its own harness is not a rule.
+
+**A12.2 — pass 8's nits.** The history word list no longer contains `was` or `old` — pass 8 showed
+they launder a current claim through the word *thresholds*. `SECURITY.md` said "If it off". The
+map's header named A1–A4 while the contract carried A1–A11.
+
 ## Closeout
 
 `scripts/verify-session-44.sh` exits 0; `scripts/verify-closeout.sh` exits 0 (or a founder
