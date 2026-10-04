@@ -66,7 +66,7 @@ printf '  %sdecision recorded as D-REORDER in sessions/session-46-flip.md%s\n' "
 
 hdr "F3 · the manifest fields were never wrong, only unreachable"
 case_ "7 · bytes before, reachability after"
-printf '  %sbefore%s  homepage + repository.url already held the right values; the URL 404'd\n' "$D" "$N"
+printf '  %sbefore%s  homepage + repository.url already held the right values; the URL returned 404\n' "$D" "$N"
 printf '  %safter%s   same bytes, HTTP 200 — editing either field would be the failure\n' "$D" "$N"
 printf '            homepage       = %s\n' "$(node -p "require('./packages/core/package.json').homepage")"
 printf '            repository.url = %s\n' "$(node -p "require('./packages/core/package.json').repository.url")"
