@@ -9,7 +9,7 @@
   `ground_truth_commit_exempt_branch_suffixes: [-closeout, -enforcement]` is the only thing that lets
   a NO-CODE session commit at all — and a contract **not** at `HEAD` makes `canonical_inputs_sha`
   uncomputable, so `check_review_attestation` could only ever read `BLOCK`. On this branch it computes:
-  `bash scripts/verify-closeout.sh --inputs-sha 45` → `898b65c3…a43060` (at S40: *uncomputable*).
+  `bash scripts/verify-closeout.sh --inputs-sha 45` → `2d95c863…3e401` (at S40: *uncomputable*).
 - **Contract:** `prompts/45-task-public-flip.md` — 11 requirements in four groups: **A** the audit,
   **B** the ledger, **C** the carry-forward, **D** proof and closeout. **No amendments yet** — the N1
   freeze attaches when the cold review starts, not before.

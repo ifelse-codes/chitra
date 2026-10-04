@@ -37,7 +37,7 @@ live on npm, and the repo around it is still **private**.
   choice and a **5-step re-verify order** S46 must record *before* the push.
 - **One closeout blocker is closed by this session.** Committing the contract on a `-closeout` branch
   made `canonical_inputs_sha` computable: `bash scripts/verify-closeout.sh --inputs-sha 45` →
-  `898b65c3…a43060` (*canonical input hash uncomputable* at S40). That was the precondition for
+  `2d95c863…3e401` (*canonical input hash uncomputable* at S40). That was the precondition for
   `review-inputs-attested`.
 - **`check_verify_demo_scripts` is the counter-example to the vacuity finding**: it reads
   `[ "$((N % 5))" -eq 0 ]` and returns `N/A — no session scripts expected`, so S45 owes no gate and
