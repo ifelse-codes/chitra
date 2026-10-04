@@ -144,7 +144,7 @@ two gates have no owner.**
 | 1 | `main` = `1b6c17d` | `STATE.md:7`, `SESSION-BOOT.md:5,30`, `TASK.md:5`, `CONTINUATION-PROMPT.md:4` | `5a39c43` |
 | 2 | S44 is in-progress on `session-44-oss-polish` | `SESSION-BOOT.md:4-5`, `TASK.md:3-5` | **merged** (PR #65 + #66) |
 | 3 | "**D4b — `main` still matches** `(/|-)Users[-/][a-z]+`" | `STATE.md:75-76` | **0 files in the tree** at `main` *and* `HEAD`; **1001** pairs in *history* — the claim is false about the tree, true about history, and says "tree clean, history not" three lines later |
-| 4 | "the live set is **39 / 42 / 43 / 44**"; the rest unrunnable (01, 02, 03, 07, 31, 34, 36, 37, 38) | `STATE.md:118-119` | **32** `verify-session-*.sh` exist incl. 08, 09, 10–15, 18–30, 33, 41. A 4-item "live set" is prose curation with no deriving command |
+| 4 | "the live set is **39 / 42 / 43 / 44**"; the rest unrunnable (01, 02, 03, 07, 31, 34, 36, 37, 38) | `STATE.md:118-119` | **36** numbered `verify-session-*.sh` exist (+1 template) — so the state names 4 as live and leaves **32** unclassified. A 4-item "live set" is prose curation with no deriving command. *(Corrected before review: this row first read "32 exist", miscounted from a truncated listing. See the summary's Corrections.)* |
 | 5 | "Suite is 452 tests" | `KNOWLEDGE.md:207` | **453** |
 | 6 | pill reads "`452` tests (`App.tsx` **L550 / L570**)" | `KNOWLEDGE.md:226` | `453` at **L927** — wrong number *and* wrong lines |
 | 7 | "`main` hosts S00–S39"; "newest tag `v0.3.0` at `f4ff6ef9`", "`v0.2.0` at `76d21f3`" | `KNOWLEDGE.md:109,112` | main hosts S00–**S44**; `v0.3.0` = **`87dafe2`**, `v0.2.0` = **`9495fa7`** — 2 of 3 tag SHAs wrong |
@@ -293,7 +293,7 @@ anyone noticing.
 | **B1** | `ROADMAP.md:56` schedules `check_required_crew` to S44 inside the *deliberately NOT scheduled* table; S44 did not do it; a 4th waiver is one closeout away | 🔴 | S46 |
 | **E1** | 3-file cap violated by **17/60** commits (S40 measured 8) and declared "hook-enforced" | 🔴 | S46 |
 | **C2** | `STATE.md`'s D4b red is false about the tree (0 files) and true about history (1001 pairs) | 🟠 | S46 |
-| **C3** | "Live set 39/42/43/44" is prose curation over 32 scripts, with no deriving command | 🟠 | S46 |
+| **C3** | "Live set 39/42/43/44" is prose curation: **36** numbered scripts exist, 4 are named live, **32** are unclassified — with no deriving command | 🟠 | S46 |
 | **H2** | S44's cost line omits the follow-up PR, 8 passes and the REJECT | 🟠 | S46 |
 | **B2** | P1 and P2 — the flip's two gates — have **no roadmap owner** | 🟠 | **S46, blocking the flip** |
 | **E2** | `.ai/.session-owner` gitignored and pinned at chat `12`; `clean_room.enabled: false` | 🟡 | backlog |
