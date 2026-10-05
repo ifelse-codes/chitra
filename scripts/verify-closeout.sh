@@ -797,17 +797,21 @@ check_ground_truth_no_code() {
     bad "$NAME"; return
   fi
   echo "GT artifact present: $GT ($(wc -l < "$GT" | tr -d ' ') lines)" >> "$LOG"
-  local base; base="$(git merge-base main HEAD 2>/dev/null || true)"
+  # S47 R2: the range is overridable so a caller can exercise the OFFENDER clause
+  # against a real committed change (VLT_GT_BASE/VLT_GT_HEAD) instead of an
+  # untracked probe, which `git diff base HEAD` cannot see. Defaults unchanged.
+  local base; base="${VLT_GT_BASE:-$(git merge-base main HEAD 2>/dev/null || true)}"
+  local head_ref; head_ref="${VLT_GT_HEAD:-HEAD}"
   if [ -z "$base" ]; then
     echo "BLOCK: no merge-base with main - empty range proves nothing (fail closed)." >> "$LOG"
     bad "$NAME"; return
   fi
-  if [ "$(git rev-parse HEAD)" = "$(git rev-parse "$base")" ]; then
-    echo "BLOCK: HEAD == merge-base ($base) - empty range, NO-CODE unprovable here; run on the session branch." >> "$LOG"
+  if [ "$(git rev-parse "$head_ref" 2>/dev/null || true)" = "$(git rev-parse "$base" 2>/dev/null || true)" ]; then
+    echo "BLOCK: range is empty ($base == $head_ref) - empty range, NO-CODE unprovable here; run on the session branch." >> "$LOG"
     bad "$NAME"; return
   fi
   local offenders
-  offenders="$(git diff --name-only --no-color "$base" HEAD -- . \
+  offenders="$(git diff --name-only --no-color "$base" "$head_ref" -- . \
                  ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
                | grep -vE '\.(md|txt)$' || true)"
   if [ -z "$offenders" ]; then
