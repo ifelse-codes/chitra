@@ -51,10 +51,11 @@ governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-
 ## What Is Broken / Incomplete
 - 🔴 **The P1 residual is disclosed, ticket text ready, filing needs a human.**
   `refs/pull/*` is read-only (`DELETE …/git/refs/pull/67/head` → **`422
-  refs/pull/* is read-only`**, re-derived 2026-10-05); **70** PR heads served at last
-  probe. No API we own deletes them. Request text + evidence:
-  `sessions/session-47-support-ticket.md`. Until support confirms deletion + GC, the
-  status is DISCLOSED, not closed (same as S46 left it).
+  refs/pull/* is read-only`**, re-derived 2026-10-05); **71** PR heads served
+  (derive with `git ls-remote origin 'refs/pull/*/head' | wc -l` — this count moves
+  with every PR: 70 before #71, 68 at the S46 audit). No API we own deletes them.
+  Request text + evidence: `sessions/session-47-support-ticket.md`. Until support
+  confirms deletion + GC, the status is DISCLOSED, not closed (same as S46 left it).
 - 🔴 **The crew gate's standing condition.** 5 waivers (S38/S39/S42/S44/S46); S47
   records waiver-or-green honestly. Vajra confirms helper provenance only from a
   Claude Code record, so under OpenCode the gate needs `VAJRA_CLOSEOUT_WAIVER=47`

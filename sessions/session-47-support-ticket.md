@@ -11,7 +11,9 @@ $ gh api repos/ifelse-codes/chitra --jq '{private, visibility}'
 {"private":false,"visibility":"public"}
 
 $ git ls-remote origin 'refs/pull/*/head' | wc -l
-70   # 68 at S46 audit time; PR refs accumulate, none GC'd
+70   # recorded 2026-10-05 (S47 authoring); 68 at the S46 audit. LIVE MOVED — re-run
+      # this command before quoting it: 71 after PR #71 opened. PR refs accumulate,
+      # none GC'd.
 
 $ gh api -X DELETE repos/ifelse-codes/chitra/git/refs/pull/67/head
 422 {"message":"refs/pull/* is read-only.", ...}

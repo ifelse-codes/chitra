@@ -466,6 +466,8 @@
   vajra-owned `AGENTS.md` line saying otherwise is disclosed, not edited. Same for the
   GT cadence: named in BOOT + TASK + ROADMAP + contract with the `N % 5` derivation
   (S50 next); the constitution line is a vajra-side change, proposed in the S47 summary.
-- **P1 residual:** `refs/pull/*` read-only (DELETE → 422, re-derived); 70 heads at last
-  probe. Ticket text + evidence: `sessions/session-47-support-ticket.md`. Filing needs a
-  human in GitHub Support.
+- **P1 residual:** `refs/pull/*` read-only (DELETE → 422, re-derived); **71** heads at
+  last probe — derive, never trust: `git ls-remote origin 'refs/pull/*/head' | wc -l`
+  (70 before PR #71, 68 at the S46 audit; the count moves with every PR). Ticket text
+  + evidence: `sessions/session-47-support-ticket.md`. Filing needs a human in
+  GitHub Support.
