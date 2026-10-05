@@ -1,56 +1,50 @@
-# chitra — Continuation Handoff (after S46)
+# chitra — Continuation Handoff (after S47)
 
-**Resume in a NEW chat (S47).** `.ai/SESSION` = 46; **`@ifelse.codes/chitra@0.4.0` is LIVE on npm
-with provenance** (`latest`); the **repo is public** (`gh api repos/ifelse-codes/chitra --jq .private`
-→ `false`). `main` = the S46 merge **`86bc909`** (**derive with `git rev-parse main`** — every sha in
-this file is a citation, not a fact; re-derive before trusting it). **S46 was the public flip**: P1,
-P2, F1–F6 all discharged, contract never amended.
+**Resume in a NEW chat (S48).** `.ai/SESSION` = 47; **`@ifelse.codes/chitra@0.4.0` is LIVE on npm
+with provenance** (`latest`); the **repo is public** (`private` → `false`). `main` = the S47 merge
+(**derive with `git rev-parse main`** — every sha in this file is a citation, not a fact;
+re-derive before trusting it). **S47 made the governance gates able to fail**: coverage sees
+squash merges (newest S46, was S37), no-code fails closed, cost needs a measurement, S44 REJECT
+disclosed, delivery cap derived, stale facts guarded, crew row re-pointed, cadence named where
+owned, P1 ticket text + 422 evidence recorded.
 
-> **The one thing to carry forward:** the flip is done, so the repo's claims are now checkable by a
-> stranger — and one door is still not ours to close. **`refs/pull/*` is read-only on GitHub and 56
-> of 67 PR heads still expose the pre-rewrite home path**; P1's done-condition (reachable from `HEAD`)
-> is met and disclosed, but only a **GitHub support ticket** deletes those refs. That ticket plus
-> `sessions/session-45-ground-truth.md` § *Findings, ranked* is the S47 story.
+> **The one thing to carry forward:** the gates now derive their populations instead of
+> curating them — and two lines are still not ours to change. **`AGENTS.md`'s governed body
+> is vajra-owned**: the GT-cadence line and the "Hook-enforced" cap line live there, so S47
+> fixed everything it owns and proposed the vajra-side patch in `sessions/session-47-summary.md`.
+> The P1 support ticket is **prepared, not filed** (`sessions/session-47-support-ticket.md`) —
+> filing needs a human in GitHub Support.
 
 ## Where we are
 
-Detail: `sessions/session-46-flip.md` (decisions + before/after evidence) +
-`sessions/session-46-summary.md` (fidelity map) + `sessions/session-46-review.md` (cold pass) +
-`.ai/STATE.md`.
+Detail: `sessions/session-47-summary.md` (fidelity map) + `sessions/session-47-review.md` (cold pass) +
+`prompts/47-task-gate-truth.md` (R1–R9) + `.ai/STATE.md`.
 
-| S46 delivered | State |
+| S47 delivered | State |
 |---|---|
-| **P1** history rewrite | **shipped** — `git filter-repo` 2.47.0: **1001 → 0** (commit, file) pairs over **444** commits; tree `8167462…`, count and **367** tracked files unchanged; one force-push with `--no-verify` (pre-push hook blocks *any* `main` push), disclosed |
-| P1 residual | **owed** — `refs/pull/*` read-only (422), **56 of 67** PR heads still carry it → **support ticket** |
-| **P2** private reporting | **shipped** — `{"enabled":true}`; unsatisfiable before F1 (public-repo-only endpoint, proved against `octocat/Hello-World` with `admin: true`) → **D-REORDER** |
-| **F1/F2** | **shipped** — `true`→`false`, `404`→`200`, anonymous clone works; both `before` rows recorded |
-| **F3** | **shipped** — `homepage` + `repository.url` **unedited** (only `version` differs from `main`); the URL simply resolves now |
-| **F4** | **shipped** — every `REPO-SETTINGS` row re-probed; `SECURITY.md` / `CODE_OF_CONDUCT.md` stopped calling an established route a pre-flip task |
-| **F5** | **shipped** — `0.4.0` tagged on merged `main`, CI run `37217761468` published it via Trusted Publishing; **provenance on `0.4.0`, none on `0.3.0`**, **zero workflow edits** |
-| **F6** | **shipped** — `t0` = **119 lifetime downloads, none organic**, recorded in `.ai/STATE.md`, derived from the downloads API; the two `.ai/` files that still called the baseline zero were corrected |
-| a live gate | **fixed, not left red** — S44's `home-path-scrubbed` demanded a commit that still carries the path, which P1 made permanently unsatisfiable; proof moved to runtime-assembled samples + an inverted history walk |
+| **R1** coverage union | **shipped** — merge-only newest S37 (blindness, measured) vs union newest S46; S40 backfilled (disclosed) |
+| **R2** no-code fail-closed | **shipped** — GT artifact required, empty range BLOCKS; offender path exercised (planted probe, synthetic N) |
+| **R3** cost measured | **shipped** — decisions + counts + derivation words; heading-only fixture red |
+| **R4** S44 REJECT | **shipped** — STATE + ROADMAP disclose REJECT + 8 passes + PR #66, never COMPLETE |
+| **R5** cap honest | **shipped** — delivery derived per commit (max ≤ 3); history scope + vajra line disclosed |
+| **R6** stale guarded | **shipped** — main/version/tags re-derived with commands; `stale-facts-guarded` in session gate |
+| **R7** crew re-pointed | **shipped** — ROADMAP owns S47 with done-condition; waiver-or-green honest |
+| **R8** P1 ticket | **prepared** — 422 re-derived, request text ready, filing needs a human |
+| **R9** cadence named | **shipped where owned** — BOOT + TASK + ROADMAP + contract carry `N % 5`, S50 named; AGENTS half proposed |
+| Product | **untouched** — 453/453 stands by byte-identity (no node/pnpm on this machine — disclosed fallback, fail-closed on change) |
 
-## S47 — the candidate
+## S48 — candidates
 
-`prompts/47-task-*.md` does not exist yet — write it at plan time. The spec is
-`sessions/session-45-ground-truth.md` § *Findings, ranked*, chiefly: **`check_session_coverage` is
-blind for S38–S44** (squash-merged subjects match nothing; newest belief **S37**; it already missed
-`sessions/session-40-summary.md` being absent), **the GT cadence is absent from `AGENTS.md`**
-(**vajra-owned** — disclose it, do not smuggle it), **S44's `REJECT` recorded as COMPLETE**, the
-**3-file cap unenforced by 17 of 60**, and the stale-fact class. Plus the **support ticket** above.
-
-Alternatives: the **GTM proof pack** (F6 recorded `t0` only — benchmarks, channels, first organic
-signal), or **new product surface** (none since `c72cc14`, S09).
+No contract yet — write `prompts/48-task-*.md` at plan time. Options S47 left:
+the **GTM proof pack** beyond `t0`, or **new product surface** (none since `c72cc14`).
+**S50 (`50 % 5 == 0`) is the next NO-CODE ground truth** — never schedule a code session onto it.
 
 ## Three process facts worth inheriting
 
-1. **`==>` is the replacement separator in `git filter-repo`, not `=>`.** With `=>` the whole line
-   becomes one literal, matches nothing, and the rewrite silently changes nothing but every SHA —
-   measured, not guessed.
-2. **A counterfactual that requires history to keep a redacted value cannot survive the redaction.**
-   S44's gate demanded "some commit still matches"; after P1 the correct state fails it forever.
-   Prove a pattern against an **assembled** sample instead — and assemble it, because a literal
-   sample inside the gate's own source makes the tree scan flag the gate.
-3. **Vajra cannot verify helper provenance outside Claude Code.** `.ai/handoffs/session-46-tech-lead.md`
-   validates structurally but reads `unverifiable … gitBranch "session-18-heatmap-lock"`; the crew
-   gate's own message prescribes the path: `VAJRA_CLOSEOUT_WAIVER=<NN>` with a reason, at close.
+1. **A population defined by prose is a check a workflow change can switch off.** S36's
+   coverage read merge subjects; squash merges emptied it silently. Derive from the thing
+   governed (union of subject shapes), refuse emptiness, name the newest belief.
+2. **`set -e` eats `cmd && var=1`.** A failing grep before `&&` exits the function —
+   write `if grep ...; then var=1; fi`. S47 paid this twice (closeout cost check, demo cap).
+3. **A literal sample inside a gate's own source flags the gate.** Scope stale-pattern
+   scans to the live files that must not carry them, never the whole tree (S44 lesson, S47 §R6).
