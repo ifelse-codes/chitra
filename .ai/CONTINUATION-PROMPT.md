@@ -9,16 +9,21 @@ disclosed, delivery cap derived, stale facts guarded, crew row re-pointed, caden
 owned, P1 ticket text + 422 evidence recorded.
 
 > **The one thing to carry forward:** the gates now derive their populations instead of
-> curating them — and two lines are still not ours to change. **`AGENTS.md`'s governed body
-> is vajra-owned**: the GT-cadence line and the "Hook-enforced" cap line live there, so S47
+> curating them — and three things are still open. **`AGENTS.md`'s governed body is
+> vajra-owned**: the GT-cadence line and the "Hook-enforced" cap line live there, so S47
 > fixed everything it owns and proposed the vajra-side patch in `sessions/session-47-summary.md`.
 > The P1 support ticket is **prepared, not filed** (`sessions/session-47-support-ticket.md`) —
-> filing needs a human in GitHub Support.
+> filing needs a human in GitHub Support. And **S47's own review listed its residuals**:
+> the worktree scan exempts untracked root-level dotfiles, the cost counts are asserted
+> rather than re-derived, and one waiver variable covers both `required-crew` and
+> `review-inputs-attested`. All three are in `.ai/STATE.md` § *What Is Broken*.
 
 ## Where we are
 
-Detail: `sessions/session-47-summary.md` (fidelity map) + `sessions/session-47-review.md` (cold pass) +
-`prompts/47-task-gate-truth.md` (R1–R9) + `.ai/STATE.md`.
+Detail: `sessions/session-47-summary.md` (fidelity map) + `sessions/session-47-review.md`
+(**4 independent passes: builder N1 → REJECT → ACCEPT → ACCEPT 13/13**, all preserved in
+the file, canonical verdict first) + `prompts/47-task-gate-truth.md` (R1–R9) +
+`.ai/STATE.md`.
 
 | S47 delivered | State |
 |---|---|
