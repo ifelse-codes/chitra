@@ -2,7 +2,8 @@
 
 ## Current Session
 - **Number:** 47 — **make the governance gates able to fail** (`47 % 5 == 2`,
-  ordinary code session), **in progress** on branch `session-47-gate-truth`.
+  ordinary code session), **complete and closed 2026-10-05** — 4 independent
+  review passes ending **ACCEPT 13/13**; branch `session-47-gate-truth`.
 - **Branch:** `session-47-gate-truth` from `main` (`a218ac5` at branch time —
   derive with `git rev-parse main`, never trust this citation).
 - **Contract:** `prompts/47-task-gate-truth.md` — requirements **R1–R9**,
@@ -23,9 +24,10 @@
 
 - `.ai/SESSION` = 47. **`main` = `a218ac5`** (S46 closeout #70 — derive it).
 - **The repo is public** (`private` → `false`, `visibility` → `public`).
-  P1 holds (0 matches, re-derived by S46's gate); **residual:** 70 `refs/pull/*`
-  heads still serve pre-rewrite blobs, DELETE → 422 — ticket text in
-  `sessions/session-47-support-ticket.md` (R8).
+  P1 holds (0 matches, re-derived by S46's gate); **residual:** `refs/pull/*` heads
+  still serve pre-rewrite blobs, DELETE → 422 — count it, never trust it:
+  `git ls-remote origin 'refs/pull/*/head' | wc -l` → **71** at S47 close (70 before
+  PR #71). Ticket text in `sessions/session-47-support-ticket.md` (R8), **not filed**.
 - **S40 now has a summary** (`sessions/session-40-summary.md`, backfilled in S47
   — the record `check_session_coverage` exists to require). New coverage newest
   belief **S46** (merge-only body still believes S37 — the blindness, measured).

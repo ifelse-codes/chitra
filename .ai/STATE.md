@@ -1,15 +1,18 @@
 # chitra — Current State Snapshot
 
 **Snapshot, not log.** Overwritten in full at every closeout. (S47 — **make the
-governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-ground-truth.md`
-§ *Findings, ranked*. S46 closed 2026-10-04: P1, P2, F1–F6 discharged, repo public.)
+governance gates able to fail**, complete and closed 2026-10-05: R1–R9 from
+`sessions/session-45-ground-truth.md` § *Findings, ranked*, 4 review passes ending
+**ACCEPT 13/13**; S46 closed 2026-10-04: P1, P2, F1–F6 discharged, repo public.)
 
 ## Active Branch
 `session-47-gate-truth` from `main` (`a218ac5` at branch time — derive with
-`git rev-parse main`). Delivery: `scripts/verify-closeout.sh` fail-closed fixes
-(R1–R3) + `scripts/verify-session-47.sh` + `scripts/demo-session-47.sh` +
+`git rev-parse main`). Delivery: **16 commits** (10 from the builder session, 6 from
+the finisher), all `S47:`, max **3 files** each (derived per commit with
+`git show --numstat`): `scripts/verify-closeout.sh` fail-closed fixes (R1–R3) +
+`scripts/verify-session-47.sh` + `scripts/demo-session-47.sh` +
 `prompts/47-task-gate-truth.md` + backfilled `sessions/session-40-summary.md` +
-`sessions/session-47-support-ticket.md` (R8 evidence). No file under
+`sessions/session-47-support-ticket.md` (R8 evidence) + `.ai/` sync. No file under
 `packages/core/src/`; lockfile untouched.
 
 ## What Currently Works (observed, not claimed)
@@ -28,12 +31,18 @@ governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-
   refuses an empty population, and requires a summary per merged session ≥ S17.
   **S40 backfilled** (`sessions/session-40-summary.md`, disclosed backfill) — the exact
   record the old blindness cost.
-- **R2 — no-code fails closed.** `check_ground_truth_no_code` requires the GT artifact
-  non-empty and BLOCKS on an empty/unresolvable range instead of passing; offender path
-  exercised in `verify-session-47.sh` with a planted file under synthetic GT N.
-- **R3 — cost tracking is a measurement.** The check requires decisions + commit/requirement
-  counts + derivation words over a 200-char floor; a heading-only block goes red
-  (demonstrated on a fixture in the session gate).
+- **R2 — no-code fails closed, all three conjuncts.** `check_ground_truth_no_code`
+  requires the GT artifact non-empty, BLOCKS on an empty/unresolvable range instead of
+  passing, and **scans the worktree as well as `base..HEAD`** — so the contract's
+  literal stimulus (an untracked `packages/core/src/*.ts` under synthetic GT N) goes
+  red. Proven as a pair: a code-free range reads OK, the same range with the plant
+  reads RED, plant removed reads OK again; and the clause fires a second time on a
+  real committed code change aimed at with `VLT_GT_BASE`/`VLT_GT_HEAD`.
+- **R3 — cost tracking is a measurement, not a keyword.** The check requires a NUMBER
+  within 60 chars of each of `session|decision|requirement|commit|release` plus a
+  derivation word over a 200-char floor; a heading-only block goes red **and** the
+  long zero-digit prose block pass 2 shipped as its fakest green goes red (both
+  fixtures executed in the session gate).
 - **R4 — S44's canonical verdict is REJECT, disclosed.** `sessions/session-44-review.md`
   carries one verdict line (`**Verdict:** REJECT`, 8 passes, follow-up PR #66
   `79af323`); `check_review_attestation` reads N/A for a REJECT, so S44 carries no
@@ -42,8 +51,10 @@ governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-
   @ifelse.codes/chitra run test`); typecheck, chart drift, prettier clean.
 
 ## What Is In Progress
-- **S47 is in progress** on `session-47-gate-truth` (R1–R9). Remaining in-session:
-  session gate green, cold review with attestation, closeout green, PR.
+- **S47 is complete.** 4 independent review passes (pass 2 **REJECT** → 2 fixes →
+  pass 3 ACCEPT → 2 residual fixes → pass 4 **ACCEPT 13/13**), session gate **14/14**,
+  demo **9/9**, closeout green behind the founder crew waiver. What closes it: a new
+  chat for **S48**.
 - **S50 (`50 % 5 == 0`) is the next NO-CODE ground truth** (cadence:
   `CONSTRAINTS.yaml#ground_truth_every_n_sessions: 5`, named in BOOT + TASK +
   ROADMAP this session). S48/S49 are code sessions.
@@ -73,6 +84,17 @@ governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-
   (BOOT + TASK + ROADMAP + contract, each with the `N % 5` derivation); the
   constitution line itself is vajra-owned — patch proposed in the S47 summary,
   never smuggled as an edit.
+- 🟠 **S47's own residuals, listed by the independent review (pass 4), none a
+  contract done-condition:** (a) the worktree scan exempts untracked **root-level
+  dotfiles** while the committed side catches them — the gap only ever exempts a file
+  that never ships; (b) gitignored paths (`dist/`) stay invisible to
+  `git status --porcelain`, disclosed in the code comment; (c) the **cost counts are
+  asserted, not re-derived** — an honest-but-wrong cost line still passes, unlike the
+  test count (suite-derived) and the tag SHAs (`git rev-parse`); (d) one
+  `VAJRA_CLOSEOUT_WAIVER` variable waives **both** `required-crew` and
+  `review-inputs-attested`, so "17/17 with waiver" is 15 verified + 2 waived;
+  (e) the gate's probes `touch`/`rm -f` a named file — an interrupted run leaves
+  debris with no check to notice it.
 - 🟠 **Vision has no new product surface since `c72cc14` (S09).** Sequencing was
   defensible (cleanup → flip → gates); the path is now clear.
 - 🟠 **`.ai/.session-owner` gitignored at chat `12`; `clean_room.enabled: false`**
@@ -98,17 +120,24 @@ governance gates able to fail**, in progress: R1–R9 from `sessions/session-45-
   audit, 🔴 — cadence named nowhere, coverage blind 7 sessions, S44 REJECT recorded COMPLETE ·
   **S46** **the public flip** — repo public, history scrubbed (`1001 → 0`), private reporting on,
   `0.4.0` with provenance where `0.3.0` has none, `t0` recorded, S44 home-path gate repaired.
-- 🔄 **S47 (in progress)** — gates that can fail (R1–R9) + P1 ticket ride-along.
+- **S47** **make the governance gates able to fail** — coverage sees squash merges
+  (S40 backfilled), no-code fails closed on empty ranges *and* planted files, cost
+  tracking needs numbers not keywords, S44's REJECT disclosed, the 3-file cap scoped
+  honestly, stale facts guarded by derivation, crew row re-pointed, the P1 ticket
+  text written, the GT cadence named — closed with **4 review passes ending ACCEPT**.
 
 ## Cost Tracking
-- S47 (in progress, measured so far): one opencode session; plan approval carrying
-  commit approval + 2 founder decisions requested at plan (D-47-1 S44 record, D-47-2
-  crew gate); **9** requirements (R1–R9) + **2** assumptions, both held; delivery so far
-  **4 commits** (contract, closeout-gate fixes, S40 backfill + ticket, boot chain),
-  each **≤ 3 files** (derived per commit with `git show --numstat`, not asserted);
-  **0** product tests added (453 stays 453); **0** lockfile changes; **0** npm secrets;
-  **0** new recurring infrastructure. Token/`$` cost **unmeasured** (billed to the
-  founder's plan): the correct honest reading. Final counts at closeout.
+- S47 measured (final): **2** opencode sessions — the builder session and the finisher
+  session that closed its review's REJECT — under **1** chat (founder overrode the
+  one-session-per-chat rule explicitly); plan approval carrying commit approval, **2**
+  founder decisions at plan (D-47-1 S44 record, D-47-2 crew gate) + **1** crew-waiver
+  grant in chat; **9** requirements (R1–R9) + **2** assumptions, both held;
+  **16 delivery commits** (10 builder + 6 finisher), each **≤ 3 files** (derived per
+  commit with `git show --numstat`, not asserted); **4** review passes (1 ended REJECT,
+  2 fixes, final ACCEPT 13/13 by an independent reviewer session); **0** product tests
+  added (453 stays 453); **0** lockfile changes; **0** npm secrets; **0** releases this
+  session; **0** new recurring infrastructure. Token/`$` cost **unmeasured** (billed to
+  the founder's plan): the correct honest reading.
 - S46 measured: one opencode session; **3** founder decisions in-chat (plan approval, P2
   reorder, `home-path-scrubbed` fix) + **1** implicit commit approval; **8** requirements
   (P1, P2, F1–F6) + **2** assumptions, both held; **4 delivery commits, 9 files, max 3
