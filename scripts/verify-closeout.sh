@@ -119,10 +119,26 @@ check_cost_tracking() {
   local NAME="cost-tracking-present"; local LOG="$ARTIFACTS/${NAME}.log"
   local F=".ai/STATE.md"
   if [ ! -f "$F" ]; then echo "BLOCK: $F missing" > "$LOG"; bad "$NAME"; return; fi
-  if grep -q "Cost Tracking" "$F"; then
-    echo "OK: STATE.md has Cost Tracking section" > "$LOG"; ok "$NAME"
+  if ! grep -q "Cost Tracking" "$F"; then
+    echo "MISSING: STATE.md lacks Cost Tracking section" > "$LOG"; bad "$NAME"; return
+  fi
+  # S47 (S40 row 8, S45 H2): a heading is not a measurement. The section must carry
+  # derived counts, not just the words. Counterfactual: a heading-only block goes red.
+  local section
+  section="$(awk '/Cost Tracking/{f=1} f' "$F")"
+  if [ "${#section}" -lt 200 ]; then
+    echo "BLOCK: Cost Tracking section is a heading with no measurement (${#section} chars)." >> "$LOG"; bad "$NAME"; return
+  fi
+  local has_decision=0 has_commit=0 has_derived=0
+  if grep -qiE 'decision' <<<"$section"; then has_decision=1; fi
+  if grep -qiE 'commit|file.*per commit|requirement' <<<"$section"; then has_commit=1; fi
+  if grep -qiE 'deriv|measur|per commit|git show' <<<"$section"; then has_derived=1; fi
+  if [ "$has_decision" -eq 1 ] && [ "$has_commit" -eq 1 ] && [ "$has_derived" -eq 1 ]; then
+    echo "OK: STATE.md Cost Tracking carries decisions + commit/requirement counts + a derivation." > "$LOG"; ok "$NAME"
   else
-    echo "MISSING: STATE.md lacks Cost Tracking section" > "$LOG"; bad "$NAME"
+    echo "BLOCK: Cost Tracking section lacks a measurement (need decision + commit/requirement counts + derivation words)." >> "$LOG"
+    echo "  decision=$has_decision commit/requirement=$has_commit derived=$has_derived" >> "$LOG"
+    bad "$NAME"
   fi
 }
 
@@ -719,6 +735,23 @@ check_session_coverage() {
   if ! git rev-parse --verify main >/dev/null 2>&1; then
     echo "N/A: no main ref to scan." >> "$LOG"; ok "$NAME"; return
   fi
+  # S47 (S45 G1): the S36 body read ONLY merge subjects + session-NN-slug, so every
+  # squash-merged session since S38 was invisible (newest belief S37) and S40's missing
+  # summary went unseen. Population is now the UNION of merge subjects and squash
+  # subjects; an empty population FAILS; newest belief is recorded. Counterfactual:
+  # the old body stays green on the live tree where S40 has no summary.
+  local merge_list squash_list all_list
+  merge_list="$(git log --merges --format='%s' main 2>/dev/null \
+              | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p' || true)"
+  squash_list="$(git log --format='%s' main 2>/dev/null \
+              | grep -oE 'S[0-9]{2}:' | grep -oE '[0-9]+' || true)"
+  all_list="$(printf '%s\n%s\n' "$merge_list" "$squash_list" | grep -E '^[0-9]+$' | sort -n -u || true)"
+  if [ -z "$all_list" ]; then
+    echo "BLOCK: empty session population - nothing derived, nothing proven." >> "$LOG"
+    bad "$NAME"; return
+  fi
+  local newest; newest="$(printf '%s\n' "$all_list" | tail -1)"
+  echo "population: merge-subjects + squash-subjects, newest belief S$newest" >> "$LOG"
   local missing=0 seen=0 n
   while IFS= read -r n; do
     [ -n "$n" ] || continue
@@ -730,9 +763,12 @@ check_session_coverage() {
       echo "MISSING: S$n merged but sessions/session-$(printf '%02d' "$n")-summary.md absent" >> "$LOG"
       missing=$((missing+1))
     fi
-  done < <(git log --merges --format='%s' main 2>/dev/null \
-             | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p' | sort -n -u)
-  echo "scanned $seen merged session branch(es) >= S17" >> "$LOG"
+  done <<< "$all_list"
+  echo "scanned $seen merged session(s) >= S17, newest S$newest" >> "$LOG"
+  if [ "$seen" -eq 0 ]; then
+    echo "BLOCK: population derived but no session >= S17 - vacuous green refused." >> "$LOG"
+    bad "$NAME"; return
+  fi
   if [ "$missing" -eq 0 ]; then ok "$NAME"; else bad "$NAME"; fi
 }
 
@@ -749,14 +785,33 @@ check_ground_truth_no_code() {
     echo "N/A: session $N is not a ground truth." >> "$LOG"; ok "$NAME"; return
   fi
   : > "$LOG"
+  # S47 (S40 row 10, S45 Method): the old body diffed merge-base..HEAD and an empty
+  # range read OK - a GT session that committed nothing passed vacuously, and a planted
+  # code file under an empty range still read OK. Fail closed: the GT artifact must
+  # exist and be non-empty, and an empty/unresolvable range BLOCKS instead of passing.
+  # Counterfactual: plant packages/core/src/x.ts under an empty range - old OK, new red.
+  local PADDED; PADDED="$(printf '%02d' "$N")"
+  local GT="sessions/session-${PADDED}-ground-truth.md"
+  if [ ! -s "$GT" ]; then
+    echo "BLOCK: GT artifact $GT missing or empty - NO-CODE unproven." >> "$LOG"
+    bad "$NAME"; return
+  fi
+  echo "GT artifact present: $GT ($(wc -l < "$GT" | tr -d ' ') lines)" >> "$LOG"
   local base; base="$(git merge-base main HEAD 2>/dev/null || true)"
-  if [ -z "$base" ]; then echo "N/A: no merge-base with main (cannot diff)." >> "$LOG"; ok "$NAME"; return; fi
+  if [ -z "$base" ]; then
+    echo "BLOCK: no merge-base with main - empty range proves nothing (fail closed)." >> "$LOG"
+    bad "$NAME"; return
+  fi
+  if [ "$(git rev-parse HEAD)" = "$(git rev-parse "$base")" ]; then
+    echo "BLOCK: HEAD == merge-base ($base) - empty range, NO-CODE unprovable here; run on the session branch." >> "$LOG"
+    bad "$NAME"; return
+  fi
   local offenders
   offenders="$(git diff --name-only --no-color "$base" HEAD -- . \
                  ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
                | grep -vE '\.(md|txt)$' || true)"
   if [ -z "$offenders" ]; then
-    echo "OK: no code changes in ground-truth session $N." >> "$LOG"; ok "$NAME"; return
+    echo "OK: no code changes in ground-truth session $N (non-empty range evaluated)." >> "$LOG"; ok "$NAME"; return
   fi
   printf '%s\n' "$offenders" >> "$LOG"
   echo "BLOCK: ground-truth session $N changed code files (above)." >> "$LOG"
