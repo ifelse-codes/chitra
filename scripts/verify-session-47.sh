@@ -119,7 +119,7 @@ gt_no_code_fails_closed() {
     || { echo "no GT-artifact requirement in closeout"; return 1; }
   grep -q 'empty range, NO-CODE unprovable' scripts/verify-closeout.sh \
     || { echo "no empty-range fail-closed clause in closeout"; return 1; }
-  grep -q 'git status --porcelain -- packages/' scripts/verify-closeout.sh \
+  grep -q 'git status --porcelain' scripts/verify-closeout.sh \
     || { echo "no worktree scan in closeout — the contract's PLANTED stimulus reads green"; return 1; }
   local out rc=0
   out=$(bash scripts/verify-closeout.sh --gt-no-code-only 47 2>&1) || rc=$?

@@ -826,10 +826,15 @@ check_ground_truth_no_code() {
   # `packages/core/src/*.ts` must go red. `git diff base HEAD` cannot see an
   # untracked file (pass 2 proved both bodies read OK on that stimulus), so the
   # worktree is scanned too — a GT session that leaves code in its tree fails
-  # closed whether or not it committed it. Ignored files (dist/) are invisible to
-  # `git status --porcelain` by design, so a build artefact is not an offender.
-  wt="$(git status --porcelain -- packages/ 2>/dev/null \
-          | sed -E 's/^.. //' | grep -vE '\.(md|txt)$' || true)"
+  # closed whether or not it committed it. Pathspec mirrors the committed side
+  # exactly (everything except sessions/, prompts/, .ai/): pass 3 found the first
+  # draft was `packages/`-scoped, so an untracked `scripts/evil.sh` read green
+  # while a committed one did not. Root-level dotfiles (.DS_Store) are excluded —
+  # they are machine noise, not delivery; gitignored paths (dist/) stay invisible
+  # to `git status --porcelain` by design.
+  wt="$(git status --porcelain -- . \
+                 ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
+          | sed -E 's/^.. //' | grep -vE '^\.[^/]*$' | grep -vE '\.(md|txt)$' || true)"
   if [ -n "$wt" ]; then
     offenders="$(printf '%s\n%s\n' "$offenders" "$wt" | sed '/^$/d' | sort -u)"
   fi

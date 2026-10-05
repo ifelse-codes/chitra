@@ -30,14 +30,18 @@ p_r1() {  # coverage: union newest + zero missing
   m=$(git log --merges --format='%s' main 2>/dev/null | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p' | sort -n | tail -1)
   miss=0
   [ "$((10#$u))" -ge 46 ] || return 1
-  [ "$m" = "37" ] || return 1
+  # S37 was the blindness measured at authoring; pinned to `= "37"` it became a
+  # false red the day an ordinary merge landed (pass 3 residual #4). Compare the
+  # two populations instead — that is the claim being made.
+  [ -n "$m" ] || return 1
+  [ "$((10#$m))" -le "$((10#$u))" ] || return 1
   [ -s sessions/session-40-summary.md ] || return 1
-  echo "newest $u (merge-only still $m); S40 backfilled"
+  echo "newest $u (merge-only $m); S40 backfilled"
   echo ok
 }
 p_r2() {  # no-code fail-closed clauses + N/A + the contract stimulus as a PAIR + a real commit
   grep -q 'empty range, NO-CODE unprovable' scripts/verify-closeout.sh || return 1
-  grep -q 'git status --porcelain -- packages/' scripts/verify-closeout.sh || return 1
+  grep -q 'git status --porcelain' scripts/verify-closeout.sh || return 1
   bash scripts/verify-closeout.sh --gt-no-code-only 47 >/dev/null 2>&1 || return 1
   local art c cand d="" rc=0 out
   art=sessions/session-50-ground-truth.md
