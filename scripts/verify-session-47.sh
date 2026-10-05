@@ -114,12 +114,24 @@ gt_no_code_fails_closed() {
   echo "$out" | grep -q 'N/A: session 47 is not a ground truth' \
     || { echo "N=47 should be N/A (code session), got: $out"; return 1; }
   [ "$rc" -eq 0 ] || { echo "N/A path should exit 0, got $rc"; return 1; }
-  touch packages/core/src/__s47_probe__.ts
-  local out2 rc2=0
-  out2=$(bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc2=$?
-  rm -f packages/core/src/__s47_probe__.ts
-  [ "$rc2" -ne 0 ] || { echo "planted code under synthetic GT N=50 went green — offender path dead"; return 1; }
-  echo "clauses present; N=47 N/A (exit 0); planted probe under N=50 red (exit $rc2)"
+  # Offender clause, exercised against a REAL committed code change: point the
+  # check at the newest commit that touched packages/core/src, with a synthetic
+  # NON-EMPTY GT artifact so the artifact clause is satisfied and the offender
+  # clause alone can produce the red. An untracked probe is invisible to
+  # `git diff base HEAD` — that was this session's first, weaker proof.
+  # Counterfactual: delete the offender grep from closeout → this goes green.
+  local c art rc3=0 out3
+  c=$(git log --format='%H' -n1 -- packages/core/src || true)
+  [ -n "$c" ] || { echo "no commit touches packages/core/src — offender clause unexerciseable"; return 1; }
+  art="sessions/session-50-ground-truth.md"
+  if [ -e "$art" ]; then echo "$art already exists — refusing to clobber it"; return 1; fi
+  printf '# Session 50 — synthetic GT artifact (R2 offender probe)\n\nFixture: non-empty, so the artifact clause passes and the OFFENDER clause alone must fire.\n' > "$art"
+  out3=$(VLT_GT_BASE="${c}^" VLT_GT_HEAD="$c" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc3=$?
+  rm -f "$art"
+  [ "$rc3" -ne 0 ] || { echo "offender clause stayed green on a real committed code change — path dead"; return 1; }
+  echo "$out3" | grep -q 'changed code files' \
+    || { echo "red for the wrong reason (artifact/range clause, not the offender): $out3"; return 1; }
+  echo "clauses present; N=47 N/A (exit 0); offender clause RED on real commit ${c:0:8} with the GT artifact satisfied"
 }
 run_check "gt-no-code-fails-closed" gt_no_code_fails_closed
 
@@ -174,12 +186,65 @@ commit_cap_respected() {
 }
 run_check "commit-cap-respected" commit_cap_respected
 
+# ── Product: precondition stated, then suite + typecheck; tree untouched ──
+# Runs BEFORE R6 because R6 asserts the test count the suite PRINTS (SUITE_N) —
+# the number is derived once, here, never typed into four display sites.
+#
+# Precondition, stated instead of assumed (S47 fix — replaces S47's byte-identity
+# fallback, which could pass a gate it had not run): a clean checkout is RED with
+# the exact command that fixes it. No silent downgrade, and a missing toolchain can
+# never be reported as a product failure or as a green it did not earn.
+# Counterfactuals: fresh clone, no install → red with `pnpm install --frozen-lockfile`;
+# installed but unbuilt → red with the build command; installed+built → the suite runs.
+SUITE_N=""
+require_toolchain() {
+  local what="$1"
+  if ! command -v pnpm >/dev/null 2>&1; then
+    echo "$what unprovable: pnpm is not on PATH — install pnpm, then: pnpm install --frozen-lockfile && pnpm --filter @ifelse.codes/chitra run build"; return 1
+  fi
+  if [ ! -d node_modules ]; then
+    echo "$what unprovable: node_modules missing — run: pnpm install --frozen-lockfile"; return 1
+  fi
+  if [ ! -f packages/core/dist/index.cjs ]; then
+    echo "$what unprovable: packages/core/dist missing — run: pnpm --filter @ifelse.codes/chitra run build (artifacts/chitra-docs typechecks against it)"; return 1
+  fi
+  return 0
+}
+suite_green() {
+  require_toolchain "453-green suite" || return 1
+  local out n
+  out=$(pnpm --filter @ifelse.codes/chitra run test 2>&1) \
+    || { printf '%s\n' "$out" | tail -25; return 1; }
+  n=$(printf '%s\n' "$out" | grep -oE 'Tests +[0-9]+ passed' | head -1 | grep -oE '[0-9]+' || true)
+  [ -n "$n" ] || { echo "no 'Tests N passed' line in suite output — the count cannot be derived"; return 1; }
+  SUITE_N="$n"
+  printf '%s\n' "$out" | grep -E 'Test Files|Tests ' | tail -3
+  echo "suite derived count: $n"
+}
+typecheck_green() {
+  require_toolchain "typecheck" || return 1
+  pnpm run typecheck
+}
+run_check "core-suite-green" suite_green
+run_check "product-typecheck" typecheck_green
+
+product_untouched() {
+  local base; base="$(git merge-base main HEAD)"
+  local f
+  f=$(git diff --name-only "$base"..HEAD -- packages/core/src/ pnpm-lock.yaml || true)
+  [ -z "$f" ] || { echo "product files changed: $f"; return 1; }
+  echo "no packages/core/src or lockfile change in delivery"
+}
+run_check "product-untouched" product_untouched
+
 # ── R6: stale facts guarded ──
-# Counterfactual: retype 1b6c17d into a LIVE .ai file, drift the count display,
-# or touch a test file without updating the displays → red. Scope, stated: frozen
-# sessions/, prompts/ and ledger quotes legitimately cite old SHAs as history, and
-# this gate's own sources name the pattern only to forbid it — so the scan covers
-# the six live snapshot files, not the whole tree (the S44-runtime-sample lesson).
+# Counterfactual, each one executed (not asserted): retype a tag SHA in
+# KNOWLEDGE → red; drift the pill's line citation → red; move a display count →
+# red (and red against SUITE_N when the suite ran); retype main's range → red;
+# retype 1b6c17d into a LIVE .ai file → red. Scope, stated: frozen sessions/,
+# prompts/ and ledger quotes legitimately cite old SHAs as history, and this
+# gate's own sources name the pattern only to forbid it — so the scan covers the
+# six live snapshot files, not the whole tree (the S44-runtime-sample lesson).
 stale_facts_guarded() {
   local hits=""
   for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/CONTINUATION-PROMPT.md; do
@@ -189,13 +254,56 @@ stale_facts_guarded() {
   local base; base="$(git merge-base main HEAD)"
   local td; td=$(git diff --name-only "$base"..HEAD -- packages/core/tests/ || true)
   [ -z "$td" ] || { echo "test files changed in delivery: $td"; return 1; }
-  grep -q 'tests-453%20passing' README.md || { echo "README badge drifted"; return 1; }
-  grep -q 'stat-num">453<' artifacts/chitra-docs/src/App.tsx || { echo "docs hero drifted"; return 1; }
-  grep -q '\*\*453 tests\*\*' .ai/KNOWLEDGE.md || { echo "KNOWLEDGE header drifted"; return 1; }
-  git rev-parse --verify --quiet 'v0.4.0' >/dev/null || { echo "v0.4.0 tag missing"; return 1; }
-  grep -q 'v0.4.0' .ai/KNOWLEDGE.md || { echo "KNOWLEDGE never names v0.4.0"; return 1; }
-  grep -q 'S00–S46' .ai/KNOWLEDGE.md || { echo "KNOWLEDGE main range stale"; return 1; }
-  echo "no stale SHA in live .ai files; tests/ untouched in delivery so S46-measured 453 stands in suite+README+hero+KNOWLEDGE; v0.4.0 tagged and named"
+
+  # Test count: one canonical number, carried by every display site, and equal to
+  # the count the suite printed when the toolchain ran (SUITE_N). Fast scope skips
+  # the suite → cross-site agreement only, stated in the line below.
+  # Extraction is grep -m1 + bash parameter expansion — no `| head`, which under
+  # pipefail dies of SIGPIPE the moment a file repeats the pattern. The docs hero
+  # carries several stat-num pills (the first is not the test count), so its line
+  # is found BY the canonical count below, not used to invent one.
+  local m_readme m_know m_state n_readme n_know n_state v
+  m_readme=$(grep -m1 -oE 'tests-[0-9]+' README.md || true)
+  n_readme="${m_readme#tests-}"
+  m_know=$(grep -m1 -oE '\*\*[0-9]+ tests\*\*' .ai/KNOWLEDGE.md || true)
+  n_know="${m_know//[^0-9]/}"
+  m_state=$(grep -m1 -oE '[0-9]+/[0-9]+\*\* tests' .ai/STATE.md || true)
+  n_state="${m_state%%/*}"
+  for v in "$n_readme" "$n_know" "$n_state"; do
+    [ -n "$v" ] || { echo "a display site lost its test count (README=$n_readme KNOWLEDGE=$n_know STATE=$n_state)"; return 1; }
+    [ "$v" = "$n_readme" ] || { echo "display sites disagree: README=$n_readme vs $v"; return 1; }
+  done
+  local count_mode="cross-site agreement (suite not run in this scope)"
+  if [ -n "$SUITE_N" ]; then
+    [ "$SUITE_N" = "$n_readme" ] \
+      || { echo "display sites say $n_readme but the suite printed $SUITE_N"; return 1; }
+    count_mode="equals the suite-derived $SUITE_N"
+  fi
+
+  # Pill line: the docs hero must carry a stat-num with that count, and the
+  # citation must name the line it actually lives on.
+  local pill_line; pill_line=$(grep -nEm1 "stat-num\">${n_readme}<" artifacts/chitra-docs/src/App.tsx | cut -d: -f1 || true)
+  [ -n "$pill_line" ] || { echo "docs hero carries no stat-num for $n_readme tests"; return 1; }
+  grep -q "L${pill_line}\*\*" .ai/KNOWLEDGE.md \
+    || { echo "KNOWLEDGE's pill citation is stale: live pill is L$pill_line"; return 1; }
+
+  # Tag SHAs: run the very command KNOWLEDGE tells the reader to run
+  # (`git rev-parse <tag>` → short) and require the cited bytes to equal it.
+  local t sha
+  for t in v0.4.0 v0.3.0 v0.2.0 v0.1.0; do
+    sha=$(git rev-parse --short=7 "$t" 2>/dev/null) || { echo "tag $t missing — release evidence gone"; return 1; }
+    grep -q "\`$t\` at \`$sha\`" .ai/KNOWLEDGE.md \
+      || { echo "KNOWLEDGE's $t SHA is stale: live \`$sha\` (derive: git rev-parse --short=7 $t)"; return 1; }
+  done
+
+  # Main range: the same derivation KNOWLEDGE hands the reader, executed here.
+  local newest
+  newest=$(git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1 || true)
+  [ -n "$newest" ] || { echo "cannot derive main's newest session"; return 1; }
+  grep -q "S00–S${newest}" .ai/KNOWLEDGE.md \
+    || { echo "KNOWLEDGE main range stale: live newest is S$newest, file says otherwise (derive: git log --format='%s' main | grep -oE 'S[0-9]{2}:' ...)"; return 1; }
+
+  echo "no stale SHA in live .ai files; test count $count_mode; pill L$pill_line cited; 4 tag SHAs equal git rev-parse; main range S00–S$newest"
 }
 run_check "stale-facts-guarded" stale_facts_guarded
 
@@ -257,47 +365,6 @@ ledger_dispositioned() {
   echo "S45 rows 1–6 DONE; integrity gates green"
 }
 run_check "ledger-dispositioned" ledger_dispositioned
-
-# ── Product: suite + typecheck; tree untouched ──
-# Toolchain honesty, stated not hidden: this machine has no node/pnpm (only two
-# lookups spent — a third would be drift). When the toolchain is absent the two
-# checks below fall back to byte-identity against the S46-measured 453-green tree
-# and PASS disclosed; any product/test change in delivery disables the fallback
-# and FAILS closed. When the toolchain exists, the suite really runs.
-# Counterfactual: change a test or src file with no toolchain → red.
-toolchain_or_identical() {
-  local what="$1" cmd="$2"
-  if command -v pnpm >/dev/null 2>&1; then
-    bash -c "$cmd"
-    return $?
-  fi
-  local base; base="$(git merge-base main HEAD)"
-  local changed
-  changed=$(git diff --name-only "$base"..HEAD -- packages/core/ pnpm-lock.yaml || true)
-  if [ -z "$changed" ]; then
-    echo "TOOLCHAIN ABSENT (no pnpm on PATH): $what stands by byte-identity to the S46-measured green tree"
-    return 0
-  fi
-  echo "TOOLCHAIN ABSENT and product files changed ($changed) — $what unprovable"; return 1
-}
-suite_green() {
-  toolchain_or_identical "453-green suite" \
-    'pnpm --filter @ifelse.codes/chitra run test 2>&1 | grep -qE "Tests +453 passed"'
-}
-typecheck_green() {
-  toolchain_or_identical "typecheck" 'pnpm run typecheck'
-}
-run_check "core-suite-green" suite_green
-run_check "product-typecheck" typecheck_green
-
-product_untouched() {
-  local base; base="$(git merge-base main HEAD)"
-  local f
-  f=$(git diff --name-only "$base"..HEAD -- packages/core/src/ pnpm-lock.yaml || true)
-  [ -z "$f" ] || { echo "product files changed: $f"; return 1; }
-  echo "no packages/core/src or lockfile change in delivery"
-}
-run_check "product-untouched" product_untouched
 
 ( cd ".ai/verify/session-${SESSION}" && ln -sfn "${TS}" "latest" ) 2>/dev/null || true
 
