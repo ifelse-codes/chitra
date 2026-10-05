@@ -11,12 +11,14 @@ cd "$ROOT"
 FAILS=0
 row() {
   local label="$1"; shift
-  local why rc=0
-  why="$("$@" 2>/dev/null)" || rc=$?
-  if [ "$rc" -eq 0 ] && [ "$why" = "ok" ]; then
+  local out rc=0
+  out="$("$@" 2>/dev/null)" || rc=$?
+  local last; last="$(printf '%s\n' "$out" | tail -1)"
+  if [ "$rc" -eq 0 ] && [ "$last" = "ok" ]; then
+    printf '%s\n' "$out" | sed '$d' | sed 's/^/  | /'
     printf '%-34s %s\n' "$label" "SHIPPED"
   else
-    printf '%-34s %s\n' "$label" "NOT PROVEN — ${why:-exit $rc}"
+    printf '%-34s %s\n' "$label" "NOT PROVEN — ${out:-exit $rc}"
     FAILS=$((FAILS+1))
   fi
 }
@@ -57,14 +59,17 @@ p_r5() {  # delivery cap derived
   base=$(git merge-base main HEAD)
   for c in $(git rev-list "$base"..HEAD); do
     n=$(git show --numstat --format='' "$c" | grep -c . || true)
-    [ "$n" -gt "$mx" ] && mx="$n"
-    [ "$n" -gt 3 ] && return 1
+    if [ "$n" -gt "$mx" ]; then mx="$n"; fi
+    if [ "$n" -gt 3 ]; then return 1; fi
   done
   echo "max $mx files per delivery commit"
   echo ok
 }
-p_r6() {  # stale facts guarded
-  git grep -q '1b6c17d' -- . 2>/dev/null && return 1
+p_r6() {  # stale facts guarded (live snapshot files only; sessions/prompts/ledger quote old SHAs as frozen history)
+  local f
+  for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/CONTINUATION-PROMPT.md; do
+    if grep -q '1b6c17d' "$f" 2>/dev/null; then return 1; fi
+  done
   grep -q 'tests-453%20passing' README.md || return 1
   grep -q 'v0.4.0' .ai/KNOWLEDGE.md || return 1
   git rev-parse --verify --quiet 'v0.4.0' >/dev/null || return 1
