@@ -106,10 +106,13 @@
 - **Moot since S42, kept as history:** `lib/api-spec/openapi.yaml` `info.title` had to stay `Api`
   (changing it broke the orval-generated import paths). The spec and everything generated from it
   were deleted in S42; nothing imports them now.
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S46
-  (latest merge PR #70, `a218ac5`). **Read `main`'s real range, don't copy it** — this line
-  has now been wrong five times: it said S00–S08 (S35), was corrected to S00–S34 in S36,
-  drifted to S00–S37 by S40, to S00–S39 by S44, and to S00–S44 by S46. Since S47
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S47
+  (latest merge PR #71, `f0781f6` — a citation, derive it: `git rev-parse --short=7 main`).
+  **Read `main`'s real range, don't copy it** — this line
+  has now been wrong six times: it said S00–S08 (S35), was corrected to S00–S34 in S36,
+  drifted to S00–S37 by S40, to S00–S39 by S44, to S00–S44 by S46, was left at S00–S46
+  when S47's squash landed, and was caught here by `stale-facts-guarded` in
+  `scripts/verify-session-47.sh` — the first guard this line has ever had. Since S47
   `check_session_coverage` derives the population from merge subjects UNION squash
   subjects and refuses an empty one — the first guard this class has ever had. Derive it with
   `git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1`
