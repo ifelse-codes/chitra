@@ -35,10 +35,20 @@ p_r1() {  # coverage: union newest + zero missing
   echo "newest $u (merge-only still $m); S40 backfilled"
   echo ok
 }
-p_r2() {  # no-code fail-closed clauses + N/A path
+p_r2() {  # no-code fail-closed clauses + N/A path + offender clause on a REAL commit
   grep -q 'empty range, NO-CODE unprovable' scripts/verify-closeout.sh || return 1
   bash scripts/verify-closeout.sh --gt-no-code-only 47 >/dev/null 2>&1 || return 1
-  echo "fail-closed clauses present; code session N/A"
+  local c art rc=0 out
+  c=$(git log --format='%H' -n1 -- packages/core/src || true)
+  [ -n "$c" ] || return 1
+  art=sessions/session-50-ground-truth.md
+  [ -e "$art" ] && return 1
+  printf '# Session 50 — synthetic GT artifact (R2 offender probe)\n\nFixture: non-empty, so only the offender clause can fire.\n' > "$art"
+  out=$(VLT_GT_BASE="${c}^" VLT_GT_HEAD="$c" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc=$?
+  rm -f "$art"
+  [ "$rc" -ne 0 ] || return 1
+  echo "$out" | grep -q 'changed code files' || return 1
+  echo "clauses present; N/A green; offender clause red on real commit ${c:0:8}"
   echo ok
 }
 p_r3() {  # cost needs measurement
@@ -65,15 +75,24 @@ p_r5() {  # delivery cap derived
   echo "max $mx files per delivery commit"
   echo ok
 }
-p_r6() {  # stale facts guarded (live snapshot files only; sessions/prompts/ledger quote old SHAs as frozen history)
-  local f
+p_r6() {  # stale facts guarded — every assertion re-derived (live snapshot files only; sessions/prompts/ledger quote old SHAs as frozen history)
+  local f m mk ms n_r n_k n_s pill t sha newest
   for f in .ai/STATE.md .ai/SESSION-BOOT.md .ai/TASK.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/CONTINUATION-PROMPT.md; do
     if grep -q '1b6c17d' "$f" 2>/dev/null; then return 1; fi
   done
-  grep -q 'tests-453%20passing' README.md || return 1
-  grep -q 'v0.4.0' .ai/KNOWLEDGE.md || return 1
-  git rev-parse --verify --quiet 'v0.4.0' >/dev/null || return 1
-  echo "no stale SHA; 453 + v0.4.0 live"
+  m=$(grep -m1 -oE 'tests-[0-9]+' README.md) || return 1; n_r="${m#tests-}"
+  mk=$(grep -m1 -oE '\*\*[0-9]+ tests\*\*' .ai/KNOWLEDGE.md) || return 1; n_k="${mk//[^0-9]/}"
+  ms=$(grep -m1 -oE '[0-9]+/[0-9]+\*\* tests' .ai/STATE.md) || return 1; n_s="${ms%%/*}"
+  [ -n "$n_r" ] && [ "$n_r" = "$n_k" ] && [ "$n_r" = "$n_s" ] || return 1
+  pill=$(grep -nEm1 "stat-num\">${n_r}<" artifacts/chitra-docs/src/App.tsx | cut -d: -f1) || return 1
+  grep -q "L${pill}\*\*" .ai/KNOWLEDGE.md || return 1
+  for t in v0.4.0 v0.3.0 v0.2.0 v0.1.0; do
+    sha=$(git rev-parse --short=7 "$t" 2>/dev/null) || return 1
+    grep -q "\`$t\` at \`$sha\`" .ai/KNOWLEDGE.md || return 1
+  done
+  newest=$(git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1) || return 1
+  grep -q "S00–S${newest}" .ai/KNOWLEDGE.md || return 1
+  echo "count $n_r across 3 sites + hero; pill L$pill cited; 4 tag SHAs = git rev-parse; main S00–S$newest"
   echo ok
 }
 p_r7() {  # roadmap re-pointed
