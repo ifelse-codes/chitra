@@ -60,13 +60,17 @@ the finisher), all `S47:`, max **3 files** each (derived per commit with
   ROADMAP this session). S48/S49 are code sessions.
 
 ## What Is Broken / Incomplete
-- 🔴 **The P1 residual is disclosed, ticket text ready, filing needs a human.**
+- 🟠 **The P1 residual — founder decision, 2026-10-05: DO NOT FILE.**
   `refs/pull/*` is read-only (`DELETE …/git/refs/pull/67/head` → **`422
   refs/pull/* is read-only`**, re-derived 2026-10-05); **71** PR heads served
   (derive with `git ls-remote origin 'refs/pull/*/head' | wc -l` — this count moves
   with every PR: 70 before #71, 68 at the S46 audit). No API we own deletes them.
-  Request text + evidence: `sessions/session-47-support-ticket.md`. Until support
-  confirms deletion + GC, the status is DISCLOSED, not closed (same as S46 left it).
+  The request text stays prepared in `sessions/session-47-support-ticket.md`, but the
+  founder weighed it and chose to leave it: the residue is reachable only by a
+  deliberate fetch of old PR refs, no credential is in it, and the worry that GitHub's
+  cleanup might remove something we need was checked — deleting `refs/pull/*` touches
+  neither `main`, nor tags, nor releases. **Open on purpose, by decision**; only the
+  founder can reopen the filing question.
 - 🔴 **The crew gate's standing condition.** 5 waivers (S38/S39/S42/S44/S46); S47
   records waiver-or-green honestly. Vajra confirms helper provenance only from a
   Claude Code record, so under OpenCode the gate needs `VAJRA_CLOSEOUT_WAIVER=47`
