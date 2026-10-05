@@ -6,6 +6,10 @@ session:
   max_assumptions: 2
   max_retries: 2
   max_files_per_atomic_change: 3
+  # S47 (R5): branch/delivery-scoped. The local pre-commit hook enforces this per
+  # commit on session branches and the session gate derives it per delivery commit;
+  # squash merges to main never run a local hook (17 of the last 60 breach it).
+  # The vajra-owned AGENTS.md line claiming otherwise is disclosed, not edited here.
   max_stories_per_session: 1
   cap_hours_per_session: 2
   ground_truth_every_n_sessions: 5

@@ -1,45 +1,45 @@
 # Current Task Pointer
 
-## Session 46 — the public flip (complete, closed 2026-10-04)
+## Session 47 — make the governance gates able to fail (complete, closed 2026-10-05)
 
-- **Branch:** `session-46-public-flip`; delivery **4 commits / 9 files** on top of `8a083c8`,
-  squash-merged to `main` = **`86bc909`** (PR **#68**).
-- **Contract:** `prompts/46-task-public-flip.md` — preconditions **P1/P2**, requirements **F1–F6**.
-  **Never amended**; the N1 freeze held because the contract was not touched after the cold review
-  started.
-- **Delivered:**
-  - **P1** — `git filter-repo` 2.47.0 rewrite of every ref we own: **1001 → 0** (commit, file) pairs
-    across **444** commits; tree / count / tracked-files preserved (`8a083c8`, tree `8167462…`,
-    **367**); one force-push, `--no-verify` disclosed (the tracked pre-push hook blocks *any* `main`
-    push). **Residual disclosed:** `refs/pull/*` is read-only and **56 of 67** PR heads still carry
-    the old blobs — support ticket **owed**.
-  - **P2** — `{"enabled":true}`. Could not be green before F1 (public-repo-only endpoint, proved
-    against a public control with `admin: true`); founder reordered to **F1 → P2** rather than
-    waiving (**D-REORDER**, recorded in `sessions/session-46-flip.md`).
-  - **F1/F2** — `private` `true`→`false`, `visibility`→`public`, clone URL `404`→`200`, anonymous
-    clone works. **F3** — `homepage` + `repository.url` **unedited** (only the `version` line differs
-    from `main`), URL now resolves. **F4** — every `REPO-SETTINGS` row re-probed; `SECURITY.md` and
-    `CODE_OF_CONDUCT.md` no longer call an established route a pre-flip task.
-  - **F5** — `0.4.0` (manifest + generated `version.ts` + CHANGELOG) tagged on merged `main`, CI run
-    `37217761468` published it through Trusted Publishing with **no workflow edit**; `0.4.0` carries
-    provenance (sigstore log `3078088104`), `0.3.0` does not.
-  - **F6** — `t0` = **119 lifetime downloads, none organic**, recorded in `.ai/STATE.md` and derived
-    from the downloads API; the two `.ai/` files that still called the baseline zero were corrected.
-- **Product:** **453/453** unchanged; no `packages/core/src` change except generated `version.ts`;
-  no lockfile change; **0** npm secrets; **1** release.
-- **A gate was fixed, not left red:** S44's `home-path-scrubbed` demanded a commit that still carries
-  the path — permanently unsatisfiable after P1. Proof moved to runtime-assembled samples plus an
-  inverted history walk (`scripts/verify-session-44.sh`).
-- **Closeout:** `scripts/verify-session-46.sh` (16 checks) + `demo-session-46.sh`; summary + cold
-  review in `sessions/session-46-*.md`; `verify-closeout.sh` green behind the founder crew waiver
-  (Vajra cannot verify helper provenance under OpenCode).
+- **Branch:** `session-47-gate-truth` from `main`. Delivery **16 commits** (10 builder +
+  6 finisher), max **3 files** each, merged by PR **#71**.
+- **Contract:** `prompts/47-task-gate-truth.md` — requirements **R1–R9**,
+  spec `sessions/session-45-ground-truth.md` § *Findings, ranked*.
+  **Never amended**; N1 freeze held (no edit after `ff45ff4`).
+- **Cadence (`N % 5`):** S47 is a code session (`47 % 5 == 2`). The 5-session
+  ground-truth cadence (`CONSTRAINTS.yaml#ground_truth_every_n_sessions: 5`)
+  made S45 NO-CODE and makes **S50 the next ground truth**. Named here so no
+  handoff mis-schedules a code session onto a ground-truth slot again (S45 H1).
+- **Delivered (all nine):**
+  - **R1** — coverage sees squash merges; S40 backfilled; newest S46 (old: S37).
+  - **R2** — no-code fails closed: artifact required, empty range BLOCKS, **worktree
+    scanned too** so the contract's planted file goes red (pair-proven).
+  - **R3** — cost tracking needs a **number** beside each of session/decision/
+    requirement/commit/release + a derivation word (zero-digit prose goes red).
+  - **R4** — S44 REJECT disclosed in STATE/ROADMAP (was COMPLETE).
+  - **R5** — 3-file cap honest: branch/delivery-scoped; vajra line disclosed.
+  - **R6** — stale facts guarded: suite-derived test count, live pill line, 4 tag
+    SHAs via `git rev-parse`, main range via its own derivation, PR-head command.
+  - **R7** — ROADMAP:56 re-pointed to S47; crew waiver-or-green honest.
+  - **R8** — P1 ticket text + 422 evidence in `sessions/session-47-support-ticket.md`.
+  - **R9** — cadence named in BOOT + TASK + ROADMAP; AGENTS half disclosed.
+- **Review:** 4 passes by an independent reviewer session (contract + diff only):
+  pass 1 builder N1 ACCEPT → **pass 2 REJECT** (R2 literal stimulus, R3 zero-digit
+  block) → fixes → pass 3 ACCEPT → 2 residual fixes → **pass 4 ACCEPT, 13/13**,
+  attestation `29c148c1…` = `verify-closeout.sh --inputs-sha 47`.
+- **Gates:** `verify-session-47.sh` **14/14** (incl. a toolchain precondition that
+  fails with the install command instead of passing on byte-identity), demo **9/9**,
+  closeout **17/17** behind the founder crew waiver.
+- **Product:** 453/453 untouched (re-derived at verify time).
 
-## Next session (S47)
+## Next session (S48)
 
-- **Leading candidate:** the **S45 audit's 11 findings** — spec at
-  `sessions/session-45-ground-truth.md` § *Findings, ranked*. Chiefly `check_session_coverage`
-  (blind for S38–S44), the GT cadence missing from `AGENTS.md` (vajra-owned), S44's undisclosed
-  `REJECT`, the 3-file cap (17 of 60), the stale-fact class, and the **owed GitHub support ticket**
-  for the P1 residual.
-- Alternatives: the **GTM proof pack** beyond `t0`, or **new product surface** (none since `c72cc14`).
-- Contract for S47 does not exist yet — write `prompts/47-task-*.md` at plan time.
+- Candidates: GTM proof pack beyond `t0`, or new product surface (none since
+  `c72cc14`), or S47's disclosed residuals (root-dotfile asymmetry, cost counts
+  asserted rather than re-derived).
+- **The P1 support ticket is written but NOT filed** —
+  `sessions/session-47-support-ticket.md`; a human must file it.
+- **S50 (`50 % 5 == 0`) is the next NO-CODE ground truth** — no code session
+  may be scheduled onto it.
+- Contract for S48 does not exist yet — write `prompts/48-task-*.md` at plan time.

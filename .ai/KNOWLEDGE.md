@@ -3,10 +3,10 @@
 **Permanent facts only. Reloaded every session.** (Seeded S00 brownfield onboarding, 2026-07-02.)
 
 ## What chitra is
-- **`@ifelse.codes/chitra`** (`packages/core/`, v0.3.0, MIT) — the product: a zero-runtime-dependency
+- **`@ifelse.codes/chitra`** (`packages/core/`, v0.4.0, MIT) — the product: a zero-runtime-dependency
   TypeScript terminal charting library. "Beautiful visualizations for terminals, agents, and
   modern developer workflows." 20 chart types, 3 renderers (braille/blocks/ascii), 7 themes.
-  **Published on npm as `@ifelse.codes/chitra@0.3.0` (S39, tag `latest`).** Renamed from
+  **Published on npm as `@ifelse.codes/chitra@0.4.0` (S46, tag `latest`, with provenance; `0.3.0` has none).** Renamed from
   `@ifelse.codes/core` on 2026-09-29; that name is **not** deprecated (no public release, no
   external user) — the S36/S37/S38 sections below keep it because they are dated records.
 - Around the lib there is **one** app: `artifacts/chitra-docs/` — React 19 + Vite + Tailwind v4
@@ -106,17 +106,22 @@
 - **Moot since S42, kept as history:** `lib/api-spec/openapi.yaml` `info.title` had to stay `Api`
   (changing it broke the orval-generated import paths). The spec and everything generated from it
   were deleted in S42; nothing imports them now.
-- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S44
-  (latest merge PR #66, `5a39c43`). **Read `main`'s real range, don't copy it** — this line
-  has now been wrong four times: it said S00–S08 (S35), was corrected to S00–S34 in S36,
-  drifted to S00–S37 by S40, and to S00–S39 by S44. No guard protects it. Derive it with
+- Repo **is** a git repo at `github.com/ifelse-codes/chitra`; `main` hosts S00–S46
+  (latest merge PR #70, `a218ac5`). **Read `main`'s real range, don't copy it** — this line
+  has now been wrong five times: it said S00–S08 (S35), was corrected to S00–S34 in S36,
+  drifted to S00–S37 by S40, to S00–S39 by S44, and to S00–S44 by S46. Since S47
+  `check_session_coverage` derives the population from merge subjects UNION squash
+  subjects and refuses an empty one — the first guard this class has ever had. Derive it with
   `git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1`
   — and note **why the narrow pattern is required**: without the two-digit-and-colon anchor the
   command also matches commit text like `Vajra S144 dogfood`, and returns 144. Separately,
   **do not** read `main`'s range from `git log --merges`, which is what `check_session_coverage` does
-  and which stops at **S37** because every session since S38 was squash-merged. The newest tag is `v0.3.0` at `87dafe2`
-  (S39); `v0.1.0` is at `802ffc7` and `v0.2.0` at `9495fa7`, all pushed, none stale.
-  *(S45 corrected two of these three tag SHAs — `f4ff6ef9` and `76d21f3` were both wrong.)*
+  and which stopped at **S37** because every session since S38 was squash-merged (fixed in S47: the
+  population is now the union). Tags (post-S46-rewrite SHAs — the rewrite moved every SHA, so any
+  pre-2026-10-04 citation is stale by construction; derive with `git rev-parse <tag>`):
+  `v0.4.0` at `fd45ec6` (S46, latest), `v0.3.0` at `f17b204`, `v0.2.0` at `7664fed`,
+  `v0.1.0` at `48db41e`, all pushed, none stale.
+  *(S45 corrected two of three pre-rewrite tag SHAs; S46's rewrite then moved all of them.)*
   Vajra branch/commit/PR rules run via `.githooks/` (`core.hooksPath .githooks`) and
   `.ai/hooks/*`. Commits are founder-approved (`VAJRA_ALLOW_COMMIT=<NN>`); pushes/PRs
   need `VAJRA_ALLOW_PUBLISH=1`.
@@ -440,3 +445,29 @@
   Every check writes its seconds to `timings.txt`, so the cost is measured per check rather than
   repeated from a review; `gate-scope-switch` prices the skip list from the newest **complete** run
   and prints which run it used.
+
+## S47 extension — the population-nobody-derives fixes (2026-10-05)
+
+- **`check_session_coverage` derives its population now.** Merge subjects UNION squash
+  subjects (`SNN:`), newest belief recorded, empty population FAILS, every merged session
+  >= S17 needs `sessions/session-NN-summary.md`. The old body believed S37 on a tree
+  whose newest session was S46, and cost S40's summary. Backfilled:
+  `sessions/session-40-summary.md` (disclosed backfill, from S40's own ground-truth +
+  review artifacts).
+- **`check_ground_truth_no_code` fails closed.** The GT artifact must exist non-empty;
+  an empty or unresolvable range BLOCKS (was: N/A/OK). Offender path exercised in
+  `verify-session-47.sh` with a planted file under a synthetic GT N.
+- **`check_cost_tracking` needs a measurement.** Decisions + commit/requirement counts +
+  derivation words over a 200-char floor; heading-only goes red (fixture-demonstrated).
+- **S44's record corrected.** Canonical verdict REJECT (8 passes) + follow-up PR #66;
+  STATE/ROADMAP no longer COMPLETE; cost line carries the second half.
+- **Honest caps.** The 3-file cap is branch/delivery-scoped (local hook + session gate
+  `commit_cap_respected` deriving per-commit counts); squash merges bypass it, and the
+  vajra-owned `AGENTS.md` line saying otherwise is disclosed, not edited. Same for the
+  GT cadence: named in BOOT + TASK + ROADMAP + contract with the `N % 5` derivation
+  (S50 next); the constitution line is a vajra-side change, proposed in the S47 summary.
+- **P1 residual:** `refs/pull/*` read-only (DELETE → 422, re-derived); **71** heads at
+  last probe — derive, never trust: `git ls-remote origin 'refs/pull/*/head' | wc -l`
+  (70 before PR #71, 68 at the S46 audit; the count moves with every PR). Ticket text
+  + evidence: `sessions/session-47-support-ticket.md`. Filing needs a human in
+  GitHub Support.

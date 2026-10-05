@@ -53,7 +53,7 @@ if not, they go, and the one-liner becomes true.**
 | Item | Why it stays open |
 |---|---|
 | §4.3 — `ai-names-no-deleted-tree` is a membership check and **cannot catch a lie inside a listed file** | The reviewer judged it an **acceptable disclosed limit**, and I agree: the alternative it rejected was a prose-coupled check this repo has refused repeatedly. Its intended failure mode is demonstrated — a new mention site turns the gate red and forces a human. Revisit only if it costs something real |
-| `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, S42, **and now S44 — four**. The row used to read "it is **S44 decision work beside D2**", inside a table headed *deliberately NOT scheduled*, and S44 completed in October without touching it; `STATE.md` still listed it open. **Corrected in S45: this is S47 work, not S44's.** It demands a tech-lead handoff that `AGENTS.md`'s 9-step Session Loop never asks for, so it polices a step the constitution does not contain |
+| `check_required_crew` is structurally unsatisfiable | Founder-waived at S38, S39, S42, **and now S44 — four**. The row used to read "it is **S44 decision work beside D2**", inside a table headed *deliberately NOT scheduled*, and S44 completed in October without touching it; `STATE.md` still listed it open. **Corrected in S45: this is S47 work, not S44's. Claimed by S47 (R7): done-condition = waiver-or-green recorded honestly at closeout, and no file claims the gate satisfied when it was waived.** It demands a tech-lead handoff that `AGENTS.md`'s 9-step Session Loop never asks for, so it polices a step the constitution does not contain |
 
 ## Backlog (not yet scheduled)
 - ✅ **Session 42 (S42) — cleanup Batch 2: dead weight** (branch `session-42-dead-weight`,
@@ -114,7 +114,7 @@ if not, they go, and the one-liner becomes true.**
   under the contract's authorisation), **D4b = recorded for the flip**, **D5 = all 81 `overrides`
   stripped with a zero-delta lockfile regen**. **N1** closed with a rule in `reviewer/SKILL.md` +
   a pure `contract-freshness` core in `verify-closeout.sh`; **§4.9** with `VAJRA_GATE_SCOPE` +
-  per-check timings. Product untouched: **453/453**, no file under `packages/core/src/`.
+  per-check timings. Product untouched: **453/453**, no file under `packages/core/src/`. **Fidelity record, corrected in S47 (R4): canonical verdict REJECT (8 passes) + follow-up PR #66 — disclosed, never COMPLETE.**
 - ✅ **Session 45 (S45) — the mandatory ground-truth audit (NO-CODE, `45 % 5 == 0`)**,
   contract `prompts/45-task-public-flip.md`, audit `sessions/session-45-ground-truth.md`.
   **COMPLETE, 🔴.** **27 probes, 3 retired** (the retired ones are listed in the artifact — a retired
@@ -154,7 +154,7 @@ if not, they go, and the one-liner becomes true.**
   `refs/pull/*` still exposes the old blobs in **56 of 67** PR heads — a support ticket is owed.
   **P2** — `{"enabled":true}`, which was impossible before F1 (public-repo-only endpoint, proved
   against a public control), so the founder reordered F1 → P2 instead of waiving it.
-- 🔜 **Session 47 (S47) candidate — make the governance gates able to fail.** A **different story from
+- 🔄 **Session 47 (S47) — make the governance gates able to fail — IN PROGRESS** (`47 % 5 == 2`, code session; contract `prompts/47-task-gate-truth.md`, R1–R9). A **different story from
   the flip**, deliberately not folded into it: fixing `verify-closeout.sh` in the same session that
   makes the repo public would put the public surface and its gates in one unreviewable commit. Ranked
   list with severities in `sessions/session-45-ground-truth.md` § *Findings, ranked*; dispositions in
@@ -163,7 +163,7 @@ if not, they go, and the one-liner becomes true.**
   change — disclosed, not smuggled), **S44's `REJECT` is recorded as COMPLETE**, and the **3-file cap
   is unenforced by 17/60 commits**. **Rides along from S46:** file the GitHub support ticket to
   delete `refs/pull/*` and GC the unreachable pre-rewrite objects — the only remaining home-path
-  exposure, and only GitHub can remove it (`DELETE` → `422 refs/pull/* is read-only`).
+  exposure, and only GitHub can remove it (`DELETE` → `422 refs/pull/* is read-only`). **Cadence (`N % 5`): S47 is code, S48/S49 are code, S50 (`50 % 5 == 0`) is the next NO-CODE ground truth — no code session may be scheduled onto it.**
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
