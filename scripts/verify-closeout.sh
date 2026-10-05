@@ -122,24 +122,32 @@ check_cost_tracking() {
   if ! grep -q "Cost Tracking" "$F"; then
     echo "MISSING: STATE.md lacks Cost Tracking section" > "$LOG"; bad "$NAME"; return
   fi
-  # S47 (S40 row 8, S45 H2): a heading is not a measurement. The section must carry
-  # derived counts, not just the words. Counterfactual: a heading-only block goes red.
+  # S47 (S40 row 8, S45 H2): a heading is not a measurement — and neither is a
+  # keyword. Pass 2's fakest green was a 633-char block with ZERO digits that
+  # passed on `decision|commit|deriv` word-presence while the OK line claimed
+  # counts it had never read. The contract names five counts, so each must have a
+  # NUMBER within 60 chars of the word, and the OK line says only what was read.
+  # Counterfactuals: heading-only → red (length); zero-digit prose → red (this).
   local section
   section="$(awk '/Cost Tracking/{f=1} f' "$F")"
   if [ "${#section}" -lt 200 ]; then
     echo "BLOCK: Cost Tracking section is a heading with no measurement (${#section} chars)." >> "$LOG"; bad "$NAME"; return
   fi
-  local has_decision=0 has_commit=0 has_derived=0
-  if grep -qiE 'decision' <<<"$section"; then has_decision=1; fi
-  if grep -qiE 'commit|file.*per commit|requirement' <<<"$section"; then has_commit=1; fi
+  local has_derived=0 kw missing=""
   if grep -qiE 'deriv|measur|per commit|git show' <<<"$section"; then has_derived=1; fi
-  if [ "$has_decision" -eq 1 ] && [ "$has_commit" -eq 1 ] && [ "$has_derived" -eq 1 ]; then
-    echo "OK: STATE.md Cost Tracking carries decisions + commit/requirement counts + a derivation." > "$LOG"; ok "$NAME"
-  else
-    echo "BLOCK: Cost Tracking section lacks a measurement (need decision + commit/requirement counts + derivation words)." >> "$LOG"
-    echo "  decision=$has_decision commit/requirement=$has_commit derived=$has_derived" >> "$LOG"
-    bad "$NAME"
+  for kw in session decision requirement commit release; do
+    grep -qiE "${kw}[^0-9]{0,60}[0-9]+|[0-9]+[^0-9]{0,60}${kw}" <<<"$section" || missing="$missing $kw"
+  done
+  if [ -n "$missing" ]; then
+    echo "BLOCK: Cost Tracking names no NUMBER beside:$missing — a keyword is not a count." >> "$LOG"
+    bad "$NAME"; return
   fi
+  if [ "$has_derived" -ne 1 ]; then
+    echo "BLOCK: Cost Tracking has numbers but no derivation (deriv|measur|per commit|git show)." >> "$LOG"
+    bad "$NAME"; return
+  fi
+  echo "OK: Cost Tracking carries a number beside each of session/decision/requirement/commit/release, plus a derivation." > "$LOG"
+  ok "$NAME"
 }
 
 # --- Execution-sha placeholder guard (S81) -----------------------------------
@@ -810,12 +818,23 @@ check_ground_truth_no_code() {
     echo "BLOCK: range is empty ($base == $head_ref) - empty range, NO-CODE unprovable here; run on the session branch." >> "$LOG"
     bad "$NAME"; return
   fi
-  local offenders
+  local offenders wt
   offenders="$(git diff --name-only --no-color "$base" "$head_ref" -- . \
                  ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
                | grep -vE '\.(md|txt)$' || true)"
+  # S47 R2, third conjunct of the contract's done-condition: a PLANTED
+  # `packages/core/src/*.ts` must go red. `git diff base HEAD` cannot see an
+  # untracked file (pass 2 proved both bodies read OK on that stimulus), so the
+  # worktree is scanned too — a GT session that leaves code in its tree fails
+  # closed whether or not it committed it. Ignored files (dist/) are invisible to
+  # `git status --porcelain` by design, so a build artefact is not an offender.
+  wt="$(git status --porcelain -- packages/ 2>/dev/null \
+          | sed -E 's/^.. //' | grep -vE '\.(md|txt)$' || true)"
+  if [ -n "$wt" ]; then
+    offenders="$(printf '%s\n%s\n' "$offenders" "$wt" | sed '/^$/d' | sort -u)"
+  fi
   if [ -z "$offenders" ]; then
-    echo "OK: no code changes in ground-truth session $N (non-empty range evaluated)." >> "$LOG"; ok "$NAME"; return
+    echo "OK: no code changes in ground-truth session $N (non-empty range evaluated; worktree clean)." >> "$LOG"; ok "$NAME"; return
   fi
   printf '%s\n' "$offenders" >> "$LOG"
   echo "BLOCK: ground-truth session $N changed code files (above)." >> "$LOG"

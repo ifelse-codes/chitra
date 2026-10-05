@@ -72,9 +72,13 @@ contract_at_head() {
 run_check "contract-at-head" contract_at_head
 
 # ── R1: coverage sees squash merges ──
-# Counterfactual, measured on this tree: merge-only newest == S37 while the union
+# Counterfactual, measured at authoring: merge-only newest == S37 while the union
 # newest == S46 — the old body stayed green where S40 had no summary; the new body
-# went red until the backfill below.
+# went red until the backfill below. The S37 value is REPORTED, not pinned: pass 2
+# showed an exact `== 37` goes red the day an ordinary merge lands. What must hold
+# forever: both populations non-empty, merge-only never NEWER than the union,
+# union ≥ S46 (the anti-regression assertion), squash logic present in closeout,
+# and a summary for every merged session ≥ S17.
 coverage_new_sees_squash() {
   local merge_newest union_newest
   merge_newest=$(git log --merges --format='%s' main 2>/dev/null \
@@ -83,7 +87,10 @@ coverage_new_sees_squash() {
       | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p'
     git log --format='%s' main 2>/dev/null | grep -oE 'S[0-9]{2}:' | grep -oE '[0-9]+'; } \
     | sort -n -u | tail -1)
-  [ "$merge_newest" = "37" ] || { echo "merge-only newest is S$merge_newest, expected the S37 blindness"; return 1; }
+  [ -n "$merge_newest" ] || { echo "merge-only population empty — nothing to compare"; return 1; }
+  [ -n "$union_newest" ] || { echo "union population empty — refuse vacuous green"; return 1; }
+  [ "$((10#$merge_newest))" -le "$((10#$union_newest))" ] \
+    || { echo "merge-only newest S$merge_newest reads NEWER than the union S$union_newest"; return 1; }
   [ "$((10#$union_newest))" -ge 46 ] || { echo "union newest is S$union_newest, expected >= S46"; return 1; }
   grep -q 'squash' scripts/verify-closeout.sh || { echo "closeout has no squash-union logic"; return 1; }
   [ -s sessions/session-40-summary.md ] || { echo "S40 backfill missing — the gap this fix exists for"; return 1; }
@@ -96,62 +103,104 @@ coverage_new_sees_squash() {
       | sed -nE 's#.*session-([0-9]+)-[a-z0-9-]+.*#\1#p'
     git log --format='%s' main 2>/dev/null | grep -oE 'S[0-9]{2}:' | grep -oE '[0-9]+'; } | sort -n -u)
   [ "$missing" -eq 0 ] || return 1
-  echo "merge-only newest S37 (blind) vs union newest S$union_newest; zero MISSING after S40 backfill"
+  echo "merge-only newest S$merge_newest vs union newest S$union_newest (blindness at authoring: S37 vs S46); zero MISSING after S40 backfill"
 }
 run_check "coverage-new-sees-squash" coverage_new_sees_squash
 
 # ── R2: no-code fails closed; offender path executes ──
 # Counterfactual: the old body diffed merge-base..HEAD and read OK on an empty range;
-# the new body BLOCKS there and requires the GT artifact. Exercised: a planted code
-# file under synthetic GT N=50 goes red (proves the path executes, not N/A).
+# the new body BLOCKS there and requires the GT artifact. Exercised BOTH ways, per
+# the contract's literal wording (pass 2's REJECT ground): an UNTRACKED
+# packages/core/src/*.ts under synthetic GT N=50 must go red — it cannot be seen by
+# `git diff base HEAD`, so closeout scans the worktree too — and the same clause must
+# also fire on a real committed code change aimed at with VLT_GT_BASE/VLT_GT_HEAD.
 gt_no_code_fails_closed() {
   grep -q 'GT artifact present' scripts/verify-closeout.sh \
     || { echo "no GT-artifact requirement in closeout"; return 1; }
   grep -q 'empty range, NO-CODE unprovable' scripts/verify-closeout.sh \
     || { echo "no empty-range fail-closed clause in closeout"; return 1; }
+  grep -q 'git status --porcelain -- packages/' scripts/verify-closeout.sh \
+    || { echo "no worktree scan in closeout — the contract's PLANTED stimulus reads green"; return 1; }
   local out rc=0
   out=$(bash scripts/verify-closeout.sh --gt-no-code-only 47 2>&1) || rc=$?
   echo "$out" | grep -q 'N/A: session 47 is not a ground truth' \
     || { echo "N=47 should be N/A (code session), got: $out"; return 1; }
   [ "$rc" -eq 0 ] || { echo "N/A path should exit 0, got $rc"; return 1; }
-  # Offender clause, exercised against a REAL committed code change: point the
-  # check at the newest commit that touched packages/core/src, with a synthetic
-  # NON-EMPTY GT artifact so the artifact clause is satisfied and the offender
-  # clause alone can produce the red. An untracked probe is invisible to
-  # `git diff base HEAD` — that was this session's first, weaker proof.
-  # Counterfactual: delete the offender grep from closeout → this goes green.
-  local c art rc3=0 out3
-  c=$(git log --format='%H' -n1 -- packages/core/src || true)
-  [ -n "$c" ] || { echo "no commit touches packages/core/src — offender clause unexerciseable"; return 1; }
+  local art rc4=0 out4
   art="sessions/session-50-ground-truth.md"
   if [ -e "$art" ]; then echo "$art already exists — refusing to clobber it"; return 1; fi
   printf '# Session 50 — synthetic GT artifact (R2 offender probe)\n\nFixture: non-empty, so the artifact clause passes and the OFFENDER clause alone must fire.\n' > "$art"
+  # (a) the contract's literal stimulus, proven as a PAIR: a code-free range reads
+  # OK, and the SAME range with an untracked packages/core/src/*.ts goes red — so
+  # the plant alone is what flips it. (Pass 2 executed the plant against a range
+  # that was already red for an unrelated reason; a red that two causes explain
+  # proves neither.)
+  local cand d="" rc0=0 out0
+  for cand in $(git rev-list -n 25 HEAD); do
+    git rev-parse --verify --quiet "${cand}^" >/dev/null || continue
+    if [ -z "$(git diff --name-only "${cand}^" "$cand" -- . \
+                 ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null \
+               | grep -vE '\.(md|txt)$')" ]; then d="$cand"; break; fi
+  done
+  [ -n "$d" ] || { echo "no code-free commit found to serve as the clean range"; rm -f "$art"; return 1; }
+  out0=$(VLT_GT_BASE="${d}^" VLT_GT_HEAD="$d" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc0=$?
+  if [ "$rc0" -ne 0 ]; then echo "clean range must read OK first, got: $out0"; rm -f "$art"; return 1; fi
+  touch packages/core/src/__s47_planted_probe__.ts
+  out4=$(VLT_GT_BASE="${d}^" VLT_GT_HEAD="$d" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc4=$?
+  rm -f packages/core/src/__s47_planted_probe__.ts
+  if [ "$rc4" -eq 0 ]; then echo "PLANTED untracked packages/core/src/*.ts read GREEN — contract stimulus dead"; rm -f "$art"; return 1; fi
+  if ! echo "$out4" | grep -q 'changed code files'; then
+    echo "plant red for the wrong reason (not the offender clause): $out4"; rm -f "$art"; return 1
+  fi
+  # (b) the same clause against a REAL committed code change.
+  local c rc3=0 out3
+  c=$(git log --format='%H' -n1 -- packages/core/src || true)
+  if [ -z "$c" ]; then echo "no commit touches packages/core/src — second exercise impossible"; rm -f "$art"; return 1; fi
   out3=$(VLT_GT_BASE="${c}^" VLT_GT_HEAD="$c" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc3=$?
   rm -f "$art"
   [ "$rc3" -ne 0 ] || { echo "offender clause stayed green on a real committed code change — path dead"; return 1; }
   echo "$out3" | grep -q 'changed code files' \
     || { echo "red for the wrong reason (artifact/range clause, not the offender): $out3"; return 1; }
-  echo "clauses present; N=47 N/A (exit 0); offender clause RED on real commit ${c:0:8} with the GT artifact satisfied"
+  echo "clauses present; N=47 N/A (exit 0); clean range OK → PLANTED file RED (pair on ${d:0:8}); offender clause RED on real commit ${c:0:8}"
 }
 run_check "gt-no-code-fails-closed" gt_no_code_fails_closed
 
 # ── R3: cost tracking needs a measurement ──
 # Counterfactual: a heading-only fixture passes the old grep and fails the new
-# predicate; the live STATE.md passes the new predicate.
+# predicate; a long ZERO-DIGIT block (pass 2's fakest green — it passed while the
+# OK line claimed counts) fails it too; the live STATE.md passes both.
 cost_tracking_needs_measurement() {
   grep -q 'a heading is not a measurement' scripts/verify-closeout.sh \
     || { echo "no measurement clause in closeout"; return 1; }
-  local section; section="$(awk '/Cost Tracking/{f=1} f' .ai/STATE.md)"
+  grep -q 'a keyword is not a count' scripts/verify-closeout.sh \
+    || { echo "no numeric-count clause in closeout — pass 2's fakest green is back"; return 1; }
+  local section kw missing=""
+  section="$(awk '/Cost Tracking/{f=1} f' .ai/STATE.md)"
   [ "${#section}" -ge 200 ] || { echo "live Cost Tracking too short (${#section})"; return 1; }
-  for w in decision commit deriv; do
-    grep -qiE "$w" <<<"$section" || { echo "live Cost Tracking lacks '$w'"; return 1; }
+  grep -qiE 'deriv|measur|per commit|git show' <<<"$section" \
+    || { echo "live Cost Tracking has no derivation word"; return 1; }
+  for kw in session decision requirement commit release; do
+    grep -qiE "${kw}[^0-9]{0,60}[0-9]+|[0-9]+[^0-9]{0,60}${kw}" <<<"$section" \
+      || missing="$missing $kw"
   done
+  [ -z "$missing" ] || { echo "live Cost Tracking names no number beside:$missing"; return 1; }
+  local zfix zmiss=""
+  zfix="## Cost Tracking
+The sessions, decisions, requirements, files per commit and releases for this run were all
+counted carefully and derived from the recorded evidence, with every measurement taken per
+commit and every decision tallied against the plan, so the totals are honest and the
+derivation is documented in full for anyone who wants to reproduce it later."
+  for kw in session decision requirement commit release; do
+    grep -qiE "${kw}[^0-9]{0,60}[0-9]+|[0-9]+[^0-9]{0,60}${kw}" <<<"$zfix" || zmiss="$zmiss $kw"
+  done
+  [ "$(echo "$zmiss" | wc -w | tr -d ' ')" -eq 5 ] \
+    || { echo "zero-digit fixture NOT rejected on:$zmiss"; return 1; }
   local d; d=$(mktemp -d)
   printf '# X\n\n## Cost Tracking\n- one honest line, no numbers.\n' > "$d/STATE.md"
   local fix; fix="$(awk '/Cost Tracking/{f=1} f' "$d/STATE.md")"
   rm -rf "$d"
   [ "${#fix}" -lt 200 ] || { echo "fixture unexpectedly long — not heading-only"; return 1; }
-  echo "live section ${#section} chars with decisions+counts+derivation; heading-only fixture ${#fix} chars correctly short"
+  echo "live 5/5 counts carry a number + a derivation; zero-digit fixture rejected 5/5; heading-only ${#fix} chars short"
 }
 run_check "cost-tracking-needs-measurement" cost_tracking_needs_measurement
 
@@ -303,7 +352,15 @@ stale_facts_guarded() {
   grep -q "S00–S${newest}" .ai/KNOWLEDGE.md \
     || { echo "KNOWLEDGE main range stale: live newest is S$newest, file says otherwise (derive: git log --format='%s' main | grep -oE 'S[0-9]{2}:' ...)"; return 1; }
 
-  echo "no stale SHA in live .ai files; test count $count_mode; pill L$pill_line cited; 4 tag SHAs equal git rev-parse; main range S00–S$newest"
+  # Live counts carry their deriving command (pass 2 residual #5: a bare "70" for
+  # the PR-head count went stale the moment PR #71 opened). Gate the COMMAND, not
+  # the number — the number is true only until the next PR.
+  local cf
+  for cf in .ai/STATE.md .ai/KNOWLEDGE.md sessions/session-47-support-ticket.md; do
+    grep -q 'ls-remote' "$cf" || { echo "$cf quotes a PR-head count with no deriving command"; return 1; }
+  done
+
+  echo "no stale SHA in live .ai files; test count $count_mode; pill L$pill_line cited; 4 tag SHAs equal git rev-parse; main range S00–S$newest; PR-head count re-derivable"
 }
 run_check "stale-facts-guarded" stale_facts_guarded
 

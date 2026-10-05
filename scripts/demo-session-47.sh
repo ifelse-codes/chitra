@@ -35,26 +35,46 @@ p_r1() {  # coverage: union newest + zero missing
   echo "newest $u (merge-only still $m); S40 backfilled"
   echo ok
 }
-p_r2() {  # no-code fail-closed clauses + N/A path + offender clause on a REAL commit
+p_r2() {  # no-code fail-closed clauses + N/A + the contract stimulus as a PAIR + a real commit
   grep -q 'empty range, NO-CODE unprovable' scripts/verify-closeout.sh || return 1
+  grep -q 'git status --porcelain -- packages/' scripts/verify-closeout.sh || return 1
   bash scripts/verify-closeout.sh --gt-no-code-only 47 >/dev/null 2>&1 || return 1
-  local c art rc=0 out
-  c=$(git log --format='%H' -n1 -- packages/core/src || true)
-  [ -n "$c" ] || return 1
+  local art c cand d="" rc=0 out
   art=sessions/session-50-ground-truth.md
   [ -e "$art" ] && return 1
   printf '# Session 50 — synthetic GT artifact (R2 offender probe)\n\nFixture: non-empty, so only the offender clause can fire.\n' > "$art"
-  out=$(VLT_GT_BASE="${c}^" VLT_GT_HEAD="$c" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc=$?
+  for cand in $(git rev-list -n 25 HEAD); do
+    git rev-parse --verify --quiet "${cand}^" >/dev/null || continue
+    if [ -z "$(git diff --name-only "${cand}^" "$cand" -- . ':(exclude)sessions' ':(exclude)prompts' ':(exclude).ai' 2>/dev/null | grep -vE '\.(md|txt)$')" ]; then d="$cand"; break; fi
+  done
+  [ -n "$d" ] || { rm -f "$art"; return 1; }
+  rc=0; out=$(VLT_GT_BASE="${d}^" VLT_GT_HEAD="$d" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc=$?
+  [ "$rc" -eq 0 ] || { rm -f "$art"; return 1; }
+  touch packages/core/src/__s47_planted_probe__.ts
+  rc=0; out=$(VLT_GT_BASE="${d}^" VLT_GT_HEAD="$d" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc=$?
+  rm -f packages/core/src/__s47_planted_probe__.ts
+  { [ "$rc" -ne 0 ] && echo "$out" | grep -q 'changed code files'; } || { rm -f "$art"; return 1; }
+  c=$(git log --format='%H' -n1 -- packages/core/src || true)
+  [ -n "$c" ] || { rm -f "$art"; return 1; }
+  rc=0; out=$(VLT_GT_BASE="${c}^" VLT_GT_HEAD="$c" bash scripts/verify-closeout.sh --gt-no-code-only 50 2>&1) || rc=$?
   rm -f "$art"
   [ "$rc" -ne 0 ] || return 1
   echo "$out" | grep -q 'changed code files' || return 1
-  echo "clauses present; N/A green; offender clause red on real commit ${c:0:8}"
+  echo "clean range OK, planted file RED, real commit RED (${c:0:8})"
   echo ok
 }
-p_r3() {  # cost needs measurement
+p_r3() {  # cost needs measurement — numbers, not keywords (pass 2's fakest green)
   grep -q 'a heading is not a measurement' scripts/verify-closeout.sh || return 1
-  [ "$(awk '/Cost Tracking/{f=1} f' .ai/STATE.md | wc -c)" -ge 200 ] || return 1
-  echo "predicate + live section measured"
+  grep -q 'a keyword is not a count' scripts/verify-closeout.sh || return 1
+  local section kw miss=""
+  section="$(awk '/Cost Tracking/{f=1} f' .ai/STATE.md)"
+  [ "$(printf '%s' "$section" | wc -c | tr -d ' ')" -ge 200 ] || return 1
+  for kw in session decision requirement commit release; do
+    grep -qiE "${kw}[^0-9]{0,60}[0-9]+|[0-9]+[^0-9]{0,60}${kw}" <<<"$section" || miss="$miss $kw"
+  done
+  [ -z "$miss" ] || return 1
+  grep -qiE 'deriv|measur|per commit|git show' <<<"$section" || return 1
+  echo "5/5 counts carry a number + derivation; heading-only still short"
   echo ok
 }
 p_r4() {  # S44 REJECT disclosed
@@ -92,7 +112,8 @@ p_r6() {  # stale facts guarded — every assertion re-derived (live snapshot fi
   done
   newest=$(git log --format='%s' main | grep -oE '(^|[^A-Za-z0-9])S[0-9]{2}:' | grep -oE 'S[0-9]{2}' | tr -d 'S' | sort -n | tail -1) || return 1
   grep -q "S00–S${newest}" .ai/KNOWLEDGE.md || return 1
-  echo "count $n_r across 3 sites + hero; pill L$pill cited; 4 tag SHAs = git rev-parse; main S00–S$newest"
+  grep -q 'ls-remote' .ai/KNOWLEDGE.md || return 1
+  echo "count $n_r across 3 sites + hero; pill L$pill cited; 4 tag SHAs = git rev-parse; main S00–S$newest; PR-head count re-derivable"
   echo ok
 }
 p_r7() {  # roadmap re-pointed
