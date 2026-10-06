@@ -1,19 +1,20 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S47 — **make the
-governance gates able to fail**, complete and closed 2026-10-05: R1–R9 from
-`sessions/session-45-ground-truth.md` § *Findings, ranked*, 4 review passes ending
-**ACCEPT 13/13**; S46 closed 2026-10-04: P1, P2, F1–F6 discharged, repo public.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S48 — **the GTM proof
+pack**, complete and closed 2026-10-06: R1–R6 from `prompts/48-task-gtm-proof-pack.md`,
+one channel published and measurable. S47 closed 2026-10-05 — gates that can fail,
+ACCEPT 13/13; S46 closed 2026-10-04 — the public flip.)
 
 ## Active Branch
-`session-47-gate-truth` from `main` (`a218ac5` at branch time — derive with
-`git rev-parse main`). Delivery: **16 commits** (10 from the builder session, 6 from
-the finisher), all `S47:`, max **3 files** each (derived per commit with
-`git show --numstat`): `scripts/verify-closeout.sh` fail-closed fixes (R1–R3) +
-`scripts/verify-session-47.sh` + `scripts/demo-session-47.sh` +
-`prompts/47-task-gate-truth.md` + backfilled `sessions/session-40-summary.md` +
-`sessions/session-47-support-ticket.md` (R8 evidence) + `.ai/` sync. No file under
-`packages/core/src/`; lockfile untouched.
+`session-48-gtm-proof-pack` from `main` (`2f3c089` at branch time — derive with
+`git rev-parse main`). Delivery commits (derive, don't trust):
+`git rev-list --count $(git merge-base main HEAD)..HEAD` — all `S48:`, max **3 files**
+each (derived per commit with `git show --numstat`). What landed: the two instruments
+`scripts/gtm-reads.mjs` (adoption) + `scripts/gtm-bench.mjs` (size/speed),
+`scripts/verify-session-48.sh` (10 checks) + `scripts/demo-session-48.sh` (6 probed
+rows), the README **Benchmarks** section, the contract, and `sessions/session-48-*`.
+**No file under `packages/core/src/`**; lockfile untouched — a GTM session does not
+change the product.
 
 ## What Currently Works (observed, not claimed)
 - **The repository is public.** `gh api repos/ifelse-codes/chitra --jq .private` → **`false`**,
@@ -25,6 +26,32 @@ the finisher), all `S47:`, max **3 files** each (derived per commit with
 - **P2 on:** `{"enabled":true}` (public-repo-only endpoint, proved against control).
 - **F5/F6 stand:** `0.4.0` with provenance (sigstore, `0.3.0` has none, no workflow
   edit); `t0` = 119 lifetime downloads, none organic (derive with the downloads API).
+- **GTM — the adoption instrument now reads the number (S48 R2).**
+  `node scripts/gtm-reads.mjs` (day-level series, release days labelled from the npm
+  registry's own publish times): **t1 = 273** through **2026-10-06** — **243** of them
+  on the two release days (0.3.0 on 09-29, 0.4.0 on 10-04), **30** across the four days
+  after 0.3.0, and **0 on 10-05 and 10-06**. **t0 = 119 reproduces exactly** with
+  `--as-of 2026-10-03`, so S46's figure is no longer a typed number. **No organic
+  signal yet** — and the day the instrument shows one is the day this line changes.
+  Never cite 273 (or 119) as traction.
+- **One channel is live (S48 R4) — published 2026-10-06.**
+  `https://www.linkedin.com/posts/isuman_opensource-typescript-terminal-ugcPost-7513093305937657856-0U9h/`
+  — LinkedIn, native upload of the 42s `chitra-intro.mp4` film, with the repo and
+  docs links in the first comment. The measurement window opens on that date: read
+  it with `node scripts/gtm-reads.mjs` and compare the days **after 2026-10-06**
+  against the flat line before it (0 downloads on 10-05 and 10-06). An anonymous
+  fetch of the post answers **200**, which is what the gate re-checks.
+- 🔴 **S48 closed WITHOUT a final acceptance — founder order, 2026-10-06.** The
+  independent reviewer ran **8 passes, all REJECT** (ground count 4 → 2 → 11 → 8 →
+  6 → 9 → 7 → 1); the last ground (V1: a version stated in README prose) was fixed
+  in `e98928f` and **was never re-reviewed**. The founder then ordered the session
+  closed with no further pass. `sessions/session-48-review.md` therefore carries
+  `**Verdict:** REJECT … CLOSED BY FOUNDER ORDER` as its canonical line, the
+  closeout gate reads BLOCK on it, and the close was executed under
+  `VAJRA_CLOSEOUT_WAIVER=48` with that reason — **waived, not accepted**. The open
+  item is one command: re-run pass 9 (`--inputs-sha 48` →
+  `f8c7cfe26db313f2f17acf6f327ba936d1172627a80ac211d68211e193d4c910`) to turn this
+  into a real verdict.
 - **R1 — coverage sees squash merges.** `check_session_coverage` derives its population
   from merge subjects UNION squash subjects (`SNN:`), records newest belief (**S46**;
   the old merge-only body believed **S37** — run both commands beside each other),

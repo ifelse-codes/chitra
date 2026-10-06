@@ -154,7 +154,7 @@ if not, they go, and the one-liner becomes true.**
   `refs/pull/*` still exposes the old blobs in **56 of 67** PR heads — a support ticket is owed.
   **P2** — `{"enabled":true}`, which was impossible before F1 (public-repo-only endpoint, proved
   against a public control), so the founder reordered F1 → P2 instead of waiving it.
-- 🔄 **Session 47 (S47) — make the governance gates able to fail — IN PROGRESS** (`47 % 5 == 2`, code session; contract `prompts/47-task-gate-truth.md`, R1–R9). A **different story from
+- ✅ **Session 47 (S47) — make the governance gates able to fail — DONE, 2026-10-05** (`47 % 5 == 2`, code session; contract `prompts/47-task-gate-truth.md`, R1–R9; 4 review passes ending ACCEPT 13/13, merged as PR #71 + #72). A **different story from
   the flip**, deliberately not folded into it: fixing `verify-closeout.sh` in the same session that
   makes the repo public would put the public surface and its gates in one unreviewable commit. Ranked
   list with severities in `sessions/session-45-ground-truth.md` § *Findings, ranked*; dispositions in
@@ -164,6 +164,19 @@ if not, they go, and the one-liner becomes true.**
   is unenforced by 17/60 commits**. **Rides along from S46:** file the GitHub support ticket to
   delete `refs/pull/*` and GC the unreachable pre-rewrite objects — the only remaining home-path
   exposure, and only GitHub can remove it (`DELETE` → `422 refs/pull/* is read-only`). **Cadence (`N % 5`): S47 is code, S48/S49 are code, S50 (`50 % 5 == 0`) is the next NO-CODE ground truth — no code session may be scheduled onto it.**
+- ✅ **Session 48 (S48) — the GTM proof pack — DONE, 2026-10-06** (`48 % 5 == 3`, code
+  session; contract `prompts/48-task-gtm-proof-pack.md`, R1–R6; specs `ROADMAP:219` +
+  `.ai/GT-REMEDIATIONS.md` S40 row 1, which this session closed `DEFERRED → DONE`).
+  **Every number a stranger sees now comes from a command:** 20 charts ← export lines,
+  3 renderers ← `RendererType`, 7 themes ← `Object.keys(themes)`, 453 tests ← the suite,
+  0 deps / MIT / 0.4.0 ← manifest + changelog — checked in `README.md`,
+  `packages/core/README.md`, the docs hero and `KNOWLEDGE.md`. `scripts/gtm-reads.mjs`
+  reads adoption day by day with release days labelled (**t1 = 273** at 2026-10-06,
+  **t0 = 119** reproduces with `--as-of 2026-10-03`, **0 organic**); `scripts/gtm-bench.mjs`
+  measures **0 deps · 81.5 KB packed · 398.4 KB / 39 files · ≤ 2 ms**, cited in the README
+  with the reproduce command above them. **One channel live:** the LinkedIn post of
+  **2026-10-06** (URL + date in `.ai/STATE.md`, re-fetched by the gate). Gate **10/10**,
+  demo **6/6**, **11 counterfactuals** executed red; product untouched.
 - ✅ **Session 37 (S37) — publish the package to npm (the S36-deferred item):** the
   `@chitra` npm **org is not owned by the account** (and unscoped `chitra` was taken),
   so the package was renamed `@chitra/core` → **`@ifelse.codes/core`** across 26 live
@@ -217,7 +230,10 @@ if not, they go, and the one-liner becomes true.**
   guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
 - 🔜 **Next (S41 candidates):** the three S39 items stand unchanged, now pushed out one
   session by S40's mandatory ground-truth audit — a **GTM proof pack** (benchmarks /
-  token-savings / before-after), a real **`0.4.0` through CI** (the cheapest proof that the
+  token-savings / before-after) — **delivered in S48**: `scripts/gtm-reads.mjs`
+  (adoption, day-level, release days labelled) + `scripts/gtm-bench.mjs`
+  (size/speed, all figures reproducible) + `sessions/session-48-summary.md`
+  (what shipped vs what moved), a real **`0.4.0` through CI** (the cheapest proof that the
   trusted publisher works; nothing needs to change for it), and **fixing the
   `required-crew` gate** (two founder waivers, S38/S39, for a tech-lead step
   `.ai/AGENTS.md` never asks for). `artifacts/api-server` beyond `/healthz` **was** the
@@ -228,8 +244,9 @@ if not, they go, and the one-liner becomes true.**
   appeared in **zero of the last four handoffs** — which is exactly how S40 arrived as a
   surprise, since S39 offered three code-shaped candidates and named no audit.
   **The vision verdict came back 🟡, not 🔴, after two founder corrections recorded in the
-  audit:** nothing has been released-and-marketed, so the **adoption baseline of zero is the
-  correct pre-launch reading** — the finding is that the number had *never been read*
+  audit:** nothing has been released-and-marketed, so the **adoption baseline of zero** was the
+  pre-launch reading then (**superseded — false since S45: t0 = 119, not zero**) — the finding is
+  that the number had *never been read*
   (`@ifelse.codes/core`'s downloads are 0 for the 9 days before its publish and all land in a
   5-day window after it — **S45 re-probed: 318 lifetime, not 304** — and
   `@ifelse.codes/chitra` is **not** unindexed either: **119** lifetime, all inside a 6-day window
