@@ -30,6 +30,9 @@ gate_skips() { [ "$1" = fast ] || return 1; case " $FAST_SKIP " in *" $2 "*) ret
 FAST_SKIP="core-suite-green docs-link-live adoption-reading-recorded channel-recorded"
 
 PASS=0; FAIL=0; RESULTS=()
+# Set by core-suite-green and consumed by claims-match-truth: the test count the
+# suite PRINTED, never a number typed into a badge.
+SUITE_N=""
 write_summary() {
   { for r in "${RESULTS[@]:-}"; do
       printf '%-34s %s\n' "$(echo "$r" | awk '{print $1}')" "$(echo "$r" | awk '{print $NF}')"
@@ -74,6 +77,20 @@ require_toolchain() {
   return 0
 }
 
+# Every occurrence of a claim surface must equal the derived value — `grep -m1`
+# and presence checks let a SECOND, disagreeing claim ride along (pass-4 E3–E7).
+# Zero matches is not an error here: presence is enforced by the dedicated b_*
+# checks above; this one is about contradictions.
+every_equals() {
+  local exp="$1" label="$2" file="$3" pat="$4" xf="${5:-}" raw v bad=""
+  while IFS= read -r raw; do
+    [ -n "$raw" ] || continue
+    if [ -n "$xf" ]; then v=$(printf '%s' "$raw" | sed -E "$xf"); else v=$(printf '%s' "$raw" | grep -oE '[0-9]+' | sed -n '1p'); fi
+    [ "$v" = "$exp" ] || bad="$bad '$v'"
+  done < <(grep -oE "$pat" "$file" 2>/dev/null || true)
+  [ -z "$bad" ] || { echo "$label disagreeing value(s):$bad (expected $exp)"; return 1; }
+}
+
 # ── R0: the contract is at HEAD, numbered, capped ──────────────────────────────
 # Counterfactual: delete prompts/48-task-gtm-proof-pack.md from the index → red.
 contract_at_head() {
@@ -94,16 +111,24 @@ run_check "contract-at-head" contract_at_head
 # here, because the badge is the number this check greps for.
 suite_green() {
   require_toolchain "the tests claim" || return 1
-  local claimed out
+  local claimed out n
   claimed=$(grep -m1 -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/')
   [ -n "$claimed" ] || { echo "README carries no tests badge to check"; return 1; }
   out=$(pnpm --filter @ifelse.codes/chitra run test 2>&1) \
     || { printf '%s\n' "$out" | tail -25; return 1; }
   printf '%s\n' "$out" | grep -E 'Test Files|Tests ' | tail -3
-  if ! printf '%s\n' "$out" | grep -qE "Tests +${claimed} passed"; then
-    echo "README claims ${claimed} tests; the suite printed something else"; return 1
-  fi
-  echo "README badge (${claimed}) == suite output"
+  n=$(printf '%s\n' "$out" | grep -oE 'Tests +[0-9]+ passed' | grep -oE '[0-9]+' | sed -n '1p' || true)
+  [ -n "$n" ] || { echo "the suite printed no 'Tests N passed' line"; return 1; }
+  SUITE_N="$n"
+  # Pass-4 E4: every tests badge must equal what the suite printed — a second,
+  # false badge is not covered by the first one.
+  local v bad=""
+  while IFS= read -r v; do
+    [ -n "$v" ] || continue
+    [ "$v" = "$SUITE_N" ] || bad="$bad '$v'"
+  done < <(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' || true)
+  [ -z "$bad" ] || { echo "tests badge disagreeing with the suite:$bad (suite printed $SUITE_N)"; return 1; }
+  echo "README tests badge(s) == suite output $SUITE_N"
 }
 run_check "core-suite-green" suite_green
 
@@ -177,6 +202,21 @@ claims_match_truth() {
   grep -qF "all ${charts} charts" .ai/KNOWLEDGE.md || bad="$bad KNOWLEDGE-charts"
   [ -z "$bad" ] || { echo "claim ≠ truth in:$bad (derived values above)"; return 1; }
 
+  # Pass-4 E3/E4/E5/E7: presence checks and `grep -m1` cannot see a SECOND,
+  # disagreeing claim. Every occurrence of every count surface is compared.
+  local dups=""
+  every_equals "$charts"    "README shield URL"        README.md              'badge/charts-[0-9]+'                '' || dups="$dups README-shield-charts"
+  every_equals "$deps"      "README deps shield URL"   README.md              'badge/dependencies-[0-9]+'          '' || dups="$dups README-shield-deps"
+  every_equals "$SUITE_N"   "README tests badge(s)"    README.md              'tests-[0-9]+%20passing' 's/tests-([0-9]+).*/\1/' || dups="$dups README-tests-badges"
+  every_equals "$charts"    "README prose count"       README.md              'all [0-9]+ charts'                  '' || dups="$dups README-prose-count"
+  every_equals "$charts"    "KNOWLEDGE prose count"    .ai/KNOWLEDGE.md       'all [0-9]+ charts'                  '' || dups="$dups KNOWLEDGE-prose-count"
+  every_equals "$charts"    "core README chart count"  packages/core/README.md '\*\*[0-9]+ Chart Types:\*\*'      '' || dups="$dups coreREADME-chart-types"
+  every_equals "$charts"    "README chart-types cell"  README.md              '\| \*\*[0-9]+ chart types\*\* \|'  '' || dups="$dups README-types-cell"
+  every_equals "$renderers" "README renderers cell"    README.md              '\| \*\*[0-9]+ renderers\*\* \|'    '' || dups="$dups README-renderers-cell"
+  every_equals "$deps"      "README deps cell"         README.md              '\| \*\*[0-9]+ dependencies\*\* \|' '' || dups="$dups README-deps-cell"
+  every_equals "$deps"      "core README deps count"   packages/core/README.md '\*\*[0-9]+ Dependencies:\*\*'     '' || dups="$dups coreREADME-deps"
+  [ -z "$dups" ] || { echo "contradicting claim(s):$dups"; return 1; }
+
   # Docs hero: number AND label must appear in the same stat block.
   local hero
   hero=$(node -e '
@@ -188,7 +228,7 @@ claims_match_truth() {
   local want="${charts} Chart types
 ${renderers} Renderers
 ${themes} Themes
-$(grep -m1 -oE 'tests-[0-9]+' README.md | grep -oE '[0-9]+') Tests passing
+${SUITE_N} Tests passing
 ${deps} Dependencies"
   if [ "$hero" != "$want" ]; then
     echo "docs hero drifted from the derived values:"
@@ -325,6 +365,20 @@ benchmarks_cited_with_command() {
   done <<< "$vals"
   [ -z "$table_bad" ] || { echo "Benchmarks table carries value(s) no command prints:$table_bad"; return 1; }
 
+  # Pass-4 E18: values are checked but rows are not bound — `| **Cold start** |
+  # **0** |` uses a printed value for a claim no command produces. The table's
+  # ROWS must be exactly the rows gtm-bench.mjs declares, in that order.
+  local script_rows readme_rows
+  script_rows=$(printf '%s' "$json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).rows||""))')
+  readme_rows=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[2]; gsub(/[*`]/,"",c); gsub(/^[ \t]+|[ \t]+$/,"",c); if(c!="") print c}}' README.md | paste -sd'|' -)
+  [ -n "$script_rows" ] || { echo "gtm-bench.mjs declares no rows"; return 1; }
+  if [ "$readme_rows" != "$script_rows" ]; then
+    echo "Benchmarks rows ≠ the rows the script declares:"
+    echo "  script: $script_rows"
+    echo "  README: ${readme_rows:-<none>}"
+    return 1
+  fi
+
   # The script's own verdict: if the live render is over budget it exits 1, and
   # that already failed above — say so rather than leaving the reason implicit.
   node scripts/gtm-bench.mjs >/dev/null 2>&1 \
@@ -361,19 +415,26 @@ record_honest() {
     # evidence (pass-3 N8 planted one in an unrelated table row).
     hits=$(grep -hiE 'downloads|installs|stars|signups' "$f" 2>/dev/null \
            | awk '/^\|/ && /(counterfactual|stimulus|→|red|FAIL|instrument prints|probe)/{gsub(/`[^`]*`/,"")} {print}' \
-           | grep -oE '[0-9][0-9,]*([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,]*([[:space:]][a-z]+){0,3}[[:space:]]installs|downloads[^/0-9]{0,15}[0-9][0-9,]*' || true)
+           | grep -oE '[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?' || true)
     while IFS= read -r h; do
       [ -n "$h" ] || continue
       case "$h" in */*) continue ;; esac      # a path (downloads/range/2026-…) is not a figure
-      n=$(printf '%s' "$h" | tr -d ',' | grep -oE '[0-9]{3,}' | sed -n '1p')
+      # Normalise: strip separators, expand k/M suffixes (pass-4 E10: `0.8k
+      # downloads` must read 800, not slip through because it has a dot).
+      n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
+          | awk '{ v=$0; gsub(/,/,"",v);
+                  if (v ~ /[kKmM]$/) { s=substr(v,length(v),1); v=substr(v,1,length(v)-1)+0;
+                    if (s=="k"||s=="K") v*=1000; else v*=1000000 }
+                  printf "%d", v }')
       [ -n "$n" ] || continue
       if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
         # The ledger quotes its own audit history: a finite, explicit set of
-        # figures it has evidence for. Anything else is a fresh claim — pass-3 N7
+        # figures it has evidence for. Anything else is a fresh claim — pass-4 N7
         # planted `⚠ 888 downloads` and the marker used to make it a free pass.
-        case "$n" in 89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
+        # 0 is always allowed: a zero can never be inflated traction.
+        case "$n" in 0|89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
       else
-        case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+        case "$n" in 0|119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
       fi
     done <<< "$hits"
     # Traction language with no instrument behind it (pass-3 N9): claiming success
@@ -382,11 +443,15 @@ record_honest() {
     if [ "$f" = "sessions/session-48-summary.md" ]; then
       while IFS= read -r line; do
         [ -n "$line" ] || continue
+        # Pass-4 E15/E16: a finite keyword list plus a one-word negation escape let
+        # `Milestone reached: our first user…` and `The channel is working, no ads`
+        # through. The exemption is now an explicit list of this record's OWN guard
+        # sentences — not any line containing `no`.
         case "$line" in
-          *no\ *|*not\ *|*never*|*without*|*rather*|*cannot*|*if\ *) : ;;
+          *'none organic'*|*'no organic'*|*'never cite'*|*'never as traction'*|*'no traction'*|*'not traction'*|*'flat zero'*|*'stays at zero'*|*'not the product'*|*'if the days'*|*'no signal'*|*'no users'*) : ;;
           *) bad="$bad $f:(traction claim with no derived number: ${line:0:60})" ;;
         esac
-      done < <(grep -iE 'taking off|is working|grew |growth|surging|exploding|popular|demand' "$f" 2>/dev/null || true)
+      done < <(grep -iE 'taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups' "$f" 2>/dev/null || true)
     fi
     while IFS= read -r line; do
       [ -n "$line" ] || continue

@@ -9,6 +9,17 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 FAILS=0
+# Every occurrence of a claim surface must agree with the derived value —
+# presence checks let a second, disagreeing claim ride along (pass-4 E3–E7).
+every() {
+  local exp="$1" file="$2" pat="$3" xf="${4:-}" raw v
+  while IFS= read -r raw; do
+    [ -n "$raw" ] || continue
+    if [ -n "$xf" ]; then v=$(printf '%s' "$raw" | sed -E "$xf"); else v=$(printf '%s' "$raw" | grep -oE '[0-9]+' | sed -n '1p'); fi
+    [ "$v" = "$exp" ] || return 1
+  done < <(grep -oE "$pat" "$file" 2>/dev/null || true)
+  return 0
+}
 row() {
   local label="$1"; shift
   local out rc=0
@@ -51,6 +62,19 @@ p_r1() {  # claims derive from their source
   grep -qF "**${charts} Chart Types:**" packages/core/README.md || return 1
   grep -qF "badge/license-${license}-" README.md || return 1
   grep -qF "## [${version}]" packages/core/CHANGELOG.md || return 1
+  # every occurrence must agree (pass-4 E3/E4/E5/E7)
+  every "$charts" README.md 'badge/charts-[0-9]+' || return 1
+  every "$deps" README.md 'badge/dependencies-[0-9]+' || return 1
+  every "$charts" README.md 'all [0-9]+ charts' || return 1
+  every "$charts" .ai/KNOWLEDGE.md 'all [0-9]+ charts' || return 1
+  every "$charts" packages/core/README.md '\*\*[0-9]+ Chart Types:\*\*' || return 1
+  every "$charts" README.md '\| \*\*[0-9]+ chart types\*\* \|' || return 1
+  every "$renderers" README.md '\| \*\*[0-9]+ renderers\*\* \|' || return 1
+  every "$deps" README.md '\| \*\*[0-9]+ dependencies\*\* \|' || return 1
+  every "$deps" packages/core/README.md '\*\*[0-9]+ Dependencies:\*\*' || return 1
+  local t1st
+  t1st=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
+  every "$t1st" README.md 'tests-[0-9]+%20passing' 's/tests-([0-9]+).*/\1/' || return 1
   node -e '
     const s=require("fs").readFileSync("artifacts/chitra-docs/src/App.tsx","utf8");
     const need=process.argv.slice(1);
@@ -93,7 +117,12 @@ p_r3() {  # benchmarks, measured now
     [ -n "$v" ] || continue
     case " ${allowed[*]} " in *" $v "*) : ;; *) return 1 ;; esac
   done <<< "$vals"
-  echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — every table value printed by the script"
+  # rows must be exactly what the script declares (pass-4 E18)
+  local script_rows readme_rows
+  script_rows=$(printf '%s' "$out" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).rows||""))')
+  readme_rows=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[2]; gsub(/[*`]/,"",c); gsub(/^[ \t]+|[ \t]+$/,"",c); if(c!="") print c}}' README.md | paste -sd'|' -)
+  [ -n "$script_rows" ] && [ "$readme_rows" = "$script_rows" ] || return 1
+  echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — every row and value printed by the script"
   echo ok
 }
 p_r4() {  # one channel, live, with its date and its reader
@@ -133,18 +162,34 @@ p_r6() {  # the record only carries derived numbers
   local f line hits h n bad=""
   for f in "${files[@]}"; do
     [ -f "$f" ] || return 1
-    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null \
-           | awk '/^\|/{gsub(/`[^`]*`/,"")} {print}' \
-           | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
+    hits=$(grep -hiE 'downloads|installs|stars|signups' "$f" 2>/dev/null \
+           | awk '/^\|/ && /(counterfactual|stimulus|→|red|FAIL|instrument prints|probe)/{gsub(/`[^`]*`/,"")} {print}' \
+           | grep -oE '[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?' || true)
     while IFS= read -r h; do
       [ -n "$h" ] || continue
-      n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
+      case "$h" in */*) continue ;; esac
+      n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
+          | awk '{ v=$0; gsub(/,/,"",v);
+                  if (v ~ /[kKmM]$/) { s=substr(v,length(v),1); v=substr(v,1,length(v)-1)+0;
+                    if (s=="k"||s=="K") v*=1000; else v*=1000000 }
+                  printf "%d", v }')
+      [ -n "$n" ] || continue
       if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
-        grep -F "$h" "$f" | grep -qE '⚠|FALSIFIED|→|re-probe|re-derived|derive|≠|not [0-9]' || bad="$bad $f:'$h'"
+        case "$n" in 0|89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
       else
-        case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+        case "$n" in 0|119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
       fi
     done <<< "$hits"
+    # traction claims with no derived number (summary only — R6's counterfactual)
+    if [ "$f" = "sessions/session-48-summary.md" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        case "$line" in
+          *'none organic'*|*'no organic'*|*'never cite'*|*'never as traction'*|*'no traction'*|*'not traction'*|*'flat zero'*|*'stays at zero'*|*'not the product'*|*'if the days'*|*'no signal'*|*'no users'*) : ;;
+          *) bad="$bad $f:(traction claim)" ;;
+        esac
+      done < <(grep -iE 'taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups' "$f" 2>/dev/null || true)
+    fi
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       case "$line" in

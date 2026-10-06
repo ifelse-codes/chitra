@@ -78,6 +78,15 @@ async function main() {
     "render-budget-ms": BUDGET_MS,
     "render-iterations": iterations,
     node: process.version,
+    // The canonical benchmark ROWS. The README's table must be exactly these, in
+    // this order — a row no command produces (pass-4 E18: `Cold start | 0`) is
+    // not a benchmark, it is a claim with a plausible number in it.
+    rows: [
+      "Runtime dependencies",
+      "npm install download",
+      "Installed footprint",
+      "Render a 100-point line chart",
+    ].join("|"),
   };
 
   if (asJson) {
