@@ -1,45 +1,39 @@
 # Current Task Pointer
 
-## Session 47 — make the governance gates able to fail (complete, closed 2026-10-05)
+## Session 48 — the GTM proof pack (complete, closed 2026-10-06)
 
-- **Branch:** `session-47-gate-truth` from `main`. Delivery **16 commits** (10 builder +
-  6 finisher), max **3 files** each, merged by PR **#71**.
-- **Contract:** `prompts/47-task-gate-truth.md` — requirements **R1–R9**,
-  spec `sessions/session-45-ground-truth.md` § *Findings, ranked*.
-  **Never amended**; N1 freeze held (no edit after `ff45ff4`).
-- **Cadence (`N % 5`):** S47 is a code session (`47 % 5 == 2`). The 5-session
-  ground-truth cadence (`CONSTRAINTS.yaml#ground_truth_every_n_sessions: 5`)
-  made S45 NO-CODE and makes **S50 the next ground truth**. Named here so no
-  handoff mis-schedules a code session onto a ground-truth slot again (S45 H1).
-- **Delivered (all nine):**
-  - **R1** — coverage sees squash merges; S40 backfilled; newest S46 (old: S37).
-  - **R2** — no-code fails closed: artifact required, empty range BLOCKS, **worktree
-    scanned too** so the contract's planted file goes red (pair-proven).
-  - **R3** — cost tracking needs a **number** beside each of session/decision/
-    requirement/commit/release + a derivation word (zero-digit prose goes red).
-  - **R4** — S44 REJECT disclosed in STATE/ROADMAP (was COMPLETE).
-  - **R5** — 3-file cap honest: branch/delivery-scoped; vajra line disclosed.
-  - **R6** — stale facts guarded: suite-derived test count, live pill line, 4 tag
-    SHAs via `git rev-parse`, main range via its own derivation, PR-head command.
-  - **R7** — ROADMAP:56 re-pointed to S47; crew waiver-or-green honest.
-  - **R8** — P1 ticket text + 422 evidence in `sessions/session-47-support-ticket.md`.
-  - **R9** — cadence named in BOOT + TASK + ROADMAP; AGENTS half disclosed.
-- **Review:** 4 passes by an independent reviewer session (contract + diff only):
-  pass 1 builder N1 ACCEPT → **pass 2 REJECT** (R2 literal stimulus, R3 zero-digit
-  block) → fixes → pass 3 ACCEPT → 2 residual fixes → **pass 4 ACCEPT, 13/13**,
-  attestation `29c148c1…` = `verify-closeout.sh --inputs-sha 47`.
-- **Gates:** `verify-session-47.sh` **14/14** (incl. a toolchain precondition that
-  fails with the install command instead of passing on byte-identity), demo **9/9**,
-  closeout **17/17** behind the founder crew waiver.
-- **Product:** 453/453 untouched (re-derived at verify time).
+- **Branch:** `session-48-gtm-proof-pack` from `main`.
+- **Contract:** `prompts/48-task-gtm-proof-pack.md` — requirements **R1–R6**,
+  spec `.ai/ROADMAP.md:219` + `.ai/GT-REMEDIATIONS.md` S40 row 1.
+  **Never amended**; N1 freeze held.
+- **Cadence (`N % 5`):** S48 is a code session (`48 % 5 == 3`). **S50** is the next
+  ground truth — named here so no handoff mis-schedules onto it again.
+- **Delivered (all six):**
+  - **R1** — front-door claims derive from their source: 20 charts ← export lines,
+    3 renderers ← `RendererType`, 7 themes ← `Object.keys(themes)`, 453 ← suite,
+    0 deps / MIT / 0.4.0 ← manifest. README + docs hero + KNOWLEDGE all checked.
+  - **R2** — adoption read by `scripts/gtm-reads.mjs`: **t1 = 273** (2026-10-06),
+    **t0 = 119** reproduces with `--as-of 2026-10-03`, release days labelled,
+    **0 organic**. Ledger S40 row 1 `DEFERRED → DONE`.
+  - **R3** — benchmarks from `scripts/gtm-bench.mjs`: 0 deps · 81.5 KB packed ·
+    398.4 KB / 39 files · ≤ 2 ms — cited in the README with the command above.
+  - **R4** — one channel live: LinkedIn post published **2026-10-06** (URL in
+    STATE, re-fetched 200 by the gate), measurement window opens that day.
+  - **R5** — first screen probed: install line, docs link 200, README example
+    byte-identical to a real render.
+  - **R6** — record honest: roadmap points at the instruments; only 119/273 may
+    appear as downloads figures; `never cite as traction` enforced.
+- **Gates:** `verify-session-48.sh` **10/10** · `demo-session-48.sh` **6/6 probed**
+  · **11 counterfactuals** executed, all red with the right diagnosis.
+- **Product:** 453/453 untouched (`product-untouched` green at every commit).
 
-## Next session (S48)
+## Next session (S49)
 
-- Candidates: GTM proof pack beyond `t0`, or new product surface (none since
-  `c72cc14`), or S47's disclosed residuals (root-dotfile asymmetry, cost counts
-  asserted rather than re-derived).
-- **The P1 support ticket is written but NOT filed** —
-  `sessions/session-47-support-ticket.md`; a human must file it.
-- **S50 (`50 % 5 == 0`) is the next NO-CODE ground truth** — no code session
-  may be scheduled onto it.
-- Contract for S48 does not exist yet — write `prompts/48-task-*.md` at plan time.
+- **Read the channel:** `node scripts/gtm-reads.mjs` after **2026-10-13** — compare
+  the days after the post against the flat line before it. This is the reading the
+  whole pack exists to produce.
+- Alternatives: **new product surface** (none since `c72cc14`), or **S47's three
+  disclosed residuals** (root-dotfile asymmetry, cost counts asserted-not-derived,
+  one waiver covering two checks).
+- **S50 (`50 % 5 == 0`) is the next NO-CODE ground truth.**
+- Contract for S49 does not exist yet — write `prompts/49-task-*.md` at plan time.
