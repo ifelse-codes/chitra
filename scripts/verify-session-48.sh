@@ -95,7 +95,7 @@ run_check "contract-at-head" contract_at_head
 suite_green() {
   require_toolchain "the tests claim" || return 1
   local claimed out
-  claimed=$(grep -m1 -oE 'tests-[0-9]+%20passing' README.md | grep -oE '[0-9]+')
+  claimed=$(grep -m1 -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/')
   [ -n "$claimed" ] || { echo "README carries no tests badge to check"; return 1; }
   out=$(pnpm --filter @ifelse.codes/chitra run test 2>&1) \
     || { printf '%s\n' "$out" | tail -25; return 1; }
@@ -159,7 +159,17 @@ ${deps} Dependencies"
     diff <(printf '%s\n' "$want") <(printf '%s\n' "$hero") || true
     return 1
   fi
-  echo "README, KNOWLEDGE and the docs hero all carry the derived values"
+  # Pass-1 found two claim surfaces R1 names that nothing checked: the core README
+  # (a `20 Chart Types` line) and the license badge's RENDERED value — retyping the
+  # alt text alone leaves a stranger reading Apache on an MIT package. The version
+  # claim needs a target too: the manifest's version must head the changelog.
+  grep -qF "**${charts} Chart Types:**" packages/core/README.md \
+    || { echo "packages/core/README.md chart claim ≠ derived ${charts}"; return 1; }
+  grep -qF "badge/license-${license}-" README.md \
+    || { echo "README's rendered license badge is not ${license} (the alt text can lie)"; return 1; }
+  grep -qF "## [${version}]" packages/core/CHANGELOG.md \
+    || { echo "CHANGELOG has no heading for the manifest version ${version}"; return 1; }
+  echo "README (badges, prose, rendered license URL), packages/core/README.md, docs hero, KNOWLEDGE and CHANGELOG all carry the derived values"
 }
 run_check "claims-match-truth" claims_match_truth
 
@@ -274,25 +284,46 @@ run_check "benchmarks-cited-with-command" benchmarks_cited_with_command
 
 # ── R6: the record says what happened, not what we hope ───────────────────────
 # The roadmap must point at the instruments that delivered its pack, and every
-# downloads figure in the live snapshot files must be one the instrument prints
-# (119 = t0, 273 = t1). A number nobody derived cannot enter the record, and the
-# "never cite as traction" guard must survive in STATE.
-# Counterfactual: write "500 downloads" into STATE, or drop the pointer → red.
+# downloads figure in the LIVE record must be one the instrument prints (119 = t0,
+# 273 = t1) — across all seven files a reader trusts, not just STATE + ROADMAP
+# (pass-1 planted `999 downloads` in KNOWLEDGE and it stayed green). Quoted
+# stimuli are exempt: a counterfactual table showing `500 downloads` in backticks
+# is evidence, an unquoted sentence is a claim (pass-1's P14). And the "baseline
+# is zero" phrase may stand only beside a superseding marker — it has been false
+# since S45 (t0 = 119).
+# Counterfactuals: 500 downloads into KNOWLEDGE or the summary; a bare
+# "adoption baseline is zero"; the evidence pointer removed → red.
 record_honest() {
   grep -q 'GTM proof pack' .ai/ROADMAP.md || { echo "roadmap no longer names the pack"; return 1; }
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' \
     || { echo "roadmap's pack row has no evidence pointer"; return 1; }
-  local hits h n bad=""
-  hits=$(grep -hiE 'downloads' .ai/STATE.md .ai/ROADMAP.md \
-         | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
-  while IFS= read -r h; do
-    [ -n "$h" ] || continue
-    n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
-    case "$n" in 119|273) : ;; *) bad="$bad '$h'" ;; esac
-  done <<< "$hits"
-  [ -z "$bad" ] || { echo "downloads figure(s) no instrument prints:$bad"; return 1; }
+  local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
+               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md sessions/session-48-summary.md)
+  local f line hits h n bad=""
+  for f in "${files[@]}"; do
+    [ -f "$f" ] || continue
+    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null | sed -E 's/`[^`]*`//g' \
+           | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
+    while IFS= read -r h; do
+      [ -n "$h" ] || continue
+      n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
+      case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+    done <<< "$hits"
+    while IFS= read -r line; do
+      [ -n "$line" ] || continue
+      case "$line" in
+        *superseded*|*false*|*"not zero"*|*"must not"*|*FALSIFIED*|*119*) : ;;
+        *) bad="$bad $f:(zero-claim with no superseding marker)" ;;
+      esac
+    done < <(awk '
+      function flush() { if (buf != "") { print buf; buf = "" } }
+      /baseline (of|is) zero/ { flush(); buf = $0; pending = 2; next }
+      pending > 0 { buf = buf " " $0; pending--; if (pending == 0) flush(); next }
+      END { flush() }' "$f" 2>/dev/null || true)
+  done
+  [ -z "$bad" ] || { echo "figure or claim no instrument prints:$bad"; return 1; }
   grep -qi 'never cite' .ai/STATE.md || { echo "STATE lost the 'never cite as traction' guard"; return 1; }
-  echo "roadmap points at the instruments; every downloads figure is 119 or 273; traction guard present"
+  echo "roadmap points at its instruments; all 7 live files carry only 119/273 (quoted stimuli stripped); zero-claims marked superseded; traction guard present"
 }
 run_check "record-honest" record_honest
 

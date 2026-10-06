@@ -24,22 +24,25 @@ row() {
 }
 
 p_r1() {  # claims derive from their source
-  local charts renderers themes deps tests
+  local charts renderers themes deps tests license version
   charts=$(grep -cE '^export \{ [a-z]' packages/core/src/charts/index.ts)
   renderers=$(grep -m1 'export type RendererType' packages/core/src/types.ts | grep -oE '"[a-z]+"' | grep -c .)
-  read -r themes deps <<<"$(node -e '
+  read -r themes deps license version <<<"$(node -e '
     const m=require("./packages/core/package.json"), c=require("./packages/core/dist/index.cjs");
-    console.log(Object.keys(c.themes).length, Object.keys(m.dependencies||{}).length);')"
+    console.log(Object.keys(c.themes).length, Object.keys(m.dependencies||{}).length, m.license, m.version);')"
   tests=$(grep -m1 -oE 'tests-[0-9]+' README.md | grep -oE '[0-9]+')
   grep -q "charts-${charts}" README.md || return 1
   grep -q "all ${charts} charts" .ai/KNOWLEDGE.md || return 1
   grep -q "dependencies-${deps}" README.md || return 1
+  grep -qF "**${charts} Chart Types:**" packages/core/README.md || return 1
+  grep -qF "badge/license-${license}-" README.md || return 1
+  grep -qF "## [${version}]" packages/core/CHANGELOG.md || return 1
   node -e '
     const s=require("fs").readFileSync("artifacts/chitra-docs/src/App.tsx","utf8");
     const need=process.argv.slice(1);
     for (const n of need) if (!s.includes(`<span className="stat-num">${n}</span>`)) process.exit(1);
   ' "$charts" "$renderers" "$themes" || return 1
-  echo "charts=$charts renderers=$renderers themes=$themes deps=$deps tests=$tests — README, hero, KNOWLEDGE agree"
+  echo "charts=$charts renderers=$renderers themes=$themes deps=$deps tests=$tests license=$license version=$version — README, core README, hero, KNOWLEDGE, CHANGELOG agree"
   echo ok
 }
 p_r2() {  # adoption, read for the dates the record claims
@@ -98,17 +101,33 @@ p_r5() {  # first screen: install, live link, example still true
 }
 p_r6() {  # the record only carries derived numbers
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' || return 1
-  local hits h n bad=""
-  hits=$(grep -hiE 'downloads' .ai/STATE.md .ai/ROADMAP.md \
-         | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
-  while IFS= read -r h; do
-    [ -n "$h" ] || continue
-    n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
-    case "$n" in 119|273) : ;; *) bad="$bad '$h'" ;; esac
-  done <<< "$hits"
+  local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
+               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md sessions/session-48-summary.md)
+  local f line hits h n bad=""
+  for f in "${files[@]}"; do
+    [ -f "$f" ] || continue
+    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null | sed -E 's/`[^`]*`//g' \
+           | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
+    while IFS= read -r h; do
+      [ -n "$h" ] || continue
+      n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
+      case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+    done <<< "$hits"
+    while IFS= read -r line; do
+      [ -n "$line" ] || continue
+      case "$line" in
+        *superseded*|*false*|*"not zero"*|*"must not"*|*FALSIFIED*|*119*) : ;;
+        *) bad="$bad $f:(zero-claim)" ;;
+      esac
+    done < <(awk '
+      function flush() { if (buf != "") { print buf; buf = "" } }
+      /baseline (of|is) zero/ { flush(); buf = $0; pending = 2; next }
+      pending > 0 { buf = buf " " $0; pending--; if (pending == 0) flush(); next }
+      END { flush() }' "$f" 2>/dev/null || true)
+  done
   [ -z "$bad" ] || return 1
   grep -qi 'never cite' .ai/STATE.md || return 1
-  echo "roadmap points at the instruments; only 119/273 appear; traction guard present"
+  echo "7 live files: only 119/273 (quoted stimuli stripped), zero-claims marked superseded, traction guard present"
   echo ok
 }
 
