@@ -33,6 +33,9 @@ PASS=0; FAIL=0; RESULTS=()
 # Set by core-suite-green and consumed by claims-match-truth: the test count the
 # suite PRINTED, never a number typed into a badge.
 SUITE_N=""
+# Set by record-honest on first use: every integer the instruments have printed
+# this run (today's reading + the t0 reading + STATE's recorded figures).
+READS_SET=""
 write_summary() {
   { for r in "${RESULTS[@]:-}"; do
       printf '%-34s %s\n' "$(echo "$r" | awk '{print $1}')" "$(echo "$r" | awk '{print $NF}')"
@@ -225,6 +228,13 @@ claims_match_truth() {
   every_equals "$charts"  "README static charts shield" README.md              'label=charts&message=[0-9]+'    's#.*message=##' || dups="$dups README-static-charts"
   every_equals "$deps"    "README static deps shield"   README.md              'label=dependencies&message=[0-9]+' 's#.*message=##' || dups="$dups README-static-deps"
   every_equals "$SUITE_N" "README static tests shield"  README.md              'label=tests&message=[0-9]+'     's#.*message=##' || dups="$dups README-static-tests"
+  # Pass-6 X_REL_BADGE / X_STATIC_LIC: the same claim wearing a different label.
+  # A badge is a badge — `release-9.9.9` on a 0.4.0 package and a static
+  # `label=license&message=Apache` are both versions R1 enumerates.
+  every_equals "$version" "README release shield"      README.md              'badge/release-[0-9A-Za-z.]+'  's#.*release-##' || dups="$dups README-release-shield"
+  every_equals "$version" "core README release shield" packages/core/README.md 'badge/release-[0-9A-Za-z.]+' 's#.*release-##' || dups="$dups coreREADME-release-shield"
+  every_equals "$license" "README static license shield" README.md            'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || dups="$dups README-static-license"
+  every_equals "$license" "core README static license" packages/core/README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || dups="$dups coreREADME-static-license"
   # EVERY '## License' block in the core README must name the manifest's license
   local lic_block lic_bad=""
   while IFS= read -r lic_block; do
@@ -410,6 +420,23 @@ benchmarks_cited_with_command() {
   done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
            | grep -oE '[0-9][0-9.]*[[:space:]]?(MB|KB|kB|GB|Gb)' || true)
 
+  # Pass-6 Y_TIME: the same scan for TIME claims — R3 names render-time as one of
+  # its four numbers, and `| **Renders in 500 ms** |` outside the table used to
+  # ride past the size-only scan. Any time token outside the table must fit the
+  # budget the script declares.
+  local t_tok t_val
+  while IFS= read -r t_tok; do
+    [ -n "$t_tok" ] || continue
+    t_val=$(printf '%s' "$t_tok" | grep -oE '[0-9][0-9.]*' | sed -n '1p')
+    case "$t_tok" in
+      *ms*) : ;;
+      *seco*) t_val=$(( t_val * 1000 )) ;;
+    esac
+    [ "$t_val" -le "$budget" ] 2>/dev/null \
+      || { echo "README carries a timing claim no command prints: '$t_tok' (budget is ${budget} ms)"; return 1; }
+  done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
+           | grep -oiE '[0-9][0-9.]*[[:space:]]?(ms|msec|milliseconds|seconds|s)\b' || true)
+
   # The script's own verdict: if the live render is over budget it exits 1, and
   # that already failed above — say so rather than leaving the reason implicit.
   node scripts/gtm-bench.mjs >/dev/null 2>&1 \
@@ -429,6 +456,48 @@ run_check "benchmarks-cited-with-command" benchmarks_cited_with_command
 # since S45 (t0 = 119).
 # Counterfactuals: 500 downloads into KNOWLEDGE or the summary; a bare
 # "adoption baseline is zero"; the evidence pointer removed → red.
+# ── R2 helpers: a zero must be RE-DERIVED for the window it names ─────────────
+# Pass-6 X_ZERO_WINDOW: a bare `10-05` token on the line used to buy any zero.
+# The claim's own period is queried against the downloads API; only `0` passes.
+# Counterfactual: `0 downloads in October 2026` → API returns 169 → red.
+api_total() { # $1=start $2=end → integer total (ERR on failure)
+  curl -s -m 20 "https://api.npmjs.org/downloads/range/$1:$2/@ifelse.codes/chitra" \
+    | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{
+        try { const j=JSON.parse(d); console.log(j.downloads.reduce((a,x)=>a+x.downloads,0)); }
+        catch(e) { console.log("ERR"); } })'
+}
+# Prints the API total for the window the LINE claims, or "NOWINDOW".
+zero_claim_total() {
+  local line="$1" yr mon mnum s e day
+  yr=$(printf '%s' "$line" | grep -oE '20[0-9]{2}' | sed -n '1p')
+  # 1. a named month beats a bare day token (October 2026 containing "since 10-05")
+  for mon in January February March April May June July August September October November December; do
+    if printf '%s' "$line" | grep -qiE "(^|[^a-zA-Z])${mon}([^a-zA-Z]|$)"; then
+      mnum=$(awk -v m="$mon" 'BEGIN{split("January February March April May June July August September October November December",a," ");for(i=1;i<=12;i++) if(a[i]==m) printf "%02d",i}')
+      [ -n "$yr" ] || yr=2026
+      api_total "$(printf '%s-%s-01' "$yr" "$mnum")" "$(printf '%s-%s-31' "$yr" "$mnum")"
+      return
+    fi
+  done
+  # 2. lifetime / since-launch claims span the whole reading window
+  if printf '%s' "$line" | grep -qiE 'since launch|lifetime|all time|so far'; then
+    api_total "2026-09-15" "$(date +%F)"; return
+  fi
+  # 3. explicit dates (10-05, 2026-10-05) — sum exactly those days
+  local total=0 got
+  while IFS= read -r day; do
+    [ -n "$day" ] || continue
+    case "$day" in 20[0-9][0-9]-*) : ;; *) day="$(printf '%s' "${yr:-2026}-${day}")" ;; esac
+    got=$(api_total "$day" "$day")
+    case "$got" in *[!0-9]*) echo NOWINDOW; return ;; esac
+    total=$((total + got))
+  done < <(printf '%s' "$line" | grep -oE '(20[0-9]{2}-)?[0-9]{2}-[0-9]{2}' | sort -u || true)
+  if [ "$total" -gt 0 ] || [ "$total" -eq 0 ] && [ -n "$(printf '%s' "$line" | grep -oE '[0-9]{2}-[0-9]{2}' | sed -n '1p')" ]; then
+    printf '%s' "$total"; return
+  fi
+  echo NOWINDOW
+}
+
 record_honest() {
   grep -q 'GTM proof pack' .ai/ROADMAP.md || { echo "roadmap no longer names the pack"; return 1; }
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' \
@@ -436,11 +505,17 @@ record_honest() {
   local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
                .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md .ai/GT-REMEDIATIONS.md
                sessions/session-48-summary.md)
+  # Pass-6 Y_HANDOFF: the counterfactual says `.ai/` with no qualifier, and the
+  # loop's own handoffs live there.
+  local hf
+  for hf in .ai/handoffs/*.md; do
+    [ -f "$hf" ] && files+=("$hf")
+  done
   # Pass-5 restructure: LINE-based, because a zero needs the window it came from
   # and a traction claim needs the digits on its own line.
   local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
   local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
-  local f line scrub h n hits bad=""
+  local f line scrub h n hits zt nums tok sT0 sT1 bad=""
   for f in "${files[@]}"; do
     # Fail CLOSED on a missing file: pass 2 deleted CONTINUATION-PROMPT and the
     # check printed an OK line about a file it never read.
@@ -472,13 +547,19 @@ record_honest() {
                     printf "%d", v }')
         [ -n "$n" ] || continue
         if [ "$n" = "0" ]; then
-          # Pass-5 H_ZERO/H_ZERO2: a zero is admitted only when the line says which
-          # window it describes, or carries the audit that derived it. `0 downloads
-          # since launch` and `0 downloads in October` are figures the API does not
-          # return — and a false zero is the exact error this session exists to kill.
+          # Pass-5 H_ZERO/H_ZERO2 + pass-6 X_ZERO_WINDOW: a zero is NOT admitted by
+          # a token on the line — the window the line CLAIMS is queried against the
+          # downloads API and must return 0. History lines that carry their own
+          # audit (`re-probe`, `re-derived`, `before its publish`) are what they say.
           case "$line" in
-            *10-05*|*10-06*|*before\ its\ publish*|*re-probe*|*re-derived*) : ;;
-            *) bad="$bad $f:'$h' (zero with no window the API supports)" ;;
+            *re-probe*|*re-derived*|*before\ its\ publish*) : ;;
+            *)
+              zt=$(zero_claim_total "$line")
+              if [ "$zt" = "NOWINDOW" ]; then
+                bad="$bad $f:'$h' (zero whose window the line never states)"
+              elif [ "$zt" != "0" ]; then
+                bad="$bad $f:'$h' (API returns $zt for the window this line claims)"
+              fi ;;
           esac
         elif [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
           # The ledger quotes its own audit history: a finite, explicit set.
@@ -488,15 +569,33 @@ record_honest() {
         fi
       done <<< "$hits"
       fi
-      # Pass-5 H_GUARD/H_VOCAB: a traction line must QUOTE A NUMBER. No guard
-      # sentence exempts it (a claim can carry one and still claim), and no keyword
-      # list can be grown past — either the line cites a figure the instrument
-      # prints, or it is not a claim this record keeps. Summary only: R6's
-      # counterfactual names that file.
-      if [ "$f" = "sessions/session-48-summary.md" ]; then
+      # Pass-5 H_GUARD/H_VOCAB + pass-6 X_TRACTION_DIGIT: a traction line must
+      # quote numbers THE INSTRUMENTS PRINT — a digit alone is not enough (99
+      # likes proves it), and no guard sentence exempts a claim that carries one.
+      # Summary only: R6's counterfactual names that file — and it names *sentences*.
+      # Table rows are structured evidence whose downloads figures are already
+      # governed by the figure rule above (their citations — `ROADMAP.md:219`,
+      # `S48`, `#47` — are not claims).
+      if [ "$f" = "sessions/session-48-summary.md" ] && [ "${line:0:1}" != "|" ]; then
         if printf '%s' "$line" | grep -qiE "$TRACT"; then
-          printf '%s' "$line" | grep -q '[0-9]' \
-            || bad="$bad $f:(traction claim quoting no number: $(printf '%s' "$line" | sed -E 's/^[[:space:]]+//' | cut -c1-48))"
+          if [ -z "$READS_SET" ]; then
+            sT0=$(grep -m1 -oE '`t0` = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+            sT1=$(grep -m1 -oE 't1 = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+            READS_SET="$({ node scripts/gtm-reads.mjs 2>/dev/null
+                           node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null
+                           printf ' %s %s\n' "$sT0" "$sT1"; } \
+                         | grep -oE '[0-9]+' | sort -u | tr '\n' ' ')"
+          fi
+          nums=$(printf '%s' "$line" | grep -oE '[0-9]+' || true)
+          if [ -z "$nums" ]; then
+            bad="$bad $f:(traction claim quoting no number: $(printf '%s' "$line" | sed -E 's/^[[:space:]]+//' | cut -c1-44))"
+          else
+            for tok in $nums; do
+              case " $READS_SET " in *" $tok "*) : ;;
+                *) bad="$bad $f:(traction number '$tok' no instrument prints)" ;;
+              esac
+            done
+          fi
         fi
       fi
     done < "$f"
@@ -514,7 +613,7 @@ record_honest() {
   done
   [ -z "$bad" ] || { echo "figure or claim no instrument prints:$bad"; return 1; }
   grep -qi 'never cite' .ai/STATE.md || { echo "STATE lost the 'never cite as traction' guard"; return 1; }
-  echo "roadmap points at its instruments; all 8 live files line-scanned (figures window-bound, ledger allow-listed, table quotes marker-gated); every traction line quotes a number; zero-claims superseded"
+  echo "roadmap points at its instruments; every scanned file line-checked (handoffs included): figures window-VERIFIED against the API, ledger allow-listed, table quotes marker-gated; every traction sentence quotes an instrument-printed number; zero-claims superseded"
 }
 run_check "record-honest" record_honest
 

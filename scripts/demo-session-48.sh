@@ -9,6 +9,41 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 FAILS=0
+
+# Same helper as the gate: a zero must be re-derived for the window it claims.
+api_total() {
+  curl -s -m 20 "https://api.npmjs.org/downloads/range/$1:$2/@ifelse.codes/chitra" \
+    | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{
+        try { const j=JSON.parse(d); console.log(j.downloads.reduce((a,x)=>a+x.downloads,0)); }
+        catch(e) { console.log("ERR"); } })'
+}
+zero_claim_total() {
+  local line="$1" yr mon mnum day total=0 got
+  yr=$(printf '%s' "$line" | grep -oE '20[0-9]{2}' | sed -n '1p')
+  for mon in January February March April May June July August September October November December; do
+    if printf '%s' "$line" | grep -qiE "(^|[^a-zA-Z])${mon}([^a-zA-Z]|$)"; then
+      mnum=$(awk -v m="$mon" 'BEGIN{split("January February March April May June July August September October November December",a," ");for(i=1;i<=12;i++) if(a[i]==m) printf "%02d",i}')
+      [ -n "$yr" ] || yr=2026
+      api_total "$(printf '%s-%s-01' "$yr" "$mnum")" "$(printf '%s-%s-31' "$yr" "$mnum")"; return
+    fi
+  done
+  if printf '%s' "$line" | grep -qiE 'since launch|lifetime|all time|so far'; then
+    api_total "2026-09-15" "$(date +%F)"; return
+  fi
+  while IFS= read -r day; do
+    [ -n "$day" ] || continue
+    case "$day" in 20[0-9][0-9]-*) : ;; *) day="$(printf '%s' "${yr:-2026}-${day}")" ;; esac
+    got=$(api_total "$day" "$day")
+    case "$got" in *[!0-9]*) echo NOWINDOW; return ;; esac
+    total=$((total + got))
+  done < <(printf '%s' "$line" | grep -oE '(20[0-9]{2}-)?[0-9]{2}-[0-9]{2}' | sort -u || true)
+  if [ -n "$(printf '%s' "$line" | grep -oE '[0-9]{2}-[0-9]{2}' | sed -n '1p')" ]; then
+    printf '%s' "$total"; return
+  fi
+  echo NOWINDOW
+}
+READS_SET=""
+
 # Every occurrence of a claim surface must agree with the derived value —
 # presence checks let a second, disagreeing claim ride along (pass-4 E3–E7).
 every() {
@@ -77,6 +112,10 @@ p_r1() {  # claims derive from their source
   every "$version" README.md 'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || return 1
   every "$version" packages/core/README.md 'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || return 1
   every "$charts" README.md 'label=charts&message=[0-9]+' 's#.*message=##' || return 1
+  every "$version" README.md 'badge/release-[0-9A-Za-z.]+' 's#.*release-##' || return 1
+  every "$version" packages/core/README.md 'badge/release-[0-9A-Za-z.]+' 's#.*release-##' || return 1
+  every "$license" README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
+  every "$license" packages/core/README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
   local tfirst
   tfirst=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
   every "$tfirst" README.md 'label=tests&message=[0-9]+' 's#.*message=##' || return 1
@@ -136,6 +175,14 @@ p_r3() {  # benchmarks, measured now
   script_rows=$(printf '%s' "$out" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).rows||""))')
   readme_rows=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[2]; gsub(/[*`]/,"",c); gsub(/^[ \t]+|[ \t]+$/,"",c); if(c!="") print c}}' README.md | paste -sd'|' -)
   [ -n "$script_rows" ] && [ "$readme_rows" = "$script_rows" ] || return 1
+  local t_tok t_val
+  while IFS= read -r t_tok; do
+    [ -n "$t_tok" ] || continue
+    t_val=$(printf '%s' "$t_tok" | grep -oE '[0-9][0-9.]*' | sed -n '1p')
+    case "$t_tok" in *seco*) t_val=$(( t_val * 1000 )) ;; esac
+    [ "$t_val" -le "$budget" ] 2>/dev/null || return 1
+  done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
+           | grep -oiE '[0-9][0-9.]*[[:space:]]?(ms|msec|milliseconds|seconds|s)\b' || true)
   echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — every row and value printed by the script"
   echo ok
 }
@@ -175,7 +222,7 @@ p_r6() {  # the record only carries derived numbers — line-based, like the gat
                sessions/session-48-summary.md)
   local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
   local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
-  local f line scrub h hits n bad=""
+  local f line scrub h hits n zt tok sT0 sT1 bad=""
   for f in "${files[@]}"; do
     [ -f "$f" ] || return 1
     while IFS= read -r line; do
@@ -199,8 +246,12 @@ p_r6() {  # the record only carries derived numbers — line-based, like the gat
           [ -n "$n" ] || continue
           if [ "$n" = "0" ]; then
             case "$line" in
-              *10-05*|*10-06*|*before\ its\ publish*|*re-probe*|*re-derived*) : ;;
-              *) bad="$bad $f:'$h'(zero-window)" ;;
+              *re-probe*|*re-derived*|*before\ its\ publish*) : ;;
+              *)
+                zt=$(zero_claim_total "$line")
+                if [ "$zt" = "NOWINDOW" ] || [ "$zt" != "0" ]; then
+                  bad="$bad $f:'$h'(zero-window: ${zt})"
+                fi ;;
             esac
           elif [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
             case "$n" in 89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
@@ -209,9 +260,18 @@ p_r6() {  # the record only carries derived numbers — line-based, like the gat
           fi
         done <<< "$hits"
       fi
-      if [ "$f" = "sessions/session-48-summary.md" ]; then
+      if [ "$f" = "sessions/session-48-summary.md" ] && [ "${line:0:1}" != "|" ]; then
         if printf '%s' "$line" | grep -qiE "$TRACT"; then
-          printf '%s' "$line" | grep -q '[0-9]' || bad="$bad $f:(traction-without-number)"
+          if [ -z "$READS_SET" ]; then
+            sT0=$(grep -m1 -oE '`t0` = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+            sT1=$(grep -m1 -oE 't1 = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+            READS_SET="$({ node scripts/gtm-reads.mjs 2>/dev/null
+                           node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null
+                           printf ' %s %s\n' "$sT0" "$sT1"; } | grep -oE '[0-9]+' | sort -u | tr '\n' ' ')"
+          fi
+          for tok in $(printf '%s' "$line" | grep -oE '[0-9]+' || true); do
+            case " $READS_SET " in *" $tok "*) : ;; *) bad="$bad $f:(number $tok not printed)" ;; esac
+          done
         fi
       fi
     done < "$f"
