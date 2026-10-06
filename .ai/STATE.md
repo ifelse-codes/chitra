@@ -1,19 +1,20 @@
 # chitra — Current State Snapshot
 
-**Snapshot, not log.** Overwritten in full at every closeout. (S47 — **make the
-governance gates able to fail**, complete and closed 2026-10-05: R1–R9 from
-`sessions/session-45-ground-truth.md` § *Findings, ranked*, 4 review passes ending
-**ACCEPT 13/13**; S46 closed 2026-10-04: P1, P2, F1–F6 discharged, repo public.)
+**Snapshot, not log.** Overwritten in full at every closeout. (S48 — **the GTM proof
+pack**, complete and closed 2026-10-06: R1–R6 from `prompts/48-task-gtm-proof-pack.md`,
+one channel published and measurable. S47 closed 2026-10-05 — gates that can fail,
+ACCEPT 13/13; S46 closed 2026-10-04 — the public flip.)
 
 ## Active Branch
-`session-47-gate-truth` from `main` (`a218ac5` at branch time — derive with
-`git rev-parse main`). Delivery: **16 commits** (10 from the builder session, 6 from
-the finisher), all `S47:`, max **3 files** each (derived per commit with
-`git show --numstat`): `scripts/verify-closeout.sh` fail-closed fixes (R1–R3) +
-`scripts/verify-session-47.sh` + `scripts/demo-session-47.sh` +
-`prompts/47-task-gate-truth.md` + backfilled `sessions/session-40-summary.md` +
-`sessions/session-47-support-ticket.md` (R8 evidence) + `.ai/` sync. No file under
-`packages/core/src/`; lockfile untouched.
+`session-48-gtm-proof-pack` from `main` (`2f3c089` at branch time — derive with
+`git rev-parse main`). Delivery commits (derive, don't trust):
+`git rev-list --count $(git merge-base main HEAD)..HEAD` — all `S48:`, max **3 files**
+each (derived per commit with `git show --numstat`). What landed: the two instruments
+`scripts/gtm-reads.mjs` (adoption) + `scripts/gtm-bench.mjs` (size/speed),
+`scripts/verify-session-48.sh` (10 checks) + `scripts/demo-session-48.sh` (6 probed
+rows), the README **Benchmarks** section, the contract, and `sessions/session-48-*`.
+**No file under `packages/core/src/`**; lockfile untouched — a GTM session does not
+change the product.
 
 ## What Currently Works (observed, not claimed)
 - **The repository is public.** `gh api repos/ifelse-codes/chitra --jq .private` → **`false`**,
