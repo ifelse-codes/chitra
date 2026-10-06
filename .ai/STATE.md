@@ -41,6 +41,17 @@ change the product.
   it with `node scripts/gtm-reads.mjs` and compare the days **after 2026-10-06**
   against the flat line before it (0 downloads on 10-05 and 10-06). An anonymous
   fetch of the post answers **200**, which is what the gate re-checks.
+- 🔴 **S48 closed WITHOUT a final acceptance — founder order, 2026-10-06.** The
+  independent reviewer ran **8 passes, all REJECT** (ground count 4 → 2 → 11 → 8 →
+  6 → 9 → 7 → 1); the last ground (V1: a version stated in README prose) was fixed
+  in `e98928f` and **was never re-reviewed**. The founder then ordered the session
+  closed with no further pass. `sessions/session-48-review.md` therefore carries
+  `**Verdict:** REJECT … CLOSED BY FOUNDER ORDER` as its canonical line, the
+  closeout gate reads BLOCK on it, and the close was executed under
+  `VAJRA_CLOSEOUT_WAIVER=48` with that reason — **waived, not accepted**. The open
+  item is one command: re-run pass 9 (`--inputs-sha 48` →
+  `f8c7cfe26db313f2f17acf6f327ba936d1172627a80ac211d68211e193d4c910`) to turn this
+  into a real verdict.
 - **R1 — coverage sees squash merges.** `check_session_coverage` derives its population
   from merge subjects UNION squash subjects (`SNN:`), records newest belief (**S46**;
   the old merge-only body believed **S37** — run both commands beside each other),
