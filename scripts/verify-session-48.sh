@@ -149,6 +149,30 @@ claims_match_truth() {
   [ "$b_renderers" = "$renderers" ]   || bad="$bad README-renderers('${b_renderers}'≠${renderers})"
   [ "$b_deps" = "$deps" ]             || bad="$bad README-deps('${b_deps}'≠${deps})"
   [ "$b_license" = "$license" ]       || bad="$bad README-license('${b_license}'≠${license})"
+  # Pass-3 N1/N2: the deps badge's SHIELD URL and README's dependency cell were
+  # never extracted (charts had both, deps had neither) — P1g's stimulus, red for
+  # two passes, went green in d26a418. Now both are compared as values.
+  local b_deps_url deps_cell
+  b_deps_url=$(grep -m1 -oE 'badge/dependencies-[0-9]+' README.md | sed -E 's#.*dependencies-##' || true)
+  [ "$b_deps_url" = "$deps" ] || bad="$bad README-deps-url('${b_deps_url}'≠${deps})"
+  if [ "$deps" -eq 0 ]; then deps_cell="| **Zero dependencies** |"; else deps_cell="| **${deps} dependencies** |"; fi
+  grep -qF "$deps_cell" README.md || bad="$bad README-deps-cell(expected '$deps_cell')"
+  # Pass-3 N5: `grep -m1` made a second, false badge invisible. EVERY badge must
+  # agree with the derived value — one extraction per occurrence, all compared.
+  local mismatch
+  mismatch=$(grep -oE '!\[charts: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/' \
+             | grep -cv "^${charts}$" || true)
+  [ "$mismatch" = "0" ] || bad="$bad README-charts-badge-x${mismatch} disagreeing badge(s)"
+  mismatch=$(grep -oE '!\[dependencies: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/' \
+             | grep -cv "^${deps}$" || true)
+  [ "$mismatch" = "0" ] || bad="$bad README-deps-badge-x${mismatch} disagreeing badge(s)"
+  # Pass-3 N3/N4: R1 names packages/core/README.md's LICENSE and dependency count;
+  # only its chart line was checked. Both are extracted from that file.
+  local core_lic core_deps
+  core_lic=$(awk '/^## License/{f=1;next} f && NF{gsub(/^[ \t]+|[ \t]+$/,""); print; exit}' packages/core/README.md || true)
+  [ "$core_lic" = "$license" ] || bad="$bad coreREADME-license('$core_lic'≠$license)"
+  if [ "$deps" -eq 0 ]; then core_deps="**Zero Dependencies:**"; else core_deps="**${deps} Dependencies:**"; fi
+  grep -qF "$core_deps" packages/core/README.md || bad="$bad coreREADME-deps(expected '$core_deps')"
   grep -qF "all ${charts} charts" README.md        || bad="$bad README-prose"
   grep -qF "all ${charts} charts" .ai/KNOWLEDGE.md || bad="$bad KNOWLEDGE-charts"
   [ -z "$bad" ] || { echo "claim ≠ truth in:$bad (derived values above)"; return 1; }
@@ -286,6 +310,21 @@ benchmarks_cited_with_command() {
   grep -qF "| **Render a 100-point line chart** | **≤ ${budget} ms**" README.md \
     || { echo "README render row ≠ the ${budget} ms budget the script declares"; return 1; }
 
+  # Pass-3 N11: the contract's counterfactual is "a benchmark number with no
+  # command → red", so EVERY value in the Benchmarks table must be one the script
+  # prints — not only the four rows this check happens to know about.
+  local allowed vals v table_bad=""
+  allowed=("${deps}" "${tkb} KB" "${ukb} KB" "${files}" "≤ ${budget} ms")
+  vals=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0}
+             f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[3];
+               if(match(c,/\*\*[^*]+\*\*/)) print substr(c,RSTART+2,RLENGTH-4)}}' README.md)
+  [ -n "$vals" ] || { echo "the Benchmarks table has no value cells to check"; return 1; }
+  while IFS= read -r v; do
+    [ -n "$v" ] || continue
+    case " ${allowed[*]} " in *" $v "*) : ;; *) table_bad="$table_bad '$v'" ;; esac
+  done <<< "$vals"
+  [ -z "$table_bad" ] || { echo "Benchmarks table carries value(s) no command prints:$table_bad"; return 1; }
+
   # The script's own verdict: if the live render is over budget it exits 1, and
   # that already failed above — say so rather than leaving the reason implicit.
   node scripts/gtm-bench.mjs >/dev/null 2>&1 \
@@ -317,24 +356,38 @@ record_honest() {
     # Fail CLOSED on a missing file: pass 2 deleted CONTINUATION-PROMPT and the
     # check printed an OK line about a file it never read.
     [ -f "$f" ] || { echo "live file missing: $f"; return 1; }
-    # Quoted figures are exempt ONLY on table rows — a counterfactual table shows
-    # its own stimulus as evidence. In prose a backtick is not an alibi.
-    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null \
-           | awk '/^\|/{gsub(/`[^`]*`/,"")} {print}' \
-           | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
+    # Quoted figures are exempt ONLY on a table row that also carries a
+    # counterfactual marker — a counterfactual table shows its own stimulus as
+    # evidence (pass-3 N8 planted one in an unrelated table row).
+    hits=$(grep -hiE 'downloads|installs|stars|signups' "$f" 2>/dev/null \
+           | awk '/^\|/ && /(counterfactual|stimulus|→|red|FAIL|instrument prints|probe)/{gsub(/`[^`]*`/,"")} {print}' \
+           | grep -oE '[0-9][0-9,]*([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,]*([[:space:]][a-z]+){0,3}[[:space:]]installs|downloads[^/0-9]{0,15}[0-9][0-9,]*' || true)
     while IFS= read -r h; do
       [ -n "$h" ] || continue
-      n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
+      case "$h" in */*) continue ;; esac      # a path (downloads/range/2026-…) is not a figure
+      n=$(printf '%s' "$h" | tr -d ',' | grep -oE '[0-9]{3,}' | sed -n '1p')
+      [ -n "$n" ] || continue
       if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
-        # The audit ledger legitimately quotes history (304, 318, 89, 181, the range
-        # path) — those lines carry their evidence markers; a fresh unmarked figure
-        # in the ledger does not (pass-2 NEW-D planted one there).
-        grep -F "$h" "$f" | grep -qE '⚠|FALSIFIED|→|re-probe|re-derived|derive|≠|not [0-9]' \
-          || bad="$bad $f:'$h'"
+        # The ledger quotes its own audit history: a finite, explicit set of
+        # figures it has evidence for. Anything else is a fresh claim — pass-3 N7
+        # planted `⚠ 888 downloads` and the marker used to make it a free pass.
+        case "$n" in 89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
       else
         case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
       fi
     done <<< "$hits"
+    # Traction language with no instrument behind it (pass-3 N9): claiming success
+    # needs a derived number beside it. Negated/conditional lines pass, assertions
+    # do not. Scoped to the summary — R6's counterfactual names that file.
+    if [ "$f" = "sessions/session-48-summary.md" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        case "$line" in
+          *no\ *|*not\ *|*never*|*without*|*rather*|*cannot*|*if\ *) : ;;
+          *) bad="$bad $f:(traction claim with no derived number: ${line:0:60})" ;;
+        esac
+      done < <(grep -iE 'taking off|is working|grew |growth|surging|exploding|popular|demand' "$f" 2>/dev/null || true)
+    fi
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       case "$line" in

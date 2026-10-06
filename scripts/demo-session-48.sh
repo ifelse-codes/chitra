@@ -82,7 +82,18 @@ p_r3() {  # benchmarks, measured now
   grep -qF "**${tkb} KB** gzip tarball" README.md || return 1
   grep -qF "**${ukb} KB** unpacked, ${files} files" README.md || return 1
   grep -qF "node scripts/gtm-bench.mjs" README.md || return 1
-  echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — cited with the command"
+  # every value in the Benchmarks table must be one the script prints
+  local allowed vals v
+  allowed=("${deps}" "${tkb} KB" "${ukb} KB" "${files}" "≤ ${budget} ms")
+  vals=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0}
+             f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[3];
+               if(match(c,/\*\*[^*]+\*\*/)) print substr(c,RSTART+2,RLENGTH-4)}}' README.md)
+  [ -n "$vals" ] || return 1
+  while IFS= read -r v; do
+    [ -n "$v" ] || continue
+    case " ${allowed[*]} " in *" $v "*) : ;; *) return 1 ;; esac
+  done <<< "$vals"
+  echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — every table value printed by the script"
   echo ok
 }
 p_r4() {  # one channel, live, with its date and its reader
