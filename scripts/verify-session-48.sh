@@ -233,6 +233,45 @@ adoption_reading_recorded() {
 }
 run_check "adoption-reading-recorded" adoption_reading_recorded
 
+# ── R3: benchmarks are measured, not claimed ──────────────────────────────────
+# Every figure in the README's benchmark table must equal what gtm-bench.mjs
+# prints RIGHT NOW, with the command visible beside them. Timing is compared as a
+# budget (the script exits 1 when it is blown) because a millisecond fossilised in
+# a README would be false on the next machine — that is why the row cites the
+# ceiling and tells the reader to run the script for their own median.
+# Counterfactual: change 81.5 KB to 40 KB, drop a row, or delete the command → red.
+benchmarks_cited_with_command() {
+  command -v node >/dev/null 2>&1 || { echo "node is not on PATH"; return 1; }
+  [ -s scripts/gtm-bench.mjs ] || { echo "instrument scripts/gtm-bench.mjs missing"; return 1; }
+  local json deps tkb ukb files budget
+  json=$(node scripts/gtm-bench.mjs --json 2>&1) || { echo "bench failed: $json"; return 1; }
+  read -r deps tkb ukb files budget <<<"$(printf '%s' "$json" | node -e '
+    let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+      const j=JSON.parse(s);
+      console.log(j.deps, j["tarball-kb"], j["unpacked-kb"], j["pack-files"], j["render-budget-ms"]);
+    })')"
+  [ -n "$deps" ] && [ -n "$tkb" ] && [ -n "$ukb" ] && [ -n "$files" ] && [ -n "$budget" ] \
+    || { echo "could not parse the bench output"; return 1; }
+
+  grep -qF 'node scripts/gtm-bench.mjs' README.md \
+    || { echo "README does not show the command that produces these numbers"; return 1; }
+  grep -qF "| **Runtime dependencies** | **${deps}** |" README.md \
+    || { echo "README deps row ≠ measured ${deps}"; return 1; }
+  grep -qF "| **\`npm install\` download** | **${tkb} KB** gzip tarball |" README.md \
+    || { echo "README tarball row ≠ measured ${tkb} KB"; return 1; }
+  grep -qF "| **Installed footprint** | **${ukb} KB** unpacked, ${files} files |" README.md \
+    || { echo "README footprint row ≠ measured ${ukb} KB / ${files} files"; return 1; }
+  grep -qF "| **Render a 100-point line chart** | **≤ ${budget} ms**" README.md \
+    || { echo "README render row ≠ the ${budget} ms budget the script declares"; return 1; }
+
+  # The script's own verdict: if the live render is over budget it exits 1, and
+  # that already failed above — say so rather than leaving the reason implicit.
+  node scripts/gtm-bench.mjs >/dev/null 2>&1 \
+    || { echo "live render is over the ${budget} ms budget the README advertises"; return 1; }
+  echo "README cites deps=${deps}, ${tkb} KB, ${ukb} KB / ${files} files, ≤${budget} ms — all printed by gtm-bench.mjs, command shown"
+}
+run_check "benchmarks-cited-with-command" benchmarks_cited_with_command
+
 # ── Product untouched: this session sells what exists, it does not change it ───
 # Counterfactual: any packages/core/src or lockfile change in the delivery → red
 # (the pack measures the product; a code change belongs to a different story).
