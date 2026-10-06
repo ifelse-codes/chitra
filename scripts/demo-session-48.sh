@@ -72,6 +72,20 @@ p_r1() {  # claims derive from their source
   every "$renderers" README.md '\| \*\*[0-9]+ renderers\*\* \|' || return 1
   every "$deps" README.md '\| \*\*[0-9]+ dependencies\*\* \|' || return 1
   every "$deps" packages/core/README.md '\*\*[0-9]+ Dependencies:\*\*' || return 1
+  every "$license" README.md '!\\[license: [^]]+\\]' 's/^!\\[license: //; s/\\]$//' || return 1
+  every "$version" README.md '!\\[version: [^]]+\\]' 's/^!\\[version: //; s/\\]$//' || return 1
+  every "$version" README.md 'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || return 1
+  every "$version" packages/core/README.md 'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || return 1
+  every "$charts" README.md 'label=charts&message=[0-9]+' 's#.*message=##' || return 1
+  local tfirst
+  tfirst=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
+  every "$tfirst" README.md 'label=tests&message=[0-9]+' 's#.*message=##' || return 1
+  local lb lic_ok=1
+  while IFS= read -r lb; do
+    [ -n "$lb" ] || continue
+    [ "$lb" = "$license" ] || lic_ok=0
+  done < <(awk '/^## License/{f=1;next} f && NF{gsub(/^[ \t]+|[ \t]+$/,""); print; f=0}' packages/core/README.md || true)
+  [ "$lic_ok" = "1" ] || return 1
   local t1st
   t1st=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
   every "$t1st" README.md 'tests-[0-9]+%20passing' 's/tests-([0-9]+).*/\1/' || return 1
@@ -153,58 +167,58 @@ p_r5() {  # first screen: install, live link, example still true
   echo "install line present; docs link 200; README example == live render"
   echo ok
 }
-p_r6() {  # the record only carries derived numbers
+p_r6() {  # the record only carries derived numbers — line-based, like the gate
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -q 'gtm-reads' || return 1
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -q 'gtm-bench' || return 1
   local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
                .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md .ai/GT-REMEDIATIONS.md
                sessions/session-48-summary.md)
-  local f line hits h n bad=""
+  local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
+  local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
+  local f line scrub h hits n bad=""
   for f in "${files[@]}"; do
     [ -f "$f" ] || return 1
-    hits=$(grep -hiE 'downloads|installs|stars|signups' "$f" 2>/dev/null \
-           | awk '/^\|/ && /(counterfactual|stimulus|→|red|FAIL|instrument prints|probe)/{gsub(/`[^`]*`/,"")} {print}' \
-           | grep -oE '[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?' || true)
-    while IFS= read -r h; do
-      [ -n "$h" ] || continue
-      case "$h" in */*) continue ;; esac
-      n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
-          | awk '{ v=$0; gsub(/,/,"",v);
-                  if (v ~ /[kKmM]$/) { s=substr(v,length(v),1); v=substr(v,1,length(v)-1)+0;
-                    if (s=="k"||s=="K") v*=1000; else v*=1000000 }
-                  printf "%d", v }')
-      [ -n "$n" ] || continue
-      if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
-        case "$n" in 0|89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
-      else
-        case "$n" in 0|119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
-      fi
-    done <<< "$hits"
-    # traction claims with no derived number (summary only — R6's counterfactual)
-    if [ "$f" = "sessions/session-48-summary.md" ]; then
-      while IFS= read -r line; do
-        [ -n "$line" ] || continue
-        case "$line" in
-          *'none organic'*|*'no organic'*|*'never cite'*|*'never as traction'*|*'no traction'*|*'not traction'*|*'flat zero'*|*'stays at zero'*|*'not the product'*|*'if the days'*|*'no signal'*|*'no users'*) : ;;
-          *) bad="$bad $f:(traction claim)" ;;
-        esac
-      done < <(grep -iE 'taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups' "$f" 2>/dev/null || true)
-    fi
     while IFS= read -r line; do
       [ -n "$line" ] || continue
-      case "$line" in
-        *superseded*|*false*|*"not zero"*|*must\ not*|*FALSIFIED*|*⚠*) : ;;
-        *) bad="$bad $f:(zero-claim)" ;;
+      scrub="$line"
+      case "$scrub" in
+        \|*) case "$scrub" in
+               *counterfactual*|*stimulus*|*→*|*FAIL*|*'instrument prints'*|*probe*)
+                 scrub=$(printf '%s' "$scrub" | sed -E 's/`[^`]*`//g') ;;
+             esac ;;
       esac
-    done < <(awk '
-      function flush() { if (buf != "") { print buf; buf = "" } }
-      /baseline (of|is) zero/ { flush(); buf = $0; pending = 2; next }
-      pending > 0 { buf = buf " " $0; pending--; if (pending == 0) flush(); next }
-      END { flush() }' "$f" 2>/dev/null || true)
+      hits=$(printf '%s\n' "$scrub" | grep -oE "$FIG" || true)
+      if [ -n "$hits" ]; then
+        while IFS= read -r h; do
+          [ -n "$h" ] || continue
+          case "$h" in */*) continue ;; esac
+          n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
+              | awk '{ v=$0; gsub(/,/,"",v); if (v ~ /[kKmM]$/) { s=substr(v,length(v),1);
+                        v=substr(v,1,length(v)-1)+0; if (s=="k"||s=="K") v*=1000; else v*=1000000 }
+                        printf "%d", v }')
+          [ -n "$n" ] || continue
+          if [ "$n" = "0" ]; then
+            case "$line" in
+              *10-05*|*10-06*|*before\ its\ publish*|*re-probe*|*re-derived*) : ;;
+              *) bad="$bad $f:'$h'(zero-window)" ;;
+            esac
+          elif [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
+            case "$n" in 89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
+          else
+            case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+          fi
+        done <<< "$hits"
+      fi
+      if [ "$f" = "sessions/session-48-summary.md" ]; then
+        if printf '%s' "$line" | grep -qiE "$TRACT"; then
+          printf '%s' "$line" | grep -q '[0-9]' || bad="$bad $f:(traction-without-number)"
+        fi
+      fi
+    done < "$f"
   done
   [ -z "$bad" ] || return 1
   grep -qi 'never cite' .ai/STATE.md || return 1
-  echo "8 live files: only 119/273 (table-quoted stimuli stripped; ledger needs markers), zero-claims superseded, guard present"
+  echo "8 files line-scanned: figures window-bound, ledger allow-listed, every traction line quotes a number"
   echo ok
 }
 

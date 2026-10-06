@@ -215,6 +215,23 @@ claims_match_truth() {
   every_equals "$renderers" "README renderers cell"    README.md              '\| \*\*[0-9]+ renderers\*\* \|'    '' || dups="$dups README-renderers-cell"
   every_equals "$deps"      "README deps cell"         README.md              '\| \*\*[0-9]+ dependencies\*\* \|' '' || dups="$dups README-deps-cell"
   every_equals "$deps"      "core README deps count"   packages/core/README.md '\*\*[0-9]+ Dependencies:\*\*'     '' || dups="$dups coreREADME-deps"
+  # Pass-5 H_LIC/H_LIC2/H_VER/H_ALTURL: the enumeration's own members that
+  # every_equals did not cover — license and version on BOTH files, and the
+  # shields formats (static/v1 label=message, version badges) a stranger reads.
+  every_equals "$license" "README license badge(s)"     README.md              '!\[license: [^]]+\]'        's/^!\[license: //; s/\]$//' || dups="$dups README-license-alt"
+  every_equals "$version" "README version badge(s)"     README.md              '!\[version: [^]]+\]'        's/^!\[version: //; s/\]$//' || dups="$dups README-version-alt"
+  every_equals "$version" "README version shield"       README.md              'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || dups="$dups README-version-shield"
+  every_equals "$version" "core README version shield"  packages/core/README.md 'badge/version-[0-9A-Za-z.]+' 's#.*version-##' || dups="$dups coreREADME-version"
+  every_equals "$charts"  "README static charts shield" README.md              'label=charts&message=[0-9]+'    's#.*message=##' || dups="$dups README-static-charts"
+  every_equals "$deps"    "README static deps shield"   README.md              'label=dependencies&message=[0-9]+' 's#.*message=##' || dups="$dups README-static-deps"
+  every_equals "$SUITE_N" "README static tests shield"  README.md              'label=tests&message=[0-9]+'     's#.*message=##' || dups="$dups README-static-tests"
+  # EVERY '## License' block in the core README must name the manifest's license
+  local lic_block lic_bad=""
+  while IFS= read -r lic_block; do
+    [ -n "$lic_block" ] || continue
+    [ "$lic_block" = "$license" ] || lic_bad="$lic_bad '$lic_block'"
+  done < <(awk '/^## License/{f=1;next} f && NF{gsub(/^[ \t]+|[ \t]+$/,""); print; f=0}' packages/core/README.md || true)
+  [ -z "$lic_bad" ] || { echo "core README License block(s) disagreeing:$lic_bad (expected $license)"; return 1; }
   [ -z "$dups" ] || { echo "contradicting claim(s):$dups"; return 1; }
 
   # Docs hero: number AND label must appear in the same stat block.
@@ -379,6 +396,20 @@ benchmarks_cited_with_command() {
     return 1
   fi
 
+  # Pass-5 H_BUNDLE: a benchmark-shaped claim ANYWHERE ELSE in the README — bundle
+  # size is the first thing R3 names, and the table scan cannot see a size claim
+  # made outside it. Every size token outside ## Benchmarks must be one of the two
+  # the script prints.
+  local size_tok s
+  while IFS= read -r size_tok; do
+    [ -n "$size_tok" ] || continue
+    s=$(printf '%s' "$size_tok" | sed -E 's/[[:space:]]+//g')
+    case " ${tkb}KB ${ukb}KB " in *" ${s} "*) : ;;
+      *) echo "README carries a size claim no command prints: '$size_tok' (script prints ${tkb} KB / ${ukb} KB)"; return 1 ;;
+    esac
+  done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
+           | grep -oE '[0-9][0-9.]*[[:space:]]?(MB|KB|kB|GB|Gb)' || true)
+
   # The script's own verdict: if the live render is over budget it exits 1, and
   # that already failed above — say so rather than leaving the reason implicit.
   node scripts/gtm-bench.mjs >/dev/null 2>&1 \
@@ -405,54 +436,70 @@ record_honest() {
   local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
                .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md .ai/GT-REMEDIATIONS.md
                sessions/session-48-summary.md)
-  local f line hits h n bad=""
+  # Pass-5 restructure: LINE-based, because a zero needs the window it came from
+  # and a traction claim needs the digits on its own line.
+  local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
+  local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
+  local f line scrub h n hits bad=""
   for f in "${files[@]}"; do
     # Fail CLOSED on a missing file: pass 2 deleted CONTINUATION-PROMPT and the
     # check printed an OK line about a file it never read.
     [ -f "$f" ] || { echo "live file missing: $f"; return 1; }
-    # Quoted figures are exempt ONLY on a table row that also carries a
-    # counterfactual marker — a counterfactual table shows its own stimulus as
-    # evidence (pass-3 N8 planted one in an unrelated table row).
-    hits=$(grep -hiE 'downloads|installs|stars|signups' "$f" 2>/dev/null \
-           | awk '/^\|/ && /(counterfactual|stimulus|→|red|FAIL|instrument prints|probe)/{gsub(/`[^`]*`/,"")} {print}' \
-           | grep -oE '[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?' || true)
-    while IFS= read -r h; do
-      [ -n "$h" ] || continue
-      case "$h" in */*) continue ;; esac      # a path (downloads/range/2026-…) is not a figure
-      # Normalise: strip separators, expand k/M suffixes (pass-4 E10: `0.8k
-      # downloads` must read 800, not slip through because it has a dot).
-      n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
-          | awk '{ v=$0; gsub(/,/,"",v);
-                  if (v ~ /[kKmM]$/) { s=substr(v,length(v),1); v=substr(v,1,length(v)-1)+0;
-                    if (s=="k"||s=="K") v*=1000; else v*=1000000 }
-                  printf "%d", v }')
-      [ -n "$n" ] || continue
-      if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
-        # The ledger quotes its own audit history: a finite, explicit set of
-        # figures it has evidence for. Anything else is a fresh claim — pass-4 N7
-        # planted `⚠ 888 downloads` and the marker used to make it a free pass.
-        # 0 is always allowed: a zero can never be inflated traction.
-        case "$n" in 0|89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
-      else
-        case "$n" in 0|119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+    while IFS= read -r line; do
+      [ -n "$line" ] || continue
+      scrub="$line"
+      # Backticked spans are evidence ONLY on a table row carrying a counterfactual
+      # marker — anywhere else a backtick is not an alibi (pass-3 N8, pass-5 H_TABLEK).
+      case "$scrub" in
+        \|*) case "$scrub" in
+               *counterfactual*|*stimulus*|*→*|*FAIL*|*'instrument prints'*|*probe*)
+                 scrub=$(printf '%s' "$scrub" | sed -E 's/`[^`]*`//g') ;;
+             esac ;;
+      esac
+      # Hits are captured first and iterated with a HERE-STRING: a nested
+      # `while read < <(...)` inside this file-reading loop crashes macOS bash 3.2
+      # mid-run (observed RC 133/134, reproduced by bisect — with the inner loop
+      # removed the gate runs green).
+      hits=$(printf '%s\n' "$scrub" | grep -oE "$FIG" || true)
+      if [ -n "$hits" ]; then
+      while IFS= read -r h; do
+        [ -n "$h" ] || continue
+        case "$h" in */*) continue ;; esac      # a path (downloads/range/2026-…) is not a figure
+        n=$(printf '%s' "$h" | grep -oE '[0-9][0-9,.]*[kKmM]?' | sed -n '1p' \
+            | awk '{ v=$0; gsub(/,/,"",v);
+                    if (v ~ /[kKmM]$/) { s=substr(v,length(v),1); v=substr(v,1,length(v)-1)+0;
+                      if (s=="k"||s=="K") v*=1000; else v*=1000000 }
+                    printf "%d", v }')
+        [ -n "$n" ] || continue
+        if [ "$n" = "0" ]; then
+          # Pass-5 H_ZERO/H_ZERO2: a zero is admitted only when the line says which
+          # window it describes, or carries the audit that derived it. `0 downloads
+          # since launch` and `0 downloads in October` are figures the API does not
+          # return — and a false zero is the exact error this session exists to kill.
+          case "$line" in
+            *10-05*|*10-06*|*before\ its\ publish*|*re-probe*|*re-derived*) : ;;
+            *) bad="$bad $f:'$h' (zero with no window the API supports)" ;;
+          esac
+        elif [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
+          # The ledger quotes its own audit history: a finite, explicit set.
+          case "$n" in 89|119|181|273|304|318) : ;; *) bad="$bad $f:'$h'" ;; esac
+        else
+          case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+        fi
+      done <<< "$hits"
       fi
-    done <<< "$hits"
-    # Traction language with no instrument behind it (pass-3 N9): claiming success
-    # needs a derived number beside it. Negated/conditional lines pass, assertions
-    # do not. Scoped to the summary — R6's counterfactual names that file.
-    if [ "$f" = "sessions/session-48-summary.md" ]; then
-      while IFS= read -r line; do
-        [ -n "$line" ] || continue
-        # Pass-4 E15/E16: a finite keyword list plus a one-word negation escape let
-        # `Milestone reached: our first user…` and `The channel is working, no ads`
-        # through. The exemption is now an explicit list of this record's OWN guard
-        # sentences — not any line containing `no`.
-        case "$line" in
-          *'none organic'*|*'no organic'*|*'never cite'*|*'never as traction'*|*'no traction'*|*'not traction'*|*'flat zero'*|*'stays at zero'*|*'not the product'*|*'if the days'*|*'no signal'*|*'no users'*) : ;;
-          *) bad="$bad $f:(traction claim with no derived number: ${line:0:60})" ;;
-        esac
-      done < <(grep -iE 'taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups' "$f" 2>/dev/null || true)
-    fi
+      # Pass-5 H_GUARD/H_VOCAB: a traction line must QUOTE A NUMBER. No guard
+      # sentence exempts it (a claim can carry one and still claim), and no keyword
+      # list can be grown past — either the line cites a figure the instrument
+      # prints, or it is not a claim this record keeps. Summary only: R6's
+      # counterfactual names that file.
+      if [ "$f" = "sessions/session-48-summary.md" ]; then
+        if printf '%s' "$line" | grep -qiE "$TRACT"; then
+          printf '%s' "$line" | grep -q '[0-9]' \
+            || bad="$bad $f:(traction claim quoting no number: $(printf '%s' "$line" | sed -E 's/^[[:space:]]+//' | cut -c1-48))"
+        fi
+      fi
+    done < "$f"
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       case "$line" in
@@ -467,7 +514,7 @@ record_honest() {
   done
   [ -z "$bad" ] || { echo "figure or claim no instrument prints:$bad"; return 1; }
   grep -qi 'never cite' .ai/STATE.md || { echo "STATE lost the 'never cite as traction' guard"; return 1; }
-  echo "roadmap points at its instruments; all 8 live files carry only 119/273 (table-quoted stimuli stripped; ledger history needs its evidence marker); zero-claims marked superseded; traction guard present"
+  echo "roadmap points at its instruments; all 8 live files line-scanned (figures window-bound, ledger allow-listed, table quotes marker-gated); every traction line quotes a number; zero-claims superseded"
 }
 run_check "record-honest" record_honest
 
