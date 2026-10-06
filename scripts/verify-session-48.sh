@@ -25,9 +25,9 @@ SCOPE="$(resolve_scope "${VAJRA_GATE_SCOPE:-}")" \
   || { echo "VAJRA_GATE_SCOPE must be full or fast (got '${VAJRA_GATE_SCOPE:-}')"; exit 2; }
 
 gate_skips() { [ "$1" = fast ] || return 1; case " $FAST_SKIP " in *" $2 "*) return 0 ;; esac; return 1; }
-# Inherited cost: the suite run and the network probe. Every check this session
+# Inherited cost: the suite run and the network probes. Every check this session
 # OWNS (R1–R6 evidence) runs in both scopes.
-FAST_SKIP="core-suite-green docs-link-live"
+FAST_SKIP="core-suite-green docs-link-live adoption-reading-recorded"
 
 PASS=0; FAIL=0; RESULTS=()
 write_summary() {
@@ -197,6 +197,41 @@ docs_link_live() {
   echo "https://chitra.iifelse.com → 200"
 }
 run_check "docs-link-live" docs_link_live
+
+# ── R2: adoption is measured, not asserted ────────────────────────────────────
+# The recorded figures are re-derived for the DATES they claim — never compared
+# with today's total, which moves every time someone installs. A stale or invented
+# number goes red because the API still has to return what .ai/STATE.md says it
+# returned on the day it says it did. The S40 ledger row must be dispositioned too.
+# Counterfactual: change 273 -> 274 in STATE, or its --as-of date → red.
+adoption_reading_recorded() {
+  command -v node >/dev/null 2>&1 || { echo "node is not on PATH"; return 1; }
+  [ -s scripts/gtm-reads.mjs ] || { echo "instrument scripts/gtm-reads.mjs missing"; return 1; }
+  local t1 t1day t0 t0day out
+  t1=$(grep -m1 -oE 't1 = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+  t1day=$(grep -m1 -oE 'through \*\*[0-9-]+\*\*' .ai/STATE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || true)
+  t0=$(grep -m1 -oE '`t0` = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
+  t0day=$(grep -m1 -oE '\-\-as-of [0-9]{4}-[0-9]{2}-[0-9]{2}' .ai/STATE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || true)
+  [ -n "$t1" ] && [ -n "$t1day" ] && [ -n "$t0" ] && [ -n "$t0day" ] \
+    || { echo "STATE does not carry both readings with their dates (t1=$t1@$t1day t0=$t0@$t0day)"; return 1; }
+
+  out=$(node scripts/gtm-reads.mjs --as-of "$t1day" 2>&1 | grep -m1 '^total=' || true)
+  [ "$out" = "total=$t1" ] || { echo "STATE says t1=$t1 through $t1day; instrument says '${out#total=}'"; return 1; }
+  out=$(node scripts/gtm-reads.mjs --as-of "$t0day" 2>&1 | grep -m1 '^total=' || true)
+  [ "$out" = "total=$t0" ] || { echo "STATE says t0=$t0 through $t0day; instrument says '${out#total=}'"; return 1; }
+
+  local row1
+  row1=$(awk -F'|' '/^\| # \| Finding \(S40\)/{f=1} f && /^\| 1 \|/{print $4; exit}' .ai/GT-REMEDIATIONS.md)
+  case "$row1" in
+    *DONE*|*WAIVED*) : ;;
+    *) echo "S40 row 1 (adoption baseline) status is '${row1// /}', not DONE"; return 1 ;;
+  esac
+  if grep -qE 'baseline (of|is) zero|`t0` = 0\b' .ai/STATE.md; then
+    echo "STATE still calls the baseline zero"; return 1
+  fi
+  echo "t1=$t1 through $t1day and t0=$t0 through $t0day both re-derive; ledger row 1 DONE; no zero claim"
+}
+run_check "adoption-reading-recorded" adoption_reading_recorded
 
 # ── Product untouched: this session sells what exists, it does not change it ───
 # Counterfactual: any packages/core/src or lockfile change in the delivery → red
