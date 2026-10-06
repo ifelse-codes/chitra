@@ -25,6 +25,14 @@ the finisher), all `S47:`, max **3 files** each (derived per commit with
 - **P2 on:** `{"enabled":true}` (public-repo-only endpoint, proved against control).
 - **F5/F6 stand:** `0.4.0` with provenance (sigstore, `0.3.0` has none, no workflow
   edit); `t0` = 119 lifetime downloads, none organic (derive with the downloads API).
+- **GTM — the adoption instrument now reads the number (S48 R2).**
+  `node scripts/gtm-reads.mjs` (day-level series, release days labelled from the npm
+  registry's own publish times): **t1 = 273** through **2026-10-06** — **243** of them
+  on the two release days (0.3.0 on 09-29, 0.4.0 on 10-04), **30** across the four days
+  after 0.3.0, and **0 on 10-05 and 10-06**. **t0 = 119 reproduces exactly** with
+  `--as-of 2026-10-03`, so S46's figure is no longer a typed number. **No organic
+  signal yet** — and the day the instrument shows one is the day this line changes.
+  Never cite 273 (or 119) as traction.
 - **R1 — coverage sees squash merges.** `check_session_coverage` derives its population
   from merge subjects UNION squash subjects (`SNN:`), records newest belief (**S46**;
   the old merge-only body believed **S37** — run both commands beside each other),
