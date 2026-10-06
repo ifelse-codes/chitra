@@ -272,6 +272,30 @@ benchmarks_cited_with_command() {
 }
 run_check "benchmarks-cited-with-command" benchmarks_cited_with_command
 
+# ── R6: the record says what happened, not what we hope ───────────────────────
+# The roadmap must point at the instruments that delivered its pack, and every
+# downloads figure in the live snapshot files must be one the instrument prints
+# (119 = t0, 273 = t1). A number nobody derived cannot enter the record, and the
+# "never cite as traction" guard must survive in STATE.
+# Counterfactual: write "500 downloads" into STATE, or drop the pointer → red.
+record_honest() {
+  grep -q 'GTM proof pack' .ai/ROADMAP.md || { echo "roadmap no longer names the pack"; return 1; }
+  grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' \
+    || { echo "roadmap's pack row has no evidence pointer"; return 1; }
+  local hits h n bad=""
+  hits=$(grep -hiE 'downloads' .ai/STATE.md .ai/ROADMAP.md \
+         | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
+  while IFS= read -r h; do
+    [ -n "$h" ] || continue
+    n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
+    case "$n" in 119|273) : ;; *) bad="$bad '$h'" ;; esac
+  done <<< "$hits"
+  [ -z "$bad" ] || { echo "downloads figure(s) no instrument prints:$bad"; return 1; }
+  grep -qi 'never cite' .ai/STATE.md || { echo "STATE lost the 'never cite as traction' guard"; return 1; }
+  echo "roadmap points at the instruments; every downloads figure is 119 or 273; traction guard present"
+}
+run_check "record-honest" record_honest
+
 # ── Product untouched: this session sells what exists, it does not change it ───
 # Counterfactual: any packages/core/src or lockfile change in the delivery → red
 # (the pack measures the product; a code change belongs to a different story).

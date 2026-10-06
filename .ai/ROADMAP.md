@@ -217,7 +217,10 @@ if not, they go, and the one-liner becomes true.**
   guard, a hardcoded version literal, two fabricated demo `WORKS` rows) — all fixed.
 - 🔜 **Next (S41 candidates):** the three S39 items stand unchanged, now pushed out one
   session by S40's mandatory ground-truth audit — a **GTM proof pack** (benchmarks /
-  token-savings / before-after), a real **`0.4.0` through CI** (the cheapest proof that the
+  token-savings / before-after) — **delivered in S48**: `scripts/gtm-reads.mjs`
+  (adoption, day-level, release days labelled) + `scripts/gtm-bench.mjs`
+  (size/speed, all figures reproducible) + `sessions/session-48-summary.md`
+  (what shipped vs what moved), a real **`0.4.0` through CI** (the cheapest proof that the
   trusted publisher works; nothing needs to change for it), and **fixing the
   `required-crew` gate** (two founder waivers, S38/S39, for a tech-lead step
   `.ai/AGENTS.md` never asks for). `artifacts/api-server` beyond `/healthz` **was** the
