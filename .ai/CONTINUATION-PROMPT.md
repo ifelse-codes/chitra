@@ -1,50 +1,56 @@
-# chitra — Continuation Handoff (after S47)
+# chitra — Continuation Handoff (after S48)
 
-**Resume in a NEW chat (S48).** `.ai/SESSION` = 47; **`@ifelse.codes/chitra@0.4.0` is LIVE on npm
+**Resume in a NEW chat (S49).** `.ai/SESSION` = 48; **`@ifelse.codes/chitra@0.4.0` is LIVE on npm
 with provenance** (`latest`); the **repo is public** (`private` → `false`). `main` = the S47 merge
-(**derive with `git rev-parse main`** — every sha in this file is a citation, not a fact;
-re-derive before trusting it). **S47 made the governance gates able to fail**: coverage sees
-squash merges (newest S46, was S37), no-code fails closed, cost needs a measurement, S44 REJECT
-disclosed, delivery cap derived, stale facts guarded, crew row re-pointed, cadence named where
-owned, P1 ticket text + 422 evidence recorded.
++ its post-merge sync (**derive with `git rev-parse main`** — every sha in this file is a citation,
+not a fact; re-derive before trusting it). **S48 was the GTM proof pack**: every public number now
+comes from a command, the adoption reading is an instrument instead of a typed figure, and one
+channel is live and measurable.
 
-> **The one thing to carry forward:** the gates now derive their populations instead of
-> curating them — and two lines are still not ours to change. **`AGENTS.md`'s governed body
-> is vajra-owned**: the GT-cadence line and the "Hook-enforced" cap line live there, so S47
-> fixed everything it owns and proposed the vajra-side patch in `sessions/session-47-summary.md`.
-> The P1 support ticket is **prepared, not filed** (`sessions/session-47-support-ticket.md`) —
-> filing needs a human in GitHub Support.
+> **The one thing to carry forward:** the pack shipped the **instrument**, not a result —
+> **273 downloads, 0 organic, the last two days flat zero**. The reading that decides whether this
+> channel was right happens **7 days after 2026-10-06**: run `node scripts/gtm-reads.mjs` after
+> **2026-10-13** and compare the days after the post against the line before it. If it stays at
+> zero, the channel was wrong, not the product — say so out loud; the gate exists so the record
+> cannot quietly disagree. Also standing: the **P1 ticket is prepared and the founder decided
+> not to file it** (open on purpose, by decision — `.ai/STATE.md`).
 
 ## Where we are
 
-Detail: `sessions/session-47-summary.md` (fidelity map) + `sessions/session-47-review.md` (cold pass) +
-`prompts/47-task-gate-truth.md` (R1–R9) + `.ai/STATE.md`.
+Detail: `sessions/session-48-summary.md` (fidelity map) + `sessions/session-48-review.md` (cold pass) +
+`prompts/48-task-gtm-proof-pack.md` (R1–R6) + `.ai/STATE.md`.
 
-| S47 delivered | State |
+| S48 delivered | State |
 |---|---|
-| **R1** coverage union | **shipped** — merge-only newest S37 (blindness, measured) vs union newest S46; S40 backfilled (disclosed) |
-| **R2** no-code fail-closed | **shipped** — GT artifact required, empty range BLOCKS; offender path exercised (planted probe, synthetic N) |
-| **R3** cost measured | **shipped** — decisions + counts + derivation words; heading-only fixture red |
-| **R4** S44 REJECT | **shipped** — STATE + ROADMAP disclose REJECT + 8 passes + PR #66, never COMPLETE |
-| **R5** cap honest | **shipped** — delivery derived per commit (max ≤ 3); history scope + vajra line disclosed |
-| **R6** stale guarded | **shipped** — main/version/tags re-derived with commands; `stale-facts-guarded` in session gate |
-| **R7** crew re-pointed | **shipped** — ROADMAP owns S47 with done-condition; waiver-or-green honest |
-| **R8** P1 ticket | **prepared** — 422 re-derived, request text ready, filing needs a human |
-| **R9** cadence named | **shipped where owned** — BOOT + TASK + ROADMAP + contract carry `N % 5`, S50 named; AGENTS half proposed |
-| Product | **untouched** — 453/453 stands by byte-identity (no node/pnpm on this machine — disclosed fallback, fail-closed on change) |
+| **R1** claims derived | **shipped** — 20 charts ← export lines, 3 renderers ← `RendererType`, 7 themes ← `Object.keys`, 453 ← suite, 0/MIT/0.4.0 ← manifest; README + hero + KNOWLEDGE checked; 4 counterfactuals red |
+| **R2** adoption measured | **shipped** — `gtm-reads.mjs`: t1 = 273 (2026-10-06), t0 = 119 reproduces with `--as-of 2026-10-03`, release days labelled, ledger row 1 DONE; 2 counterfactuals red |
+| **R3** benchmarks measured | **shipped** — `gtm-bench.mjs`: 0 deps · 81.5 KB · 398.4 KB / 39 files · ≤ 2 ms, cited in README with the command; 3 counterfactuals red |
+| **R4** one channel | **shipped** — LinkedIn post published 2026-10-06, URL + date in STATE, gate re-fetches it (200), demo row probed |
+| **R5** first screen probed | **shipped** — install line, docs link 200 live, README example byte-identical to a real render |
+| **R6** record honest | **shipped** — roadmap points at the instruments; only 119/273 may appear; `never cite as traction` enforced; 2 counterfactuals red |
+| Product | **untouched** — `packages/core/src/` and the lockfile unchanged; 453/453 re-derived |
 
-## S48 — candidates
+## S49 — candidates
 
-No contract yet — write `prompts/48-task-*.md` at plan time. Options S47 left:
-the **GTM proof pack** beyond `t0`, or **new product surface** (none since `c72cc14`).
+No contract yet — write `prompts/49-task-*.md` at plan time. Options S48 left:
+
+1. **Read the channel** (2026-10-13 onward) — the reading the whole pack exists to produce.
+2. **New product surface** — none since `c72cc14` (S09); a channel that answers is the trigger.
+3. **S47's three disclosed residuals** — root-dotfile asymmetry, cost counts asserted-not-derived,
+   one waiver covering two checks. One small maintenance lane.
+
 **S50 (`50 % 5 == 0`) is the next NO-CODE ground truth** — never schedule a code session onto it.
 
-## Three process facts worth inheriting
+## Four process facts worth inheriting
 
-1. **A population defined by prose is a check a workflow change can switch off.** S36's
-   coverage read merge subjects; squash merges emptied it silently. Derive from the thing
-   governed (union of subject shapes), refuse emptiness, name the newest belief.
-2. **`set -e` eats `cmd && var=1`.** A failing grep before `&&` exits the function —
-   write `if grep ...; then var=1; fi`. S47 paid this twice (closeout cost check, demo cap).
-3. **A literal sample inside a gate's own source flags the gate.** Scope stale-pattern
-   scans to the live files that must not carry them, never the whole tree (S44 lesson, S47 §R6).
+1. **A number typed in a file is a number nobody can check.** Derive it with a command, cite the
+   command beside it, and gate on re-deriving the figure **for the date it claims** — never against
+   today's live total, which moves on every install.
+2. **The naive derivation can be wrong while the claim is right.** Counting files in `charts/` says
+   23; the public API exports 20 (`ring.ts` is implemented and never exported). S48 nearly "fixed"
+   a correct badge. Write the derivation next to the claim so the next agent cannot repeat it.
+3. **A demo row that cannot fail is the fakest green.** `row()` prints SHIPPED only when the probe
+   exits 0 *and* ends with `ok` — S48's own first run printed NOT PROVEN because of a missing
+   parenthesis in my probe.
+4. **Cite a budget, not a fossil.** A millisecond measured in October is wrong in December on
+   someone else's machine: assert `≤ 2 ms` and let the reader measure their own median.
