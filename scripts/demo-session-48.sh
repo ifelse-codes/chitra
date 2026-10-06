@@ -116,6 +116,15 @@ p_r1() {  # claims derive from their source
   every "$version" packages/core/README.md 'badge/release-[0-9A-Za-z.]+' 's#.*release-##' || return 1
   every "$license" README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
   every "$license" packages/core/README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
+  # every x.y.z displayed in an image URL must equal the manifest version
+  local img vtok
+  while IFS= read -r img; do
+    [ -n "$img" ] || continue
+    while IFS= read -r vtok; do
+      [ -n "$vtok" ] || continue
+      [ "$vtok" = "$version" ] || return 1
+    done < <(printf '%s' "$img" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+  done < <(grep -ohE '!\[[^]]*\]\([^)]+\)' README.md packages/core/README.md 2>/dev/null || true)
   local tfirst
   tfirst=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
   every "$tfirst" README.md 'label=tests&message=[0-9]+' 's#.*message=##' || return 1
@@ -175,11 +184,24 @@ p_r3() {  # benchmarks, measured now
   script_rows=$(printf '%s' "$out" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).rows||""))')
   readme_rows=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} f && /^\| \*\*/{n=split($0,a,"|"); if(n>=4){c=a[2]; gsub(/[*`]/,"",c); gsub(/^[ \t]+|[ \t]+$/,"",c); if(c!="") print c}}' README.md | paste -sd'|' -)
   [ -n "$script_rows" ] && [ "$readme_rows" = "$script_rows" ] || return 1
+  local size_tok s2 tb ub
+  tb=$(printf '%s' "$out" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{console.log(JSON.parse(d)["tarball-bytes"])}catch(e){console.log("")}})')
+  ub=$(printf '%s' "$out" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{console.log(JSON.parse(d)["unpacked-bytes"])}catch(e){console.log("")}})')
+  while IFS= read -r size_tok; do
+    [ -n "$size_tok" ] || continue
+    s2=$(printf '%s' "$size_tok" | sed -E 's/[[:space:]]+//g')
+    if printf '%s' "$size_tok" | grep -qiE 'bytes?$'; then
+      case " $tb $ub " in *" ${s2%%[!0-9]*} "*) : ;; *) return 1 ;; esac
+    else
+      case " ${tkb}KB ${ukb}KB " in *" $s2 "*) : ;; *) return 1 ;; esac
+    fi
+  done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
+           | grep -oE '[0-9][0-9.]*[[:space:]]?(MB|KB|kB|GB|Gb|bytes|byte)' || true)
   local t_tok t_val
   while IFS= read -r t_tok; do
     [ -n "$t_tok" ] || continue
     t_val=$(printf '%s' "$t_tok" | grep -oE '[0-9][0-9.]*' | sed -n '1p')
-    case "$t_tok" in *seco*) t_val=$(( t_val * 1000 )) ;; esac
+    case "$t_tok" in *ms*|*milli*) : ;; *) t_val=$(awk -v v="$t_val" 'BEGIN{printf "%d", v*1000}') ;; esac
     [ "$t_val" -le "$budget" ] 2>/dev/null || return 1
   done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
            | grep -oiE '[0-9][0-9.]*[[:space:]]?(ms|msec|milliseconds|seconds|s)\b' || true)
@@ -222,7 +244,7 @@ p_r6() {  # the record only carries derived numbers — line-based, like the gat
                sessions/session-48-summary.md)
   local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
   local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
-  local f line scrub h hits n zt tok sT0 sT1 bad=""
+  local f line scrub tline h hits n zt tok sT0 sT1 hit_read bad=""
   for f in "${files[@]}"; do
     [ -f "$f" ] || return 1
     while IFS= read -r line; do
@@ -260,18 +282,26 @@ p_r6() {  # the record only carries derived numbers — line-based, like the gat
           fi
         done <<< "$hits"
       fi
-      if [ "$f" = "sessions/session-48-summary.md" ] && [ "${line:0:1}" != "|" ]; then
-        if printf '%s' "$line" | grep -qiE "$TRACT"; then
-          if [ -z "$READS_SET" ]; then
-            sT0=$(grep -m1 -oE '`t0` = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
-            sT1=$(grep -m1 -oE 't1 = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
-            READS_SET="$({ node scripts/gtm-reads.mjs 2>/dev/null
-                           node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null
-                           printf ' %s %s\n' "$sT0" "$sT1"; } | grep -oE '[0-9]+' | sort -u | tr '\n' ' ')"
+      if [ "$f" = "sessions/session-48-summary.md" ]; then
+        tline="$scrub"
+        case "$tline" in
+          \|*) tline=$(printf '%s' "$tline" | sed -E 's/[A-Za-z0-9_./#-]+:[0-9]+//g; s/[RS][0-9]{1,2}\b//g; s/#-?[0-9]+//g; s/session-[0-9]+//g') ;;
+        esac
+        if printf '%s' "$tline" | grep -qiE "$TRACT"; then
+          [ -n "$READS_SET" ] || READS_SET="$({ node scripts/gtm-reads.mjs 2>/dev/null
+              node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null; } \
+            | awk '/^day /{print $3; next} /=/{split($0,a,"="); if (a[1] ~ /^(total|release-shaped-total|non-release-total|non-zero-days|days-since-last-non-zero)$/) print a[2]; else if (a[1] ~ /^(first-non-zero|last-non-zero)$/) print a[3];}' \
+            | grep -oE '[0-9]+' | sort -u | tr '\n' ' ')"
+          nums=$(printf '%s' "$tline" | grep -oE '[0-9]+' || true)
+          if [ -z "$nums" ]; then bad="$bad $f:(traction-no-number)"; else
+            hit_read=0
+            for tok in $nums; do
+              case " $READS_SET " in *" $tok "*) hit_read=1 ;;
+                *) case "$tok" in [0-9]|[01][0-9]|[12][0-9]|3[01]|20[0-9][0-9]) : ;; *) bad="$bad $f:(number $tok not printed)" ;; esac ;;
+              esac
+            done
+            [ "$hit_read" = "1" ] || bad="$bad $f:(traction-no-reading)"
           fi
-          for tok in $(printf '%s' "$line" | grep -oE '[0-9]+' || true); do
-            case " $READS_SET " in *" $tok "*) : ;; *) bad="$bad $f:(number $tok not printed)" ;; esac
-          done
         fi
       fi
     done < "$f"

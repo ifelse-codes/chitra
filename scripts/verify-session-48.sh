@@ -159,6 +159,10 @@ claims_match_truth() {
   ')"
   [ -n "$themes" ] || { echo "could not derive themes/deps/license/version"; return 1; }
   echo "derived: charts=$charts renderers=$renderers themes=$themes deps=$deps license=$license version=$version"
+  # fast scope skips core-suite-green, so SUITE_N can be unset — fall back to the
+  # badge's own value (disclosed: in fast scope the tests badge is not suite-bound;
+  # full scope, the default, binds it to what the suite printed).
+  local tests_ref="${SUITE_N:-$(grep -m1 -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/')}"
 
   # Anchored, not substring: pass 2 showed `charts-20` matches inside `charts-200`
   # and `3 renderers` inside `13 renderers`, so a badge could claim 200 charts while
@@ -210,7 +214,7 @@ claims_match_truth() {
   local dups=""
   every_equals "$charts"    "README shield URL"        README.md              'badge/charts-[0-9]+'                '' || dups="$dups README-shield-charts"
   every_equals "$deps"      "README deps shield URL"   README.md              'badge/dependencies-[0-9]+'          '' || dups="$dups README-shield-deps"
-  every_equals "$SUITE_N"   "README tests badge(s)"    README.md              'tests-[0-9]+%20passing' 's/tests-([0-9]+).*/\1/' || dups="$dups README-tests-badges"
+  every_equals "$tests_ref" "README tests badge(s)"    README.md              'tests-[0-9]+%20passing' 's/tests-([0-9]+).*/\1/' || dups="$dups README-tests-badges"
   every_equals "$charts"    "README prose count"       README.md              'all [0-9]+ charts'                  '' || dups="$dups README-prose-count"
   every_equals "$charts"    "KNOWLEDGE prose count"    .ai/KNOWLEDGE.md       'all [0-9]+ charts'                  '' || dups="$dups KNOWLEDGE-prose-count"
   every_equals "$charts"    "core README chart count"  packages/core/README.md '\*\*[0-9]+ Chart Types:\*\*'      '' || dups="$dups coreREADME-chart-types"
@@ -242,6 +246,18 @@ claims_match_truth() {
     [ "$lic_block" = "$license" ] || lic_bad="$lic_bad '$lic_block'"
   done < <(awk '/^## License/{f=1;next} f && NF{gsub(/^[ \t]+|[ \t]+$/,""); print; f=0}' packages/core/README.md || true)
   [ -z "$lic_bad" ] || { echo "core README License block(s) disagreeing:$lic_bad (expected $license)"; return 1; }
+  # Pass-7 Z_STATIC_VER/Z_VER_SHORT/Z_BADGEN: one finite rule instead of a synonym
+  # list — EVERY x.y.z triple displayed inside an image URL must equal the manifest
+  # version, whatever provider renders it. Absence is fine; disagreement is not.
+  local img vtok vbads=""
+  while IFS= read -r img; do
+    [ -n "$img" ] || continue
+    while IFS= read -r vtok; do
+      [ -n "$vtok" ] || continue
+      [ "$vtok" = "$version" ] || vbads="$vbads '$vtok'"
+    done < <(printf '%s' "$img" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+  done < <(grep -ohE '!\[[^]]*\]\([^)]+\)' README.md packages/core/README.md 2>/dev/null || true)
+  [ -z "$vbads" ] || { echo "image badge(s) display a version the manifest does not:$vbads (expected $version)"; return 1; }
   [ -z "$dups" ] || { echo "contradicting claim(s):$dups"; return 1; }
 
   # Docs hero: number AND label must appear in the same stat block.
@@ -255,7 +271,7 @@ claims_match_truth() {
   local want="${charts} Chart types
 ${renderers} Renderers
 ${themes} Themes
-${SUITE_N} Tests passing
+${tests_ref} Tests passing
 ${deps} Dependencies"
   if [ "$hero" != "$want" ]; then
     echo "docs hero drifted from the derived values:"
@@ -380,6 +396,9 @@ benchmarks_cited_with_command() {
   # Pass-3 N11: the contract's counterfactual is "a benchmark number with no
   # command → red", so EVERY value in the Benchmarks table must be one the script
   # prints — not only the four rows this check happens to know about.
+  local tb ub
+  tb=$(printf '%s' "$json" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{console.log(JSON.parse(d)["tarball-bytes"])}catch(e){console.log("")}})')
+  ub=$(printf '%s' "$json" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{console.log(JSON.parse(d)["unpacked-bytes"])}catch(e){console.log("")}})')
   local allowed vals v table_bad=""
   allowed=("${deps}" "${tkb} KB" "${ukb} KB" "${files}" "≤ ${budget} ms")
   vals=$(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0}
@@ -414,11 +433,17 @@ benchmarks_cited_with_command() {
   while IFS= read -r size_tok; do
     [ -n "$size_tok" ] || continue
     s=$(printf '%s' "$size_tok" | sed -E 's/[[:space:]]+//g')
-    case " ${tkb}KB ${ukb}KB " in *" ${s} "*) : ;;
-      *) echo "README carries a size claim no command prints: '$size_tok' (script prints ${tkb} KB / ${ukb} KB)"; return 1 ;;
-    esac
+    if printf '%s' "$size_tok" | grep -qiE 'bytes?$'; then
+      case " ${tb} ${ub} " in *" ${s%%[!0-9]*} "*) : ;;
+        *) echo "README carries a size claim no command prints: '$size_tok' (script prints ${tb} / ${ub} bytes)"; return 1 ;;
+      esac
+    else
+      case " ${tkb}KB ${ukb}KB " in *" ${s} "*) : ;;
+        *) echo "README carries a size claim no command prints: '$size_tok' (script prints ${tkb} KB / ${ukb} KB)"; return 1 ;;
+      esac
+    fi
   done < <(awk '/^## Benchmarks/{f=1;next} f && /^## /{f=0} !f' README.md \
-           | grep -oE '[0-9][0-9.]*[[:space:]]?(MB|KB|kB|GB|Gb)' || true)
+           | grep -oE '[0-9][0-9.]*[[:space:]]?(MB|KB|kB|GB|Gb|bytes|byte)' || true)
 
   # Pass-6 Y_TIME: the same scan for TIME claims — R3 names render-time as one of
   # its four numbers, and `| **Renders in 500 ms** |` outside the table used to
@@ -429,8 +454,8 @@ benchmarks_cited_with_command() {
     [ -n "$t_tok" ] || continue
     t_val=$(printf '%s' "$t_tok" | grep -oE '[0-9][0-9.]*' | sed -n '1p')
     case "$t_tok" in
-      *ms*) : ;;
-      *seco*) t_val=$(( t_val * 1000 )) ;;
+      *ms*|*milli*) : ;;                                   # already milliseconds
+      *) t_val=$(awk -v v="$t_val" 'BEGIN{printf "%d", v*1000}') ;;  # bare `s`/`seconds` = seconds
     esac
     [ "$t_val" -le "$budget" ] 2>/dev/null \
       || { echo "README carries a timing claim no command prints: '$t_tok' (budget is ${budget} ms)"; return 1; }
@@ -515,7 +540,7 @@ record_honest() {
   # and a traction claim needs the digits on its own line.
   local FIG='[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]downloads|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]installs|[0-9][0-9,.]*[kKmM]?([[:space:]][a-z]+){0,3}[[:space:]]stars|downloads[^/0-9]{0,15}[0-9][0-9,.]*[kKmM]?'
   local TRACT='taking off|is working|worked|grew|growth|surging|exploding|popular|demand|milestone|first user|traction|organic|signups|climbing|stars'
-  local f line scrub h n hits zt nums tok sT0 sT1 bad=""
+  local f line scrub tline h n hits zt nums tok sT0 sT1 hit_read bad_tok bad=""
   for f in "${files[@]}"; do
     # Fail CLOSED on a missing file: pass 2 deleted CONTINUATION-PROMPT and the
     # check printed an OK line about a file it never read.
@@ -572,29 +597,46 @@ record_honest() {
       # Pass-5 H_GUARD/H_VOCAB + pass-6 X_TRACTION_DIGIT: a traction line must
       # quote numbers THE INSTRUMENTS PRINT — a digit alone is not enough (99
       # likes proves it), and no guard sentence exempts a claim that carries one.
-      # Summary only: R6's counterfactual names that file — and it names *sentences*.
-      # Table rows are structured evidence whose downloads figures are already
-      # governed by the figure rule above (their citations — `ROADMAP.md:219`,
-      # `S48`, `#47` — are not claims).
-      if [ "$f" = "sessions/session-48-summary.md" ] && [ "${line:0:1}" != "|" ]; then
-        if printf '%s' "$line" | grep -qiE "$TRACT"; then
+      # Pass-7 Z_TRACTION_ROW / Z_TRACTION_DATE:
+      #  * the sentence rule applies to TABLE CELLS too — the reviewer traced that
+      #    citations carry no TRACT keyword, so no row exemption is needed once the
+      #    figure rule's backtick scrub and the citations are removed;
+      #  * the number must be a READING (a value the instruments print), not a date
+      #    part: "arrived on 2026-10-06" quotes no R2 figure.
+      if [ "$f" = "sessions/session-48-summary.md" ]; then
+        tline="$scrub"
+        case "$tline" in
+          \|*) tline=$(printf '%s' "$tline" | sed -E 's/[A-Za-z0-9_./#-]+:[0-9]+//g; s/[RS][0-9]{1,2}\b//g; s/#-?[0-9]+//g; s/session-[0-9]+//g') ;;
+        esac
+        if printf '%s' "$tline" | grep -qiE "$TRACT"; then
           if [ -z "$READS_SET" ]; then
             sT0=$(grep -m1 -oE '`t0` = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
             sT1=$(grep -m1 -oE 't1 = [0-9]+' .ai/STATE.md | sed -E 's/.*= //' || true)
             READS_SET="$({ node scripts/gtm-reads.mjs 2>/dev/null
-                           node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null
-                           printf ' %s %s\n' "$sT0" "$sT1"; } \
+                           node scripts/gtm-reads.mjs --as-of 2026-10-03 2>/dev/null; } \
+                         | awk '/^day /{print $3; next}
+                                /=/{split($0,a,"=");
+                                    if (a[1] ~ /^(total|release-shaped-total|non-release-total|non-zero-days|days-since-last-non-zero)$/) print a[2];
+                                    else if (a[1] ~ /^(first-non-zero|last-non-zero)$/) print a[3];}' \
                          | grep -oE '[0-9]+' | sort -u | tr '\n' ' ')"
+            READS_SET="$READS_SET $sT0 $sT1 "
           fi
-          nums=$(printf '%s' "$line" | grep -oE '[0-9]+' || true)
+          nums=$(printf '%s' "$tline" | grep -oE '[0-9]+' || true)
           if [ -z "$nums" ]; then
-            bad="$bad $f:(traction claim quoting no number: $(printf '%s' "$line" | sed -E 's/^[[:space:]]+//' | cut -c1-44))"
+            bad="$bad $f:(traction claim quoting no number: $(printf '%s' "$tline" | sed -E 's/^[[:space:]]+//' | cut -c1-44))"
           else
+            hit_read=0; bad_tok=""
             for tok in $nums; do
-              case " $READS_SET " in *" $tok "*) : ;;
-                *) bad="$bad $f:(traction number '$tok' no instrument prints)" ;;
+              case " $READS_SET " in
+                *" $tok "*) hit_read=1 ;;
+                *) case "$tok" in
+                     [0-9]|[01][0-9]|[12][0-9]|3[01]|20[0-9][0-9]) : ;;   # date parts, only alongside a reading
+                     *) bad_tok="$bad_tok '$tok'" ;;
+                   esac ;;
               esac
             done
+            [ "$hit_read" = "1" ] || bad="$bad $f:(traction claim quoting no reading: $(printf '%s' "$nums" | tr '\n' ' '))"
+            [ -z "$bad_tok" ] || bad="$bad $f:(traction number$bad_tok no instrument prints)"
           fi
         fi
       fi
