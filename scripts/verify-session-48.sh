@@ -27,7 +27,7 @@ SCOPE="$(resolve_scope "${VAJRA_GATE_SCOPE:-}")" \
 gate_skips() { [ "$1" = fast ] || return 1; case " $FAST_SKIP " in *" $2 "*) return 0 ;; esac; return 1; }
 # Inherited cost: the suite run and the network probes. Every check this session
 # OWNS (R1–R6 evidence) runs in both scopes.
-FAST_SKIP="core-suite-green docs-link-live adoption-reading-recorded"
+FAST_SKIP="core-suite-green docs-link-live adoption-reading-recorded channel-recorded"
 
 PASS=0; FAIL=0; RESULTS=()
 write_summary() {
@@ -295,6 +295,28 @@ record_honest() {
   echo "roadmap points at the instruments; every downloads figure is 119 or 273; traction guard present"
 }
 run_check "record-honest" record_honest
+
+# ── R4: one channel, one link, attributable ───────────────────────────────────
+# The post must be recorded in STATE with its date, it must actually answer 200
+# (LinkedIn returns 404 for a deleted post; a bot-wall is not a 404), and the
+# record must point at the reader so the days after it can be read against the
+# days before.
+# Counterfactual: delete the URL, the date, or the reader pointer → red.
+channel_recorded() {
+  local url
+  url=$(grep -m1 -oE 'https://www\.linkedin\.com/posts/[A-Za-z0-9_/-]+' .ai/STATE.md || true)
+  [ -n "$url" ] || { echo "STATE records no post URL"; return 1; }
+  grep -q 'published 2026-10-06' .ai/STATE.md || { echo "STATE records no publish date for the post"; return 1; }
+  grep -A7 -i 'one channel is live' .ai/STATE.md | grep -q 'gtm-reads' \
+    || { echo "the post record does not point at the reader that measures it"; return 1; }
+  local code
+  code=$(curl -s -o /dev/null -m 20 -L \
+           -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36' \
+           -w '%{http_code}' "$url" || echo 000)
+  [ "$code" = "200" ] || { echo "$url → $code (expected 200)"; return 1; }
+  echo "$url → 200; published 2026-10-06; window read with gtm-reads"
+}
+run_check "channel-recorded" channel_recorded
 
 # ── Product untouched: this session sells what exists, it does not change it ───
 # Counterfactual: any packages/core/src or lockfile change in the delivery → red

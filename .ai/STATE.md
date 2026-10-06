@@ -33,6 +33,13 @@ the finisher), all `S47:`, max **3 files** each (derived per commit with
   `--as-of 2026-10-03`, so S46's figure is no longer a typed number. **No organic
   signal yet** — and the day the instrument shows one is the day this line changes.
   Never cite 273 (or 119) as traction.
+- **One channel is live (S48 R4) — published 2026-10-06.**
+  `https://www.linkedin.com/posts/isuman_opensource-typescript-terminal-ugcPost-7513093305937657856-0U9h/`
+  — LinkedIn, native upload of the 42s `chitra-intro.mp4` film, with the repo and
+  docs links in the first comment. The measurement window opens on that date: read
+  it with `node scripts/gtm-reads.mjs` and compare the days **after 2026-10-06**
+  against the flat line before it (0 downloads on 10-05 and 10-06). An anonymous
+  fetch of the post answers **200**, which is what the gate re-checks.
 - **R1 — coverage sees squash merges.** `check_session_coverage` derives its population
   from merge subjects UNION squash subjects (`SNN:`), records newest belief (**S46**;
   the old merge-only body believed **S37** — run both commands beside each other),

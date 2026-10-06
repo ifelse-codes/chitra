@@ -68,6 +68,17 @@ p_r3() {  # benchmarks, measured now
   echo "${deps} deps, ${tkb} KB packed, ${ukb} KB / ${files} files installed, ≤${budget} ms — cited with the command"
   echo ok
 }
+p_r4() {  # one channel, live, with its date and its reader
+  local url code
+  url=$(grep -m1 -oE 'https://www\.linkedin\.com/posts/[A-Za-z0-9_/-]+' .ai/STATE.md || true)
+  [ -n "$url" ] || return 1
+  grep -q 'published 2026-10-06' .ai/STATE.md || return 1
+  grep -A7 -i 'one channel is live' .ai/STATE.md | grep -q 'gtm-reads' || return 1
+  code=$(curl -s -o /dev/null -m 20 -L -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36' -w '%{http_code}' "$url" || echo 000)
+  [ "$code" = "200" ] || return 1
+  echo "post live → 200; published 2026-10-06; days after it read with gtm-reads"
+  echo ok
+}
 p_r5() {  # first screen: install, live link, example still true
   grep -qE '(pnpm add|npm install|npm i) @ifelse\.codes/chitra' README.md || return 1
   local code; code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' https://chitra.iifelse.com || echo 000)
@@ -112,6 +123,7 @@ echo ""
 row "R1 claims derive from source" p_r1
 row "R2 adoption read, not asserted" p_r2
 row "R3 benchmarks measured" p_r3
+row "R4 one channel live" p_r4
 row "R5 first screen probed" p_r5
 row "R6 record is derived-only" p_r6
 
