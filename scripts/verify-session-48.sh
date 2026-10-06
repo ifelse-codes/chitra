@@ -246,18 +246,18 @@ claims_match_truth() {
     [ "$lic_block" = "$license" ] || lic_bad="$lic_bad '$lic_block'"
   done < <(awk '/^## License/{f=1;next} f && NF{gsub(/^[ \t]+|[ \t]+$/,""); print; f=0}' packages/core/README.md || true)
   [ -z "$lic_bad" ] || { echo "core README License block(s) disagreeing:$lic_bad (expected $license)"; return 1; }
-  # Pass-7 Z_STATIC_VER/Z_VER_SHORT/Z_BADGEN: one finite rule instead of a synonym
-  # list — EVERY x.y.z triple displayed inside an image URL must equal the manifest
-  # version, whatever provider renders it. Absence is fine; disagreement is not.
-  local img vtok vbads=""
-  while IFS= read -r img; do
-    [ -n "$img" ] || continue
-    while IFS= read -r vtok; do
-      [ -n "$vtok" ] || continue
-      [ "$vtok" = "$version" ] || vbads="$vbads '$vtok'"
-    done < <(printf '%s' "$img" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
-  done < <(grep -ohE '!\[[^]]*\]\([^)]+\)' README.md packages/core/README.md 2>/dev/null || true)
-  [ -z "$vbads" ] || { echo "image badge(s) display a version the manifest does not:$vbads (expected $version)"; return 1; }
+  # Pass-7 Z_STATIC_VER/Z_VER_SHORT/Z_BADGEN + pass-8 V1: one rule for the whole
+  # VERSION class — every x.y.z triple written anywhere in either README, whether
+  # it is a badge URL or prose (`Latest release: [v9.9.9]`), must equal the
+  # manifest version. Both files carry zero version tokens today, so the rule is
+  # exact on this tree; a future legitimate triple (an engine floor, say) would be
+  # red until it is the published version — fail closed, disclosed.
+  local vtok vbads=""
+  while IFS= read -r vtok; do
+    [ -n "$vtok" ] || continue
+    [ "$vtok" = "$version" ] || vbads="$vbads '$vtok'"
+  done < <(grep -ohE '[0-9]+\.[0-9]+\.[0-9]+' README.md packages/core/README.md 2>/dev/null || true)
+  [ -z "$vbads" ] || { echo "version token(s) in the READMEs disagree with the manifest:$vbads (expected $version)"; return 1; }
   [ -z "$dups" ] || { echo "contradicting claim(s):$dups"; return 1; }
 
   # Docs hero: number AND label must appear in the same stat block.

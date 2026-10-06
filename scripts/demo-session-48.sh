@@ -116,15 +116,12 @@ p_r1() {  # claims derive from their source
   every "$version" packages/core/README.md 'badge/release-[0-9A-Za-z.]+' 's#.*release-##' || return 1
   every "$license" README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
   every "$license" packages/core/README.md 'label=license&message=[A-Za-z0-9.-]+' 's#.*message=##' || return 1
-  # every x.y.z displayed in an image URL must equal the manifest version
-  local img vtok
-  while IFS= read -r img; do
-    [ -n "$img" ] || continue
-    while IFS= read -r vtok; do
-      [ -n "$vtok" ] || continue
-      [ "$vtok" = "$version" ] || return 1
-    done < <(printf '%s' "$img" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
-  done < <(grep -ohE '!\[[^]]*\]\([^)]+\)' README.md packages/core/README.md 2>/dev/null || true)
+  # every x.y.z written in either README (badge URL or prose) must equal the manifest
+  local vtok
+  while IFS= read -r vtok; do
+    [ -n "$vtok" ] || continue
+    [ "$vtok" = "$version" ] || return 1
+  done < <(grep -ohE '[0-9]+\.[0-9]+\.[0-9]+' README.md packages/core/README.md 2>/dev/null || true)
   local tfirst
   tfirst=$(grep -oE 'tests-[0-9]+%20passing' README.md | sed -E 's/tests-([0-9]+).*/\1/' | sed -n '1p')
   every "$tfirst" README.md 'label=tests&message=[0-9]+' 's#.*message=##' || return 1
