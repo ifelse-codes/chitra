@@ -132,13 +132,25 @@ claims_match_truth() {
   [ -n "$themes" ] || { echo "could not derive themes/deps/license/version"; return 1; }
   echo "derived: charts=$charts renderers=$renderers themes=$themes deps=$deps license=$license version=$version"
 
-  local bad=""
-  grep -q "charts-${charts}" README.md            || bad="$bad README-badge"
-  grep -q "all ${charts} charts" README.md        || bad="$bad README-prose"
-  grep -q "${renderers} renderers" README.md      || bad="$bad README-renderers"
-  grep -q "dependencies-${deps}" README.md        || bad="$bad README-deps"
-  grep -q "license: ${license}" README.md         || bad="$bad README-license"
-  grep -q "all ${charts} charts" .ai/KNOWLEDGE.md || bad="$bad KNOWLEDGE-charts"
+  # Anchored, not substring: pass 2 showed `charts-20` matches inside `charts-200`
+  # and `3 renderers` inside `13 renderers`, so a badge could claim 200 charts while
+  # the gate reported "all carry the derived values". Each badge and table cell is
+  # now EXTRACTED and compared as a value.
+  local b_charts b_charts_url b_types b_renderers b_deps b_license bad=""
+  b_charts=$(grep -m1 -oE '!\[charts: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/' || true)
+  b_charts_url=$(grep -m1 -oE 'badge/charts-[0-9]+' README.md | sed -E 's#.*charts-##' || true)
+  b_types=$(grep -m1 -oE '\| \*\*[0-9]+ chart types\*\* \|' README.md | grep -oE '[0-9]+' || true)
+  b_renderers=$(grep -m1 -oE '\| \*\*[0-9]+ renderers\*\* \|' README.md | grep -oE '[0-9]+' || true)
+  b_deps=$(grep -m1 -oE '!\[dependencies: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/' || true)
+  b_license=$(grep -m1 -oE '!\[license: [^]]+\]' README.md | sed -E 's/^!\[license: //; s/\]$//' || true)
+  [ "$b_charts" = "$charts" ]         || bad="$bad README-badge-alt('${b_charts}'≠${charts})"
+  [ "$b_charts_url" = "$charts" ]     || bad="$bad README-badge-url('${b_charts_url}'≠${charts})"
+  [ "$b_types" = "$charts" ]          || bad="$bad README-chart-types('${b_types}'≠${charts})"
+  [ "$b_renderers" = "$renderers" ]   || bad="$bad README-renderers('${b_renderers}'≠${renderers})"
+  [ "$b_deps" = "$deps" ]             || bad="$bad README-deps('${b_deps}'≠${deps})"
+  [ "$b_license" = "$license" ]       || bad="$bad README-license('${b_license}'≠${license})"
+  grep -qF "all ${charts} charts" README.md        || bad="$bad README-prose"
+  grep -qF "all ${charts} charts" .ai/KNOWLEDGE.md || bad="$bad KNOWLEDGE-charts"
   [ -z "$bad" ] || { echo "claim ≠ truth in:$bad (derived values above)"; return 1; }
 
   # Docs hero: number AND label must appear in the same stat block.
@@ -298,21 +310,35 @@ record_honest() {
   grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' \
     || { echo "roadmap's pack row has no evidence pointer"; return 1; }
   local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
-               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md sessions/session-48-summary.md)
+               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md .ai/GT-REMEDIATIONS.md
+               sessions/session-48-summary.md)
   local f line hits h n bad=""
   for f in "${files[@]}"; do
-    [ -f "$f" ] || continue
-    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null | sed -E 's/`[^`]*`//g' \
+    # Fail CLOSED on a missing file: pass 2 deleted CONTINUATION-PROMPT and the
+    # check printed an OK line about a file it never read.
+    [ -f "$f" ] || { echo "live file missing: $f"; return 1; }
+    # Quoted figures are exempt ONLY on table rows — a counterfactual table shows
+    # its own stimulus as evidence. In prose a backtick is not an alibi.
+    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null \
+           | awk '/^\|/{gsub(/`[^`]*`/,"")} {print}' \
            | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
     while IFS= read -r h; do
       [ -n "$h" ] || continue
       n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
-      case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+      if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
+        # The audit ledger legitimately quotes history (304, 318, 89, 181, the range
+        # path) — those lines carry their evidence markers; a fresh unmarked figure
+        # in the ledger does not (pass-2 NEW-D planted one there).
+        grep -F "$h" "$f" | grep -qE '⚠|FALSIFIED|→|re-probe|re-derived|derive|≠|not [0-9]' \
+          || bad="$bad $f:'$h'"
+      else
+        case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+      fi
     done <<< "$hits"
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       case "$line" in
-        *superseded*|*false*|*"not zero"*|*"must not"*|*FALSIFIED*|*119*) : ;;
+        *superseded*|*false*|*"not zero"*|*must\ not*|*FALSIFIED*|*⚠*) : ;;
         *) bad="$bad $f:(zero-claim with no superseding marker)" ;;
       esac
     done < <(awk '
@@ -323,7 +349,7 @@ record_honest() {
   done
   [ -z "$bad" ] || { echo "figure or claim no instrument prints:$bad"; return 1; }
   grep -qi 'never cite' .ai/STATE.md || { echo "STATE lost the 'never cite as traction' guard"; return 1; }
-  echo "roadmap points at its instruments; all 7 live files carry only 119/273 (quoted stimuli stripped); zero-claims marked superseded; traction guard present"
+  echo "roadmap points at its instruments; all 8 live files carry only 119/273 (table-quoted stimuli stripped; ledger history needs its evidence marker); zero-claims marked superseded; traction guard present"
 }
 run_check "record-honest" record_honest
 

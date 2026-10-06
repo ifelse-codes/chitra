@@ -31,9 +31,23 @@ p_r1() {  # claims derive from their source
     const m=require("./packages/core/package.json"), c=require("./packages/core/dist/index.cjs");
     console.log(Object.keys(c.themes).length, Object.keys(m.dependencies||{}).length, m.license, m.version);')"
   tests=$(grep -m1 -oE 'tests-[0-9]+' README.md | grep -oE '[0-9]+')
-  grep -q "charts-${charts}" README.md || return 1
-  grep -q "all ${charts} charts" .ai/KNOWLEDGE.md || return 1
-  grep -q "dependencies-${deps}" README.md || return 1
+  # Anchored extraction (pass-2 NEW-A/NEW-B): a substring grep let a badge read 200
+  # charts and a table cell 13 renderers while the gate stayed green.
+  local b_charts b_url b_types b_renderers b_deps b_license
+  b_charts=$(grep -m1 -oE '!\[charts: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/') || return 1
+  b_url=$(grep -m1 -oE 'badge/charts-[0-9]+' README.md | sed -E 's#.*charts-##') || return 1
+  b_types=$(grep -m1 -oE '\| \*\*[0-9]+ chart types\*\* \|' README.md | grep -oE '[0-9]+') || return 1
+  b_renderers=$(grep -m1 -oE '\| \*\*[0-9]+ renderers\*\* \|' README.md | grep -oE '[0-9]+') || return 1
+  b_deps=$(grep -m1 -oE '!\[dependencies: [0-9]+\]' README.md | sed -E 's/[^0-9]*([0-9]+).*/\1/') || return 1
+  b_license=$(grep -m1 -oE '!\[license: [^]]+\]' README.md | sed -E 's/^!\[license: //; s/\]$//') || return 1
+  [ "$b_charts" = "$charts" ] || return 1
+  [ "$b_url" = "$charts" ] || return 1
+  [ "$b_types" = "$charts" ] || return 1
+  [ "$b_renderers" = "$renderers" ] || return 1
+  [ "$b_deps" = "$deps" ] || return 1
+  [ "$b_license" = "$license" ] || return 1
+  grep -qF "all ${charts} charts" README.md || return 1
+  grep -qF "all ${charts} charts" .ai/KNOWLEDGE.md || return 1
   grep -qF "**${charts} Chart Types:**" packages/core/README.md || return 1
   grep -qF "badge/license-${license}-" README.md || return 1
   grep -qF "## [${version}]" packages/core/CHANGELOG.md || return 1
@@ -42,7 +56,7 @@ p_r1() {  # claims derive from their source
     const need=process.argv.slice(1);
     for (const n of need) if (!s.includes(`<span className="stat-num">${n}</span>`)) process.exit(1);
   ' "$charts" "$renderers" "$themes" || return 1
-  echo "charts=$charts renderers=$renderers themes=$themes deps=$deps tests=$tests license=$license version=$version — README, core README, hero, KNOWLEDGE, CHANGELOG agree"
+  echo "charts=$charts renderers=$renderers themes=$themes deps=$deps tests=$tests license=$license version=$version — all six badge/cell values extracted and equal"
   echo ok
 }
 p_r2() {  # adoption, read for the dates the record claims
@@ -100,23 +114,30 @@ p_r5() {  # first screen: install, live link, example still true
   echo ok
 }
 p_r6() {  # the record only carries derived numbers
-  grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -qE 'gtm-reads|gtm-bench|session-48-summary' || return 1
+  grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -q 'gtm-reads' || return 1
+  grep -A3 'GTM proof pack' .ai/ROADMAP.md | grep -q 'gtm-bench' || return 1
   local files=(.ai/STATE.md .ai/ROADMAP.md .ai/KNOWLEDGE.md .ai/TASK.md
-               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md sessions/session-48-summary.md)
+               .ai/SESSION-BOOT.md .ai/CONTINUATION-PROMPT.md .ai/GT-REMEDIATIONS.md
+               sessions/session-48-summary.md)
   local f line hits h n bad=""
   for f in "${files[@]}"; do
-    [ -f "$f" ] || continue
-    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null | sed -E 's/`[^`]*`//g' \
+    [ -f "$f" ] || return 1
+    hits=$(grep -hiE 'downloads' "$f" 2>/dev/null \
+           | awk '/^\|/{gsub(/`[^`]*`/,"")} {print}' \
            | grep -oE '[0-9]{3,}[^0-9]{0,25}downloads|downloads[^0-9]{0,25}[0-9]{3,}' || true)
     while IFS= read -r h; do
       [ -n "$h" ] || continue
       n=$(printf '%s' "$h" | grep -oE '[0-9]{3,}' | sed -n '1p')
-      case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+      if [ "$f" = ".ai/GT-REMEDIATIONS.md" ]; then
+        grep -F "$h" "$f" | grep -qE '⚠|FALSIFIED|→|re-probe|re-derived|derive|≠|not [0-9]' || bad="$bad $f:'$h'"
+      else
+        case "$n" in 119|273) : ;; *) bad="$bad $f:'$h'" ;; esac
+      fi
     done <<< "$hits"
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       case "$line" in
-        *superseded*|*false*|*"not zero"*|*"must not"*|*FALSIFIED*|*119*) : ;;
+        *superseded*|*false*|*"not zero"*|*must\ not*|*FALSIFIED*|*⚠*) : ;;
         *) bad="$bad $f:(zero-claim)" ;;
       esac
     done < <(awk '
@@ -127,7 +148,7 @@ p_r6() {  # the record only carries derived numbers
   done
   [ -z "$bad" ] || return 1
   grep -qi 'never cite' .ai/STATE.md || return 1
-  echo "7 live files: only 119/273 (quoted stimuli stripped), zero-claims marked superseded, traction guard present"
+  echo "8 live files: only 119/273 (table-quoted stimuli stripped; ledger needs markers), zero-claims superseded, guard present"
   echo ok
 }
 
