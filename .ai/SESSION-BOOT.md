@@ -22,8 +22,9 @@
 
 - `.ai/SESSION` = 48. **`main` = `2f3c089`** (S47's post-merge sync #73 — derive it).
 - **The repo is public**; npm `latest` → **`0.4.0`** with provenance.
-- **Adoption, measured:** `node scripts/gtm-reads.mjs` → **t1 = 273** through
-  2026-10-06 (243 on the two release days, **0 on 10-05 and 10-06**);
+- **Adoption, measured:** `node scripts/gtm-reads.mjs` → **t1 = 289** through
+  2026-10-07 (243 on the two release days, 16 retroactively credited on 10-05,
+  **0 on 10-06 and 10-07** — npm credits counts after the read);
   **t0 = 119 reproduces exactly** with `--as-of 2026-10-03`. **No organic signal.**
   Never cite either as traction — STATE's guard says so and the gate enforces it.
 - **One channel live:** LinkedIn post published **2026-10-06** (URL in

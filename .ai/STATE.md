@@ -26,20 +26,26 @@ change the product.
 - **P2 on:** `{"enabled":true}` (public-repo-only endpoint, proved against control).
 - **F5/F6 stand:** `0.4.0` with provenance (sigstore, `0.3.0` has none, no workflow
   edit); `t0` = 119 lifetime downloads, none organic (derive with the downloads API).
-- **GTM — the adoption instrument now reads the number (S48 R2).**
+- **GTM — the adoption instrument now reads the number (S48 R2; re-derived
+  2026-10-07 — npm credits counts after the read, so this snapshot re-runs, it is
+  never typed).**
   `node scripts/gtm-reads.mjs` (day-level series, release days labelled from the npm
-  registry's own publish times): **t1 = 273** through **2026-10-06** — **243** of them
+  registry's own publish times): **t1 = 289** through **2026-10-07** — **243** of them
   on the two release days (0.3.0 on 09-29, 0.4.0 on 10-04), **30** across the four days
-  after 0.3.0, and **0 on 10-05 and 10-06**. **t0 = 119 reproduces exactly** with
+  after 0.3.0, **16** more retroactively credited on 10-05 (absent at the close read of
+  2026-10-06, before the post, so not reader-driven), and **0** on 10-06 and 10-07.
+  **t0 = 119 reproduces exactly** with
   `--as-of 2026-10-03`, so S46's figure is no longer a typed number. **No organic
   signal yet** — and the day the instrument shows one is the day this line changes.
-  Never cite 273 (or 119) as traction.
+  Never cite 289 (or 119) as traction.
 - **One channel is live (S48 R4) — published 2026-10-06.**
   `https://www.linkedin.com/posts/isuman_opensource-typescript-terminal-ugcPost-7513093305937657856-0U9h/`
   — LinkedIn, native upload of the 42s `chitra-intro.mp4` film, with the repo and
   docs links in the first comment. The measurement window opens on that date: read
   it with `node scripts/gtm-reads.mjs` and compare the days **after 2026-10-06**
-  against the flat line before it (0 downloads on 10-05 and 10-06). An anonymous
+  against the flat line before it — the close-of-day read said 0, but npm later
+  credited 16 to 10-05 (re-read, never trust a stored snapshot). Now:
+  **0 downloads on 10-06 and 10-07** (10-07 a partial day). An anonymous
   fetch of the post answers **200**, which is what the gate re-checks.
 - 🔴 **S48 closed WITHOUT a final acceptance — founder order, 2026-10-06.** The
   independent reviewer ran **8 passes, all REJECT** (ground count 4 → 2 → 11 → 8 →
