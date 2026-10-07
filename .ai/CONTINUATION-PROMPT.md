@@ -9,7 +9,8 @@ channel is live and measurable.
 
 > **The one thing to carry forward:** the pack shipped the **instrument**, not a result —
 > **289 counted, none of it reader-driven; 16 of it, credited late to 10-05, came before
-> the post, and nothing since.** The reading that decides whether this
+> the post, and nothing since (npm revises its panel — re-read, never trust the snapshot).**
+> The reading that decides whether this
 > channel was right happens **7 days after 2026-10-06**: run `node scripts/gtm-reads.mjs` after
 > **2026-10-13** and compare the days after the post against the line before it. If it stays at
 > zero, the channel was wrong, not the product — say so out loud; the gate exists so the record
@@ -33,7 +34,10 @@ Detail: `sessions/session-48-summary.md` (fidelity map) + `sessions/session-48-r
 
 ## S49 — candidates
 
-No contract yet — write `prompts/49-task-*.md` at plan time. Options S48 left:
+No contract yet — write `prompts/49-task-*.md` at plan time. **Fold in here:** the
+**pass-9 fidelity re-review** owed by S48 (`--inputs-sha 48` after this sync, so the
+hash must be re-derived that day) — it turns the founder-ordered close into a real
+verdict, and the review inputs now include this sync. Sequencing options the record shows:
 
 1. **Read the channel** (2026-10-13 onward) — the reading the whole pack exists to produce.
 2. **New product surface** — none since `c72cc14` (S09); a channel that answers is the trigger.
