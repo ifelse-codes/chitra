@@ -12,9 +12,10 @@
   - **R1** — front-door claims derive from their source: 20 charts ← export lines,
     3 renderers ← `RendererType`, 7 themes ← `Object.keys(themes)`, 453 ← suite,
     0 deps / MIT / 0.4.0 ← manifest. README + docs hero + KNOWLEDGE all checked.
-  - **R2** — adoption read by `scripts/gtm-reads.mjs`: **t1 = 273** (2026-10-06),
-    **t0 = 119** reproduces with `--as-of 2026-10-03`, release days labelled,
-    **0 organic**. Ledger S40 row 1 `DEFERRED → DONE`.
+  - **R2** — adoption read by `scripts/gtm-reads.mjs`: **t1 = 289** (2026-10-07
+    re-read; the close read of 273 through 10-06 was later revised by npm — 16
+    credited to 10-05), **t0 = 119** reproduces with `--as-of 2026-10-03`,
+    release days labelled, **0 organic**. Ledger S40 row 1 `DEFERRED → DONE`.
   - **R3** — benchmarks from `scripts/gtm-bench.mjs`: 0 deps · 81.5 KB packed ·
     398.4 KB / 39 files · ≤ 2 ms — cited in the README with the command above.
   - **R4** — one channel live: LinkedIn post published **2026-10-06** (URL in

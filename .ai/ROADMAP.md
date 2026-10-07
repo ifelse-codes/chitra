@@ -171,7 +171,8 @@ if not, they go, and the one-liner becomes true.**
   3 renderers ← `RendererType`, 7 themes ← `Object.keys(themes)`, 453 tests ← the suite,
   0 deps / MIT / 0.4.0 ← manifest + changelog — checked in `README.md`,
   `packages/core/README.md`, the docs hero and `KNOWLEDGE.md`. `scripts/gtm-reads.mjs`
-  reads adoption day by day with release days labelled (**t1 = 273** at 2026-10-06,
+  reads adoption day by day with release days labelled (**t1 = 289** at 2026-10-07,
+  an earlier read said 273 at 2026-10-06 and npm later credited 16 to 10-05;
   **t0 = 119** reproduces with `--as-of 2026-10-03`, **0 organic**); `scripts/gtm-bench.mjs`
   measures **0 deps · 81.5 KB packed · 398.4 KB / 39 files · ≤ 2 ms**, cited in the README
   with the reproduce command above them. **One channel live:** the LinkedIn post of
