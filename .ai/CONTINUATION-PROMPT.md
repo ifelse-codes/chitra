@@ -8,7 +8,8 @@ comes from a command, the adoption reading is an instrument instead of a typed f
 channel is live and measurable.
 
 > **The one thing to carry forward:** the pack shipped the **instrument**, not a result —
-> **273 downloads, 0 organic, the last two days flat zero**. The reading that decides whether this
+> **289 counted, none of it reader-driven; 16 of it, credited late to 10-05, came before
+> the post, and nothing since.** The reading that decides whether this
 > channel was right happens **7 days after 2026-10-06**: run `node scripts/gtm-reads.mjs` after
 > **2026-10-13** and compare the days after the post against the line before it. If it stays at
 > zero, the channel was wrong, not the product — say so out loud; the gate exists so the record
@@ -23,11 +24,11 @@ Detail: `sessions/session-48-summary.md` (fidelity map) + `sessions/session-48-r
 | S48 delivered | State |
 |---|---|
 | **R1** claims derived | **shipped** — 20 charts ← export lines, 3 renderers ← `RendererType`, 7 themes ← `Object.keys`, 453 ← suite, 0/MIT/0.4.0 ← manifest; README + hero + KNOWLEDGE checked; 4 counterfactuals red |
-| **R2** adoption measured | **shipped** — `gtm-reads.mjs`: t1 = 273 (2026-10-06), t0 = 119 reproduces with `--as-of 2026-10-03`, release days labelled, ledger row 1 DONE; 2 counterfactuals red |
+| **R2** adoption measured | **shipped** — `gtm-reads.mjs`: t1 = 289 (2026-10-07 re-read; the close read of 273 at 10-06 was revised — 16 late-credited to 10-05), t0 = 119 reproduces with `--as-of 2026-10-03`, release days labelled, ledger row 1 DONE; 2 counterfactuals red |
 | **R3** benchmarks measured | **shipped** — `gtm-bench.mjs`: 0 deps · 81.5 KB · 398.4 KB / 39 files · ≤ 2 ms, cited in README with the command; 3 counterfactuals red |
 | **R4** one channel | **shipped** — LinkedIn post published 2026-10-06, URL + date in STATE, gate re-fetches it (200), demo row probed |
 | **R5** first screen probed | **shipped** — install line, docs link 200 live, README example byte-identical to a real render |
-| **R6** record honest | **shipped** — roadmap points at the instruments; only 119/273 may appear; `never cite as traction` enforced; 2 counterfactuals red |
+| **R6** record honest | **shipped** — roadmap points at the instruments; only figures the instruments print may appear; `never cite as traction` enforced; 2 counterfactuals red |
 | Product | **untouched** — `packages/core/src/` and the lockfile unchanged; 453/453 re-derived |
 
 ## S49 — candidates
