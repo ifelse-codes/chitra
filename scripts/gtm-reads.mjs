@@ -30,10 +30,7 @@ const asJson = process.argv.includes("--json");
 
 async function main() {
   const rangeUrl = `https://api.npmjs.org/downloads/range/${start}:${asOf}/${PKG}`;
-  const [rangeRes, timeRes] = await Promise.all([
-    fetch(rangeUrl),
-    fetch(REGISTRY_TIME_URL),
-  ]);
+  const [rangeRes, timeRes] = await Promise.all([fetch(rangeUrl), fetch(REGISTRY_TIME_URL)]);
   if (!rangeRes.ok) throw new Error(`downloads range → HTTP ${rangeRes.status}`);
   if (!timeRes.ok) throw new Error(`registry time → HTTP ${timeRes.status}`);
 
@@ -56,9 +53,7 @@ async function main() {
     .reduce((a, d) => a + d.downloads, 0);
   const lastNonZero = nonZero.length ? nonZero[nonZero.length - 1] : null;
   const daysSinceLast = lastNonZero
-    ? Math.round(
-        (Date.parse(asOf) - Date.parse(lastNonZero.day)) / 86400000
-      )
+    ? Math.round((Date.parse(asOf) - Date.parse(lastNonZero.day)) / 86400000)
     : null;
 
   if (asJson) {
@@ -95,9 +90,7 @@ async function main() {
     `last-non-zero=${lastNonZero ? `${lastNonZero.day}=${lastNonZero.downloads}` : "none"}`
   );
   console.log(`days-since-last-non-zero=${daysSinceLast}`);
-  console.log(
-    `release-days=${releases.map((r) => `${r.day}(${r.version})`).join(",") || "none"}`
-  );
+  console.log(`release-days=${releases.map((r) => `${r.day}(${r.version})`).join(",") || "none"}`);
   console.log(`release-shaped-total=${releaseTotal}`);
   console.log(`non-release-total=${total - releaseTotal}`);
   for (const d of days) {
