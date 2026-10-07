@@ -28,11 +28,10 @@ const asJson = process.argv.includes("--json");
 
 async function packInfo() {
   const { execFileSync } = await import("node:child_process");
-  const out = execFileSync(
-    "npm",
-    ["pack", "--dry-run", "--json", "--silent"],
-    { cwd: PKG_DIR, encoding: "utf8" }
-  );
+  const out = execFileSync("npm", ["pack", "--dry-run", "--json", "--silent"], {
+    cwd: PKG_DIR,
+    encoding: "utf8",
+  });
   const j = JSON.parse(out)[0];
   return { size: j.size, unpackedSize: j.unpackedSize, files: (j.files || []).length };
 }
